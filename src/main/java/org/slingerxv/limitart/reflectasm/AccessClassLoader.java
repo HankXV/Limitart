@@ -1,0 +1,147 @@
+package org.slingerxv.limitart.reflectasm;
+
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.security.ProtectionDomain;
+import java.util.WeakHashMap;
+
+class AccessClassLoader extends ClassLoader {
+	// Weak-references to class loaders, to avoid perm gen memory leaks, for example
+	// in app servers/web containters if the
+	// reflectasm library (including this class) is loaded outside the deployed
+	// applications (WAR/EAR) using ReflectASM/Kryo (exts,
+	// user classpath, etc).
+	// The key is the parent class loader and the value is the AccessClassLoader,
+	// both are weak-referenced in the hash table.
+	static private final WeakHashMap<ClassLoader, WeakReference<AccessClassLoader>> accessClassLoaders = new WeakHashMap<ClassLoader, WeakReference<AccessClassLoader>>();
+
+	// Fast-path for classes loaded in the same ClassLoader as this class.
+	static private final ClassLoader selfContextParentClassLoader = getParentClassLoader(AccessClassLoader.class);
+	static private volatile AccessClassLoader selfContextAccessClassLoader = new AccessClassLoader(
+			selfContextParentClassLoader);
+
+	static private volatile Method defineClassMethod;
+	static {
+		try {
+			defineClassMethod = ClassLoader.class.getDeclaredMethod("defineClass",
+					new Class[] { String.class, byte[].class, int.class, int.class, ProtectionDomain.class });
+			defineClassMethod.setAccessible(true);
+		} catch (Exception ignored) {
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static AccessClassLoader get(Class type) {
+		ClassLoader parent = getParentClassLoader(type);
+		// 1. fast-path:
+		if (selfContextParentClassLoader.equals(parent)) {
+			if (selfContextAccessClassLoader == null) {
+				synchronized (accessClassLoaders) { // DCL with volatile semantics
+					if (selfContextAccessClassLoader == null)
+						selfContextAccessClassLoader = new AccessClassLoader(selfContextParentClassLoader);
+				}
+			}
+			return selfContextAccessClassLoader;
+		}
+		// 2. normal search:
+		synchronized (accessClassLoaders) {
+			WeakReference<AccessClassLoader> ref = accessClassLoaders.get(parent);
+			if (ref != null) {
+				AccessClassLoader accessClassLoader = ref.get();
+				if (accessClassLoader != null)
+					return accessClassLoader;
+				else
+					accessClassLoaders.remove(parent); // the value has been GC-reclaimed, but still not the key
+														// (defensive sanity)
+			}
+			AccessClassLoader accessClassLoader = new AccessClassLoader(parent);
+			accessClassLoaders.put(parent, new WeakReference<AccessClassLoader>(accessClassLoader));
+			return accessClassLoader;
+		}
+	}
+
+	public static void remove(ClassLoader parent) {
+		// 1. fast-path:
+		if (selfContextParentClassLoader.equals(parent)) {
+			selfContextAccessClassLoader = null;
+		} else {
+			// 2. normal search:
+			synchronized (accessClassLoaders) {
+				accessClassLoaders.remove(parent);
+			}
+		}
+	}
+
+	public static int activeAccessClassLoaders() {
+		int sz = accessClassLoaders.size();
+		if (selfContextAccessClassLoader != null)
+			sz++;
+		return sz;
+	}
+
+	private AccessClassLoader(ClassLoader parent) {
+		super(parent);
+	}
+
+	protected java.lang.Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		// These classes come from the classloader that loaded AccessClassLoader.
+		if (name.equals(FieldAccess.class.getName()))
+			return FieldAccess.class;
+		if (name.equals(MethodAccess.class.getName()))
+			return MethodAccess.class;
+		if (name.equals(ConstructorAccess.class.getName()))
+			return ConstructorAccess.class;
+		if (name.equals(PublicConstructorAccess.class.getName()))
+			return PublicConstructorAccess.class;
+		// All other classes come from the classloader that loaded the type we are
+		// accessing.
+		return super.loadClass(name, resolve);
+	}
+
+	public Class<?> defineClass(String name, byte[] bytes) throws ClassFormatError {
+		try {
+			// Attempt to load the access class in the same loader, which makes protected
+			// and default access members accessible.
+			return (Class<?>) getDefineClassMethod().invoke(getParent(), new Object[] { name, bytes, Integer.valueOf(0),
+					Integer.valueOf(bytes.length), getClass().getProtectionDomain() });
+		} catch (Exception ignored) {
+			// continue with the definition in the current loader (won't have access to
+			// protected and package-protected members)
+		}
+		return defineClass(name, bytes, 0, bytes.length, getClass().getProtectionDomain());
+	}
+
+	// As per JLS, section 5.3,
+	// "The runtime package of a class or interface is determined by the package
+	// name and defining class loader of the class or interface."
+	@SuppressWarnings("rawtypes")
+	static boolean areInSameRuntimeClassLoader(Class type1, Class type2) {
+
+		if (type1.getPackage() != type2.getPackage()) {
+			return false;
+		}
+		ClassLoader loader1 = type1.getClassLoader();
+		ClassLoader loader2 = type2.getClassLoader();
+		ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+		if (loader1 == null) {
+			return (loader2 == null || loader2 == systemClassLoader);
+		}
+		if (loader2 == null) {
+			return loader1 == systemClassLoader;
+		}
+		return loader1 == loader2;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static ClassLoader getParentClassLoader(Class type) {
+		ClassLoader parent = type.getClassLoader();
+		if (parent == null)
+			parent = ClassLoader.getSystemClassLoader();
+		return parent;
+	}
+
+	private static Method getDefineClassMethod() throws Exception {
+		// DCL on volatile
+		return defineClassMethod;
+	}
+}
