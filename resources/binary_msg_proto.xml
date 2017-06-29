@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 消息协议文件 id:0~255 -->
+<messages id="1" name="MessagePackageTest"
+	package="org.slingerxv.limitart.net.binary.msgimpl" explain="消息生成测试">
+	<meta name="MetaInfo" explain="消息Bean测试">
+		<field type="int" name="ID" explain="测试ID" />
+		<field type="String" name="str" explain="测试名字" />
+		<list type="int" name="list" explain="测试列表" />
+	</meta>
+	<message name="MessageTest" explain="消息测试">
+		<field type="int" name="ID" explain="ID" />
+		<field type="String" name="name" explain="名称" />
+		<list type="MetaInfo" name="metas" explain="bean列表" />
+	</message>
+	<message name="MessageTest1" explain="消息测试1">
+		<field type="int" name="ID" explain="ID" />
+		<field type="String" name="name" explain="名称" />
+		<list type="MetaInfo" name="metas" explain="bean列表" />
+	</message>
+</messages>

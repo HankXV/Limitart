@@ -1,4 +1,5 @@
 /.settings
 /bin
 /target
-/lang_dumps
+/.idea
+/Limitart.iml
