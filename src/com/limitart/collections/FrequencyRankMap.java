@@ -7,18 +7,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.limitart.collections.define.DefaultRankObj;
+import com.limitart.collections.define.IRankMap;
 import com.limitart.collections.define.IRankObj;
 import com.limitart.math.util.RandomUtil;
 
 /**
- * 排行榜集合
+ * 活跃性排行榜 插入时立即能获取排名，适用于随时都会取排名的场合
  * 
  * @author hank
  *
  * @param <K>
  * @param <V>
  */
-public class RankMap<K, V extends IRankObj<K>> {
+public class FrequencyRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V> {
 	private List<V> list;
 	private Map<K, V> map;
 	private final Comparator<V> comparator;
@@ -26,7 +27,7 @@ public class RankMap<K, V extends IRankObj<K>> {
 
 	public static void main(String[] args) {
 		int count = 10;
-		RankMap<Long, DefaultRankObj> old = new RankMap<>(DefaultRankObj.COMPARATOR, count);
+		IRankMap<Long, DefaultRankObj> old = new FrequencyRankMap<>(DefaultRankObj.COMPARATOR, count);
 		long now = System.currentTimeMillis();
 		for (long i = 0; i < count; ++i) {
 			DefaultRankObj obj = new DefaultRankObj(i, RandomUtil.randomLong(0, count), i, i);
@@ -42,27 +43,14 @@ public class RankMap<K, V extends IRankObj<K>> {
 		System.out.println(old);
 	}
 
-	/**
-	 * 排行集合
-	 * 
-	 * @param comparator
-	 * @param limit
-	 *            排行最大长度
-	 */
-	public RankMap(Comparator<V> comparator, int capacity) {
+	public FrequencyRankMap(Comparator<V> comparator, int capacity) {
 		this.map = new HashMap<>(capacity);
 		this.comparator = comparator;
 		list = new ArrayList<>(capacity);
 		this.capacity = capacity;
 	}
 
-	/**
-	 * 放入一个元素
-	 * 
-	 * @param key
-	 * @param value
-	 * @return 返回被剔除排行榜的列表
-	 */
+	@Override
 	public synchronized void put(K key, V value) {
 		if (map.containsKey(key)) {
 			V obj = map.get(key);
@@ -87,26 +75,17 @@ public class RankMap<K, V extends IRankObj<K>> {
 		}
 	}
 
-	/**
-	 * 是否包含一个Key
-	 * 
-	 * @param key
-	 * @return
-	 */
+	@Override
 	public boolean containsKey(K key) {
 		return map.containsKey(key);
 	}
 
+	@Override
 	public int size() {
 		return list.size();
 	}
 
-	/**
-	 * 找到此Key在排行榜的名次
-	 * 
-	 * @param key
-	 * @return
-	 */
+	@Override
 	public int getIndex(K key) {
 		if (!this.map.containsKey(key)) {
 			return -1;
@@ -115,13 +94,7 @@ public class RankMap<K, V extends IRankObj<K>> {
 		return binarySearch(v, false);
 	}
 
-	/**
-	 * 获取一个范围的数据
-	 * 
-	 * @param start
-	 * @param end
-	 * @return
-	 */
+	@Override
 	public List<V> getRange(int start, int end) {
 		List<V> temp = new ArrayList<>();
 		int size = size();
@@ -150,12 +123,7 @@ public class RankMap<K, V extends IRankObj<K>> {
 		return temp;
 	}
 
-	/**
-	 * 获取指定位置的元数
-	 * 
-	 * @param index
-	 * @return
-	 */
+	@Override
 	public V getAt(int index) {
 		int size = size();
 		if (size == 0) {
