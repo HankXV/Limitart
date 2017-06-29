@@ -11,7 +11,7 @@ import com.limitart.collections.define.IRankMap;
 import com.limitart.collections.define.IRankObj;
 
 /**
- * 一次性排行，调用一次获得排名排名就永远不会改变
+ * 一次性排行，调用一次获得排名排名就永远不会改变，插入快
  * 
  * @author hank
  *

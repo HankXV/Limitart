@@ -12,7 +12,7 @@ import com.limitart.collections.define.IRankObj;
 import com.limitart.math.util.RandomUtil;
 
 /**
- * 活跃性排行榜 插入时立即能获取排名，适用于随时都会取排名的场合
+ * 活跃性排行榜 插入时立即能获取排名，适用于随时都会取排名的场合，插入相对较慢
  * 
  * @author hank
  *
@@ -96,7 +96,7 @@ public class FrequencyRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V
 
 	@Override
 	public List<V> getAll() {
-		return getRange(0, size() - 1);
+		return new ArrayList<>(list);
 	}
 
 	@Override
@@ -122,10 +122,7 @@ public class FrequencyRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V
 			}
 			return temp;
 		}
-		for (int i = start; i < size && i <= end; ++i) {
-			temp.add(list.get(i));
-		}
-		return temp;
+		return list.subList(start, end);
 	}
 
 	@Override
