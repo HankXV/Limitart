@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.limitart.collections.define.DefaultRankObj;
 import com.limitart.collections.define.IRankObj;
+import com.limitart.math.util.RandomUtil;
 
 /**
  * 排行榜集合
@@ -21,6 +23,24 @@ public class RankMap<K, V extends IRankObj<K>> {
 	private Map<K, V> map;
 	private final Comparator<V> comparator;
 	private int capacity;
+
+	public static void main(String[] args) {
+		int count = 10;
+		RankMap<Long, DefaultRankObj> old = new RankMap<>(DefaultRankObj.COMPARATOR, count);
+		long now = System.currentTimeMillis();
+		for (long i = 0; i < count; ++i) {
+			DefaultRankObj obj = new DefaultRankObj(i, RandomUtil.randomLong(0, count), i, i);
+			old.put(i, obj);
+		}
+		System.out.println("oldMap:" + (System.currentTimeMillis() - now));
+		now = System.currentTimeMillis();
+		for (long i = 0; i < count; ++i) {
+			DefaultRankObj obj = new DefaultRankObj(i, RandomUtil.randomLong(0, count), i, i);
+			old.put(i, obj);
+		}
+		System.out.println("oldMap:" + (System.currentTimeMillis() - now));
+		System.out.println(old);
+	}
 
 	/**
 	 * 排行集合
@@ -43,7 +63,7 @@ public class RankMap<K, V extends IRankObj<K>> {
 	 * @param value
 	 * @return 返回被剔除排行榜的列表
 	 */
-	public void put(K key, V value) {
+	public synchronized void put(K key, V value) {
 		if (map.containsKey(key)) {
 			V obj = map.get(key);
 			// 比较新数据与老数据大小
@@ -61,7 +81,7 @@ public class RankMap<K, V extends IRankObj<K>> {
 		}
 		map.put(key, value);
 		list.add(binarySearch, value);
-		while (map.size() + 1 > this.capacity) {
+		while (map.size() > this.capacity) {
 			V pollLast = list.remove(map.size() - 1);
 			map.remove(pollLast.key());
 		}
@@ -78,7 +98,7 @@ public class RankMap<K, V extends IRankObj<K>> {
 	}
 
 	public int size() {
-		return map.size();
+		return list.size();
 	}
 
 	/**
