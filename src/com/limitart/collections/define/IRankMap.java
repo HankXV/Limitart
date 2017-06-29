@@ -47,6 +47,8 @@ public interface IRankMap<K, V extends IRankObj<K>> {
 	 */
 	List<V> getRange(int start, int end);
 
+	List<V> getAll();
+
 	/**
 	 * 获取指定位置的元数
 	 * 

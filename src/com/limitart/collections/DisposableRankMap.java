@@ -69,11 +69,16 @@ public class DisposableRankMap<K, V extends IRankObj<K>> implements IRankMap<K, 
 	}
 
 	@Override
-	public synchronized List<V> getRange(int start, int end) {
+	public List<V> getAll() {
 		if (result == null) {
 			result = new ArrayList<>(treeSet);
 		}
 		return result;
+	}
+
+	@Override
+	public synchronized List<V> getRange(int start, int end) {
+		return null;
 	}
 
 	@Override
@@ -86,4 +91,5 @@ public class DisposableRankMap<K, V extends IRankObj<K>> implements IRankMap<K, 
 	public String toString() {
 		return treeSet.toString();
 	}
+
 }

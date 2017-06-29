@@ -95,6 +95,11 @@ public class FrequencyRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V
 	}
 
 	@Override
+	public List<V> getAll() {
+		return getRange(0, size() - 1);
+	}
+
+	@Override
 	public List<V> getRange(int start, int end) {
 		List<V> temp = new ArrayList<>();
 		int size = size();
@@ -162,4 +167,5 @@ public class FrequencyRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V
 		}
 		return -1;
 	}
+
 }
