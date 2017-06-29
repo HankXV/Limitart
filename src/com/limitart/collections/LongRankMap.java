@@ -2,23 +2,15 @@ package com.limitart.collections;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.limitart.collections.define.IRankObj;
+import com.limitart.collections.define.ILongRankObject;
 
-/**
- * 排行榜集合
- * 
- * @author hank
- *
- * @param <K>
- * @param <V>
- */
-public class RankMap<K, V extends IRankObj<K>> {
+import io.netty.util.collection.LongObjectHashMap;
+
+public class LongRankMap<V extends ILongRankObject> {
 	private List<V> list;
-	private Map<K, V> map;
+	private LongObjectHashMap<V> map;
 	private final Comparator<V> comparator;
 	private int capacity;
 
@@ -29,8 +21,8 @@ public class RankMap<K, V extends IRankObj<K>> {
 	 * @param limit
 	 *            排行最大长度
 	 */
-	public RankMap(Comparator<V> comparator, int capacity) {
-		this.map = new HashMap<>(capacity);
+	public LongRankMap(Comparator<V> comparator, int capacity) {
+		this.map = new LongObjectHashMap<>(capacity);
 		this.comparator = comparator;
 		list = new ArrayList<>(capacity);
 		this.capacity = capacity;
@@ -43,7 +35,7 @@ public class RankMap<K, V extends IRankObj<K>> {
 	 * @param value
 	 * @return 返回被剔除排行榜的列表
 	 */
-	public void put(K key, V value) {
+	public void put(long key, V value) {
 		if (map.containsKey(key)) {
 			V obj = map.get(key);
 			// 比较新数据与老数据大小
@@ -73,7 +65,7 @@ public class RankMap<K, V extends IRankObj<K>> {
 	 * @param key
 	 * @return
 	 */
-	public boolean containsKey(K key) {
+	public boolean containsKey(long key) {
 		return map.containsKey(key);
 	}
 
@@ -87,7 +79,7 @@ public class RankMap<K, V extends IRankObj<K>> {
 	 * @param key
 	 * @return
 	 */
-	public int getIndex(K key) {
+	public int getIndex(long key) {
 		if (!this.map.containsKey(key)) {
 			return -1;
 		}
