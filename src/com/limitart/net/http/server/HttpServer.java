@@ -89,16 +89,14 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 		try {
 			ServerBootstrap boot = new ServerBootstrap();
 			if (Epoll.isAvailable()) {
-				boot.channel(EpollServerSocketChannel.class);
+				boot.channel(EpollServerSocketChannel.class).option(ChannelOption.SO_BACKLOG, 1024);
 				log.info(this.config.getServerName() + " epoll init");
 			} else {
 				boot.channel(NioServerSocketChannel.class);
 				log.info(this.config.getServerName() + " nio init");
 			}
-			boot.group(bossGroup, workerGroup).option(ChannelOption.SO_BACKLOG, 1024)
-					.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+			boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 					.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-					.childOption(ChannelOption.SO_KEEPALIVE, true)
 					.childHandler(new ChannelInitializer<SocketChannel>() {
 
 						@Override

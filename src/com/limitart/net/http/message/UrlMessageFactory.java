@@ -1,13 +1,13 @@
 package com.limitart.net.http.message;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.limitart.net.http.handler.HttpHandler;
 import com.limitart.reflectasm.ConstructorAccess;
-
 
 /**
  * 消息工厂 注意：这里的handler是单例，一定不能往里存成员变量
@@ -17,8 +17,8 @@ import com.limitart.reflectasm.ConstructorAccess;
  */
 public class UrlMessageFactory {
 	private static Logger log = LogManager.getLogger();
-	private HashMap<String, ConstructorAccess<? extends UrlMessage<String>>> messages = new HashMap<>();
-	private HashMap<String, HttpHandler> handlers = new HashMap<String, HttpHandler>();
+	private Map<String, ConstructorAccess<? extends UrlMessage<String>>> messages = new HashMap<>();
+	private Map<String, HttpHandler> handlers = new HashMap<>();
 
 	public synchronized UrlMessageFactory registerMsg(String url, Class<? extends UrlMessage<String>> msgClass,
 			HttpHandler handler) {

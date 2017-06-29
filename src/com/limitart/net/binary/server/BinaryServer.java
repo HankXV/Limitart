@@ -102,9 +102,10 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		if (Epoll.isAvailable()) {
 			bossGroup = new EpollEventLoopGroup();
 			workerGroup = new EpollEventLoopGroup();
-			boot.channel(EpollServerSocketChannel.class).childOption(ChannelOption.SO_LINGER, 0)
-					.childOption(ChannelOption.SO_REUSEADDR, true).childOption(ChannelOption.SO_KEEPALIVE, true)
-					.childOption(ChannelOption.SO_SNDBUF, 32 * 1024).childOption(ChannelOption.SO_RCVBUF, 32 * 1024);
+			boot.option(ChannelOption.SO_BACKLOG, 1024).channel(EpollServerSocketChannel.class)
+					.childOption(ChannelOption.SO_LINGER, 0).childOption(ChannelOption.SO_REUSEADDR, true)
+					.childOption(ChannelOption.SO_KEEPALIVE, true).childOption(ChannelOption.SO_SNDBUF, 32 * 1024)
+					.childOption(ChannelOption.SO_RCVBUF, 32 * 1024);
 			log.info(config.getServerName() + " epoll init");
 		} else {
 			bossGroup = new NioEventLoopGroup();
@@ -112,8 +113,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 			boot.channel(NioServerSocketChannel.class);
 			log.info(config.getServerName() + " nio init");
 		}
-		boot.group(bossGroup, workerGroup).option(ChannelOption.SO_BACKLOG, 1024)
-				.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializerImpl(this));
 		schedule(new Runnable() {

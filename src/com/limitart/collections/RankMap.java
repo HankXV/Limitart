@@ -1,29 +1,18 @@
 package com.limitart.collections;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.Map;
 
 import com.limitart.collections.define.IRankObj;
 
-/**
- * 排行榜集合
- * 
- * @author hank
- *
- * @param <K>
- * @param <V>
- */
-public class SynchronizedRankMap<K, V extends IRankObj<K>> {
-	private TreeSet<V> treeSet;
-	private HashMap<K, V> map;
+public class RankMap<K, V extends IRankObj<K>> {
+	private List<V> list;
+	private Map<K, V> map;
 	private final Comparator<V> comparator;
-	private boolean modified = false;
-	private List<V> indexList;
-	private final int limit;
+	private int capacity;
 
 	/**
 	 * 排行集合
@@ -32,11 +21,11 @@ public class SynchronizedRankMap<K, V extends IRankObj<K>> {
 	 * @param limit
 	 *            排行最大长度
 	 */
-	public SynchronizedRankMap(Comparator<V> comparator, int limit) {
-		this.treeSet = new TreeSet<>(comparator);
+	public RankMap(Comparator<V> comparator, int capacity) {
 		this.map = new HashMap<>();
 		this.comparator = comparator;
-		this.limit = limit;
+		list = new ArrayList<>(capacity);
+		this.capacity = capacity;
 	}
 
 	/**
@@ -46,28 +35,28 @@ public class SynchronizedRankMap<K, V extends IRankObj<K>> {
 	 * @param value
 	 * @return 返回被剔除排行榜的列表
 	 */
-	public synchronized List<V> put(K key, V value) {
-		List<V> removeList = new ArrayList<>();
+	public void put(K key, V value) {
 		if (map.containsKey(key)) {
 			V obj = map.get(key);
 			// 比较新数据与老数据大小
 			int compare = comparator.compare(value, obj);
 			if (compare == 0) {
-				return removeList;
+				return;
 			}
 			// 因为防止老对象被更改值，所以要删除一次
-			treeSet.remove(obj);
+			int binarySearch = binarySearch(obj, false);
+			list.remove(binarySearch);
+		}
+		int binarySearch = 0;
+		if (size() > 0) {
+			binarySearch = binarySearch(value, true);
 		}
 		map.put(key, value);
-		treeSet.add(value);
-		modified = true;
-		// 清理排行最后的数据
-		while (map.size() > limit) {
-			V pollLast = treeSet.pollLast();
+		list.add(binarySearch, value);
+		while (map.size() + 1 > this.capacity) {
+			V pollLast = list.remove(map.size() - 1);
 			map.remove(pollLast.key());
-			removeList.add(pollLast);
 		}
-		return removeList;
 	}
 
 	/**
@@ -76,7 +65,7 @@ public class SynchronizedRankMap<K, V extends IRankObj<K>> {
 	 * @param key
 	 * @return
 	 */
-	public synchronized boolean containsKey(K key) {
+	public boolean containsKey(K key) {
 		return map.containsKey(key);
 	}
 
@@ -90,13 +79,12 @@ public class SynchronizedRankMap<K, V extends IRankObj<K>> {
 	 * @param key
 	 * @return
 	 */
-	public synchronized int getIndex(K key) {
+	public int getIndex(K key) {
 		if (!this.map.containsKey(key)) {
 			return -1;
 		}
 		V v = map.get(key);
-		checkModified();
-		return Collections.binarySearch(indexList, v, this.comparator);
+		return binarySearch(v, false);
 	}
 
 	/**
@@ -106,7 +94,7 @@ public class SynchronizedRankMap<K, V extends IRankObj<K>> {
 	 * @param end
 	 * @return
 	 */
-	public synchronized List<V> getRange(int start, int end) {
+	public List<V> getRange(int start, int end) {
 		List<V> temp = new ArrayList<>();
 		int size = size();
 		if (size == 0) {
@@ -128,9 +116,8 @@ public class SynchronizedRankMap<K, V extends IRankObj<K>> {
 			}
 			return temp;
 		}
-		checkModified();
-		for (int i = start; i < indexList.size() && i <= end; ++i) {
-			temp.add(indexList.get(i));
+		for (int i = start; i < size && i <= end; ++i) {
+			temp.add(list.get(i));
 		}
 		return temp;
 	}
@@ -141,7 +128,7 @@ public class SynchronizedRankMap<K, V extends IRankObj<K>> {
 	 * @param index
 	 * @return
 	 */
-	public synchronized V getAt(int index) {
+	public V getAt(int index) {
 		int size = size();
 		if (size == 0) {
 			return null;
@@ -152,25 +139,31 @@ public class SynchronizedRankMap<K, V extends IRankObj<K>> {
 		if (index >= size) {
 			index = size - 1;
 		}
-		if (index == 0) {
-			return treeSet.first();
-		}
-		if (index == size() - 1) {
-			return treeSet.last();
-		}
-		checkModified();
-		return indexList.get(index);
-	}
-
-	private void checkModified() {
-		if (modified) {
-			modified = false;
-			indexList = new ArrayList<>(treeSet);
-		}
+		return list.get(index);
 	}
 
 	@Override
 	public String toString() {
-		return treeSet.toString();
+		return list.toString();
+	}
+
+	private int binarySearch(V v, boolean similar) {
+		int low = 0;
+		int high = size() - 1;
+		while (low <= high) {
+			int mid = (low + high) >>> 1;
+			V midVal = list.get(mid);
+			int cmp = this.comparator.compare(midVal, v);
+			if (cmp < 0)
+				low = mid + 1;
+			else if (cmp > 0)
+				high = mid - 1;
+			else
+				return mid;
+		}
+		if (similar) {
+			return low;
+		}
+		return -1;
 	}
 }

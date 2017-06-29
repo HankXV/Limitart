@@ -532,7 +532,7 @@ public class LogDBUtil {
 
 			public WhereConditionBuilder and() throws Exception {
 				if (contactSignal != 0) {
-					throw new Exception("there is more conntact exists!");
+					throw new Exception("there is more contact exists!");
 				}
 				sb.append(" and ");
 				++contactSignal;
@@ -541,7 +541,7 @@ public class LogDBUtil {
 
 			public WhereConditionBuilder or() throws Exception {
 				if (contactSignal != 0) {
-					throw new Exception("there is more conntact exists!");
+					throw new Exception("there is more contact exists!");
 				}
 				sb.append(" or ");
 				++contactSignal;
@@ -599,8 +599,7 @@ public class LogDBUtil {
 				if (sb.length() == 0) {
 					return "";
 				}
-				StringBuilder sbCopy = new StringBuilder(sb.toString());
-				return sbCopy.toString();
+				return sb.toString();
 			}
 		}
 	}
