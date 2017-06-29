@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF8"?>
+<project basedir="." default="copy">
+	<property name="project" value="limitart" />
+	<property name="version" value="2.0" />
+	<property name="src.dir" value="${basedir}/src" />
+	<property name="lib.dir" value="${basedir}/lib" />
+	<property name="buildclass.dir" value="${basedir}/target/classes" />
+	<property name="jarfile" value="${basedir}/target/${project}-${version}.jar" />
+	<pathconvert property="libs.project" pathsep=" ">
+		<mapper>
+			<chainedmapper>
+				<flattenmapper />
+				<globmapper from="*" to="libs/*" />
+			</chainedmapper>
+		</mapper>
+		<path>
+			<fileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+	</pathconvert>
+
+	<target name="remove">
+		<delete dir="${basedir}/target/" />
+	</target>
+
+	<target name="build" depends="remove">
+		<mkdir dir="${buildclass.dir}" />
+		<echo message="开始编译..." />
+		<path id="classpath">
+			<fileset dir="${lib.dir}" includes="*.jar" />
+		</path>
+		<javac debug="true" source="1.8" srcdir="${src.dir}" destdir="${buildclass.dir}"
+			encoding="UTF-8" includeantruntime="on">
+			<compilerarg value="-Xlint:deprecation" />
+			<classpath refid="classpath" />
+		</javac>
+		<echo message="编译结束" />
+		<echo message="开始拷贝jar内必要配置" />
+		<copy file="${src.dir}/log4j2.xml" tofile="${buildclass.dir}/log4j2.xml" />
+	</target>
+
+	<target name="build-jar" depends="build">
+		<echo message="开始构建jar包..." />
+		<jar destfile="${jarfile}" basedir="${buildclass.dir}">
+			<manifest>
+				<attribute name="Manifest-Version" value="1.0" />
+				<attribute name="Class-Path" value="${libs.project}" />
+			</manifest>
+		</jar>
+		<delete dir="${buildclass.dir}" />
+		<echo message="构建jar包结束" />
+	</target>
+
+	<target name="copy" depends="build-jar">
+		<echo message="开始拷贝libs" />
+		<copy todir="${basedir}/target/libs">
+			<fileset dir="${lib.dir}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+		<echo message="开始压缩" />
+		<zip destfile="${basedir}/target/${project}-${version}.zip" basedir="${basedir}/target">
+		</zip>
+		<echo message="打包结束" />
+	</target>
+</project>
