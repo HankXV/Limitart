@@ -43,6 +43,12 @@ public class FrequencyReadRankMap<K, V extends IRankObj<K>> implements IRankMap<
 		System.out.println(old);
 	}
 
+	@Override
+	public synchronized void clear() {
+		list.clear();
+		map.clear();
+	}
+
 	public FrequencyReadRankMap(Comparator<V> comparator, int capacity) {
 		this.map = new HashMap<>(capacity);
 		this.comparator = comparator;

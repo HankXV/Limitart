@@ -57,4 +57,6 @@ public interface IRankMap<K, V extends IRankObj<K>> {
 	 */
 	V getAt(int index);
 
+	void clear();
+
 }

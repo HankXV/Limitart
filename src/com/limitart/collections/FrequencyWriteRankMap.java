@@ -35,6 +35,14 @@ public class FrequencyWriteRankMap<K, V extends IRankObj<K>> implements IRankMap
 	}
 
 	@Override
+	public synchronized void clear() {
+		treeSet.clear();
+		map.clear();
+		indexList = null;
+		modified = true;
+	}
+
+	@Override
 	public synchronized void put(K key, V value) {
 		if (map.containsKey(key)) {
 			V obj = map.get(key);
@@ -141,5 +149,4 @@ public class FrequencyWriteRankMap<K, V extends IRankObj<K>> implements IRankMap
 			indexList = new ArrayList<>(treeSet);
 		}
 	}
-
 }
