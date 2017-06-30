@@ -12,14 +12,14 @@ import com.limitart.collections.define.IRankObj;
 import com.limitart.math.util.RandomUtil;
 
 /**
- * 活跃性排行榜 插入时立即能获取排名，适用于随时都会取排名的场合，插入相对较慢
+ * 高频率读取排行结构 主要用于读取频率远远大于写入频率
  * 
  * @author hank
  *
  * @param <K>
  * @param <V>
  */
-public class FrequencyRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V> {
+public class FrequencyReadRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V> {
 	private List<V> list;
 	private Map<K, V> map;
 	private final Comparator<V> comparator;
@@ -27,7 +27,7 @@ public class FrequencyRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V
 
 	public static void main(String[] args) {
 		int count = 10;
-		IRankMap<Long, DefaultRankObj> old = new FrequencyRankMap<>(DefaultRankObj.COMPARATOR, count);
+		IRankMap<Long, DefaultRankObj> old = new FrequencyReadRankMap<>(DefaultRankObj.COMPARATOR, count);
 		long now = System.currentTimeMillis();
 		for (long i = 0; i < count; ++i) {
 			DefaultRankObj obj = new DefaultRankObj(i, RandomUtil.randomLong(0, count), i, i);
@@ -43,7 +43,7 @@ public class FrequencyRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V
 		System.out.println(old);
 	}
 
-	public FrequencyRankMap(Comparator<V> comparator, int capacity) {
+	public FrequencyReadRankMap(Comparator<V> comparator, int capacity) {
 		this.map = new HashMap<>(capacity);
 		this.comparator = comparator;
 		list = new ArrayList<>(capacity);
