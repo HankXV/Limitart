@@ -1,5 +1,6 @@
 package com.limitart.net.binary.message;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,8 +11,6 @@ import com.limitart.net.binary.message.define.IMessagePool;
 import com.limitart.reflectasm.ConstructorAccess;
 import com.limitart.util.ReflectionUtil;
 
-import io.netty.util.collection.ShortObjectHashMap;
-
 /**
  * 消息工厂 注意：这里的handler是单例，一定不能往里存成员变量
  * 
@@ -21,8 +20,8 @@ import io.netty.util.collection.ShortObjectHashMap;
 public class MessageFactory {
 	private static Logger log = LogManager.getLogger();
 	// !!这里的asm应用经测试在JAVA8下最优
-	private final ShortObjectHashMap<ConstructorAccess<? extends Message>> msgs = new ShortObjectHashMap<>();
-	private final ShortObjectHashMap<IHandler> handlers = new ShortObjectHashMap<>();
+	private final HashMap<Short, ConstructorAccess<? extends Message>> msgs = new HashMap<>();
+	private final HashMap<Short, IHandler> handlers = new HashMap<>();
 
 	/**
 	 * 通过反射调用具有IMessagePool接口的消息构造
