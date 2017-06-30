@@ -1,8 +1,13 @@
 package com.limitart.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import io.netty.util.CharsetUtil;
 
@@ -49,5 +54,61 @@ public class SecurityUtil {
 
 	public static String md5Encode32(String source, Object salt) {
 		return md5PasswordEncoder.encodePassword(source, salt);
+	}
+
+	/**
+	 * 数据压缩
+	 * 
+	 * @param data
+	 * @return
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	public static byte[] gzipCompress(byte[] data) throws IOException {
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		GZIPOutputStream gos = new GZIPOutputStream(byteArrayOutputStream);
+		try {
+			int count;
+			byte[] temp = new byte[1024];
+			while ((count = bais.read(temp, 0, temp.length)) != -1) {
+				gos.write(temp, 0, count);
+			}
+			gos.finish();
+			gos.flush();
+			return byteArrayOutputStream.toByteArray();
+		} finally {
+			bais.close();
+			gos.close();
+			byteArrayOutputStream.close();
+		}
+
+	}
+
+	/**
+	 * 数据解压缩
+	 * 
+	 * @param data
+	 * @return
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	public static byte[] gzipDecompress(byte[] data) throws IOException {
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		GZIPInputStream gis = new GZIPInputStream(bais);
+		try {
+			int count;
+			byte[] temp = new byte[1024];
+			while ((count = gis.read(temp, 0, temp.length)) != -1) {
+				baos.write(temp, 0, count);
+			}
+			baos.flush();
+			return baos.toByteArray();
+		} finally {
+			baos.close();
+			bais.close();
+			gis.close();
+		}
 	}
 }
