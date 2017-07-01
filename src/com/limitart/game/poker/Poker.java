@@ -13,7 +13,6 @@ public class Poker {
 	private final static byte CARD_NUM_COUNT = 13;
 	private final static byte CARD_SUIT_COUNT = 4;
 	private final static byte[] STANDARD_POKER = new byte[CARD_COUNT];
-	private final static byte[] COMPLETE_POKER = new byte[CARD_COUNT + 2];
 	// 花色
 	public final static byte CARD_SUIT_HEART = 1;
 	public final static byte CARD_SUIT_CLUB = 2;
@@ -32,11 +31,8 @@ public class Poker {
 		for (byte i = 0; i < CARD_SUIT_COUNT; ++i) {
 			for (byte j = 0; j < CARD_NUM_COUNT; ++j) {
 				STANDARD_POKER[CARD_NUM_COUNT * i + j] = createCard((byte) (j + 2), (byte) (i + 1));
-				COMPLETE_POKER[CARD_NUM_COUNT * i + j] = createCard((byte) (j + 2), (byte) (i + 1));
 			}
 		}
-		COMPLETE_POKER[52] = createCard(CARD_NUM_JOKER_SMALL, CARD_SUIT_JOKER);
-		COMPLETE_POKER[53] = createCard(CARD_NUM_JOKER_BIG, CARD_SUIT_JOKER);
 	}
 
 	public static byte createCard(byte number, byte color) {
@@ -59,9 +55,11 @@ public class Poker {
 	 * 
 	 * @return
 	 */
-	public static byte[] createPokerComplete() {
+	public static byte[] createPokerWithJoker() {
 		byte[] template = new byte[CARD_COUNT + 2];
-		System.arraycopy(COMPLETE_POKER, 0, template, 0, COMPLETE_POKER.length);
+		System.arraycopy(STANDARD_POKER, 0, template, 0, STANDARD_POKER.length);
+		template[52] = createCard(CARD_NUM_JOKER_SMALL, CARD_SUIT_JOKER);
+		template[53] = createCard(CARD_NUM_JOKER_BIG, CARD_SUIT_JOKER);
 		return template;
 	}
 
@@ -72,7 +70,10 @@ public class Poker {
 	 */
 	public static void shuffle(byte[] cards) {
 		for (int oldIndex = 0; oldIndex < cards.length; ++oldIndex) {
-			int newIndex = RandomUtil.DEFAULT.nextInt(cards.length);
+			int newIndex = RandomUtil.randomInt(0, cards.length - 1);
+			if (newIndex == oldIndex) {
+				continue;
+			}
 			byte tempCard = cards[oldIndex];
 			cards[oldIndex] = cards[newIndex];
 			cards[newIndex] = tempCard;
