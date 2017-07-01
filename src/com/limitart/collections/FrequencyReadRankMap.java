@@ -9,7 +9,7 @@ import java.util.Map;
 import com.limitart.collections.define.DefaultRankObj;
 import com.limitart.collections.define.IRankMap;
 import com.limitart.collections.define.IRankObj;
-import com.limitart.math.util.RandomUtil;
+import com.limitart.util.RandomUtil;
 
 /**
  * 高频率读取排行结构 主要用于读取频率远远大于写入频率

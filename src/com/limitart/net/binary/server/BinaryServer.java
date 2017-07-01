@@ -12,7 +12,6 @@ import javax.crypto.NoSuchPaddingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.limitart.math.util.RandomUtil;
 import com.limitart.net.binary.codec.ByteDecoder;
 import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.listener.SendMessageListener;
@@ -25,6 +24,7 @@ import com.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessSe
 import com.limitart.net.binary.server.config.BinaryServerConfig;
 import com.limitart.net.binary.server.listener.BinaryServerEventListener;
 import com.limitart.net.binary.util.SendMessageUtil;
+import com.limitart.util.RandomUtil;
 import com.limitart.util.SymmetricEncryptionUtil;
 
 import io.netty.bootstrap.ServerBootstrap;

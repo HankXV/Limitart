@@ -1,6 +1,6 @@
 package com.limitart.game.poker;
 
-import com.limitart.math.util.RandomUtil;
+import com.limitart.util.RandomUtil;
 
 /**
  * 扑克工具类(扑克号码和颜色都从1开始)

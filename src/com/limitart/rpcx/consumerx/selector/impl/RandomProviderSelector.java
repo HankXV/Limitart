@@ -2,8 +2,8 @@ package com.limitart.rpcx.consumerx.selector.impl;
 
 import java.util.List;
 
-import com.limitart.math.util.RandomUtil;
 import com.limitart.rpcx.consumerx.selector.define.IProviderSelector;
+import com.limitart.util.RandomUtil;
 
 
 /**
