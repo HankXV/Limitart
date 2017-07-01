@@ -158,28 +158,28 @@ public class Poker {
 	public static String toString(byte card) {
 		byte number = getCardNumber(card);
 		byte color = getCardColor(card);
-		String suit = "";
+		String suit = null;
 		if (color == CARD_SUIT_CLUB) {
-			suit += "梅花";
+			suit = "梅花";
 		} else if (color == CARD_SUIT_HEART) {
-			suit += "红桃";
+			suit = "红桃";
 		} else if (color == CARD_SUIT_DIAMOND) {
-			suit += "方块";
+			suit = "方块";
 		} else if (color == CARD_SUIT_SPADE) {
-			suit += "黑桃";
+			suit = "黑桃";
 		}
-		String num = "";
-		if (number == 11) {
+		String num = null;
+		if (number == CARD_NUM_JACK) {
 			num = "J";
-		} else if (number == 12) {
+		} else if (number == CARD_NUM_QUEEN) {
 			num = "Q";
-		} else if (number == 13) {
+		} else if (number == CARD_NUM_KING) {
 			num = "K";
-		} else if (number == 14) {
+		} else if (number == CARD_NUM_ACE) {
 			num = "A";
 		} else {
-			num = "" + number;
+			num = number + "";
 		}
-		return suit + num;
+		return num + "[" + suit + "]";
 	}
 }
