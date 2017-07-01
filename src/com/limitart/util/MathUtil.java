@@ -13,8 +13,15 @@ public class MathUtil {
 	 */
 	public static <E> List<List<E>> CNM(List<E> source, int pickNum) {
 		List<List<E>> result = new ArrayList<>();
-		// 第几个位置
-		CNM0(result, pickNum, new ArrayList<>(), source, pickNum);
+		if (pickNum < 0) {
+			pickNum = 1;
+		}
+		if (pickNum >= source.size()) {
+			result.add(source);
+		} else {
+			// 第几个位置
+			CNM0(result, pickNum, new ArrayList<>(), source, pickNum);
+		}
 		return result;
 	}
 
