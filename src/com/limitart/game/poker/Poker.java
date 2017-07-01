@@ -98,7 +98,7 @@ public class Poker {
 	 * @return
 	 */
 	public static byte getCardColor(byte value) {
-		return (byte) (value & 0X07);
+		return (byte) (value & 7);
 	}
 
 	/*
@@ -136,6 +136,28 @@ public class Poker {
 	 */
 	public static boolean isSmallJoker(byte card) {
 		return isJoker(card) && getCardNumber(card) == CARD_NUM_JOKER_SMALL;
+	}
+
+	/**
+	 * 是否是相同花色
+	 * 
+	 * @param card
+	 * @param anotherCard
+	 * @return
+	 */
+	public static boolean isSameSuit(byte card, byte anotherCard) {
+		return (card & anotherCard & 7) != 0;
+	}
+
+	/**
+	 * 是否是相同编号
+	 * 
+	 * @param card
+	 * @param anotherCard
+	 * @return
+	 */
+	public static boolean isSameNumber(byte card, byte anotherCard) {
+		return (card & anotherCard) >> 3 != 0;
 	}
 
 	/**
