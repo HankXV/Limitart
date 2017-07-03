@@ -114,6 +114,9 @@ public class TXCardsCalculator {
 					temp = colors[i];
 					colors[i] = colors[j];
 					colors[j] = temp;
+					temp = cards[i];
+					cards[i] = cards[j];
+					cards[j] = temp;
 				}
 			}
 		}
@@ -122,14 +125,6 @@ public class TXCardsCalculator {
 		for (int i = 0; i < numbers.length; ++i) {
 			evaluator |= ((long) numbers[i]) << ((numbers.length - i - 1) * 8);
 		}
-	}
-
-	public byte getIndex(int index) {
-		int leftPos = (5 - index) * 8;
-		long mask = ((long) 0XFF) << leftPos;
-		long value = (mask | evaluator) >> leftPos;
-		byte number = (byte) (value % 13);
-		return number;
 	}
 
 	/**
