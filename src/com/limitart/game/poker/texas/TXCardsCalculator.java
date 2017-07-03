@@ -93,6 +93,17 @@ public class TXCardsCalculator {
 			numbers[i] = Poker.getCardNumber(card);
 			colors[i] = Poker.getCardColor(card);
 		}
+		// 统计
+		statistics();
+		// 为同花顺时，不去匹配其他牌型
+		if (isStraightFlush()) {
+			if (maxNumberOfStraight == Poker.CARD_NUM_ACE) {
+				rank = STRAIGHT_FLUSH;
+			}
+		} else {
+			// 匹配牌型
+			compareRank();
+		}
 		// 将卡牌从大到小排序
 		for (int i = 0; i < numbers.length; ++i) {
 			for (int j = i + 1; j < numbers.length; ++j) {
@@ -106,19 +117,19 @@ public class TXCardsCalculator {
 				}
 			}
 		}
-		// 统计
-		statistics();
-		// 为同花顺时，不去匹配其他牌型
-		if (isStraightFlush()) {
-			if (maxNumberOfStraight == Poker.CARD_NUM_ACE) {
-				rank = STRAIGHT_FLUSH;
-			}
-		} else {
-			// 匹配牌型
-			compareRank();
-		}
 		// 评估数值
-		evaluatorValue();
+		evaluator = ((long) rank) << 40;
+		for (int i = 0; i < numbers.length; ++i) {
+			evaluator |= ((long) numbers[i]) << ((numbers.length - i - 1) * 8);
+		}
+	}
+
+	public byte getIndex(int index) {
+		int leftPos = (5 - index) * 8;
+		long mask = ((long) 0XFF) << leftPos;
+		long value = (mask | evaluator) >> leftPos;
+		byte number = (byte) (value % 13);
+		return number;
 	}
 
 	/**
@@ -163,6 +174,14 @@ public class TXCardsCalculator {
 			}
 		}
 		for (int i = cardNumbers.length - 1; i >= 0; --i) {
+			// 给所有对子的点数增加一个区间，用于最后对比牌内大小
+			if (cardNumbers[i] > 1) {
+				for (int j = 0; j < numbers.length; ++j) {
+					if (numbers[j] == i + 2) {
+						numbers[j] += 13;
+					}
+				}
+			}
 			// 统计对子
 			if (cardNumbers[i] == 2) {
 				++pairCount;
@@ -201,16 +220,6 @@ public class TXCardsCalculator {
 				|| isTwoPair() || isOnePair());
 		if (!hasRank) {
 			rank = HIGH_CARD;
-		}
-	}
-
-	/**
-	 * 评估牌型数值
-	 */
-	private void evaluatorValue() {
-		evaluator = ((long) rank) << 40;
-		for (int i = 0; i < numbers.length; ++i) {
-			evaluator |= ((long) numbers[i]) << ((numbers.length - i - 1) * 8);
 		}
 	}
 
