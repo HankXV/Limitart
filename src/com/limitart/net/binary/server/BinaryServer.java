@@ -304,6 +304,11 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 			if (InnerMessageEnum.getTypeByValue(messageId) != null) {
 				handler.handle(msg);
 			} else {
+				// 如果没通过验证，不接受消息
+				if (tempChannels.containsKey(ctx.channel().id().asLongText())) {
+					log.error("channel " + ctx.channel() + " has not validate yet!");
+					return;
+				}
 				this.serverEventListener.dispatchMessage(msg);
 			}
 		} finally {
