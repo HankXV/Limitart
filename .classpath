@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.22.jar"/>
 	<classpathentry kind="lib" path="lib/disruptor-3.3.6.jar"/>
 	<classpathentry kind="lib" path="lib/fastjson-1.2.29.jar"/>
+	<classpathentry kind="lib" path="lib/commons-net-3.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

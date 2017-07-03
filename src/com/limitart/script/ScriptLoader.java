@@ -19,6 +19,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 
 import com.limitart.script.constant.ScriptFileType;
 import com.limitart.script.exception.ScriptException;
+import com.limitart.util.FTPUtil;
 import com.limitart.util.FileUtil;
 
 import groovy.lang.GroovyClassLoader;
@@ -227,18 +228,7 @@ public class ScriptLoader<KEY> {
 		return this;
 	}
 
-	/**
-	 * 加载jar包
-	 * 
-	 * @param jarFile
-	 * @return
-	 * @throws ClassNotFoundException
-	 * @throws IOException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws ScriptException
-	 */
-	public ScriptLoader<KEY> loadScriptsByJar(String jarName) throws ClassNotFoundException, IOException,
+	private ScriptLoader<KEY> loadScriptsByJar(String jarName) throws ClassNotFoundException, IOException,
 			InstantiationException, IllegalAccessException, ScriptException {
 		if (isJar == 1) {
 			throw new ScriptException("this script loader is a fileloader!");
@@ -293,6 +283,55 @@ public class ScriptLoader<KEY> {
 		}
 		isJar = 2;
 		return this;
+	}
+
+	/**
+	 * 加载本地Jar
+	 * 
+	 * @param jarPath
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws IOException
+	 * @throws ScriptException
+	 */
+	public void reloadScriptJarLocal(String jarPath) throws ClassNotFoundException, InstantiationException,
+			IllegalAccessException, IOException, ScriptException {
+		log.info("start load local jar:" + jarPath);
+		loadScriptsByJar(jarPath);
+	}
+
+	/**
+	 * 远程FTP加载Jar
+	 * 
+	 * @param ftpIp
+	 * @param ftpPort
+	 * @param username
+	 * @param password
+	 * @param resourceDir
+	 * @param jarName
+	 * @throws ScriptException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public void reloadScriptJarFTP(String ftpIp, int ftpPort, String username, String password, String resourceDir,
+			String jarName) throws ScriptException, IOException, ClassNotFoundException, InstantiationException,
+			IllegalAccessException {
+		log.info("strat load remote jar:" + jarName);
+		byte[] download = FTPUtil.download(ftpIp, ftpPort, username, password, resourceDir, jarName);
+		if (download == null) {
+			throw new ScriptException("下载游戏脚本失败！");
+		}
+		log.info("拉取jar成功，jar大小：" + download.length);
+		String tempDir = "temp";
+		String tempJar = "script.xfuture";
+		String tempPath = tempDir + "/" + tempJar;
+		File jarFile = new File(tempPath);
+		FileUtil.writeNewFile(tempDir, tempJar, download);
+		loadScriptsByJar(tempPath);
+		jarFile.delete();
 	}
 
 	/**
