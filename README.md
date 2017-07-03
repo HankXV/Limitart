@@ -1,10 +1,14 @@
-# Limitart
-Java游戏服务器解决方案
-包含网络通信(net,rpcx)
-脚本重加载(script)
-消息队列(taskqueue)
-消息队列组(taskqueuegroup)
-数据库日志(db.log)
-数据库表检查(db.tablechecker)
-游戏常用集合类(collections)
-游戏常用功能抽象(game)
+#Limitart-Java游戏服务器解决方案
+##网络通信(net,rpcx)
+###消息
+		每个消息有自己的编号，消息作为Message的子类传输，传输消息的方式(参考SendMessageUtil)
+###服务器连接过程
+		首先与服务器建立Socket链接，服务器会返回一个加密的Token串(参考加密SymmetricEncryptionUtil),Token的内容为一个整型值，解密完毕发送给服务器，服务器返回消息，连接成功！
+		服务器内部消息编号：(1)服务器发送加密串(2)客户端发送解密结果(3)服务器发送验证成功
+##脚本重加载(script)
+##消息队列(taskqueue)
+##消息队列组(taskqueuegroup)
+##数据库日志(db.log)
+##数据库表检查(db.tablechecker)
+##游戏常用集合类(collections)
+##游戏常用功能抽象(game)
