@@ -35,10 +35,11 @@ public class TXCardsCalculator {
 	// 皇家同花顺
 	public final static byte ROYAL_FLUSH = 10;
 	// 原始数据
+	private byte[] cards = null;
 	private byte[] numbers = new byte[5];
 	private byte[] colors = new byte[5];
 	// 对子数量
-	private int pairCount = 0;
+	private byte pairCount = 0;
 	// 最大三条点数
 	private byte maxthreeOfAKindNumber = 0;
 	// 最大四条点数
@@ -72,8 +73,8 @@ public class TXCardsCalculator {
 		// 所有组合中牌型最大的一种
 		long maxValue = 0;
 		TXCardsCalculator maxEval = null;
-		for (int j = 0; j < cnm.size(); ++j) {
-			TXCardsCalculator temp = new TXCardsCalculator(NumberUtil.toByteArray(cnm.get(j)));
+		for (List<Byte> list : cnm) {
+			TXCardsCalculator temp = new TXCardsCalculator(NumberUtil.toByteArray(list));
 			if (temp.getValue() > maxValue) {
 				maxEval = temp;
 				maxValue = temp.getValue();
@@ -86,6 +87,7 @@ public class TXCardsCalculator {
 		if (txCards.length != 5) {
 			throw new IllegalArgumentException("the length has to be five");
 		}
+		cards = txCards;
 		for (int i = 0; i < txCards.length; ++i) {
 			byte card = txCards[i];
 			numbers[i] = Poker.getCardNumber(card);
@@ -135,6 +137,10 @@ public class TXCardsCalculator {
 	 */
 	public long getValue() {
 		return this.evaluator;
+	}
+
+	public byte[] getCards() {
+		return this.cards;
 	}
 
 	/**
