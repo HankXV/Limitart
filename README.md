@@ -18,6 +18,8 @@ BinaryServerConfig是构造二进制服务器(BinaryServer)必要的配置选项
 BinaryClient的接口跟BinaryServer类似，通过构造函数传相应参数即可
 ## RPC服务(rpcx)
 ## 脚本(script)
+### Jar包脚本加载(JarScriptLoader)
+### 文件脚本加载(FileScriptLoader)
 ## 消息队列(taskqueue)
 ## 消息队列组(taskqueuegroup)
 ## 数据库相关(db)
@@ -27,10 +29,14 @@ BinaryClient的接口跟BinaryServer类似，通过构造函数传相应参数�
 数据库日志系统主要用作统计，方便后台查看营收等游戏数据。每个日志都对应了一个日志结构(继承自AbstractLog)，他会指定滚动时间，与数据库对应的字段类型检查用注解@LogColumn放在字段上，日志的名字为类名的小写加滚动后缀。滚动的类型有日表、月表、年表、不滚动4种，按需配置。日志系统每次启动前都会检查所有表结构是否正确，如果不正确在可修正的范围内给与修正，如果无法修正则抛出异常。使用LogDBServerConfig来构造日志系统，需要指定扫描的日志包名、线程以及数据库编码之类的配置，建议线程数量不要太多，1-3个足够。
 ## 游戏常用集合类(collections)
 ## 游戏常用功能抽象(game)
+### 排行榜(IRankMap)
+IRankMap目前有两个实现(FrequencyReadRankMap、FrequencyWriteRankMap)前者是需要随时更新排名信息的，后者是一次性结算排名的，不同场景使用不同实现。需要排行的类需要实现IRankObj。
+### 限制型Map(ConstraintMap)
+就是帮助你从Object强转为任意类型的Map，跟普通Map没太多区别，只是特性场景下接口友好
 ## 常用工具(util)
 ### 唯一ID生成工具(UniqueIdUtil)
 生成Java自带的UUID或者使用createUUID来创建一个long型的唯一ID，后者的唯一ID按照区域划分，最多支持16位区域数量和每秒16位数量的并发
 ### 计时器(TimerUtil)
 粗略的间隔执行计时器，单线程执行，内部其实是一个ScheduledThreadPoolExecutor，不满足需求请自己使用ScheduledThreadPoolExecutor实现
 ### 定时任务作业(SchedulerUtil)
-内部使用quatz实现，支持cron表达式和时分秒配置，计时比较精确
+内部使用quartz实现，支持cron表达式和时分秒配置，计时比较精确
