@@ -66,15 +66,9 @@ public class TXPotPool {
 	 */
 	public void flushAward() {
 		for (TXPot pot : pots.values()) {
-			List<Integer> result = new ArrayList<>();
-			for (int index : pot.roles) {
-				if (!listener.canGetAward(index)) {
-					continue;
-				}
-				result.add(index);
-			}
-			for (int index : result) {
-				listener.onAward(index, pot.chips / result.size());
+			List<Integer> whoWins = listener.whoWins(new ArrayList<>(pot.roles));
+			for (int index : whoWins) {
+				listener.onAward(index, pot.chips / whoWins.size(), pot.roles.size() == 1);
 			}
 		}
 	}
