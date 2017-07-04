@@ -7,6 +7,12 @@ import java.util.Map;
 
 import com.limitart.game.poker.texas.listener.ITXPotListener;
 
+/**
+ * 德州扑克奖池
+ * 
+ * @author hank
+ *
+ */
 public class TXPotPool {
 	Map<String, TXPot> pots = new HashMap<>();
 	ITXPotListener listener;
@@ -15,6 +21,12 @@ public class TXPotPool {
 		this.listener = listener;
 	}
 
+	/**
+	 * 每轮触发的计算
+	 * 
+	 * @param bets
+	 *            座位索引对应玩家当轮的注数
+	 */
 	public void calTrigger(long[] bets) {
 		long min = Long.MAX_VALUE;
 		for (long bet : bets) {
@@ -49,6 +61,9 @@ public class TXPotPool {
 		calTrigger(bets);
 	}
 
+	/**
+	 * 触发发奖
+	 */
 	public void flushAward() {
 		for (TXPot pot : pots.values()) {
 			List<Integer> result = new ArrayList<>();
