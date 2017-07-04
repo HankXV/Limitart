@@ -30,11 +30,11 @@ BinaryClient的接口跟BinaryServer类似，通过构造函数传相应参数�
 ### 数据库日志系统(LogDBServer)
 数据库日志系统主要用作统计，方便后台查看营收等游戏数据。每个日志都对应了一个日志结构(继承自AbstractLog)，他会指定滚动时间，与数据库对应的字段类型检查用注解@LogColumn放在字段上，日志的名字为类名的小写加滚动后缀。滚动的类型有日表、月表、年表、不滚动4种，按需配置。日志系统每次启动前都会检查所有表结构是否正确，如果不正确在可修正的范围内给与修正，如果无法修正则抛出异常。使用LogDBServerConfig来构造日志系统，需要指定扫描的日志包名、线程以及数据库编码之类的配置，建议线程数量不要太多，1-3个足够。
 ## 游戏常用集合类(collections)
-## 游戏常用功能抽象(game)
 ### 排行榜(IRankMap)
 IRankMap目前有两个实现(FrequencyReadRankMap、FrequencyWriteRankMap)前者是需要随时更新排名信息的，后者是一次性结算排名的，不同场景使用不同实现。排行元数据需要实现IRankObj接口。
 ### 限制型Map(ConstraintMap)
 Map内存Object类型，Map的Key为指定类型，此Map没有特殊性，只不过在接口上做了限制的处理，比如获取int类型为getInt()、获取byte为getByte(),这种Map在Json和上下文参数的应用上比较友好。
+## 游戏常用功能抽象(game)
 ## 常用工具(util)
 ### 唯一ID生成工具(UniqueIdUtil)
 生成Java自带的UUID或者使用createUUID来创建一个long型的唯一ID，后者的唯一ID按照区域划分，最多支持16位区域数量和每秒16位数量的并发。
