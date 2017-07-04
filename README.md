@@ -7,7 +7,7 @@
 ### 二进制消息（Message、MessageMeta）
 每个消息必须继承Message类，并且消息只支持基本类型和消息元(MessageMeta)类型以及前两者类型的List或数组，消息元类型就是所谓的消息里携带对象，List的长度不能超过一个short的长度。每个消息必须有一个唯一Id来标识，长度为一个short。消息里面的decode和encode编码必须顺序一致。二进制服务器构造的时候需要一个消息工厂(MessageFactory)，里面需要初始化消息到消息处理器(IHandler)的映射，当二进制服务器收到消息时，会去寻找相应的消息处理器作为回调，从而执行逻辑。建议在实际项目中，消息按模块分包，开发时先思考清楚需要开发的功能会用到什么消息，然后分别处理好相应的handler即可。比如：一个背包系统，对于客户端来讲基本是3个元操作，增加物品、删除物品、更新物品信息，那么定好相应的消息，客户端就只用关心这3个操作如何处理就行，其余的功能根据这3个元操作组合即可得到。
 ### 发送二进制消息（SendMessageUtil）
-我们保留了Netty的远程Channel来作为服务器与每个用户的通道，发送消息很简单，调用SendMessageUtil里的sendMessage方法即可，需要注意的是，为了防止重复编码，在向多个Channel发送消息时，请尽量调用有List参数的重载函数。
+我们保留了Netty的原生Channel来作为服务器与每个用户的通道，发送消息很简单，调用SendMessageUtil里的sendMessage方法即可，需要注意的是，为了防止重复编码，在向多个Channel发送消息时，请尽量调用有List参数的重载函数。
 ### 二进制消息处理器（IHandler）
 每个处理器必须要实现IHandler接口，然后注册进消息工厂(MessageFactory)与相应的消息(Message)所对应，IHandler被认为是单例模式，所以不要在IHandler的实现类里缓存任何非全局的数据。
 ### 反射构造消息工厂(MessageFactory)
@@ -21,6 +21,8 @@ BinaryClient的接口跟BinaryServer类似，通过构造函数传相应参数�
 ## 消息队列(taskqueue)
 ## 消息队列组(taskqueuegroup)
 ## 数据库相关(db)
+### 数据库表检查器(BinaryClient)
+数据库表检查器的作用在于当服务器检测到数据库表结构和自身的对象结构不吻合时，应当立即关闭服务器，以免更糟糕的错误发生。要使用表结构检查器，需要用到表检查注解(@TableCheck)放在类上，字段检查注解(@FieldCheck)放在字段上，最后调用TableChecker来注册需要检查的类返回检查结果。在项目中应当养成写检查的良好习惯。
 ## 游戏常用集合类(collections)
 ## 游戏常用功能抽象(game)
 ## 常用工具(util)
