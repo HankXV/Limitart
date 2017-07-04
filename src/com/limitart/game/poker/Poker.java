@@ -167,14 +167,31 @@ public class Poker {
 	 * @return
 	 */
 	public static long cardsToLong(byte[] cards) {
-		if (cards.length > 8) {
-			throw new IllegalArgumentException("length <=8");
+		if (cards.length > Long.BYTES) {
+			throw new IllegalArgumentException("length <=" + Long.BYTES);
 		}
 		long longOfCards = 0;
 		for (int i = 0; i < cards.length; i++) {
-			longOfCards |= cards[i] << i * 8;
+			longOfCards |= ((long) cards[i]) << i * Byte.SIZE;
 		}
 		return longOfCards;
+	}
+
+	/**
+	 * 将long转化为一副牌(只支持8张牌)
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static byte[] longToCards(long value) {
+		int pos = 0;
+		byte[] temp = new byte[Long.BYTES];
+		while ((temp[pos] = (byte) ((value >> (pos * Byte.SIZE)) & 0XFFL)) != 0) {
+			++pos;
+		}
+		byte[] result = new byte[pos];
+		System.arraycopy(temp, 0, result, 0, result.length);
+		return result;
 	}
 
 	public static String toString(byte card) {
