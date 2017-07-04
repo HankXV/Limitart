@@ -2,7 +2,6 @@ package com.limitart.game.poker.texas;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +16,6 @@ import com.limitart.game.poker.texas.listener.ITXPotListener;
 public class TXPotPool {
 	Map<String, TXPot> pots = new HashMap<>();
 	ITXPotListener listener;
-	int personNum = 0;
 
 	public TXPotPool(ITXPotListener listener) {
 		this.listener = listener;
@@ -30,11 +28,6 @@ public class TXPotPool {
 	 *            座位索引对应玩家当轮的注数
 	 */
 	public void calTrigger(long[] bets) {
-		personNum = bets.length;
-		calTrigger0(bets);
-	}
-
-	private void calTrigger0(long[] bets) {
 		long min = Long.MAX_VALUE;
 		for (long bet : bets) {
 			if (bet == 0) {
@@ -61,30 +54,25 @@ public class TXPotPool {
 		TXPot sidePot = pots.get(key);
 		if (sidePot == null) {
 			sidePot = new TXPot();
+			sidePot.key = key;
 			sidePot.roles = list;
 			pots.put(key, sidePot);
 		}
 		sidePot.chips += min * list.size();
-		calTrigger0(bets);
+		calTrigger(bets);
 	}
 
 	/**
 	 * 触发发奖
 	 */
-	public long[] flushAward() {
-		long[] awards = new long[personNum];
+	public void flushAward() {
 		for (TXPot pot : pots.values()) {
-			HashSet<Integer> whoWins = listener.whoWins(new ArrayList<>(pot.roles));
-			for (int index : pot.roles) {
-				long result = pot.chips / whoWins.size();
-				awards[index] += result;
-				listener.onAward(index, whoWins.contains(index), result, pot.roles.size() == 1);
-			}
+			listener.onAward(pot.key, pot.roles, pot.chips);
 		}
-		return awards;
 	}
 
 	private class TXPot {
+		private String key;
 		// 奖池数量
 		private long chips;
 		// 放入该边池筹码的玩家作为索引
