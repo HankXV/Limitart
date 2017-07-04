@@ -101,7 +101,7 @@ public class SecurityUtil {
 		return new String(hexEncode);
 	}
 
-	public String encodePassword(String rawPass, Object salt) {
+	public String encodePassword(String rawPass, Object salt) throws NoSuchAlgorithmException {
 		String saltedPass = mergePasswordAndSalt(rawPass, salt, false);
 		MessageDigest messageDigest = getMessageDigest();
 		byte[] digest = messageDigest.digest(Utf8.encode(saltedPass));
@@ -111,15 +111,11 @@ public class SecurityUtil {
 		return new String(SecurityUtil.hexEncode(digest));
 	}
 
-	private final MessageDigest getMessageDigest() throws IllegalArgumentException {
-		try {
-			return MessageDigest.getInstance(ALGORITHM_MD5);
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalArgumentException("No such algorithm [" + ALGORITHM_MD5 + "]");
-		}
+	private final MessageDigest getMessageDigest() throws NoSuchAlgorithmException {
+		return MessageDigest.getInstance(ALGORITHM_MD5);
 	}
 
-	public boolean isPasswordValid(String encPass, String rawPass, Object salt) {
+	public boolean isPasswordValid(String encPass, String rawPass, Object salt) throws NoSuchAlgorithmException {
 		String pass1 = "" + encPass;
 		String pass2 = encodePassword(rawPass, salt);
 		byte[] expectedBytes = pass1 == null ? null : Utf8.encode(pass1);
