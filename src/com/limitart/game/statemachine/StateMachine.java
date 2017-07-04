@@ -89,7 +89,7 @@ public class StateMachine {
 			throw new NullPointerException("stateId");
 		}
 		if (this.curState != null && stateId.intValue() == this.curState.getStateId().intValue()) {
-			throw new StateException("already on state:" + stateId);
+			return this;
 		}
 		if (!stateMap.containsKey(stateId)) {
 			throw new StateException(MessageFormat.format("NodeId:{0} does not exist !", stateId));
