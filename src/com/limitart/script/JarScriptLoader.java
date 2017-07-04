@@ -35,7 +35,7 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 				if (entryName.endsWith(".class")) {
 					String className = entryName.replace("/", ".").substring(0, entryName.indexOf(".class"));
 					Class<?> clazz = classLoader.loadClass(className);
-					log.info("加载class文件：" + className);
+					log.info("load class：" + className);
 					if (clazz == null) {
 						throw new ScriptException("class not found:" + className);
 					}
@@ -107,11 +107,11 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		log.info("strat load remote jar:" + jarName);
 		byte[] download = FTPUtil.download(ftpIp, ftpPort, username, password, resourceDir, jarName);
 		if (download == null) {
-			throw new ScriptException("下载游戏脚本失败！");
+			throw new ScriptException("download script file failed！");
 		}
-		log.info("拉取jar成功，jar大小：" + download.length);
+		log.info("download jar file success，file length：" + download.length);
 		String tempDir = "temp";
-		String tempJar = "script.xfuture";
+		String tempJar = "script.limitart";
 		String tempPath = tempDir + "/" + tempJar;
 		File jarFile = new File(tempPath);
 		FileUtil.writeNewFile(tempDir, tempJar, download);
