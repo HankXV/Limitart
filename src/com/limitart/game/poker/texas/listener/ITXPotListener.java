@@ -1,5 +1,6 @@
 package com.limitart.game.poker.texas.listener;
 
+import java.util.HashSet;
 import java.util.List;
 
 public interface ITXPotListener {
@@ -13,7 +14,7 @@ public interface ITXPotListener {
 	 * @param winOrReturn
 	 *            是赢的还是返还的
 	 */
-	public void onAward(int index, long chips, boolean winOrReturn);
+	public void onAward(int index, boolean isWin, long chips, boolean winOrReturn);
 
-	public List<Integer> whoWins(List<Integer> roles);
+	public HashSet<Integer> whoWins(List<Integer> roles);
 }
