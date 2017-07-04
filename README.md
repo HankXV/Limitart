@@ -11,9 +11,9 @@
 ### 二进制消息处理器（IHandler）
 每个处理器必须要实现IHandler接口，然后注册进消息工厂(MessageFactory)与相应的消息(Message)所对应，IHandler被认为是单例模式，所以不要在IHandler的实现类里缓存任何非全局的数据。
 ### 反射构造消息工厂(MessageFactory)
-在实际开发中，我们都知道按模块来区分代码是非常有必要的事，各个模块的消息可以注册到各个模块的自己的消息池(IMessagePool)，这样可以避免所有消息混在一起，修改和查看显得非常麻烦，通过调用消息工厂(MessageFactory)的createByPackage方法可以使指定包下所有的消息池(IMessagePool)组合成一个消息工厂(MessageFactory)。
+在实际开发中，我们都知道按模块来区分代码是非常有必要的事，各个模块的消息可以注册到各个模块自己的消息池(IMessagePool)里，这样可以避免所有消息混在一起，修改和查看显得非常麻烦，通过调用消息工厂(MessageFactory)的createByPackage方法可以使指定包下所有的消息池(IMessagePool)组合成一个消息工厂(MessageFactory)。
 ### 二进制服务器配置(BinaryServer)
-BinaryServerConfig是构造二进制服务器(BinaryServer)必要的配置选项，主要用于确定端口、数据包限制以及链接验证码公钥(见上文链接过程中提到的验证码)。在二进制服务器(BinaryServer)中会有各种事件的回调函数，包括Netty原生回调和自定义回调：1.onServerBind 服务器绑定端口成功 2.onConnectionEffective 客户端链接验证成功，一个链接是否有效，或者说要判断此链接是否可以正式交由本服务器处理，都建议从这里开始 3.dispatchMessage 这里就是分发消息的回调了，因为不同的应用线程模型不同，所以我们需要把消息放到不同线程来执行，并且可能会对消息有统计行为，比如arpg游戏的大概模型就会按地图来分线程，那么这里就很可能会去寻找相应的地图线程来执行消息。
+BinaryServerConfig是构造二进制服务器(BinaryServer)必要的配置选项，主要用于确定端口、数据包限制以及链接验证码公钥(见上文链接过程中提到的验证码)。在二进制服务器(BinaryServer)中会有各种事件的回调函数，包括Netty原生回调和自定义回调：1.onServerBind 服务器绑定端口成功 2.onConnectionEffective 客户端链接验证成功，一个链接是否有效，或者说要判断此链接的消息是否可以正式交由本服务器处理，都建议从这里开始 3.dispatchMessage 这里就是分发消息的回调了，因为不同的应用线程模型不同，所以我们需要把消息放到不同线程来执行(参考taskqueue)，并且可能会对消息有统计行为，比如arpg游戏的大概模型就会按地图来分线程，那么这里就很可能会去寻找相应的地图线程来执行消息。
 ### 二进制客户端配置(BinaryClient)
 BinaryClient的接口跟BinaryServer类似，通过构造函数传相应参数即可。
 ## RPC服务(rpcx)
@@ -21,7 +21,7 @@ BinaryClient的接口跟BinaryServer类似，通过构造函数传相应参数�
 ### Jar包脚本加载(JarScriptLoader)
 ### 文件脚本加载(FileScriptLoader)
 ## 消息队列(taskqueue)
-很多异步任务都需要由消息队列来做中间层来完成线程的跳转，游戏中应用到的场景可能是消息的分发和异步IO任务(如异步数据库保存)的处理，这里提供两种实现，DisruptorTaskQueue和LinkedBlockingTaskQueue，前者底层为Disruptor快速无锁的环形队列，吞吐量很高，后者为Java原生的并发阻塞队列，推荐使用前者。
+很多异步任务都需要由消息队列做中间层来完成线程的跳转，游戏中应用到的场景可能是消息的分发和异步IO任务(如异步数据库保存)的处理，这里提供两种实现，DisruptorTaskQueue和LinkedBlockingTaskQueue，前者底层为Disruptor快速无锁的环形队列，吞吐量很高，后者为Java原生的并发阻塞队列，推荐使用前者。
 ## 消息队列组(taskqueuegroup)
 由于任务处理线程可能有动态增长的需要，这里加入一个简单的消息队列组来完成任务，其功能类似于Java自身的ThreadPoolExecutor,但是不同之处在于，消息队列组可以确定某个到来的任务只能由特定的线程执行，比如同一战场的玩家任务一定要在同一个线程执行，同一个地图的玩家任务也一定要在同一个线程执行，有交互行为的任务要在同一线程执行等。线程租中每个执行的单位需要继承AutoGrowthEntity以帮助他们找到自己所在的线程。
 ## 数据库相关(db)
