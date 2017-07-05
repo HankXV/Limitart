@@ -4,6 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
@@ -104,7 +107,7 @@ public class SecurityUtil {
 	public String encodePassword(String rawPass, Object salt) throws NoSuchAlgorithmException {
 		String saltedPass = mergePasswordAndSalt(rawPass, salt, false);
 		MessageDigest messageDigest = getMessageDigest();
-		byte[] digest = messageDigest.digest(Utf8.encode(saltedPass));
+		byte[] digest = messageDigest.digest(utf8Encode(saltedPass));
 		for (int i = 1; i < this.iterations; ++i) {
 			digest = messageDigest.digest(digest);
 		}
@@ -118,8 +121,8 @@ public class SecurityUtil {
 	public boolean isPasswordValid(String encPass, String rawPass, Object salt) throws NoSuchAlgorithmException {
 		String pass1 = "" + encPass;
 		String pass2 = encodePassword(rawPass, salt);
-		byte[] expectedBytes = pass1 == null ? null : Utf8.encode(pass1);
-		byte[] actualBytes = pass2 == null ? null : Utf8.encode(pass2);
+		byte[] expectedBytes = pass1 == null ? null : utf8Encode(pass1);
+		byte[] actualBytes = pass2 == null ? null : utf8Encode(pass2);
 		int expectedLength = (expectedBytes == null) ? -1 : expectedBytes.length;
 		int actualLength = (actualBytes == null) ? -1 : actualBytes.length;
 		int result = (expectedLength == actualLength) ? 0 : 1;
@@ -232,6 +235,26 @@ public class SecurityUtil {
 			baos.close();
 			bais.close();
 			gis.close();
+		}
+	}
+
+	public static byte[] utf8Encode(CharSequence string) {
+		try {
+			ByteBuffer bytes = CharsetUtil.UTF_8.newEncoder().encode(CharBuffer.wrap(string));
+			byte[] bytesCopy = new byte[bytes.limit()];
+			System.arraycopy(bytes.array(), 0, bytesCopy, 0, bytes.limit());
+
+			return bytesCopy;
+		} catch (CharacterCodingException e) {
+			throw new IllegalArgumentException("Encoding failed", e);
+		}
+	}
+
+	public static String utf8Decode(byte[] bytes) {
+		try {
+			return CharsetUtil.UTF_8.newDecoder().decode(ByteBuffer.wrap(bytes)).toString();
+		} catch (CharacterCodingException e) {
+			throw new IllegalArgumentException("Decoding failed", e);
 		}
 	}
 
