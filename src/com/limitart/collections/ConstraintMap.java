@@ -213,7 +213,7 @@ public class ConstraintMap<K> {
 	}
 
 	public String toJSON() {
-		return JSON.toJSONString(this.map);
+		return StringUtil.toJSON(this.map);
 	}
 
 	private void fromJSON(String jsonContent) {

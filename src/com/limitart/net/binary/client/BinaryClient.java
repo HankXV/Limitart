@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.limitart.net.binary.client.config.BinaryClientConfig;
 import com.limitart.net.binary.client.listener.BinaryClientEventListener;
-import com.limitart.net.binary.codec.ByteDecoder;
 import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
@@ -103,7 +102,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
-			ch.pipeline().addLast(new ByteDecoder(this.client.clientConfig.getDataMaxLength()));
+			ch.pipeline().addLast(client.clientConfig.getDecoder());
 			ch.pipeline().addLast(this.client);
 		}
 
@@ -216,7 +215,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
-			short messageId = buffer.readShort();
+			short messageId = this.clientConfig.getDecoder().readMessageId(ctx.channel(), buffer);
 			Message msg = BinaryClient.this.messageFactory.getMessage(messageId);
 			if (msg == null) {
 				throw new Exception(clientConfig.getClientName() + " message empty,id:" + messageId);

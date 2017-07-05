@@ -49,13 +49,20 @@ public class StringUtil {
 		return m.matches();
 	}
 
-	public static String toJSON(Object obj) {
+	public static String toJSONWithClassInfo(Object obj) {
 		if (obj == null) {
 			return null;
 		}
 		return JSON.toJSONString(obj, SerializerFeature.WriteClassName, SerializerFeature.WriteNullStringAsEmpty,
 				SerializerFeature.WriteNullListAsEmpty, SerializerFeature.WriteNullBooleanAsFalse,
 				SerializerFeature.WriteNullNumberAsZero);
+	}
+
+	public static String toJSON(Object obj) {
+		if (obj == null) {
+			return null;
+		}
+		return JSON.toJSONString(obj);
 	}
 
 	public static final <T> T toObject(String text, Class<T> clazz) {

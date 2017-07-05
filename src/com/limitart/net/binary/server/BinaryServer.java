@@ -12,7 +12,7 @@ import javax.crypto.NoSuchPaddingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.limitart.net.binary.codec.ByteDecoder;
+import com.limitart.net.binary.codec.AbstractBinaryDecoder;
 import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
@@ -169,7 +169,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
-			ch.pipeline().addLast(new ByteDecoder(config.getDataMaxLength())).addLast(this.server);
+			ch.pipeline().addLast(AbstractBinaryDecoder.DEFAULT_DECODER).addLast(this.server);
 		}
 	}
 
@@ -286,7 +286,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
-			short messageId = buffer.readShort();
+			short messageId = this.config.getDecoder().readMessageId(ctx.channel(), buffer);
 			Message msg = messageFactory.getMessage(messageId);
 			if (msg == null) {
 				throw new Exception(config.getServerName() + " message empty,id:" + messageId);

@@ -3,6 +3,7 @@ package com.limitart.net.binary.util;
 import java.io.IOException;
 import java.util.List;
 
+import com.limitart.net.binary.codec.AbstractBinaryEncoder;
 import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 
@@ -13,6 +14,12 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
 public class SendMessageUtil {
+	private static AbstractBinaryEncoder encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
+
+	public static void setEncoder(AbstractBinaryEncoder encoderAnother) {
+		encoder = encoderAnother;
+	}
+
 	public static void sendMessage(Channel channel, Message msg, SendMessageListener listener) throws Exception {
 		if (channel == null) {
 			if (listener != null) {
@@ -28,13 +35,11 @@ public class SendMessageUtil {
 			return;
 		}
 		ByteBuf buffer = channel.alloc().ioBuffer();
-		buffer.writeShort(0);
-		buffer.writeShort(msg.getMessageId());
+		encoder.beforeWriteBody(buffer, msg.getMessageId());
 		msg.buffer(buffer);
 		msg.encode();
 		msg.buffer(null);
-		int sumLen = buffer.readableBytes() - 2;
-		buffer.setShort(0, sumLen);
+		encoder.afterWriteBody(buffer);
 		ChannelFuture writeAndFlush = channel.writeAndFlush(buffer);
 		writeAndFlush.addListener(new ChannelFutureListener() {
 
@@ -55,14 +60,11 @@ public class SendMessageUtil {
 			return;
 		}
 		ByteBuf buffer = Unpooled.directBuffer(256);
-		buffer.writeShort(0);
-		buffer.writeShort(msg.getMessageId());
+		encoder.beforeWriteBody(buffer, msg.getMessageId());
 		msg.buffer(buffer);
 		msg.encode();
 		msg.buffer(null);
-		int sumLen = buffer.readableBytes() - 2;
-		// 替换长度的值
-		buffer.setShort(0, sumLen);
+		encoder.afterWriteBody(buffer);
 		for (int i = 0; i < channels.size(); ++i) {
 			Channel channel = channels.get(i);
 			if (!channel.isWritable()) {

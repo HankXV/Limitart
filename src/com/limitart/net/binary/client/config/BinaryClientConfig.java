@@ -1,5 +1,7 @@
 package com.limitart.net.binary.client.config;
 
+import com.limitart.net.binary.codec.AbstractBinaryDecoder;
+
 /**
  * 二进制通信客户端配置
  * 
@@ -11,16 +13,16 @@ public final class BinaryClientConfig {
 	private String remoteIp;
 	private int remotePort;
 	private int autoReconnect;
-	private int dataMaxLength;
 	private String connectionPass;
+	private AbstractBinaryDecoder decoder;
 
 	private BinaryClientConfig(BinaryClientConfigBuilder builder) {
 		this.clientName = builder.clientName;
 		this.remoteIp = builder.remoteIp;
 		this.remotePort = builder.remotePort;
 		this.autoReconnect = builder.autoReconnect;
-		this.dataMaxLength = builder.dataMaxLength;
 		this.connectionPass = builder.connectionPass;
+		this.decoder = builder.decoder;
 	}
 
 	public String getClientName() {
@@ -39,12 +41,12 @@ public final class BinaryClientConfig {
 		return autoReconnect;
 	}
 
-	public int getDataMaxLength() {
-		return dataMaxLength;
-	}
-
 	public String getConnectionPass() {
 		return connectionPass;
+	}
+
+	public AbstractBinaryDecoder getDecoder() {
+		return decoder;
 	}
 
 	public static class BinaryClientConfigBuilder {
@@ -52,16 +54,16 @@ public final class BinaryClientConfig {
 		private String remoteIp;
 		private int remotePort;
 		private int autoReconnect;
-		private int dataMaxLength;
 		private String connectionPass;
+		private AbstractBinaryDecoder decoder;
 
 		public BinaryClientConfigBuilder() {
 			this.clientName = "Binary-Client";
 			this.remoteIp = "127.0.0.1";
 			this.remotePort = 8888;
 			this.autoReconnect = 0;
-			this.dataMaxLength = 20 * 1024 * 1024;
 			this.connectionPass = "limitart-core";
+			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 		}
 
 		/**
@@ -71,6 +73,11 @@ public final class BinaryClientConfig {
 		 */
 		public BinaryClientConfig build() {
 			return new BinaryClientConfig(this);
+		}
+
+		public BinaryClientConfigBuilder decoder(AbstractBinaryDecoder decoder) {
+			this.decoder = decoder;
+			return this;
 		}
 
 		public BinaryClientConfigBuilder clientName(String clientName) {
@@ -108,17 +115,6 @@ public final class BinaryClientConfig {
 		 */
 		public BinaryClientConfigBuilder autoReconnect(int autoReconnect) {
 			this.autoReconnect = autoReconnect;
-			return this;
-		}
-
-		/**
-		 * 最大数据传输长度
-		 * 
-		 * @param dataMaxLength
-		 * @return
-		 */
-		public BinaryClientConfigBuilder dataMaxLength(int dataMaxLength) {
-			this.dataMaxLength = dataMaxLength;
 			return this;
 		}
 

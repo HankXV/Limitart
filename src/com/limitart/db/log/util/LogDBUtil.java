@@ -44,7 +44,7 @@ public class LogDBUtil {
 	private static ConcurrentHashMap<Class<? extends ILog>, FieldAccess> logFieldCache = new ConcurrentHashMap<>();
 
 	public static String log2JSON(ILog alog) {
-		return StringUtil.toJSON(alog);
+		return StringUtil.toJSONWithClassInfo(alog);
 	}
 
 	/**
@@ -370,7 +370,7 @@ public class LogDBUtil {
 				|| (object instanceof Short)) {
 			return "'" + object.toString() + "'";
 		}
-		String result = "'" + StringUtil.toJSON(object) + "'";
+		String result = "'" + StringUtil.toJSONWithClassInfo(object) + "'";
 		log.debug(result);
 		return result;
 	}

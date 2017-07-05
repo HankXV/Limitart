@@ -1,5 +1,7 @@
 package com.limitart.net.binary.server.config;
 
+import com.limitart.net.binary.codec.AbstractBinaryDecoder;
+
 /**
  * 二进制服务器配置
  * 
@@ -9,16 +11,16 @@ package com.limitart.net.binary.server.config;
 public final class BinaryServerConfig {
 	private String serverName;
 	private int port;
-	private int dataMaxLength;
 	private String connectionPass;
 	private int connectionValidateTimeInSec;
+	private AbstractBinaryDecoder decoder;
 
 	private BinaryServerConfig(BinaryServerConfigBuilder builder) {
 		this.serverName = builder.serverName;
 		this.port = builder.port;
-		this.dataMaxLength = builder.dataMaxLength;
 		this.connectionPass = builder.connectionPass;
 		this.connectionValidateTimeInSec = builder.connectionValidateTimeInSec;
+		this.decoder = builder.decoder;
 	}
 
 	public String getServerName() {
@@ -37,23 +39,23 @@ public final class BinaryServerConfig {
 		return port;
 	}
 
-	public int getDataMaxLength() {
-		return dataMaxLength;
+	public AbstractBinaryDecoder getDecoder() {
+		return decoder;
 	}
 
 	public static class BinaryServerConfigBuilder {
 		private String serverName;
 		private int port;
-		private int dataMaxLength;
 		private String connectionPass;
 		private int connectionValidateTimeInSec;
+		private AbstractBinaryDecoder decoder;
 
 		public BinaryServerConfigBuilder() {
 			this.serverName = "Binary-Server";
 			this.port = 8888;
-			this.dataMaxLength = 20 * 1024 * 1024;
 			this.connectionPass = "limitart-core";
 			this.connectionValidateTimeInSec = 20;
+			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 		}
 
 		/**
@@ -63,6 +65,17 @@ public final class BinaryServerConfig {
 		 */
 		public BinaryServerConfig build() {
 			return new BinaryServerConfig(this);
+		}
+
+		/**
+		 * 自定义解码器
+		 * 
+		 * @param decoder
+		 * @return
+		 */
+		public BinaryServerConfigBuilder decoder(AbstractBinaryDecoder decoder) {
+			this.decoder = decoder;
+			return this;
 		}
 
 		public BinaryServerConfigBuilder serverName(String serverName) {
@@ -80,17 +93,6 @@ public final class BinaryServerConfig {
 			if (port >= 1024) {
 				this.port = port;
 			}
-			return this;
-		}
-
-		/**
-		 * 数据传输最大长度
-		 * 
-		 * @param dataMaxLength
-		 * @return
-		 */
-		public BinaryServerConfigBuilder dataMaxLength(int dataMaxLength) {
-			this.dataMaxLength = dataMaxLength;
 			return this;
 		}
 
