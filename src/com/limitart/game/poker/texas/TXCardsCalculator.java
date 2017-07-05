@@ -14,27 +14,26 @@ import com.limitart.util.NumberUtil;
  *
  */
 public class TXCardsCalculator {
-	private final static byte CARD_TYPE_POS = 5 << 3;
 	// 高牌
-	public final static long HIGH_CARD = 1L << CARD_TYPE_POS;
+	public final static long HIGH_CARD = 0x10000000000L;
 	// 一对
-	public final static long ONE_PAIR = 2L << CARD_TYPE_POS;
+	public final static long ONE_PAIR = 0x20000000000L;
 	// 两对
-	public final static long TWO_PAIR = 3L << CARD_TYPE_POS;
+	public final static long TWO_PAIR = 0x30000000000L;
 	// 三条
-	public final static long THREE_OF_A_KIND = 4L << CARD_TYPE_POS;
+	public final static long THREE_OF_A_KIND = 0x40000000000L;
 	// 顺子
-	public final static long STRAIGHT = 5L << CARD_TYPE_POS;
+	public final static long STRAIGHT = 0x50000000000L;
 	// 同花
-	public final static long FLUSH = 6L << CARD_TYPE_POS;
+	public final static long FLUSH = 0x60000000000L;
 	// 葫芦
-	public final static long FULL_HOUSE = 7L << CARD_TYPE_POS;
+	public final static long FULL_HOUSE = 0x70000000000L;
 	// 四条
-	public final static long FOUR_OF_A_KIND = 8L << CARD_TYPE_POS;
+	public final static long FOUR_OF_A_KIND = 0x80000000000L;
 	// 同花顺
-	public final static long STRAIGHT_FLUSH = 9L << CARD_TYPE_POS;
+	public final static long STRAIGHT_FLUSH = 0x90000000000L;
 	// 皇家同花顺
-	public final static long ROYAL_FLUSH = 10L << CARD_TYPE_POS;
+	public final static long ROYAL_FLUSH = 0xA0000000000L;
 	// 原始数据
 	private byte[] cards = null;
 	private byte[] numbers = new byte[5];

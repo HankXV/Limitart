@@ -172,7 +172,7 @@ public class Poker {
 		}
 		long longOfCards = 0;
 		for (int i = 0; i < cards.length; i++) {
-			longOfCards |= ((long) cards[i]) << i << 3;
+			longOfCards |= ((long) cards[i]) << (i << 3);
 		}
 		return longOfCards;
 	}
