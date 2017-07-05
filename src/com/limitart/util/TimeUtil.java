@@ -22,6 +22,9 @@ public final class TimeUtil {
 	private static final String ONE_MONTH_AGO = "月前";
 	private static final String ONE_YEAR_AGO = "年前";
 
+	private TimeUtil() {
+	}
+
 	/**
 	 * 获取短时间
 	 * 

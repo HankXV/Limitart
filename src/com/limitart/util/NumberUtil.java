@@ -2,7 +2,10 @@ package com.limitart.util;
 
 import java.util.Collection;
 
-public class NumberUtil {
+public final class NumberUtil {
+	private NumberUtil() {
+	}
+
 	public static byte[] toByteArray(Collection<? extends Number> collection) {
 		Object[] boxedArray = collection.toArray();
 		int len = boxedArray.length;

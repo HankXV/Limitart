@@ -22,7 +22,10 @@ import com.limitart.util.filter.FieldFilter;
  * 反射工具
  *
  */
-public class ReflectionUtil {
+public final class ReflectionUtil {
+	private ReflectionUtil() {
+	}
+
 	public static List<Field> getFields(Class<?> clazz, boolean isSuper) {
 		return getFields(clazz, isSuper, new FieldFilter() {
 

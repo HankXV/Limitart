@@ -9,7 +9,10 @@ import java.util.concurrent.atomic.LongAdder;
  * @author hank
  *
  */
-public class UniqueIdUtil {
+public final class UniqueIdUtil {
+	private UniqueIdUtil() {
+	}
+
 	/**
 	 * 生成唯一Id
 	 * 

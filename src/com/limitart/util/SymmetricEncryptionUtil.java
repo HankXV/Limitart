@@ -18,7 +18,7 @@ import io.netty.util.CharsetUtil;
  * @author hank
  *
  */
-public class SymmetricEncryptionUtil {
+public final class SymmetricEncryptionUtil {
 	private static final String TRANSFORMATION = "AES/CBC/NoPadding";
 	private static final String ALGORITHM = "AES";
 	private Key generateKey;

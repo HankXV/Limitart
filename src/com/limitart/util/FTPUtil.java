@@ -9,7 +9,10 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
-public class FTPUtil {
+public final class FTPUtil {
+	private FTPUtil() {
+	}
+
 	public static byte[] download(String url, int port, String username, String password, String remotePath,
 			String fileName) throws IOException {
 		FTPClient ftp = new FTPClient();

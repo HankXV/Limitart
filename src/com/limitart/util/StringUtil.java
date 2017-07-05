@@ -8,9 +8,12 @@ import java.util.regex.Pattern;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
-public class StringUtil {
+public final class StringUtil {
 	private static String PHONE_REG = "^((1[0-9][0-9]))\\d{8}$";
 	private static String EMAIL_REG = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
+
+	private StringUtil() {
+	}
 
 	public static boolean isEmptyOrNull(String value) {
 		return value == null || value.trim().length() == 0;

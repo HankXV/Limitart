@@ -11,6 +11,9 @@ import java.util.Random;
 public final class RandomUtil {
 	public static Random DEFAULT = new RandomXS128();
 
+	private RandomUtil() {
+	}
+
 	/**
 	 * 随机整数（包含边界值）
 	 * 

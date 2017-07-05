@@ -3,7 +3,10 @@ package com.limitart.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MathUtil {
+public final class MathUtil {
+	private MathUtil() {
+	}
+
 	/**
 	 * 从N个元素中选出指定数量的所有组合
 	 * 

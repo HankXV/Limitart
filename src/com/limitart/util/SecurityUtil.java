@@ -16,7 +16,7 @@ import com.limitart.util.exception.InvalidBase64CharacterException;
 
 import io.netty.util.CharsetUtil;
 
-public class SecurityUtil {
+public final class SecurityUtil {
 	private static final String ALGORITHM_MD5 = "MD5";
 	private int iterations = 1;
 	private static final char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
@@ -70,6 +70,9 @@ public class SecurityUtil {
 			-9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9,
 			-9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 };
 
+	private SecurityUtil() {
+	}
+
 	public static boolean isBase64(byte[] bytes) {
 		try {
 			base64Decode(bytes);
@@ -106,22 +109,17 @@ public class SecurityUtil {
 
 	public String encodePassword(String rawPass, Object salt) throws NoSuchAlgorithmException {
 		String saltedPass = mergePasswordAndSalt(rawPass, salt, false);
-		MessageDigest messageDigest = getMessageDigest();
+		MessageDigest messageDigest = MessageDigest.getInstance(ALGORITHM_MD5);
 		byte[] digest = messageDigest.digest(utf8Encode(saltedPass));
 		for (int i = 1; i < this.iterations; ++i) {
 			digest = messageDigest.digest(digest);
 		}
-		return new String(SecurityUtil.hexEncode(digest));
-	}
-
-	private final MessageDigest getMessageDigest() throws NoSuchAlgorithmException {
-		return MessageDigest.getInstance(ALGORITHM_MD5);
+		return new String(hexEncode(digest));
 	}
 
 	public boolean isPasswordValid(String encPass, String rawPass, Object salt) throws NoSuchAlgorithmException {
-		String pass1 = "" + encPass;
 		String pass2 = encodePassword(rawPass, salt);
-		byte[] expectedBytes = pass1 == null ? null : utf8Encode(pass1);
+		byte[] expectedBytes = encPass == null ? null : utf8Encode(encPass);
 		byte[] actualBytes = pass2 == null ? null : utf8Encode(pass2);
 		int expectedLength = (expectedBytes == null) ? -1 : expectedBytes.length;
 		int actualLength = (actualBytes == null) ? -1 : actualBytes.length;

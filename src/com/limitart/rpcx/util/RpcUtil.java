@@ -13,7 +13,10 @@ import com.limitart.rpcx.exception.ServiceXProxyException;
 import com.limitart.rpcx.struct.RpcProviderName;
 import com.limitart.util.StringUtil;
 
-public class RpcUtil {
+public final class RpcUtil {
+	private RpcUtil() {
+	}
+
 	/**
 	 * 获取服务名称
 	 * 

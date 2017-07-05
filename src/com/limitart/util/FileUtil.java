@@ -12,6 +12,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 
 public final class FileUtil {
+	private FileUtil() {
+	}
+
 	/**
 	 * 遍历文件夹内所有文件
 	 * 

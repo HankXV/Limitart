@@ -20,7 +20,6 @@ import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.server.BinaryServer;
 import com.limitart.net.binary.server.config.BinaryServerConfig.BinaryServerConfigBuilder;
 import com.limitart.net.binary.server.listener.BinaryServerEventListener;
-import com.limitart.net.binary.util.SendMessageUtil;
 import com.limitart.rpcx.define.ServiceX;
 import com.limitart.rpcx.exception.ServiceError;
 import com.limitart.rpcx.exception.ServiceXExecuteException;
@@ -204,7 +203,8 @@ public class ProviderX implements BinaryServerEventListener {
 	 * @throws InstantiationException
 	 * @throws Exception
 	 */
-	private void initAllServices() throws ServiceXProxyException, ClassNotFoundException, IOException, InstantiationException, IllegalAccessException {
+	private void initAllServices() throws ServiceXProxyException, ClassNotFoundException, IOException,
+			InstantiationException, IllegalAccessException {
 		services.clear();
 		List<Class<?>> classesByPackage = new ArrayList<>();
 		for (String temp : this.config.getServicePackages()) {
@@ -242,7 +242,7 @@ public class ProviderX implements BinaryServerEventListener {
 				Class<?>[] parameterTypes = method.getParameterTypes();
 				for (Class<?> paramsType : parameterTypes) {
 					RpcUtil.checkParamType(paramsType);
-				
+
 				}
 				// 检查返回参数是否合法
 				RpcUtil.checkParamType(method.getReturnType());
@@ -347,7 +347,7 @@ public class ProviderX implements BinaryServerEventListener {
 			}
 		}
 		try {
-			SendMessageUtil.sendMessage(channel, msg, null);
+			server.sendMessage(channel, msg, null);
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -363,7 +363,7 @@ public class ProviderX implements BinaryServerEventListener {
 		msg.setProviderId(this.config.getProviderUID());
 		msg.getServices().addAll(services.keySet());
 		try {
-			SendMessageUtil.sendMessage(channel, msg, null);
+			server.sendMessage(channel, msg, null);
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -383,7 +383,7 @@ public class ProviderX implements BinaryServerEventListener {
 			log.info("发布服务到服务中心：" + serviceName);
 		}
 		try {
-			SendMessageUtil.sendMessage(serviceCenterClient.channel(), msg, null);
+			serviceCenterClient.sendMessage(msg, null);
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -433,7 +433,7 @@ public class ProviderX implements BinaryServerEventListener {
 		msg.setIntervalInSeconds(job.getIntervalInSeconds());
 		msg.setIntervalInMillis(job.getIntervalInMillis());
 		msg.setRepeatCount(job.getRepeatCount());
-		SendMessageUtil.sendMessage(this.serviceCenterClient.channel(), msg, new SendMessageListener() {
+		serviceCenterClient.sendMessage(msg, new SendMessageListener() {
 
 			@Override
 			public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {

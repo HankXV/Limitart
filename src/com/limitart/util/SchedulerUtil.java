@@ -24,7 +24,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * @author hank
  *
  */
-public class SchedulerUtil {
+public final class SchedulerUtil {
 	private static final Logger log = LogManager.getLogger();
 	private static SchedulerUtil INSTANCE = new SchedulerUtil();
 	private SchedulerFactory SF;

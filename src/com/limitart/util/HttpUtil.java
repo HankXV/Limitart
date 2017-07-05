@@ -28,7 +28,10 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 
-public class HttpUtil {
+public final class HttpUtil {
+	private HttpUtil() {
+	}
+
 	public static byte[] post(String hostUrl, ConstraintMap<String> param, HashMap<String, String> requestProperty)
 			throws IOException {
 		HttpURLConnection conn = null;
@@ -119,8 +122,7 @@ public class HttpUtil {
 		return Unpooled.copiedBuffer(bytes);
 	}
 
-	public static void sendResponse(Channel channel, HttpResponseStatus resultCode, String result,
-			boolean isClose) {
+	public static void sendResponse(Channel channel, HttpResponseStatus resultCode, String result, boolean isClose) {
 		ByteBuf buf = Unpooled.copiedBuffer(result.getBytes(CharsetUtil.UTF_8));
 		sendResponse(channel, resultCode, ContentTypes.text_plain, buf, isClose);
 	}
@@ -138,22 +140,21 @@ public class HttpUtil {
 		}
 	}
 
-	public static void sendResponse(Channel channel, FullHttpRequest fullHttpRequest,
-			HttpResponseStatus resultCode, String result) {
+	public static void sendResponse(Channel channel, FullHttpRequest fullHttpRequest, HttpResponseStatus resultCode,
+			String result) {
 		boolean close = fullHttpRequest.headers().contains(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE, true)
 				|| fullHttpRequest.protocolVersion().equals(HttpVersion.HTTP_1_0) && !fullHttpRequest.headers()
 						.contains(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE, true);
 		sendResponse(channel, resultCode, result, close);
 	}
 
-	public static void sendResponseError(Channel channel, FullHttpRequest fullHttpRequest,
-			RequestErrorCode errorCode, String others) {
+	public static void sendResponseError(Channel channel, FullHttpRequest fullHttpRequest, RequestErrorCode errorCode,
+			String others) {
 		sendResponse(channel, HttpResponseStatus.BAD_GATEWAY, "ErrorCode:" + errorCode.getValue() + " Info:" + others,
 				true);
 	}
 
-	public static void sendResponseError(Channel channel, FullHttpRequest fullHttpRequest,
-			RequestErrorCode errorCode) {
+	public static void sendResponseError(Channel channel, FullHttpRequest fullHttpRequest, RequestErrorCode errorCode) {
 		sendResponseError(channel, fullHttpRequest, errorCode, errorCode.toString());
 	}
 

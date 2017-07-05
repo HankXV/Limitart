@@ -16,7 +16,7 @@ import com.limitart.util.listener.ITimerListener;
  * @see SchedulerUtil
  *
  */
-public class TimerUtil {
+public final class TimerUtil {
 	private static Logger log = LogManager.getLogger();
 	private static ScheduledThreadPoolExecutor globalTimer = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
 
@@ -27,6 +27,9 @@ public class TimerUtil {
 			return thread;
 		}
 	});
+
+	private TimerUtil() {
+	}
 
 	public static void scheduleGlobal(long delay, long interval, ITimerListener listener) {
 		globalTimer.scheduleAtFixedRate(new Runnable() {
