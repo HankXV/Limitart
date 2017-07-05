@@ -13,12 +13,15 @@ public abstract class AbstractBinaryEncoder {
 
 		@Override
 		public void beforeWriteBody(ByteBuf buf, short messageId) {
+			// 消息长度(包括消息Id)
 			buf.writeShort(0);
+			// 消息Id
 			buf.writeShort(messageId);
 		}
 
 		@Override
 		public void afterWriteBody(ByteBuf buf) {
+			// 重设消息长度
 			buf.setShort(0, buf.readableBytes() - Short.BYTES);
 		}
 

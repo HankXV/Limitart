@@ -8,6 +8,57 @@
 每个消息必须继承Message类，并且消息只支持基本类型和消息元(`MessageMeta`)类型以及前两者类型的List或数组，消息元类型就是所谓的消息里携带对象，List的长度不能超过一个short的长度。每个消息必须有一个唯一Id来标识，长度为一个short。消息里面的decode和encode编码必须顺序一致。二进制服务器构造的时候需要一个消息工厂(`MessageFactory`)，里面需要初始化消息到消息处理器(`IHandler`)的映射，当二进制服务器收到消息时，会去寻找相应的消息处理器作为回调，从而执行逻辑。建议在实际项目中，消息按模块分包，开发时先思考清楚需要开发的功能会用到什么消息，然后分别处理好相应的handler即可。比如：一个背包系统，对于客户端来讲基本是3个元操作，增加物品、删除物品、更新物品信息，那么定好相应的消息，客户端就只用关心这3个操作如何处理就行，其余的功能根据这3个元操作组合即可得到。
 ### 发送二进制消息（SendMessageUtil）
 我们保留了Netty的原生Channel来作为服务器与每个用户的通道，发送消息很简单，调用`SendMessageUtil`里的`sendMessage`方法即可，需要注意的是，为了防止重复编码，在向多个Channel发送消息时，请尽量调用有List参数的重载函数。
+### 消息编码器和解码器(AbstractBinaryEncoder、AbstractBinaryDecoder)
+使用自定义编码器必须实现在写入消息体之前的编码和消息体之后的编码<br>
+
+	public static final AbstractBinaryEncoder DEFAULT_ENCODER = new AbstractBinaryEncoder() {
+	
+		@Override
+		public void beforeWriteBody(ByteBuf buf, short messageId) {
+			// 消息长度(包括消息Id)
+			buf.writeShort(0);
+			// 消息Id
+			buf.writeShort(messageId);
+		}
+	
+		@Override
+		public void afterWriteBody(ByteBuf buf) {
+			// 重设消息长度
+			buf.setShort(0, buf.readableBytes() - Short.BYTES);
+		}
+	
+	};
+	
+使用自定义解码器：<br>
+
+	/**
+	 * 构造
+	 * 
+	 * @param maxFrameLength
+	 *            每个单位的消息最大长度
+	 * @param lengthFieldOffset
+	 *            表示长度字节的位在消息段中的偏移量
+	 * @param lengthFieldLength
+	 *            用了多长的字节表示了长度属性
+	 * @param lengthAdjustment
+	 *            长度调整(假如编码的长度信息比实际消息体的长度少2，那么此项设置为-2)
+	 * @param initialBytesToStrip
+	 *            正式解码消息时跳过原始二进制序列的几个字节
+	 */
+	public AbstractBinaryDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment,
+			int initialBytesToStrip) {
+		super(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip);
+	}
+
+
+	public static final AbstractBinaryDecoder DEFAULT_DECODER = new AbstractBinaryDecoder(Short.MAX_VALUE, 0, 2, 0, 2) {
+
+		@Override
+		public short readMessageId(Channel channel, ByteBuf buffer) {
+			return buffer.readShort();
+		}
+	};
+
 ### 二进制消息处理器（IHandler）
 每个处理器必须要实现IHandler接口，然后注册进消息工厂(`MessageFactory`)与相应的消息(`Message`)所对应，IHandler被认为是单例模式，所以不要在`IHandler`的实现类里缓存任何非全局的数据。
 ### 反射构造消息工厂(MessageFactory)
