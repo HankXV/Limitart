@@ -240,6 +240,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			}
 			msg.buffer(buffer);
 			msg.decode();
+			msg.buffer(null);
 			IHandler handler = BinaryClient.this.messageFactory.getHandler(messageId);
 			if (handler == null) {
 				throw new Exception(clientConfig.getClientName() + " can not find handler for message,id:" + messageId);
