@@ -6,10 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.limitart.collections.define.DefaultRankObj;
 import com.limitart.collections.define.IRankMap;
 import com.limitart.collections.define.IRankObj;
-import com.limitart.util.RandomUtil;
 
 /**
  * 高频率读取排行结构 主要用于读取频率远远大于写入频率
@@ -24,20 +22,6 @@ public class FrequencyReadRankMap<K, V extends IRankObj<K>> implements IRankMap<
 	private Map<K, V> map;
 	private final Comparator<V> comparator;
 	private int capacity;
-
-	public static void main(String[] args) {
-		int count = 10;
-		IRankMap<Long, DefaultRankObj> old = new FrequencyReadRankMap<>(DefaultRankObj.COMPARATOR, count);
-		long now = System.currentTimeMillis();
-		for (long i = 0; i < count; ++i) {
-			DefaultRankObj obj = new DefaultRankObj(i, RandomUtil.randomLong(0, count), i, i);
-			old.put(i, obj);
-		}
-		DefaultRankObj t = new DefaultRankObj(-1,-1,-1,-1);
-		old.put(-1L, t);
-		System.out.println("oldMap:" + (System.currentTimeMillis() - now));
-		System.out.println(old);
-	}
 
 	@Override
 	public synchronized void clear() {

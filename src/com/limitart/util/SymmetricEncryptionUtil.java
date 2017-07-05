@@ -49,12 +49,12 @@ public class SymmetricEncryptionUtil {
 	private SymmetricEncryptionUtil(String password, String ivStr) throws NoSuchAlgorithmException,
 			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
 		byte[] bytes = password.getBytes(CharsetUtil.UTF_8);
-		byte[] resultKey = new byte[16];
+		byte[] resultKey = new byte[0XF];
 		System.arraycopy(bytes, 0, resultKey, 0, Math.min(resultKey.length, bytes.length));
 		generateKey = new SecretKeySpec(resultKey, ALGORITHM);
 		if (ivStr != null) {
 			// 初始化16位向量
-			this.iv = new byte[16];
+			this.iv = new byte[0XF];
 			byte[] ivRaw = ivStr.getBytes(CharsetUtil.UTF_8);
 			System.arraycopy(ivRaw, 0, this.iv, 0, Math.min(this.iv.length, ivRaw.length));
 		}
@@ -79,8 +79,8 @@ public class SymmetricEncryptionUtil {
 		int zeroFlag = 0;
 		byte[] jsonByteFillZero = null;
 		int len = bytes.length;
-		if (len % 16 != 0) {
-			len = (len / 16 + 1) * 16;
+		if ((len & 0XF) != 0) {
+			len = (len >> 4 + 1) << 4;
 			zeroFlag = len - bytes.length;
 			jsonByteFillZero = new byte[len];
 			System.arraycopy(bytes, 0, jsonByteFillZero, 0, bytes.length);
@@ -115,7 +115,7 @@ public class SymmetricEncryptionUtil {
 		}
 		String token = tokenSource.replace('-', '+').replace('_', '/').replace('.', '=');
 		byte[] base64Decode = SecurityUtil.base64Decode(token.getBytes(CharsetUtil.UTF_8));
-		byte[] iv = new byte[16];
+		byte[] iv = new byte[0XF];
 		byte[] content = new byte[base64Decode.length - iv.length];
 		System.arraycopy(base64Decode, 0, iv, 0, iv.length);
 		System.arraycopy(base64Decode, iv.length, content, 0, content.length);

@@ -172,7 +172,7 @@ public class Poker {
 		}
 		long longOfCards = 0;
 		for (int i = 0; i < cards.length; i++) {
-			longOfCards |= ((long) cards[i]) << i * Byte.SIZE;
+			longOfCards |= ((long) cards[i]) << i << 3;
 		}
 		return longOfCards;
 	}
@@ -186,7 +186,7 @@ public class Poker {
 	public static byte[] longToCards(long value) {
 		int pos = 0;
 		byte[] temp = new byte[Long.BYTES];
-		while ((temp[pos] = (byte) ((value >> (pos * Byte.SIZE)) & 0XFFL)) != 0) {
+		while ((temp[pos] = (byte) ((value >> (pos << 3)) & 0XFFL)) != 0) {
 			++pos;
 		}
 		byte[] result = new byte[pos];

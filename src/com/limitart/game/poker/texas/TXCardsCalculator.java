@@ -14,26 +14,27 @@ import com.limitart.util.NumberUtil;
  *
  */
 public class TXCardsCalculator {
+	private final static byte CARD_TYPE_POS = 5 << 3;
 	// 高牌
-	public final static byte HIGH_CARD = 1;
+	public final static long HIGH_CARD = 1L << CARD_TYPE_POS;
 	// 一对
-	public final static byte ONE_PAIR = 2;
+	public final static long ONE_PAIR = 2L << CARD_TYPE_POS;
 	// 两对
-	public final static byte TWO_PAIR = 3;
+	public final static long TWO_PAIR = 3L << CARD_TYPE_POS;
 	// 三条
-	public final static byte THREE_OF_A_KIND = 4;
+	public final static long THREE_OF_A_KIND = 4L << CARD_TYPE_POS;
 	// 顺子
-	public final static byte STRAIGHT = 5;
+	public final static long STRAIGHT = 5L << CARD_TYPE_POS;
 	// 同花
-	public final static byte FLUSH = 6;
+	public final static long FLUSH = 6L << CARD_TYPE_POS;
 	// 葫芦
-	public final static byte FULL_HOUSE = 7;
+	public final static long FULL_HOUSE = 7L << CARD_TYPE_POS;
 	// 四条
-	public final static byte FOUR_OF_A_KIND = 8;
+	public final static long FOUR_OF_A_KIND = 8L << CARD_TYPE_POS;
 	// 同花顺
-	public final static byte STRAIGHT_FLUSH = 9;
+	public final static long STRAIGHT_FLUSH = 9L << CARD_TYPE_POS;
 	// 皇家同花顺
-	public final static byte ROYAL_FLUSH = 10;
+	public final static long ROYAL_FLUSH = 10L << CARD_TYPE_POS;
 	// 原始数据
 	private byte[] cards = null;
 	private byte[] numbers = new byte[5];
@@ -49,7 +50,7 @@ public class TXCardsCalculator {
 	// 同花花色
 	private byte flush = 0;
 	// 牌型
-	private byte rank;
+	private long rank;
 	// 牌型评估值
 	private long evaluator;
 
@@ -121,9 +122,9 @@ public class TXCardsCalculator {
 			}
 		}
 		// 评估数值
-		evaluator = ((long) rank) << 40;
+		evaluator = rank;
 		for (int i = 0; i < numbers.length; ++i) {
-			evaluator |= ((long) numbers[i]) << ((numbers.length - i - 1) * 8);
+			evaluator |= ((long) numbers[i]) << ((numbers.length - i - 1) << 3);
 		}
 	}
 
@@ -132,7 +133,7 @@ public class TXCardsCalculator {
 	 * 
 	 * @return
 	 */
-	public byte getRank() {
+	public long getRank() {
 		return this.rank;
 	}
 
