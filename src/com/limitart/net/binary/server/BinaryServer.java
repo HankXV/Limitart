@@ -307,6 +307,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 			}
 			msg.buffer(buffer);
 			msg.decode();
+			msg.buffer(null);
 			IHandler handler = messageFactory.getHandler(messageId);
 			if (handler == null) {
 				throw new Exception(config.getServerName() + " can not find handler for message,id:" + messageId);
