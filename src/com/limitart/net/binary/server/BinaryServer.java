@@ -34,7 +34,6 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -46,6 +45,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
  * 二进制通信服务器
@@ -53,7 +53,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  * @author Hank
  *
  */
-@Sharable
 public class BinaryServer extends ChannelInboundHandlerAdapter {
 	private static Logger log = LogManager.getLogger();
 	private ServerBootstrap boot;
@@ -178,7 +177,12 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
-			ch.pipeline().addLast(AbstractBinaryDecoder.DEFAULT_DECODER).addLast(this.server);
+			AbstractBinaryDecoder decoder = server.config.getDecoder();
+			ch.pipeline()
+					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
+							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
+							decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()))
+					.addLast(this.server);
 		}
 	}
 
@@ -351,6 +355,11 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
 		log.info(ctx.channel().remoteAddress() + " disconnected！");
 		this.serverEventListener.onChannelUnregistered(ctx.channel());
+	}
+
+	@Override
+	public boolean isSharable() {
+		return true;
 	}
 
 	private class SessionValidateData {

@@ -2,7 +2,6 @@ package com.limitart.net.binary.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
  * 二进制解码器
@@ -10,7 +9,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author hank
  *
  */
-public abstract class AbstractBinaryDecoder extends LengthFieldBasedFrameDecoder {
+public abstract class AbstractBinaryDecoder {
 	public static final AbstractBinaryDecoder DEFAULT_DECODER = new AbstractBinaryDecoder(Short.MAX_VALUE, 0, 2, 0, 2) {
 
 		@Override
@@ -18,6 +17,11 @@ public abstract class AbstractBinaryDecoder extends LengthFieldBasedFrameDecoder
 			return buffer.readShort();
 		}
 	};
+	private int maxFrameLength;
+	private int lengthFieldOffset;
+	private int lengthFieldLength;
+	private int lengthAdjustment;
+	private int initialBytesToStrip;
 
 	/**
 	 * 构造
@@ -35,7 +39,11 @@ public abstract class AbstractBinaryDecoder extends LengthFieldBasedFrameDecoder
 	 */
 	public AbstractBinaryDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment,
 			int initialBytesToStrip) {
-		super(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip);
+		this.maxFrameLength = maxFrameLength;
+		this.lengthFieldOffset = lengthFieldOffset;
+		this.lengthFieldLength = lengthFieldLength;
+		this.lengthAdjustment = lengthAdjustment;
+		this.initialBytesToStrip = initialBytesToStrip;
 	}
 
 	/**
@@ -46,4 +54,24 @@ public abstract class AbstractBinaryDecoder extends LengthFieldBasedFrameDecoder
 	 * @return
 	 */
 	public abstract short readMessageId(Channel channel, ByteBuf buffer);
+
+	public int getMaxFrameLength() {
+		return maxFrameLength;
+	}
+
+	public int getLengthFieldOffset() {
+		return lengthFieldOffset;
+	}
+
+	public int getLengthFieldLength() {
+		return lengthFieldLength;
+	}
+
+	public int getLengthAdjustment() {
+		return lengthAdjustment;
+	}
+
+	public int getInitialBytesToStrip() {
+		return initialBytesToStrip;
+	}
 }

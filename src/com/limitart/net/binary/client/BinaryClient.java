@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.limitart.net.binary.client.config.BinaryClientConfig;
 import com.limitart.net.binary.client.listener.BinaryClientEventListener;
+import com.limitart.net.binary.codec.AbstractBinaryDecoder;
 import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
@@ -25,7 +26,6 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -37,6 +37,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
  * 二进制通信客户端
@@ -44,7 +45,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  * @author hank
  *
  */
-@Sharable
 public class BinaryClient extends ChannelInboundHandlerAdapter {
 	private static Logger log = LogManager.getLogger();
 	private BinaryClientEventListener clientEventListener;
@@ -103,7 +103,11 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
-			ch.pipeline().addLast(client.clientConfig.getDecoder());
+			AbstractBinaryDecoder decoder = clientConfig.getDecoder();
+			ch.pipeline()
+					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
+							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
+							decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()));
 			ch.pipeline().addLast(this.client);
 		}
 
@@ -165,6 +169,11 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		} catch (Exception e) {
 			log.error(e, e);
 		}
+	}
+
+	@Override
+	public boolean isSharable() {
+		return true;
 	}
 
 	private void tryReconnect(int waitSeconds) {
