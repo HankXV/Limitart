@@ -1,6 +1,7 @@
 package com.limitart.net.binary.client.config;
 
 import com.limitart.net.binary.codec.AbstractBinaryDecoder;
+import com.limitart.net.binary.codec.AbstractBinaryEncoder;
 
 /**
  * 二进制通信客户端配置
@@ -15,6 +16,7 @@ public final class BinaryClientConfig {
 	private int autoReconnect;
 	private String connectionPass;
 	private AbstractBinaryDecoder decoder;
+	private AbstractBinaryEncoder encoder;
 
 	private BinaryClientConfig(BinaryClientConfigBuilder builder) {
 		this.clientName = builder.clientName;
@@ -23,6 +25,7 @@ public final class BinaryClientConfig {
 		this.autoReconnect = builder.autoReconnect;
 		this.connectionPass = builder.connectionPass;
 		this.decoder = builder.decoder;
+		this.encoder = builder.encoder;
 	}
 
 	public String getClientName() {
@@ -49,6 +52,10 @@ public final class BinaryClientConfig {
 		return decoder;
 	}
 
+	public AbstractBinaryEncoder getEncoder() {
+		return encoder;
+	}
+
 	public static class BinaryClientConfigBuilder {
 		private String clientName;
 		private String remoteIp;
@@ -56,6 +63,7 @@ public final class BinaryClientConfig {
 		private int autoReconnect;
 		private String connectionPass;
 		private AbstractBinaryDecoder decoder;
+		private AbstractBinaryEncoder encoder;
 
 		public BinaryClientConfigBuilder() {
 			this.clientName = "Binary-Client";
@@ -64,6 +72,7 @@ public final class BinaryClientConfig {
 			this.autoReconnect = 0;
 			this.connectionPass = "limitart-core";
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
+			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
 		}
 
 		/**
@@ -77,6 +86,11 @@ public final class BinaryClientConfig {
 
 		public BinaryClientConfigBuilder decoder(AbstractBinaryDecoder decoder) {
 			this.decoder = decoder;
+			return this;
+		}
+
+		public BinaryClientConfigBuilder encoder(AbstractBinaryEncoder encoder) {
+			this.encoder = encoder;
 			return this;
 		}
 

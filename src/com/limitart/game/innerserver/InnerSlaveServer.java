@@ -21,7 +21,6 @@ import com.limitart.net.binary.client.listener.BinaryClientEventListener;
 import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
-import com.limitart.net.binary.util.SendMessageUtil;
 
 import io.netty.channel.Channel;
 
@@ -106,7 +105,7 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener {
 		info.serverType = serverType();
 		msg.serverInfo = info;
 		try {
-			SendMessageUtil.sendMessage(client.channel(), msg, new SendMessageListener() {
+			client.sendMessage(msg, new SendMessageListener() {
 
 				@Override
 				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
@@ -127,7 +126,7 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener {
 				ReqServerLoadSlave2MasterMessage slm = new ReqServerLoadSlave2MasterMessage();
 				slm.load = serverLoad();
 				try {
-					SendMessageUtil.sendMessage(toMaster.channel(), slm, new SendMessageListener() {
+					toMaster.sendMessage(slm, new SendMessageListener() {
 
 						@Override
 						public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {

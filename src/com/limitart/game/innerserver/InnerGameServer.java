@@ -17,7 +17,6 @@ import com.limitart.net.binary.client.listener.BinaryClientEventListener;
 import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
-import com.limitart.net.binary.util.SendMessageUtil;
 
 import io.netty.channel.Channel;
 
@@ -126,7 +125,7 @@ public abstract class InnerGameServer extends InnerSlaveServer {
 		ReqConnectionReportGame2FightMessage msg = new ReqConnectionReportGame2FightMessage();
 		msg.serverId = super.serverId;
 		try {
-			SendMessageUtil.sendMessage(client.channel(), msg, new SendMessageListener() {
+			client.sendMessage(msg, new SendMessageListener() {
 
 				@Override
 				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {

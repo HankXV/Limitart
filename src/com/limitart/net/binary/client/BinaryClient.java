@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import com.limitart.net.binary.client.config.BinaryClientConfig;
 import com.limitart.net.binary.client.listener.BinaryClientEventListener;
 import com.limitart.net.binary.handler.IHandler;
+import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.message.constant.InnerMessageEnum;
@@ -116,6 +117,10 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		group.scheduleAtFixedRate(command, delay, period, unit);
 	}
 
+	public void sendMessage(Message msg, SendMessageListener listener) throws Exception {
+		SendMessageUtil.sendMessage(this.clientConfig.getEncoder(), channel, msg, listener);
+	}
+
 	public BinaryClient disConnect() {
 		group.shutdownGracefully();
 		if (channel != null) {
@@ -182,7 +187,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			int validateRandom = Integer.parseInt(decode);
 			ConnectionValidateClientMessage msg = new ConnectionValidateClientMessage();
 			msg.setValidateRandom(validateRandom);
-			SendMessageUtil.sendMessage(channel, msg, null);
+			SendMessageUtil.sendMessage(this.clientConfig.getEncoder(), channel, msg, null);
 			log.info(clientConfig.getClientName() + " parse validate code success，return result：" + validateRandom);
 		} catch (Exception e) {
 			log.error(e, e);

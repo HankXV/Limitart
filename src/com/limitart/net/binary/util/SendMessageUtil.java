@@ -13,14 +13,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
-public class SendMessageUtil {
-	private static AbstractBinaryEncoder encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
+public final class SendMessageUtil {
 
-	public static void setEncoder(AbstractBinaryEncoder encoderAnother) {
-		encoder = encoderAnother;
+	private SendMessageUtil() {
 	}
 
-	public static void sendMessage(Channel channel, Message msg, SendMessageListener listener) throws Exception {
+	public static void sendMessage(AbstractBinaryEncoder encoder, Channel channel, Message msg,
+			SendMessageListener listener) throws Exception {
 		if (channel == null) {
 			if (listener != null) {
 				listener.onComplete(false, new NullPointerException("channel"), channel);
@@ -52,7 +51,8 @@ public class SendMessageUtil {
 		});
 	}
 
-	public static void sendMessage(List<Channel> channels, Message msg, SendMessageListener listener) throws Exception {
+	public static void sendMessage(AbstractBinaryEncoder encoder, List<Channel> channels, Message msg,
+			SendMessageListener listener) throws Exception {
 		if (channels == null || channels.isEmpty()) {
 			if (listener != null) {
 				listener.onComplete(false, new IOException(" channel list  is null"), null);

@@ -4,6 +4,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -133,6 +134,14 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		workerGroup.scheduleAtFixedRate(command, delay, period, unit);
 	}
 
+	public void sendMessage(Channel channel, Message msg, SendMessageListener listener) throws Exception {
+		SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, listener);
+	}
+
+	public void sendMessage(List<Channel> channels, Message msg, SendMessageListener listener) throws Exception {
+		SendMessageUtil.sendMessage(this.config.getEncoder(), channels, msg, listener);
+	}
+
 	public void bind() {
 		new Thread(new Runnable() {
 
@@ -206,7 +215,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		}
 		msg.setValidateStr(encode);
 		try {
-			SendMessageUtil.sendMessage(channel, msg, new SendMessageListener() {
+			SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, new SendMessageListener() {
 
 				@Override
 				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
@@ -274,7 +283,8 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		log.info(config.getServerName() + " remote connection " + channel.remoteAddress() + " validate success!");
 		// 通知客户端成功
 		try {
-			SendMessageUtil.sendMessage(channel, new ConnectionValidateSuccessServerMessage(), null);
+			SendMessageUtil.sendMessage(this.config.getEncoder(), channel, new ConnectionValidateSuccessServerMessage(),
+					null);
 		} catch (Exception e) {
 			log.error(e, e);
 		}

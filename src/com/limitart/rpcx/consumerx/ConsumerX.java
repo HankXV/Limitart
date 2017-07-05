@@ -25,7 +25,6 @@ import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
-import com.limitart.net.binary.util.SendMessageUtil;
 import com.limitart.rpcx.consumerx.config.ConsumerXConfig;
 import com.limitart.rpcx.consumerx.define.IServiceAsyncCallback;
 import com.limitart.rpcx.consumerx.listener.IConsumerListener;
@@ -233,7 +232,7 @@ public class ConsumerX implements BinaryClientEventListener {
 	 */
 	private void directFetchProverServices(BinaryClient client) {
 		try {
-			SendMessageUtil.sendMessage(client.channel(), new DirectFetchProviderServicesMessage(), null);
+			client.sendMessage(new DirectFetchProviderServicesMessage(), null);
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -286,8 +285,7 @@ public class ConsumerX implements BinaryClientEventListener {
 	 */
 	private void subscribeServicesFromServiceCenter() {
 		try {
-			SendMessageUtil.sendMessage(serviceCenterClient.channel(),
-					new SubscribeServiceFromServiceCenterConsumerMessage(), null);
+			serviceCenterClient.sendMessage(new SubscribeServiceFromServiceCenterConsumerMessage(), null);
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -623,7 +621,7 @@ public class ConsumerX implements BinaryClientEventListener {
 		}
 		// 发送消息
 		try {
-			SendMessageUtil.sendMessage(binaryClient.channel(), msg, new SendMessageListener() {
+			binaryClient.sendMessage(msg, new SendMessageListener() {
 
 				@Override
 				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {

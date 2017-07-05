@@ -22,7 +22,6 @@ import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.server.BinaryServer;
 import com.limitart.net.binary.server.config.BinaryServerConfig;
 import com.limitart.net.binary.server.listener.BinaryServerEventListener;
-import com.limitart.net.binary.util.SendMessageUtil;
 
 import io.netty.channel.Channel;
 
@@ -173,7 +172,7 @@ public class InnerMasterServer implements BinaryServerEventListener {
 				fsjm.serverInfo.add(info);
 			}
 			try {
-				SendMessageUtil.sendMessage(msg.getChannel(), fsjm, new SendMessageListener() {
+				server.sendMessage(msg.getChannel(), fsjm, new SendMessageListener() {
 
 					@Override
 					public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
@@ -208,7 +207,7 @@ public class InnerMasterServer implements BinaryServerEventListener {
 				channels.add(temp.getChannel());
 			}
 			try {
-				SendMessageUtil.sendMessage(channels, fsjm, null);
+				server.sendMessage(channels, fsjm, null);
 				log.info("tell new fight server info to all game server success,fight server id:" + data.getServerId());
 			} catch (Exception e) {
 				log.error(e, e);
