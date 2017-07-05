@@ -40,19 +40,20 @@ public class RpcUtil {
 	 * 
 	 * @param type
 	 * @return
+	 * @throws ServiceXProxyException
 	 */
-	public static boolean checkParamType(Class<?> type) {
+	public static void checkParamType(Class<?> type) throws ServiceXProxyException {
 		if (!type.isPrimitive()) {
 			if (type.isArray()) {
-				return checkParamType(type.getComponentType());
+				checkParamType(type.getComponentType());
 			} else {
 				if (!MessageMeta.class.isAssignableFrom(type) && type != String.class && type != List.class
 						&& type != ArrayList.class && type != HashMap.class && type != Map.class
 						&& type != HashSet.class && type != Set.class) {
-					return false;
+					throw new ServiceXProxyException(type.getName() + "必须是基础类型（包括其数组）或" + MessageMeta.class.getName()
+							+ "的子类，或者为上述类型的java.util.List或java.util.ArrayList");
 				}
 			}
 		}
-		return true;
 	}
 }

@@ -1,5 +1,6 @@
 package com.limitart.rpcx.providerx;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +17,6 @@ import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
-import com.limitart.net.binary.message.MessageMeta;
 import com.limitart.net.binary.server.BinaryServer;
 import com.limitart.net.binary.server.config.BinaryServerConfig.BinaryServerConfigBuilder;
 import com.limitart.net.binary.server.listener.BinaryServerEventListener;
@@ -197,9 +197,14 @@ public class ProviderX implements BinaryServerEventListener {
 	 * 扫描本地服务
 	 * 
 	 * @param packageName
+	 * @throws ServiceXProxyException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
 	 * @throws Exception
 	 */
-	private void initAllServices() throws Exception {
+	private void initAllServices() throws ServiceXProxyException, ClassNotFoundException, IOException, InstantiationException, IllegalAccessException {
 		services.clear();
 		List<Class<?>> classesByPackage = new ArrayList<>();
 		for (String temp : this.config.getServicePackages()) {
@@ -236,19 +241,11 @@ public class ProviderX implements BinaryServerEventListener {
 				// 检查参数
 				Class<?>[] parameterTypes = method.getParameterTypes();
 				for (Class<?> paramsType : parameterTypes) {
-					if (!RpcUtil.checkParamType(paramsType)) {
-						throw new ServiceXProxyException("类" + clazz.getName() + "的方法" + methodOverloadName + "的参数"
-								+ paramsType.getName() + "必须是基础类型（包括其数组）或" + MessageMeta.class.getName()
-								+ "的子类，或者为上述类型的java.util.List或java.util.ArrayList");
-					}
+					RpcUtil.checkParamType(paramsType);
+				
 				}
 				// 检查返回参数是否合法
-				Class<?> returnType = method.getReturnType();
-				if (!RpcUtil.checkParamType(returnType)) {
-					throw new ServiceXProxyException("类" + clazz.getName() + "的方法" + methodOverloadName + "的返回"
-							+ returnType.getName() + "必须是基础类型（包括其数组）或" + MessageMeta.class.getName()
-							+ "的子类，或者为上述类型的java.util.List或java.util.ArrayList");
-				}
+				RpcUtil.checkParamType(method.getReturnType());
 				// 异常抛出检查
 				Class<?>[] exceptionTypes = method.getExceptionTypes();
 				if (exceptionTypes == null || exceptionTypes.length < 1) {

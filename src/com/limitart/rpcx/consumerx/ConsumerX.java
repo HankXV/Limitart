@@ -25,7 +25,6 @@ import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
-import com.limitart.net.binary.message.MessageMeta;
 import com.limitart.net.binary.util.SendMessageUtil;
 import com.limitart.rpcx.consumerx.config.ConsumerXConfig;
 import com.limitart.rpcx.consumerx.define.IServiceAsyncCallback;
@@ -479,19 +478,10 @@ public class ConsumerX implements BinaryClientEventListener {
 				// 检查参数
 				Class<?>[] parameterTypes = method.getParameterTypes();
 				for (Class<?> paramsType : parameterTypes) {
-					if (!RpcUtil.checkParamType(paramsType)) {
-						throw new ServiceXProxyException("类" + clazz.getName() + "的方法" + methodOverloadName + "的参数"
-								+ paramsType.getName() + "必须是基础类型（包括其数组）或" + MessageMeta.class.getName()
-								+ "的子类，或者为上述类型的java.util.List或java.util.ArrayList");
-					}
+					RpcUtil.checkParamType(paramsType);
 				}
 				// 检查返回参数是否合法
-				Class<?> returnType = method.getReturnType();
-				if (!RpcUtil.checkParamType(returnType)) {
-					throw new ServiceXProxyException("类" + clazz.getName() + "的方法" + methodOverloadName + "的返回"
-							+ returnType.getName() + "必须是基础类型（包括其数组）或" + MessageMeta.class.getName()
-							+ "的子类，或者为上述类型的java.util.List或java.util.ArrayList");
-				}
+				RpcUtil.checkParamType(method.getReturnType());
 				// 异常抛出检查
 				Class<?>[] exceptionTypes = method.getExceptionTypes();
 				if (exceptionTypes == null || exceptionTypes.length < 1) {
