@@ -11,7 +11,6 @@ public interface IRankMap<K, V extends IRankObj<K>> {
 	 * 
 	 * @param key
 	 * @param value
-	 * @return 返回被剔除排行榜的列表
 	 */
 	void put(K key, V value);
 

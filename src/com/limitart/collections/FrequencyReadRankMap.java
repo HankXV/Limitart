@@ -33,12 +33,8 @@ public class FrequencyReadRankMap<K, V extends IRankObj<K>> implements IRankMap<
 			DefaultRankObj obj = new DefaultRankObj(i, RandomUtil.randomLong(0, count), i, i);
 			old.put(i, obj);
 		}
-		System.out.println("oldMap:" + (System.currentTimeMillis() - now));
-		now = System.currentTimeMillis();
-		for (long i = 0; i < count; ++i) {
-			DefaultRankObj obj = new DefaultRankObj(i, RandomUtil.randomLong(0, count), i, i);
-			old.put(i, obj);
-		}
+		DefaultRankObj t = new DefaultRankObj(-1,-1,-1,-1);
+		old.put(-1L, t);
 		System.out.println("oldMap:" + (System.currentTimeMillis() - now));
 		System.out.println(old);
 	}
@@ -70,7 +66,7 @@ public class FrequencyReadRankMap<K, V extends IRankObj<K>> implements IRankMap<
 			list.remove(binarySearch);
 		} else {
 			if (!list.isEmpty()) {
-				if (comparator.compare(value, list.get(list.size() - 1)) < 0) {
+				if (comparator.compare(list.get(list.size() - 1), value) < 0) {
 					return;
 				}
 			}
