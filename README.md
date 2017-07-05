@@ -10,7 +10,7 @@
 我们保留了Netty的原生Channel来作为服务器与每个用户的通道，发送消息很简单，调用`SendMessageUtil`里的`sendMessage`方法即可，需要注意的是，为了防止重复编码，在向多个Channel发送消息时，请尽量调用有List参数的重载函数。
 ### 消息编码器和解码器(AbstractBinaryEncoder、AbstractBinaryDecoder)
 使用自定义编码器必须实现在写入消息体之前的编码和消息体之后的编码<br>
-
+```java
 	public static final AbstractBinaryEncoder DEFAULT_ENCODER = new AbstractBinaryEncoder() {
 	
 		@Override
@@ -28,9 +28,9 @@
 		}
 	
 	};
-	
+```
 使用自定义解码器：<br>
-
+```java
 	/**
 	 * 构造
 	 * 
@@ -58,7 +58,7 @@
 			return buffer.readShort();
 		}
 	};
-
+```
 ### 二进制消息处理器（IHandler）
 每个处理器必须要实现IHandler接口，然后注册进消息工厂(`MessageFactory`)与相应的消息(`Message`)所对应，IHandler被认为是单例模式，所以不要在`IHandler`的实现类里缓存任何非全局的数据。
 ### 反射构造消息工厂(MessageFactory)
