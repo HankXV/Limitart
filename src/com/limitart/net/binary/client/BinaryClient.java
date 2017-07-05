@@ -181,13 +181,17 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			channel.close();
 			channel = null;
 		}
-		schedule(new Runnable() {
+		if (waitSeconds > 0) {
+			schedule(new Runnable() {
 
-			@Override
-			public void run() {
-				connect0();
-			}
-		}, waitSeconds, TimeUnit.SECONDS);
+				@Override
+				public void run() {
+					connect0();
+				}
+			}, waitSeconds, TimeUnit.SECONDS);
+		} else {
+			connect0();
+		}
 	}
 
 	private void decodeConnectionValidateData(String validateStr) {
