@@ -26,7 +26,7 @@ import com.lmax.disruptor.dsl.ProducerType;
 public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	private static Logger log = LogManager.getLogger();
 	private Disruptor<DisruptorTaskQueueEvent> disruptor;
-	private Thread handlerThread;
+	private NamedThreadFactory threadFactory;
 	private TaskQueueEventProducerWithTraslator traslator;
 	private ITaskQueueHandler<T> handler;
 
@@ -48,6 +48,13 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 			throw new NullPointerException("handler");
 		}
 		this.handler = handler;
+		this.threadFactory = new NamedThreadFactory() {
+
+			@Override
+			public String getThreadName() {
+				return threadName;
+			}
+		};
 		disruptor = new Disruptor<>(new EventFactory<DisruptorTaskQueueEvent>() {
 
 			@Override
@@ -55,13 +62,8 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 				return new DisruptorTaskQueueEvent();
 			}
 
-		}, bufferSize, new NamedThreadFactory() {
-
-			@Override
-			public String getThreadName() {
-				return threadName;
-			}
-		}, ProducerType.MULTI, new LiteTimeoutBlockingWaitStrategy(1, TimeUnit.SECONDS));
+		}, bufferSize, this.threadFactory, ProducerType.MULTI,
+				new LiteTimeoutBlockingWaitStrategy(1, TimeUnit.SECONDS));
 		disruptor.handleEventsWith(new TaskQueueEventHandler());
 		disruptor.handleExceptionsFor(new EventHandler<DisruptorTaskQueueEvent>() {
 
@@ -76,17 +78,17 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	@Override
 	public void startServer() {
 		disruptor.start();
-		log.info("thread " + handlerThread.getName() + " start!");
+		log.info("thread " + threadFactory.getThreadName() + " start!");
 	}
 
 	@Override
 	public void stopServer() {
 		if (disruptor != null) {
 			disruptor.shutdown();
-			log.info("thread " + handlerThread.getName() + " stop!");
+			log.info("thread " + threadFactory.getThreadName() + " stop!");
 			disruptor = null;
 			traslator = null;
-			handlerThread = null;
+			threadFactory = null;
 		}
 	}
 
@@ -103,10 +105,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 
 	@Override
 	public String getThreadName() {
-		if (handlerThread == null) {
-			return "";
-		}
-		return handlerThread.getName();
+		return threadFactory.getThreadName();
 	}
 
 	/**
