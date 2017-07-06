@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF8"?>
 <project basedir="." default="copy">
 	<property name="project" value="limitart" />
-	<property name="version" value="2.0alpha" />
+	<property name="version" value="v2.0-alpha" />
 	<property name="src.dir" value="${basedir}/src" />
 	<property name="lib.dir" value="${basedir}/lib" />
 	<property name="buildclass.dir" value="${basedir}/target/classes" />
