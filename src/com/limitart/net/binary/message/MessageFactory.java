@@ -47,10 +47,9 @@ public class MessageFactory {
 		Message newInstance = null;
 		try {
 			newInstance = msgClass.newInstance();
-		} catch (InstantiationException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			log.error(e, e);
-		} catch (IllegalAccessException e) {
-			log.error(e, e);
+			return this;
 		}
 		short id = newInstance.getMessageId();
 		if (msgs.containsKey(id)) {
