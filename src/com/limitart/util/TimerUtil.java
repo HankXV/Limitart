@@ -1,12 +1,12 @@
 package com.limitart.util;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.limitart.thread.NamedThreadFactory;
 import com.limitart.util.listener.ITimerListener;
 
 /**
@@ -18,15 +18,14 @@ import com.limitart.util.listener.ITimerListener;
  */
 public final class TimerUtil {
 	private static Logger log = LogManager.getLogger();
-	private static ScheduledThreadPoolExecutor globalTimer = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+	private static ScheduledThreadPoolExecutor globalTimer = new ScheduledThreadPoolExecutor(1,
+			new NamedThreadFactory() {
 
-		@Override
-		public Thread newThread(Runnable r) {
-			Thread thread = new Thread(r);
-			thread.setName("Global-Timer");
-			return thread;
-		}
-	});
+				@Override
+				public String getThreadName() {
+					return "Global-Timer";
+				}
+			});
 
 	private TimerUtil() {
 	}

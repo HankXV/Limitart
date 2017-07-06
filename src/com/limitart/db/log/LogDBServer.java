@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
@@ -28,7 +27,7 @@ import com.limitart.db.log.tablecheck.LogStructChecker;
 import com.limitart.db.log.util.LogDBUtil;
 import com.limitart.db.log.util.LogDBUtil.QueryConditionBuilder;
 import com.limitart.reflectasm.FieldAccess;
-
+import com.limitart.thread.NamedThreadFactory;
 
 /**
  * 数据库日志记录服务器
@@ -73,13 +72,11 @@ public class LogDBServer {
 			this.logTaskQueue = new LinkedBlockingQueue<Runnable>();
 			this.threadPool = new ThreadPoolExecutor(this.config.getThreadCorePoolSize(),
 					this.config.getThreadMaximumPoolSize(), 0, TimeUnit.MILLISECONDS, logTaskQueue,
-					new ThreadFactory() {
+					new NamedThreadFactory() {
 
 						@Override
-						public Thread newThread(Runnable r) {
-							Thread thread = new Thread(r);
-							thread.setName("LogDBServer-Insert-" + threadPool.getPoolSize());
-							return thread;
+						public String getThreadName() {
+							return "LogDBServer-Insert-" + threadPool.getPoolSize();
 						}
 					});
 		} else {

@@ -1,6 +1,5 @@
 package com.limitart.taskqueue;
 
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
@@ -9,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import com.limitart.taskqueue.define.ITaskQueue;
 import com.limitart.taskqueue.define.ITaskQueueHandler;
 import com.limitart.taskqueue.exception.TaskQueueException;
+import com.limitart.thread.NamedThreadFactory;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.EventTranslatorOneArg;
@@ -55,13 +55,11 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 				return new DisruptorTaskQueueEvent();
 			}
 
-		}, bufferSize, new ThreadFactory() {
+		}, bufferSize, new NamedThreadFactory() {
 
 			@Override
-			public Thread newThread(Runnable r) {
-				handlerThread = new Thread(r);
-				handlerThread.setName(threadName);
-				return handlerThread;
+			public String getThreadName() {
+				return threadName;
 			}
 		}, ProducerType.MULTI, new LiteTimeoutBlockingWaitStrategy(1, TimeUnit.SECONDS));
 		disruptor.handleEventsWith(new TaskQueueEventHandler());
@@ -146,6 +144,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 			DisruptorTaskQueue.this.handler.handle(event.getMsg());
 		}
 	}
+
 	private class DisruptorTaskQueueEvent {
 		private T msg;
 
