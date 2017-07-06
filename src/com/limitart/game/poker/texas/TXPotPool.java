@@ -63,6 +63,19 @@ public class TXPotPool {
 	}
 
 	/**
+	 * 获取总奖池
+	 * 
+	 * @return
+	 */
+	public long getSumChips() {
+		long result = 0;
+		for (TXPot pot : pots.values()) {
+			result += pot.chips;
+		}
+		return result;
+	}
+
+	/**
 	 * 触发发奖
 	 */
 	public void flushAward() {
