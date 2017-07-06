@@ -10,7 +10,7 @@ import com.limitart.rpcx.providerx.schedule.ProviderJob.ProviderJobBuilder;
 public class ProviderXDemo {
 	public static void main(String[] args) throws Exception {
 		ProviderXConfigBuilder builder = new ProviderXConfigBuilder();
-		builder.myIp("192.168.31.175").myPort(10002).addServicePackage("limitart.core.rpcx.demo").providerUID(3)
+		builder.myIp("192.168.31.175").myPort(10002).addServicePackage("com.limitart.rpcx").providerUID(3)
 				.serviceCenterIp("192.168.31.175").serviceCenterPort(5555);
 		ProviderX provider = new ProviderX(builder.build(), new IProviderListener() {
 

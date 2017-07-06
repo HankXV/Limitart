@@ -12,7 +12,7 @@ import com.limitart.rpcx.consumerx.config.ConsumerXConfig.ConsumerXConfigBuilder
 public class ConsumerXDemo {
 	public static void main(String[] args) throws Exception {
 		ConsumerXConfigBuilder builder = new ConsumerXConfigBuilder();
-		builder.addServicePackage("limitart.core.rpcx.demo");
+		builder.addServicePackage("com.limitart.rpcx");
 		// builder.appendProviderRemote(new ProviderRemote("192.168.3.100",
 		// 10000));
 		builder.serviceCenterIp("192.168.31.175").serviceCenterPort(5555);
