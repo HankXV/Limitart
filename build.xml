@@ -30,8 +30,7 @@
 		<path id="classpath">
 			<fileset dir="${lib.dir}" includes="*.jar" />
 		</path>
-		<javac debug="true" source="1.8" srcdir="${src.dir}" destdir="${buildclass.dir}"
-			encoding="UTF-8" includeantruntime="on">
+		<javac debug="true" source="1.8" srcdir="${src.dir}" destdir="${buildclass.dir}" encoding="UTF-8" includeantruntime="on">
 			<compilerarg value="-Xlint:deprecation" />
 			<classpath refid="classpath" />
 		</javac>
@@ -60,8 +59,7 @@
 			</fileset>
 		</copy>
 		<echo message="开始压缩" />
-		<zip destfile="${basedir}/target/${project}-${version}.zip" basedir="${basedir}/target">
-		</zip>
+		<tar destfile="${basedir}/target/${project}-${version}.tar.gz" basedir="${basedir}/target" compression="gzip" />
 		<echo message="打包结束" />
 	</target>
 </project>
