@@ -88,8 +88,8 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		this.serverEventListener = serverEventListener;
 		this.config = config;
 		// 初始化内部消息
-		this.messageFactory = msgFactory.registerMsg(InnerMessageEnum.ConnectionValidateClientMessage.getValue(),
-				ConnectionValidateClientMessage.class, new ConnectionValidateClientHandler());
+		this.messageFactory = msgFactory.registerMsg(ConnectionValidateClientMessage.class,
+				new ConnectionValidateClientHandler());
 		// 初始化加密工具
 		try {
 			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(BinaryServer.this.config.getConnectionPass(),

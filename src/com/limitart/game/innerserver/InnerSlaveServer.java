@@ -48,12 +48,12 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener {
 		this.innerPort = innerPort;
 		this.outPass = outPass;
 		this.factory = factory;
-		this.factory.registerMsg(InnerMessageEnum.ResFightServerJoinMaster2GameMessage.getValue(),
-				ResFightServerJoinMaster2GameMessage.class, new ResFightServerJoinMaster2GameHandler());
-		this.factory.registerMsg(InnerMessageEnum.ResFightServerQuitMaster2GameMessage.getValue(),
-				ResFightServerQuitMaster2GameMessage.class, ResFightServerQuitMaster2GameHandler.class);
-		this.factory.registerMsg(InnerMessageEnum.ReqConnectionReportGame2FightMessage.getValue(),
-				ReqConnectionReportGame2FightMessage.class, new ReqConnectionReportGame2FightHandler());
+		this.factory.registerMsg(ResFightServerJoinMaster2GameMessage.class,
+				new ResFightServerJoinMaster2GameHandler());
+		this.factory.registerMsg(ResFightServerQuitMaster2GameMessage.class,
+				ResFightServerQuitMaster2GameHandler.class);
+		this.factory.registerMsg(ReqConnectionReportGame2FightMessage.class,
+				new ReqConnectionReportGame2FightHandler());
 		toMaster = new BinaryClient(new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5)
 				.clientName("Slave-Inner-Client").connectionPass(InnerServerUtil.getInnerPass()).remoteIp(innerMasterIp)
 				.remotePort(innerMasterPort).build(), this, factory);

@@ -2,7 +2,6 @@ package com.limitart.net.binary.message;
 
 import com.limitart.net.binary.client.BinaryClient;
 import com.limitart.net.binary.handler.IHandler;
-import com.limitart.net.binary.message.define.IMessage;
 import com.limitart.net.binary.server.BinaryServer;
 
 import io.netty.channel.Channel;
@@ -13,7 +12,7 @@ import io.netty.channel.Channel;
  * @author Hank
  *
  */
-public abstract class Message extends MessageMeta implements IMessage {
+public abstract class Message extends MessageMeta {
 	// 消息由什么通道过来
 	private transient Channel channel;
 	// 当前Message接受的客户端
@@ -24,6 +23,8 @@ public abstract class Message extends MessageMeta implements IMessage {
 	private transient Object extra;
 	private transient Object extra1;
 	private transient IHandler handler;
+
+	public abstract short getMessageId();
 
 	public BinaryClient getClient() {
 		return client;

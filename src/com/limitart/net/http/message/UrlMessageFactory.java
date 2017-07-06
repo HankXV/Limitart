@@ -20,8 +20,10 @@ public class UrlMessageFactory {
 	private Map<String, ConstructorAccess<? extends UrlMessage<String>>> messages = new HashMap<>();
 	private Map<String, HttpHandler> handlers = new HashMap<>();
 
-	public synchronized UrlMessageFactory registerMsg(String url, Class<? extends UrlMessage<String>> msgClass,
-			HttpHandler handler) {
+	public synchronized UrlMessageFactory registerMsg(Class<? extends UrlMessage<String>> msgClass, HttpHandler handler)
+			throws InstantiationException, IllegalAccessException {
+		UrlMessage<String> newInstance = msgClass.newInstance();
+		String url = newInstance.getUrl();
 		if (messages.containsKey(url)) {
 			throw new IllegalArgumentException("message url duplicated:" + url);
 		}
@@ -35,9 +37,9 @@ public class UrlMessageFactory {
 		return this;
 	}
 
-	public UrlMessageFactory registerMsg(String url, Class<? extends UrlMessage<String>> msgClass,
+	public UrlMessageFactory registerMsg(Class<? extends UrlMessage<String>> msgClass,
 			Class<? extends HttpHandler> handlerClass) throws InstantiationException, IllegalAccessException {
-		return registerMsg(url, msgClass, handlerClass.newInstance());
+		return registerMsg(msgClass, handlerClass.newInstance());
 	}
 
 	public UrlMessage<String> getMessage(String url) throws InstantiationException, IllegalAccessException {

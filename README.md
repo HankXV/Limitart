@@ -105,7 +105,7 @@
 ```java
 
 	MessageFactory factory = new MessageFactory();
-	factory.registerMsg((short) 1, BinaryMessageDemo.class, BinaryHandlerDemo.class);
+	factory.registerMsg(BinaryMessageDemo.class, BinaryHandlerDemo.class);
 		
 ```
 最后初始化一个服务器实例并绑定，收工！

@@ -42,7 +42,17 @@ public class MessageFactory {
 		return messageFactory;
 	}
 
-	public synchronized MessageFactory registerMsg(short id, Class<? extends Message> msgClass, IHandler handler) {
+	public synchronized MessageFactory registerMsg(Class<? extends Message> msgClass, IHandler handler) {
+		// 这里先实例化一个出来获取其ID
+		Message newInstance = null;
+		try {
+			newInstance = msgClass.newInstance();
+		} catch (InstantiationException e) {
+			log.error(e, e);
+		} catch (IllegalAccessException e) {
+			log.error(e, e);
+		}
+		short id = newInstance.getMessageId();
 		if (msgs.containsKey(id)) {
 			Class<? extends Message> class1 = msgs.get(id).newInstance().getClass();
 			if (!class1.getName().equals(msgClass.getName())) {
@@ -62,9 +72,9 @@ public class MessageFactory {
 		return this;
 	}
 
-	public MessageFactory registerMsg(short id, Class<? extends Message> msgClass,
+	public synchronized MessageFactory registerMsg(Class<? extends Message> msgClass,
 			Class<? extends IHandler> handlerClass) throws InstantiationException, IllegalAccessException {
-		return registerMsg(id, msgClass, handlerClass.newInstance());
+		return registerMsg(msgClass, handlerClass.newInstance());
 	}
 
 	public Message getMessage(short msgId) throws InstantiationException, IllegalAccessException {

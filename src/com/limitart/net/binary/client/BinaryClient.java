@@ -83,9 +83,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		this.clientEventListener = clientEventListener;
 		// 内部消息注册
 		this.messageFactory = messageFactory
-				.registerMsg(InnerMessageEnum.ConnectionValidateServerMessage.getValue(),
-						ConnectionValidateServerMessage.class, new ConnectionValidateServerHandler())
-				.registerMsg(InnerMessageEnum.ConnectionValidateSuccessServerMessage.getValue(),
+				.registerMsg(ConnectionValidateServerMessage.class, new ConnectionValidateServerHandler()).registerMsg(
 						ConnectionValidateSuccessServerMessage.class, new ConnectionValidateSuccessServerHandler());
 		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(clientConfig.getConnectionPass());
 		bootstrap = new Bootstrap();

@@ -36,7 +36,6 @@ import com.limitart.rpcx.exception.ServiceError;
 import com.limitart.rpcx.exception.ServiceXExecuteException;
 import com.limitart.rpcx.exception.ServiceXIOException;
 import com.limitart.rpcx.exception.ServiceXProxyException;
-import com.limitart.rpcx.message.constant.RpcMessageEnum;
 import com.limitart.rpcx.message.service.DirectFetchProviderServicesMessage;
 import com.limitart.rpcx.message.service.DirectFetchProviderServicesResultMessage;
 import com.limitart.rpcx.message.service.NoticeProviderDisconnectedServiceCenterMessage;
@@ -109,10 +108,9 @@ public class ConsumerX implements BinaryClientEventListener {
 				throw new ServiceXIOException("need service center's Ip or direct provider remote Ip!");
 			}
 			MessageFactory centryFactory = new MessageFactory();
-			centryFactory.registerMsg(RpcMessageEnum.SubscribeServiceResultServiceCenterMessage.getValue(),
-					SubscribeServiceResultServiceCenterMessage.class, new SubscribeServiceResultServiceCenterHandler());
-			centryFactory.registerMsg(RpcMessageEnum.NoticeProviderDisconnectedServiceCenterMessage.getValue(),
-					NoticeProviderDisconnectedServiceCenterMessage.class,
+			centryFactory.registerMsg(SubscribeServiceResultServiceCenterMessage.class,
+					new SubscribeServiceResultServiceCenterHandler());
+			centryFactory.registerMsg(NoticeProviderDisconnectedServiceCenterMessage.class,
 					new NoticeProviderDisconnectedServiceCenterHandler());
 			BinaryClientConfigBuilder serviceCenterBuilder = new BinaryClientConfigBuilder();
 			serviceCenterBuilder.autoReconnect(config.getAutoConnectInterval()).remoteIp(config.getServiceCenterIp())
@@ -174,10 +172,9 @@ public class ConsumerX implements BinaryClientEventListener {
 
 	private BinaryClient createRpcClient(String providerIp, int providerPort, boolean isDirectLink) throws Exception {
 		MessageFactory rpcMessageFacotry = new MessageFactory();
-		rpcMessageFacotry.registerMsg(RpcMessageEnum.RpcResultServerMessage.getValue(), RpcResultServerMessage.class,
-				new RpcResultServerHandler());
-		rpcMessageFacotry.registerMsg(RpcMessageEnum.DirectFetchProviderServicesResultMessage.getValue(),
-				DirectFetchProviderServicesResultMessage.class, new DirectFetchProviderServicesResultHandler());
+		rpcMessageFacotry.registerMsg(RpcResultServerMessage.class, new RpcResultServerHandler());
+		rpcMessageFacotry.registerMsg(DirectFetchProviderServicesResultMessage.class,
+				new DirectFetchProviderServicesResultHandler());
 		BinaryClient client = new BinaryClient(new BinaryClientConfigBuilder().remoteIp(providerIp)
 				.remotePort(providerPort).autoReconnect(config.getAutoConnectInterval()).build(), this,
 				rpcMessageFacotry);

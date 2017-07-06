@@ -24,7 +24,6 @@ import com.limitart.rpcx.define.ServiceX;
 import com.limitart.rpcx.exception.ServiceError;
 import com.limitart.rpcx.exception.ServiceXExecuteException;
 import com.limitart.rpcx.exception.ServiceXProxyException;
-import com.limitart.rpcx.message.constant.RpcMessageEnum;
 import com.limitart.rpcx.message.schedule.AddScheduleToServiceCenterProviderMessage;
 import com.limitart.rpcx.message.schedule.TriggerScheduleServiceCenterToProviderServiceCenterMessage;
 import com.limitart.rpcx.message.service.DirectFetchProviderServicesMessage;
@@ -71,19 +70,15 @@ public class ProviderX implements BinaryServerEventListener {
 		this.config = config;
 		MessageFactory factory = new MessageFactory();
 		// 初始化内部消息
-		factory.registerMsg(RpcMessageEnum.RpcExecuteClientMessage.getValue(), RpcExecuteClientMessage.class,
-				new RpcExecuteClientHandler());
-		factory.registerMsg(RpcMessageEnum.DirectFetchProviderServicesMessage.getValue(),
-				DirectFetchProviderServicesMessage.class, new DirectFetchProverServicesHandler());
+		factory.registerMsg(RpcExecuteClientMessage.class, new RpcExecuteClientHandler());
+		factory.registerMsg(DirectFetchProviderServicesMessage.class, new DirectFetchProverServicesHandler());
 		server = new BinaryServer(
 				new BinaryServerConfigBuilder().port(config.getMyPort()).serverName("RPC-Provider").build(), this,
 				factory);
 		// 处理服务中心模式
 		if (this.config.getServiceCenterIp() != null) {
 			MessageFactory centerFacotry = new MessageFactory();
-			centerFacotry.registerMsg(
-					RpcMessageEnum.TriggerScheduleServiceCenterToProviderServiceCenterMessage.getValue(),
-					TriggerScheduleServiceCenterToProviderServiceCenterMessage.class,
+			centerFacotry.registerMsg(TriggerScheduleServiceCenterToProviderServiceCenterMessage.class,
 					new TriggerScheduleServiceCenterToProviderServiceCenterHandler());
 			BinaryClientConfigBuilder centerBuilder = new BinaryClientConfigBuilder();
 			centerBuilder.autoReconnect(5).remoteIp(this.config.getServiceCenterIp())

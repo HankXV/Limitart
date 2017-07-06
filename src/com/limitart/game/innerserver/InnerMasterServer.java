@@ -40,10 +40,8 @@ public class InnerMasterServer implements BinaryServerEventListener {
 	private BinaryServer server;
 
 	public InnerMasterServer(int masterPort, MessageFactory facotry) {
-		facotry.registerMsg(InnerMessageEnum.ReqConnectionReportSlave2MasterMessage.getValue(),
-				ReqConnectionReportSlave2MasterMessage.class, new ReqConnectionReportSlave2MasterHandler());
-		facotry.registerMsg(InnerMessageEnum.ReqServerLoadSlave2MasterMessage.getValue(),
-				ReqServerLoadSlave2MasterMessage.class, new ReqServerLoadSlave2MasterHandler());
+		facotry.registerMsg(ReqConnectionReportSlave2MasterMessage.class, new ReqConnectionReportSlave2MasterHandler());
+		facotry.registerMsg(ReqServerLoadSlave2MasterMessage.class, new ReqServerLoadSlave2MasterHandler());
 		server = new BinaryServer(
 				new BinaryServerConfig.BinaryServerConfigBuilder().connectionPass(InnerServerUtil.getInnerPass())
 						.port(masterPort).serverName("Master-Inner-Server").build(),

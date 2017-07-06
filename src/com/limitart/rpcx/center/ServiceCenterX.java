@@ -22,7 +22,6 @@ import com.limitart.rpcx.center.config.ServiceCenterXConfig;
 import com.limitart.rpcx.center.schedule.ScheduleTask;
 import com.limitart.rpcx.center.struct.ServiceXClientSession;
 import com.limitart.rpcx.center.struct.ServiceXServerSession;
-import com.limitart.rpcx.message.constant.RpcMessageEnum;
 import com.limitart.rpcx.message.schedule.AddScheduleToServiceCenterProviderMessage;
 import com.limitart.rpcx.message.service.NoticeProviderDisconnectedServiceCenterMessage;
 import com.limitart.rpcx.message.service.PushServiceToServiceCenterProviderMessage;
@@ -106,14 +105,11 @@ public class ServiceCenterX {
 
 			}
 		}, new MessageFactory()
-				.registerMsg(RpcMessageEnum.SubscribeServiceFromServiceCenterConsumerMessage.getValue(),
-						SubscribeServiceFromServiceCenterConsumerMessage.class,
+				.registerMsg(SubscribeServiceFromServiceCenterConsumerMessage.class,
 						new SubscribeServiceFromServiceCenterConsumerHandler())
-				.registerMsg(RpcMessageEnum.PushServiceToServiceCenterProviderMessage.getValue(),
-						PushServiceToServiceCenterProviderMessage.class,
+				.registerMsg(PushServiceToServiceCenterProviderMessage.class,
 						new PushServiceToServiceCenterProviderHandler())
-				.registerMsg(RpcMessageEnum.AddScheduleToServiceCenterProviderMessage.getValue(),
-						AddScheduleToServiceCenterProviderMessage.class,
+				.registerMsg(AddScheduleToServiceCenterProviderMessage.class,
 						new AddScheduleToServiceCenterProviderHandler()));
 	}
 
@@ -365,7 +361,8 @@ public class ServiceCenterX {
 		map.put(ScheduleTask.SCHEDULES, this.schedules);
 		if (!StringUtil.isEmptyOrNull(cronExpression)) {
 			try {
-				Trigger addSchedule = SchedulerUtil.self().addSchedule(jobName, ScheduleTask.class, cronExpression, map);
+				Trigger addSchedule = SchedulerUtil.self().addSchedule(jobName, ScheduleTask.class, cronExpression,
+						map);
 				log.info("初始化定时任务，名称：" + jobName + "表达式：" + cronExpression + "，下次执行时间："
 						+ TimeUtil.date2Str(addSchedule.getNextFireTime().getTime()));
 			} catch (SchedulerException e) {

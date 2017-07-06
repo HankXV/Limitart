@@ -8,13 +8,13 @@ import com.limitart.net.http.constant.QueryMethod;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 
-public abstract class UrlMessage<T> {
+public abstract class UrlMessage<URL> {
 
 	private transient Channel channel;
 	private transient FullHttpRequest request;
 	private HashMap<String, byte[]> files = new HashMap<>();
 
-	public abstract T getUrl();
+	public abstract URL getUrl();
 
 	public abstract QueryMethod getMethod();
 
