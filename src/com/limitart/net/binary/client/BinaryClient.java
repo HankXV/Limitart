@@ -1,7 +1,12 @@
 package com.limitart.net.binary.client;
 
 import java.net.SocketAddress;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
+
+import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,7 +68,8 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	}
 
 	public BinaryClient(BinaryClientConfig config, BinaryClientEventListener clientEventListener,
-			MessageFactory messageFactory) throws Exception {
+			MessageFactory messageFactory) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			InvalidAlgorithmParameterException {
 		if (config == null) {
 			throw new NullPointerException("BinaryClientConfig");
 		}
