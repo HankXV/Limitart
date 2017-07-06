@@ -104,22 +104,22 @@
 构造一个消息工厂，把消息和对应的处理器注册进去。
 ```java
 
-		MessageFactory factory = new MessageFactory();
-		factory.registerMsg((short) 1, BinaryMessageDemo.class, BinaryHandlerDemo.class);
+	MessageFactory factory = new MessageFactory();
+	factory.registerMsg((short) 1, BinaryMessageDemo.class, BinaryHandlerDemo.class);
 		
 ```
 最后初始化一个服务器实例并绑定，收工！
 ```java
 
-		BinaryServer server = new BinaryServer(build, binaryServerEventListener, factory);
-		server.bind();
+	BinaryServer server = new BinaryServer(build, binaryServerEventListener, factory);
+	server.bind();
 		
 ```
 下面看看客户端，因为我们现在不让客户端处理消息(处理消息和服务器一模一样)只发送消息，所以消息工厂我们创建一个对象传过去就行，监听器跟服务器没什么两样，我们这里就直接开始构造客户端了，填写好服务器地址和端口，当然还有客户端名称。你可以选择是否重连，我们这里就不展示了。
 ```java
 
-		BinaryClientConfig build = new BinaryClientConfigBuilder().remoteIp("127.0.0.1").remotePort(8888)
-				.clientName("BinaryClientDemo").build();
+	BinaryClientConfig build = new BinaryClientConfigBuilder().remoteIp("127.0.0.1").remotePort(8888)
+			.clientName("BinaryClientDemo").build();
 				
 ```
 接下来在监听器里的链接有效回调(`onConnectionEffective`)里写发送消息给服务器的代码，因为我们一定要保证发送消息前我们连接服务器是成功的。
@@ -173,8 +173,8 @@
 最后这样，收工！
 ```java
 
-		BinaryClient client = new BinaryClient(build, binaryClientEventListener, factory);
-		client.connect();
+	BinaryClient client = new BinaryClient(build, binaryClientEventListener, factory);
+	client.connect();
 		
 ```
 让我们来看看效果吧,启动服务器，服务器绑定成功
