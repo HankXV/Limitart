@@ -63,14 +63,18 @@ public class TXPotPool {
 	}
 
 	/**
-	 * 获取总奖池
+	 * 获取奖池总奖金
 	 * 
-	 * @return
+	 * @return long[0] 有效奖金 long[1] 无效奖金(退还奖金)
 	 */
-	public long getSumChips() {
-		long result = 0;
+	public long[] getSumChips() {
+		long[] result = new long[2];
 		for (TXPot pot : pots.values()) {
-			result += pot.chips;
+			if (pot.roles.size() > 1) {
+				result[0] += pot.chips;
+			} else {
+				result[1] += pot.chips;
+			}
 		}
 		return result;
 	}
