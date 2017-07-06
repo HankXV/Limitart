@@ -1,5 +1,208 @@
 # 简介
 一个旨在帮助快速搭建**Java中小型游戏服务器**的框架，通信底层采用Netty4.X，数据库采用MySql相关(框架其实并未与Mysql产生太多耦合，但建议使用Mysql)，生产消费者采用Disruptor等。此框架的作用在于共同学习，少部分经过商业验证，稳定性有一定**风险**，请酌情考虑。**有想共同参与的或者向我吐槽的，留言**。
+# 快速开始
+使用服务器框架我们首先就是要关心如何快速的搭建出服务器的原始模型。<br>
+我们需要构造一些必要的参数：端口和服务器名称
+```java
+
+	BinaryServerConfig build = new BinaryServerConfigBuilder().port(8888).serverName("BinaryServerDemo").build();
+
+```
+然后我们需要构造一个监听器
+```java
+
+		BinaryServerEventListener binaryServerEventListener = new BinaryServerEventListener() {
+			// 当网络模块发生错误时
+			@Override
+			public void onExceptionCaught(Channel channel, Throwable cause) {
+				cause.printStackTrace();
+			}
+
+			// 当一个Channel从内存注销时
+			@Override
+			public void onChannelUnregistered(Channel channel) {
+
+			}
+
+			// 当一个Channel注册到内存时
+			@Override
+			public void onChannelRegistered(Channel channel) {
+
+			}
+
+			// 当一个Channel闲置时
+			@Override
+			public void onChannelInactive(Channel channel) {
+			}
+
+			// 当一个Channel活跃时
+			@Override
+			public void onChannelActive(Channel channel) {
+
+			}
+
+			// 当服务器完成绑定时
+			@Override
+			public void onServerBind(Channel channel) {
+
+			}
+
+			// 当链接有效时(通常在这里我们认为一个链接是有效的，因为它经过了验证)
+			@Override
+			public void onConnectionEffective(Channel channel) {
+
+			}
+
+			// 当接收到消息时
+			@Override
+			public void dispatchMessage(Message message) {
+				message.getHandler().handle(message);
+			}
+		};
+
+```
+倒数第二步我们需要确定服务器可以处理哪些消息，创建第一个消息
+```java
+
+	public class BinaryMessageDemo extends Message {
+		public String info;
+	
+		// 消息编号
+		@Override
+		public short getMessageId() {
+			return 1;
+		}
+	
+		// 编码
+		@Override
+		public void encode() throws Exception {
+			putString(this.info);
+		}
+	
+		// 解码
+		@Override
+		public void decode() throws Exception {
+			this.info = getString();
+		}
+	
+	}
+
+```
+为上面的消息创建一个处理器，这里我们就简单的打印传输过来的内容即可
+```java
+
+	public class BinaryHandlerDemo implements IHandler {
+	
+		@Override
+		public void handle(Message message) {
+			BinaryMessageDemo msg = (BinaryMessageDemo) message;
+			System.out.println("server received message:" + msg.info);
+		}
+	
+	}
+	
+```
+构造一个消息工厂，把消息和对应的处理器注册进去
+```java
+
+		MessageFactory factory = new MessageFactory();
+		factory.registerMsg((short) 1, BinaryMessageDemo.class, BinaryHandlerDemo.class);
+		
+```
+最后初始化一个服务器实例并绑定，收工！
+```java
+
+		BinaryServer server = new BinaryServer(build, binaryServerEventListener, factory);
+		server.bind();
+		
+```
+下面看看客户端，因为客户端不处理消息只发送消息，所以这里我们的消息工厂我们创建一个对象传过去就行，监听器跟服务器没什么两样，我们这里就直接开始构造客户端了，填写好服务器地址和端口，当然还有客户端名称。你可以选择是否重连，我们这里就不展示了。
+```java
+
+		BinaryClientConfig build = new BinaryClientConfigBuilder().remoteIp("127.0.0.1").remotePort(8888)
+				.clientName("BinaryClientDemo").build();
+				
+```
+接下来在监听器里的链接有效发送消息给服务器，因为我们一定要保证发送消息前我们连接服务器是成功的
+```java
+
+	BinaryClientEventListener binaryClientEventListener = new BinaryClientEventListener() {
+
+			@Override
+			public void onExceptionCaught(BinaryClient client, Throwable cause) {
+				cause.printStackTrace();
+			}
+
+			@Override
+			public void onConnectionEffective(BinaryClient client) {
+				BinaryMessageDemo message = new BinaryMessageDemo();
+				message.info = "Hello Limitart!";
+				try {
+					client.sendMessage(message, null);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onChannelUnregistered(BinaryClient client) {
+
+			}
+
+			@Override
+			public void onChannelRegistered(BinaryClient client) {
+
+			}
+
+			@Override
+			public void onChannelInactive(BinaryClient client) {
+
+			}
+
+			@Override
+			public void onChannelActive(BinaryClient client) {
+
+			}
+
+			@Override
+			public void dispatchMessage(Message message) {
+				message.getHandler().handle(message);
+			}
+		};
+		
+```
+最后这样，收工！
+```java
+
+		BinaryClient client = new BinaryClient(build, binaryClientEventListener, factory);
+		client.connect();
+		
+```
+让我们来看看效果吧,启动服务器，OK，服务器绑定成功
+```
+
+	[INFO 2017-07-06 11:08:20][BinaryServer]BinaryServerDemo nio init
+	[INFO 2017-07-06 11:08:20][BinaryServer]BinaryServerDemo bind at port:8888
+	
+```
+启动客户端，OK，客户端链接成功，并发送了消息
+```
+
+	[INFO 2017-07-06 11:09:36][BinaryClient]BinaryClientDemo nio init
+	[INFO 2017-07-06 11:09:36][BinaryClient]BinaryClientDemo start connect server：127.0.0.1:8888...
+	[INFO 2017-07-06 11:09:36][BinaryClient]BinaryClientDemo connect server：127.0.0.1:8888 success！
+	[INFO 2017-07-06 11:09:36][BinaryClient]BinaryClientDemo parse validate code success，return result：9421
+	[INFO 2017-07-06 11:09:36][BinaryClient]server validate success,remote:/127.0.0.1:8888
+
+```
+服务器验证链接成功并且收到了消息！是不是很棒！！！
+```
+
+	[INFO 2017-07-06 11:09:36][BinaryServer]BinaryServerDemo send client /127.0.0.1:52115 validate token:$12MjAxNzAxMDYAAAAAAAAAAJpvyJkN13FbEXeTva2od7U.success！
+	[INFO 2017-07-06 11:09:36][BinaryServer]BinaryServerDemo remote connection /127.0.0.1:52115 validate success!
+	server received message:Hello Limitart!
+
+```
 # 模块介绍
 ## 网络通信(net)
 ### 二进制服务器的链接过程
