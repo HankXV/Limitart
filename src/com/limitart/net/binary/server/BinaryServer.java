@@ -33,7 +33,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -137,25 +136,21 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 
 	public void bind() {
 		new Thread(() -> {
-            try {
-                boot.bind(config.getPort()).addListener(new ChannelFutureListener() {
-
-                    @Override
-                    public void operationComplete(ChannelFuture arg0) throws Exception {
-                        if (arg0.isSuccess()) {
-                            channel = arg0.channel();
-                            log.info(config.getServerName() + " bind at port:" + config.getPort());
-                            serverEventListener.onServerBind(arg0.channel());
-                        }
-                    }
-                }).sync().channel().closeFuture().sync();
-            } catch (InterruptedException e) {
-                log.error(e, e);
-            } finally {
-                bossGroup.shutdownGracefully();
-                workerGroup.shutdownGracefully();
-            }
-        }, config.getServerName() + "-Binder").start();
+			try {
+				boot.bind(config.getPort()).addListener((ChannelFuture arg0) -> {
+					if (arg0.isSuccess()) {
+						channel = arg0.channel();
+						log.info(config.getServerName() + " bind at port:" + config.getPort());
+						serverEventListener.onServerBind(arg0.channel());
+					}
+				}).sync().channel().closeFuture().sync();
+			} catch (InterruptedException e) {
+				log.error(e, e);
+			} finally {
+				bossGroup.shutdownGracefully();
+				workerGroup.shutdownGracefully();
+			}
+		}, config.getServerName() + "-Binder").start();
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
@@ -210,14 +205,14 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		msg.setValidateStr(encode);
 		try {
 			SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, (isSuccess, cause, channel1) -> {
-                if (isSuccess) {
-                    log.info(config.getServerName() + " send client " + channel1.remoteAddress() + " validate token:"
-                            + encode + "success！");
-                } else {
-                    log.error(config.getServerName() + " send client " + channel1.remoteAddress()
-                            + " validate token:" + encode + "fail！", cause);
-                }
-            });
+				if (isSuccess) {
+					log.info(config.getServerName() + " send client " + channel1.remoteAddress() + " validate token:"
+							+ encode + "success！");
+				} else {
+					log.error(config.getServerName() + " send client " + channel1.remoteAddress() + " validate token:"
+							+ encode + "fail！", cause);
+				}
+			});
 		} catch (Exception e) {
 			log.error(e, e);
 		}
