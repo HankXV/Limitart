@@ -7,6 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConcurrentConstraintMap<K> extends ConstraintMap<K> {
 	public ConcurrentConstraintMap() {
-		super(new ConcurrentHashMap<K, Object>());
+		super(new ConcurrentHashMap<>());
 	}
 }

@@ -22,7 +22,6 @@ public class AutoGrowthTaskQueueGroup<T> {
 	private AtomicInteger threadId = new AtomicInteger(0);
 	private ConcurrentHashMap<Integer, AutoGrowthSegment<T>> threads = new ConcurrentHashMap<>();
 	private int entityCountPerThread;
-	private int initThreadCount;
 	private int coreThreadCount;
 	private int maxThreadCount;
 	private ITaskQueueFactory<T> taskQueueFactory;
@@ -34,7 +33,6 @@ public class AutoGrowthTaskQueueGroup<T> {
 		}
 		this.taskQueueFactory = taskQueueFactory;
 		this.maxThreadCount = maxThreadCount;
-		this.initThreadCount = Math.min(initThreadCount, this.maxThreadCount);
 		this.entityCountPerThread = entityCountPerThread;
 		this.coreThreadCount = Math.min(coreThreadCount, this.maxThreadCount);
 		if (initThreadCount > 10) {
@@ -43,10 +41,11 @@ public class AutoGrowthTaskQueueGroup<T> {
 		if (maxThreadCount > 50) {
 			log.warn("maxThreadCount is too large,less than 50 better!");
 		}
-		log.info("init,entityCountPerThread:" + this.entityCountPerThread + ",initThreadCount:" + this.initThreadCount
+		int initCount = Math.min(initThreadCount, this.maxThreadCount);
+		log.info("init,entityCountPerThread:" + this.entityCountPerThread + ",initThreadCount:" + initCount
 				+ ",coreThreadCount:" + this.coreThreadCount + ",maxThreadCount:" + this.maxThreadCount);
-		if (this.initThreadCount > 0) {
-			for (int i = 0; i < this.initThreadCount; ++i) {
+		if (initCount > 0) {
+			for (int i = 0; i < initCount; ++i) {
 				newGrowthThread();
 			}
 		}

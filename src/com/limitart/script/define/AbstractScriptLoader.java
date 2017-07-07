@@ -21,8 +21,8 @@ import groovy.lang.GroovyClassLoader;
  */
 public abstract class AbstractScriptLoader<KEY> {
 	protected static final Logger log = LogManager.getLogger();
-	protected ConcurrentHashMap<KEY, IScript<KEY>> scriptMap = new ConcurrentHashMap<KEY, IScript<KEY>>();
-	protected ConcurrentHashMap<KEY, File> scriptPath = new ConcurrentHashMap<KEY, File>();
+	protected ConcurrentHashMap<KEY, IScript<KEY>> scriptMap = new ConcurrentHashMap<>();
+	protected ConcurrentHashMap<KEY, File> scriptPath = new ConcurrentHashMap<>();
 	private AtomicLong dynamicCodeCount = new AtomicLong(100000);
 
 	/**
@@ -65,8 +65,7 @@ public abstract class AbstractScriptLoader<KEY> {
 		if (typeByValue == null) {
 			throw new ScriptException("script type not supported:" + type);
 		}
-		GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader());
-		try {
+		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader())) {
 			@SuppressWarnings("rawtypes")
 			Class parseClass = loader.parseClass(file);
 			Object newInstance = parseClass.newInstance();
@@ -77,8 +76,6 @@ public abstract class AbstractScriptLoader<KEY> {
 			log.info("compile code success,start executing...");
 			temp.execute();
 			log.info("done!");
-		} finally {
-			loader.close();
 		}
 		return this;
 	}
@@ -108,16 +105,13 @@ public abstract class AbstractScriptLoader<KEY> {
 				+ "import com.limitart.script.IDynamicCode; public class DynamicCodeProxy"
 				+ dynamicCodeCount.getAndIncrement() + " extends IDynamicCode {" + " public void execute() {"
 				+ commandLines + "}" + "}";
-		GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader());
-		try {
+		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader())) {
 			@SuppressWarnings("rawtypes")
 			Class parseClass = loader.parseClass(result);
 			IDynamicCode newInstance = (IDynamicCode) parseClass.newInstance();
 			log.info("compile code success,start executing...");
 			newInstance.execute();
 			log.info("done!");
-		} finally {
-			loader.close();
 		}
 		return this;
 	}

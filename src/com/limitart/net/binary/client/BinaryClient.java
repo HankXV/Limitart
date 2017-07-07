@@ -29,7 +29,6 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -151,25 +150,21 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 				+ this.clientConfig.getRemotePort() + "...");
 		try {
 			bootstrap.connect(this.clientConfig.getRemoteIp(), this.clientConfig.getRemotePort())
-					.addListener(new ChannelFutureListener() {
-
-						@Override
-						public void operationComplete(ChannelFuture channelFuture) throws Exception {
-							channel = channelFuture.channel();
-							if (channelFuture.isSuccess()) {
-								log.info(clientConfig.getClientName() + " connect server："
-										+ BinaryClient.this.clientConfig.getRemoteIp() + ":"
-										+ BinaryClient.this.clientConfig.getRemotePort() + " success！");
-							} else {
-								log.error(clientConfig.getClientName() + " try connect server："
-										+ clientConfig.getRemoteIp() + ":" + clientConfig.getRemotePort() + " fail",
-										channelFuture.cause().getMessage());
-								if (clientConfig.getAutoReconnect() > 0) {
-									tryReconnect(clientConfig.getAutoReconnect());
-								}
-							}
-						}
-					}).sync();
+					.addListener((ChannelFutureListener) channelFuture -> {
+                        channel = channelFuture.channel();
+                        if (channelFuture.isSuccess()) {
+                            log.info(clientConfig.getClientName() + " connect server："
+                                    + BinaryClient.this.clientConfig.getRemoteIp() + ":"
+                                    + BinaryClient.this.clientConfig.getRemotePort() + " success！");
+                        } else {
+                            log.error(clientConfig.getClientName() + " try connect server："
+                                    + clientConfig.getRemoteIp() + ":" + clientConfig.getRemotePort() + " fail",
+                                    channelFuture.cause().getMessage());
+                            if (clientConfig.getAutoReconnect() > 0) {
+                                tryReconnect(clientConfig.getAutoReconnect());
+                            }
+                        }
+                    }).sync();
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -186,13 +181,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			channel = null;
 		}
 		if (waitSeconds > 0) {
-			schedule(new Runnable() {
-
-				@Override
-				public void run() {
-					connect0();
-				}
-			}, waitSeconds, TimeUnit.SECONDS);
+			schedule(() -> connect0(), waitSeconds, TimeUnit.SECONDS);
 		} else {
 			connect0();
 		}

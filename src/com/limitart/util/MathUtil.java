@@ -30,9 +30,9 @@ public final class MathUtil {
 
 	private static <E> void CNM0(List<List<E>> result, int originN, List<E> tempResult, List<E> source, int pickNum) {
 		if (pickNum == 1) {
-			for (int i = 0; i < source.size(); ++i) {
+			for (E aSource : source) {
 				List<E> temp = new ArrayList<>(tempResult);
-				temp.add(source.get(i));
+				temp.add(aSource);
 				result.add(temp);
 			}
 			return;

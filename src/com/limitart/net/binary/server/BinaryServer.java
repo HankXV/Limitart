@@ -116,13 +116,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializerImpl(this));
-		schedule(new Runnable() {
-
-			@Override
-			public void run() {
-				clearUnvalidatedConnection();
-			}
-		}, 0, 1, TimeUnit.SECONDS);
+		schedule(() -> clearUnvalidatedConnection(), 0, 1, TimeUnit.SECONDS);
 	}
 
 	public void schedule(Runnable command, long delay, TimeUnit unit) {
@@ -142,30 +136,26 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 	}
 
 	public void bind() {
-		new Thread(new Runnable() {
+		new Thread(() -> {
+            try {
+                boot.bind(config.getPort()).addListener(new ChannelFutureListener() {
 
-			@Override
-			public void run() {
-				try {
-					boot.bind(config.getPort()).addListener(new ChannelFutureListener() {
-
-						@Override
-						public void operationComplete(ChannelFuture arg0) throws Exception {
-							if (arg0.isSuccess()) {
-								channel = arg0.channel();
-								log.info(config.getServerName() + " bind at port:" + config.getPort());
-								serverEventListener.onServerBind(arg0.channel());
-							}
-						}
-					}).sync().channel().closeFuture().sync();
-				} catch (InterruptedException e) {
-					log.error(e, e);
-				} finally {
-					bossGroup.shutdownGracefully();
-					workerGroup.shutdownGracefully();
-				}
-			}
-		}, config.getServerName() + "-Binder").start();
+                    @Override
+                    public void operationComplete(ChannelFuture arg0) throws Exception {
+                        if (arg0.isSuccess()) {
+                            channel = arg0.channel();
+                            log.info(config.getServerName() + " bind at port:" + config.getPort());
+                            serverEventListener.onServerBind(arg0.channel());
+                        }
+                    }
+                }).sync().channel().closeFuture().sync();
+            } catch (InterruptedException e) {
+                log.error(e, e);
+            } finally {
+                bossGroup.shutdownGracefully();
+                workerGroup.shutdownGracefully();
+            }
+        }, config.getServerName() + "-Binder").start();
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
@@ -219,19 +209,15 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		}
 		msg.setValidateStr(encode);
 		try {
-			SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, new SendMessageListener() {
-
-				@Override
-				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-					if (isSuccess) {
-						log.info(config.getServerName() + " send client " + channel.remoteAddress() + " validate token:"
-								+ encode + "success！");
-					} else {
-						log.error(config.getServerName() + " send client " + channel.remoteAddress()
-								+ " validate token:" + encode + "fail！", cause);
-					}
-				}
-			});
+			SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, (isSuccess, cause, channel1) -> {
+                if (isSuccess) {
+                    log.info(config.getServerName() + " send client " + channel1.remoteAddress() + " validate token:"
+                            + encode + "success！");
+                } else {
+                    log.error(config.getServerName() + " send client " + channel1.remoteAddress()
+                            + " validate token:" + encode + "fail！", cause);
+                }
+            });
 		} catch (Exception e) {
 			log.error(e, e);
 		}

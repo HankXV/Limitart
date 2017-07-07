@@ -33,7 +33,7 @@ public final class TimeUtil {
 	 */
 	public static String date2ShortStr(long time) {
 		long delta = Math.max(System.currentTimeMillis() - time, 0);
-		if (delta < 1L * ONE_MINUTE) {
+		if (delta < ONE_MINUTE) {
 			long seconds = toSeconds(delta);
 			return (seconds <= 0 ? 1 : seconds) + ONE_SECOND_AGO;
 		}

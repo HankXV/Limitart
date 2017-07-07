@@ -13,11 +13,11 @@ public class ConcurrentHashSet<E> extends AbstractSet<E> implements java.io.Seri
 	private final ConcurrentHashMap<E, Object> map;
 
 	public ConcurrentHashSet() {
-		map = new ConcurrentHashMap<E, Object>();
+		map = new ConcurrentHashMap<>();
 	}
 
 	public ConcurrentHashSet(int initialCapacity) {
-		map = new ConcurrentHashMap<E, Object>(initialCapacity);
+		map = new ConcurrentHashMap<>(initialCapacity);
 	}
 
 	public Iterator<E> iterator() {

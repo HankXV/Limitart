@@ -15,78 +15,68 @@ import io.netty.channel.ChannelFutureListener;
 
 public final class SendMessageUtil {
 
-	private SendMessageUtil() {
-	}
+    private SendMessageUtil() {
+    }
 
-	public static void sendMessage(AbstractBinaryEncoder encoder, Channel channel, Message msg,
-			SendMessageListener listener) throws Exception {
-		if (channel == null) {
-			if (listener != null) {
-				listener.onComplete(false, new NullPointerException("channel"), channel);
-			}
-			return;
-		}
-		if (!channel.isWritable()) {
-			if (listener != null) {
-				listener.onComplete(false, new IOException(" channel " + channel.remoteAddress() + " is unwritable"),
-						channel);
-			}
-			return;
-		}
-		ByteBuf buffer = channel.alloc().ioBuffer();
-		encoder.beforeWriteBody(buffer, msg.getMessageId());
-		msg.buffer(buffer);
-		msg.encode();
-		msg.buffer(null);
-		encoder.afterWriteBody(buffer);
-		ChannelFuture writeAndFlush = channel.writeAndFlush(buffer);
-		writeAndFlush.addListener(new ChannelFutureListener() {
+    public static void sendMessage(AbstractBinaryEncoder encoder, Channel channel, Message msg,
+                                   SendMessageListener listener) throws Exception {
+        if (channel == null) {
+            if (listener != null) {
+                listener.onComplete(false, new NullPointerException("channel"), null);
+            }
+            return;
+        }
+        if (!channel.isWritable()) {
+            if (listener != null) {
+                listener.onComplete(false, new IOException(" channel " + channel.remoteAddress() + " is unwritable"),
+                        channel);
+            }
+            return;
+        }
+        ByteBuf buffer = channel.alloc().ioBuffer();
+        encoder.beforeWriteBody(buffer, msg.getMessageId());
+        msg.buffer(buffer);
+        msg.encode();
+        msg.buffer(null);
+        encoder.afterWriteBody(buffer);
+        ChannelFuture writeAndFlush = channel.writeAndFlush(buffer);
+        writeAndFlush.addListener((ChannelFutureListener) arg0 -> {
+            if (listener != null) {
+                listener.onComplete(arg0.isSuccess(), arg0.cause(), arg0.channel());
+            }
+        });
+    }
 
-			@Override
-			public void operationComplete(ChannelFuture arg0) throws Exception {
-				if (listener != null) {
-					listener.onComplete(arg0.isSuccess(), arg0.cause(), arg0.channel());
-				}
-			}
-		});
-	}
-
-	public static void sendMessage(AbstractBinaryEncoder encoder, List<Channel> channels, Message msg,
-			SendMessageListener listener) throws Exception {
-		if (channels == null || channels.isEmpty()) {
-			if (listener != null) {
-				listener.onComplete(false, new IOException(" channel list  is null"), null);
-			}
-			return;
-		}
-		ByteBuf buffer = Unpooled.directBuffer(256);
-		encoder.beforeWriteBody(buffer, msg.getMessageId());
-		msg.buffer(buffer);
-		msg.encode();
-		msg.buffer(null);
-		encoder.afterWriteBody(buffer);
-		for (int i = 0; i < channels.size(); ++i) {
-			Channel channel = channels.get(i);
-			if (!channel.isWritable()) {
-				if (listener != null) {
-					listener.onComplete(false,
-							new IOException(" channel " + channel.remoteAddress() + " is unwritable"), channel);
-				}
-				continue;
-			}
-			ChannelFuture writeAndFlush = channel.writeAndFlush(buffer.retainedSlice());
-			if (listener != null) {
-				writeAndFlush.addListener(new ChannelFutureListener() {
-
-					@Override
-					public void operationComplete(ChannelFuture arg0) throws Exception {
-						listener.onComplete(arg0.isSuccess(), arg0.cause(), arg0.channel());
-					}
-				});
-			}
-			if (i == channels.size() - 1) {
-				buffer.release();
-			}
-		}
-	}
+    public static void sendMessage(AbstractBinaryEncoder encoder, List<Channel> channels, Message msg,
+                                   SendMessageListener listener) throws Exception {
+        if (channels == null || channels.isEmpty()) {
+            if (listener != null) {
+                listener.onComplete(false, new IOException(" channel list  is null"), null);
+            }
+            return;
+        }
+        ByteBuf buffer = Unpooled.directBuffer(256);
+        encoder.beforeWriteBody(buffer, msg.getMessageId());
+        msg.buffer(buffer);
+        msg.encode();
+        msg.buffer(null);
+        encoder.afterWriteBody(buffer);
+        for (int i = 0; i < channels.size(); ++i) {
+            Channel channel = channels.get(i);
+            if (!channel.isWritable()) {
+                if (listener != null) {
+                    listener.onComplete(false,
+                            new IOException(" channel " + channel.remoteAddress() + " is unwritable"), channel);
+                }
+                continue;
+            }
+            ChannelFuture writeAndFlush = channel.writeAndFlush(buffer.retainedSlice());
+            if (listener != null) {
+                writeAndFlush.addListener((ChannelFutureListener) arg0 -> listener.onComplete(arg0.isSuccess(), arg0.cause(), arg0.channel()));
+            }
+            if (i == channels.size() - 1) {
+                buffer.release();
+            }
+        }
+    }
 }

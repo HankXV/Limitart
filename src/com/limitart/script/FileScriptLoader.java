@@ -35,8 +35,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		if (file == null) {
 			throw new NullPointerException("script id:" + scriptId + " does not exist!");
 		}
-		GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader());
-		try {
+		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader())) {
 			Class<?> parseClass = loader.parseClass(file);
 			Object newInstance = parseClass.newInstance();
 			if (!(newInstance instanceof IScript)) {
@@ -46,8 +45,6 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			IScript<KEY> newScript = (IScript<KEY>) newInstance;
 			scriptMap.put(scriptId, newScript);
 			log.info("reload script success:" + file.getName());
-		} finally {
-			loader.close();
 		}
 		return this;
 	}
@@ -80,8 +77,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		if (typeByValue == null) {
 			throw new ScriptException("script type not supported" + type);
 		}
-		GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader());
-		try {
+		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader())) {
 			@SuppressWarnings("rawtypes")
 			Class parseClass = loader.parseClass(file);
 			Object newInstance = parseClass.newInstance();
@@ -101,8 +97,6 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			scriptMap.put(scriptId, script);
 			scriptPath.put(scriptId, file);
 			log.info("compile script success:" + file.getName());
-		} finally {
-			loader.close();
 		}
 		return this;
 	}
@@ -120,8 +114,8 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 	 */
 	public AbstractScriptLoader<KEY> loadScriptsBySourceDir(String dir, ScriptFileType... scriptTypes)
 			throws IOException, InstantiationException, IllegalAccessException, ScriptException {
-		ConcurrentHashMap<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<KEY, IScript<KEY>>();
-		ConcurrentHashMap<KEY, File> scriptPath_new = new ConcurrentHashMap<KEY, File>();
+		ConcurrentHashMap<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<>();
+		ConcurrentHashMap<KEY, File> scriptPath_new = new ConcurrentHashMap<>();
 		GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader());
 		try {
 			File dir_root = new File(dir);

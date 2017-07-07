@@ -16,7 +16,6 @@ import com.limitart.game.innerserver.msg.ReqServerLoadSlave2MasterMessage;
 import com.limitart.game.innerserver.msg.ResFightServerJoinMaster2GameMessage;
 import com.limitart.game.innerserver.struct.InnerServerData;
 import com.limitart.game.innerserver.util.InnerServerUtil;
-import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.server.BinaryServer;
@@ -170,20 +169,16 @@ public class InnerMasterServer implements BinaryServerEventListener {
 				fsjm.serverInfo.add(info);
 			}
 			try {
-				server.sendMessage(msg.getChannel(), fsjm, new SendMessageListener() {
-
-					@Override
-					public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-						if (isSuccess) {
-							log.info("tell fight servers info to game server success,game server Id:"
-									+ data.getServerId());
-						} else {
-							log.error(
-									"tell fight servers info to game server fail,game server Id:" + data.getServerId(),
-									cause);
-						}
-					}
-				});
+				server.sendMessage(msg.getChannel(), fsjm, (isSuccess, cause, channel) -> {
+                    if (isSuccess) {
+                        log.info("tell fight servers info to game server success,game server Id:"
+                                + data.getServerId());
+                    } else {
+                        log.error(
+                                "tell fight servers info to game server fail,game server Id:" + data.getServerId(),
+                                cause);
+                    }
+                });
 			} catch (Exception e) {
 				log.error(e, e);
 			}

@@ -90,7 +90,7 @@ public abstract class MethodAccess {
 
 	@SuppressWarnings({ "rawtypes", "deprecation" })
 	static public MethodAccess get (Class type) {
-		ArrayList<Method> methods = new ArrayList<Method>();
+		ArrayList<Method> methods = new ArrayList<>();
 		boolean isInterface = type.isInterface();
 		if (!isInterface) {
 			Class nextClass = type;
@@ -302,8 +302,7 @@ public abstract class MethodAccess {
 	@SuppressWarnings("rawtypes")
 	private static void addDeclaredMethodsToList (Class type, ArrayList<Method> methods) {
 		Method[] declaredMethods = type.getDeclaredMethods();
-		for (int i = 0, n = declaredMethods.length; i < n; i++) {
-			Method method = declaredMethods[i];
+		for (Method method : declaredMethods) {
 			int modifiers = method.getModifiers();
 			// if (Modifier.isStatic(modifiers)) continue;
 			if (Modifier.isPrivate(modifiers)) continue;

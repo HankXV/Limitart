@@ -3,7 +3,6 @@ package com.limitart.rpcx;
 import com.limitart.rpcx.providerx.ProviderX;
 import com.limitart.rpcx.providerx.config.ProviderXConfig.ProviderXConfigBuilder;
 import com.limitart.rpcx.providerx.listener.IProviderListener;
-import com.limitart.rpcx.providerx.schedule.IProviderScheduleListener;
 import com.limitart.rpcx.providerx.schedule.ProviderJob;
 import com.limitart.rpcx.providerx.schedule.ProviderJob.ProviderJobBuilder;
 
@@ -17,13 +16,7 @@ public class ProviderXDemo {
 			@Override
 			public void onServiceCenterConnected(ProviderX provider) {
 				ProviderJob job = new ProviderJobBuilder().jobName("limitart-schedule").intervalInSeconds(5)
-						.repeatForever().listener(new IProviderScheduleListener() {
-
-							@Override
-							public void action() {
-								System.out.println("jowiejfow");
-							}
-						}).build();
+						.repeatForever().listener(() -> System.out.println("jowiejfow")).build();
 				try {
 					provider.schedule(job);
 				} catch (Exception e) {

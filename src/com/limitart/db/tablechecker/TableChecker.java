@@ -102,7 +102,6 @@ public class TableChecker {
 				if (columnInfo.isNullable() != now.isNullable()) {
 					appendError(result, sb,
 							"表：" + tableName + "[" + bean.getSimpleName() + "]" + "，字段：" + field.getName() + ",为空不一致");
-					continue;
 				}
 			}
 			for (String dbColumnName : columnDefine.getColumnInfos().keySet()) {

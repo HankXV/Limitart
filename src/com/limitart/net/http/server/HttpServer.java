@@ -24,7 +24,6 @@ import com.limitart.util.StringUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -108,17 +107,13 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 									.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
 									.addLast(HttpServer.this);
 						}
-					}).bind(this.config.getPort()).addListener(new ChannelFutureListener() {
-
-						@Override
-						public void operationComplete(ChannelFuture channelFuture) throws Exception {
-							if (channelFuture.isSuccess()) {
-								channel = channelFuture.channel();
-								log.info(config.getServerName() + " bind at port:" + config.getPort());
-								HttpServer.this.serverEventListener.onServerBind(channel);
-							}
-						}
-					}).sync().channel().closeFuture().sync();
+					}).bind(this.config.getPort()).addListener((ChannelFutureListener) channelFuture -> {
+                        if (channelFuture.isSuccess()) {
+                            channel = channelFuture.channel();
+                            log.info(config.getServerName() + " bind at port:" + config.getPort());
+                            HttpServer.this.serverEventListener.onServerBind(channel);
+                        }
+                    }).sync().channel().closeFuture().sync();
 		} catch (InterruptedException e) {
 			log.error(e, e);
 		} finally {
@@ -173,8 +168,8 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_URL_EMPTY);
 			return;
 		}
-		String url = null;
-		ConstraintMap<String> params = new ConstraintMap<String>();
+		String url;
+		ConstraintMap<String> params = new ConstraintMap<>();
 		if (msg.method() == GET) {
 			QueryStringDecoderV2 queryStringDecoder = new QueryStringDecoderV2(msg.uri());
 			url = queryStringDecoder.path();
@@ -231,7 +226,6 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 							byte[] file = fileUpload.content().array();
 							message.getFiles().put(name, file);
 						}
-					} else {
 					}
 				}
 			} catch (Exception e) {

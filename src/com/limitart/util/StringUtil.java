@@ -68,14 +68,14 @@ public final class StringUtil {
 		return JSON.toJSONString(obj);
 	}
 
-	public static final <T> T toObject(String text, Class<T> clazz) {
+	public static  <T> T toObject(String text, Class<T> clazz) {
 		if (text == null) {
 			return null;
 		}
 		return JSON.parseObject(text, clazz);
 	}
 
-	public static final <T> List<T> toArray(String text, Class<T> clazz) {
+	public static  <T> List<T> toArray(String text, Class<T> clazz) {
 		if (text == null) {
 			return new ArrayList<>();
 		}

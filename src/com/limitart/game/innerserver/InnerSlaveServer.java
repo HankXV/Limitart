@@ -105,43 +105,35 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener {
 		info.serverType = serverType();
 		msg.serverInfo = info;
 		try {
-			client.sendMessage(msg, new SendMessageListener() {
-
-				@Override
-				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-					if (isSuccess) {
-						log.info("report my server info to master success:" + info);
-					} else {
-						log.error("report my server info to master fail:" + info, cause);
-					}
-				}
-			});
+			client.sendMessage(msg, (isSuccess, cause, channel) -> {
+                if (isSuccess) {
+                    log.info("report my server info to master success:" + info);
+                } else {
+                    log.error("report my server info to master fail:" + info, cause);
+                }
+            });
 		} catch (Exception e) {
 			log.error(e, e);
 		}
-		toMaster.schedule(new Runnable() {
+		toMaster.schedule(() -> {
+            ReqServerLoadSlave2MasterMessage slm = new ReqServerLoadSlave2MasterMessage();
+            slm.load = serverLoad();
+            try {
+                toMaster.sendMessage(slm, new SendMessageListener() {
 
-			@Override
-			public void run() {
-				ReqServerLoadSlave2MasterMessage slm = new ReqServerLoadSlave2MasterMessage();
-				slm.load = serverLoad();
-				try {
-					toMaster.sendMessage(slm, new SendMessageListener() {
-
-						@Override
-						public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-							if (isSuccess) {
-								log.debug("send server load to master success,current load:{}", slm.load);
-							} else {
-								log.error("send server load to master fail,current load:{}", slm.load);
-							}
-						}
-					});
-				} catch (Exception e) {
-					log.error(e, e);
-				}
-			}
-		}, 5, 5, TimeUnit.SECONDS);
+                    @Override
+                    public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
+                        if (isSuccess) {
+                            log.debug("send server load to master success,current load:{}", slm.load);
+                        } else {
+                            log.error("send server load to master fail,current load:{}", slm.load);
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                log.error(e, e);
+            }
+        }, 5, 5, TimeUnit.SECONDS);
 	}
 
 	@Override

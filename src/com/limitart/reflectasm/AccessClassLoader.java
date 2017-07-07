@@ -13,7 +13,7 @@ class AccessClassLoader extends ClassLoader {
 	// user classpath, etc).
 	// The key is the parent class loader and the value is the
 	// AccessClassLoader, both are weak-referenced in the hash table.
-	static private final WeakHashMap<ClassLoader, WeakReference<AccessClassLoader>> accessClassLoaders = new WeakHashMap<ClassLoader, WeakReference<AccessClassLoader>>();
+	static private final WeakHashMap<ClassLoader, WeakReference<AccessClassLoader>> accessClassLoaders = new WeakHashMap<>();
 
 	// Fast-path for classes loaded in the same ClassLoader as this class.
 	static private final ClassLoader selfContextParentClassLoader = getParentClassLoader(AccessClassLoader.class);
@@ -58,7 +58,7 @@ class AccessClassLoader extends ClassLoader {
 														// (defensive sanity)
 			}
 			AccessClassLoader accessClassLoader = new AccessClassLoader(parent);
-			accessClassLoaders.put(parent, new WeakReference<AccessClassLoader>(accessClassLoader));
+			accessClassLoaders.put(parent, new WeakReference<>(accessClassLoader));
 			return accessClassLoader;
 		}
 	}
@@ -106,8 +106,8 @@ class AccessClassLoader extends ClassLoader {
 		try {
 			// Attempt to load the access class in the same loader, which makes
 			// protected and default access members accessible.
-			return (Class<?>) getDefineClassMethod().invoke(getParent(), name, bytes, Integer.valueOf(0),
-                    Integer.valueOf(bytes.length), getClass().getProtectionDomain());
+			return (Class<?>) getDefineClassMethod().invoke(getParent(), name, bytes, 0,
+					bytes.length, getClass().getProtectionDomain());
 		} catch (Exception ignored) {
 			// continue with the definition in the current loader (won't have
 			// access to protected and package-protected members)

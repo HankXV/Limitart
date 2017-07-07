@@ -14,7 +14,6 @@ import com.limitart.game.innerserver.util.InnerServerUtil;
 import com.limitart.net.binary.client.BinaryClient;
 import com.limitart.net.binary.client.config.BinaryClientConfig;
 import com.limitart.net.binary.client.listener.BinaryClientEventListener;
-import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
 
@@ -125,17 +124,13 @@ public abstract class InnerGameServer extends InnerSlaveServer {
 		ReqConnectionReportGame2FightMessage msg = new ReqConnectionReportGame2FightMessage();
 		msg.serverId = super.serverId;
 		try {
-			client.sendMessage(msg, new SendMessageListener() {
-
-				@Override
-				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-					if (isSuccess) {
-						log.info("report game server info to fight server seccess:" + msg.serverId);
-					} else {
-						log.error("report game server info to fight server fail:" + msg.serverId, cause);
-					}
-				}
-			});
+			client.sendMessage(msg, (isSuccess, cause, channel) -> {
+                if (isSuccess) {
+                    log.info("report game server info to fight server seccess:" + msg.serverId);
+                } else {
+                    log.error("report game server info to fight server fail:" + msg.serverId, cause);
+                }
+            });
 		} catch (Exception e) {
 			log.error(e, e);
 		}

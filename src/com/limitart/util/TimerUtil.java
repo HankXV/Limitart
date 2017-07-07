@@ -31,31 +31,23 @@ public final class TimerUtil {
 	}
 
 	public static void scheduleGlobal(long delay, long interval, ITimerListener listener) {
-		globalTimer.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					listener.action();
-				} catch (Exception e) {
-					log.error(e, e);
-				}
-			}
-		}, delay, interval, TimeUnit.MILLISECONDS);
+		globalTimer.scheduleAtFixedRate(() -> {
+            try {
+                listener.action();
+            } catch (Exception e) {
+                log.error(e, e);
+            }
+        }, delay, interval, TimeUnit.MILLISECONDS);
 	}
 
 	public static void scheduleGlobal(long delay, ITimerListener listener) {
-		globalTimer.schedule(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					listener.action();
-				} catch (Exception e) {
-					log.error(e, e);
-				}
-			}
-		}, delay, TimeUnit.MILLISECONDS);
+		globalTimer.schedule(() -> {
+            try {
+                listener.action();
+            } catch (Exception e) {
+                log.error(e, e);
+            }
+        }, delay, TimeUnit.MILLISECONDS);
 	}
 
 	public static void shutdown() {

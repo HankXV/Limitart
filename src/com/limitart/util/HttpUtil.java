@@ -56,7 +56,7 @@ public final class HttpUtil {
 			DataInputStream inputStream = new DataInputStream(conn.getInputStream());
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			byte[] b = new byte[1024];
-			int l = -1;
+			int l;
 			while ((l = inputStream.read(b)) > 0) {
 				buffer.write(b, 0, l);
 			}
@@ -76,7 +76,7 @@ public final class HttpUtil {
 
 	public static byte[] get(String hostUrl, ConstraintMap<String> param) throws IOException {
 		HttpURLConnection conn = null;
-		URL url = null;
+		URL url;
 		try {
 			if (param == null) {
 				url = new URL(hostUrl);
@@ -94,7 +94,7 @@ public final class HttpUtil {
 			DataInputStream inputStream = new DataInputStream(conn.getInputStream());
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			byte[] b = new byte[1024];
-			int l = -1;
+			int l;
 			while ((l = inputStream.read(b)) > 0) {
 				buffer.write(b, 0, l);
 			}

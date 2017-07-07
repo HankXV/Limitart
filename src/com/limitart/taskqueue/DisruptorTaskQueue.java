@@ -55,14 +55,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 				return threadName;
 			}
 		};
-		disruptor = new Disruptor<>(new EventFactory<DisruptorTaskQueueEvent>() {
-
-			@Override
-			public DisruptorTaskQueueEvent newInstance() {
-				return new DisruptorTaskQueueEvent();
-			}
-
-		}, bufferSize, this.threadFactory, ProducerType.MULTI,
+		disruptor = new Disruptor<>((EventFactory<DisruptorTaskQueueEvent>) () -> new DisruptorTaskQueueEvent(), bufferSize, this.threadFactory, ProducerType.MULTI,
 				new LiteTimeoutBlockingWaitStrategy(1, TimeUnit.SECONDS));
 		disruptor.handleEventsWith(new TaskQueueEventHandler());
 		disruptor.handleExceptionsFor(new EventHandler<DisruptorTaskQueueEvent>() {
@@ -115,13 +108,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	 *
 	 */
 	private class TaskQueueEventProducerWithTraslator {
-		private EventTranslatorOneArg<DisruptorTaskQueueEvent, T> translatorOneArg = new EventTranslatorOneArg<DisruptorTaskQueueEvent, T>() {
-
-			@Override
-			public void translateTo(DisruptorTaskQueueEvent arg0, long arg1, T arg2) {
-				arg0.setMsg(arg2);
-			}
-		};
+		private EventTranslatorOneArg<DisruptorTaskQueueEvent, T> translatorOneArg = (arg0, arg1, arg2) -> arg0.setMsg(arg2);
 		private final RingBuffer<DisruptorTaskQueueEvent> ringBuffer;
 
 		public TaskQueueEventProducerWithTraslator(RingBuffer<DisruptorTaskQueueEvent> ringBuffer) {

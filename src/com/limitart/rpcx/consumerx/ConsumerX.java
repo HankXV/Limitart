@@ -22,7 +22,6 @@ import com.limitart.net.binary.client.BinaryClient;
 import com.limitart.net.binary.client.config.BinaryClientConfig.BinaryClientConfigBuilder;
 import com.limitart.net.binary.client.listener.BinaryClientEventListener;
 import com.limitart.net.binary.handler.IHandler;
-import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.rpcx.consumerx.config.ConsumerXConfig;
@@ -49,8 +48,6 @@ import com.limitart.rpcx.struct.RpcProviderName;
 import com.limitart.rpcx.util.RpcUtil;
 import com.limitart.util.ReflectionUtil;
 import com.limitart.util.StringUtil;
-
-import io.netty.channel.Channel;
 
 /**
  * RPC客户端
@@ -418,7 +415,7 @@ public class ConsumerX implements BinaryClientEventListener {
 	 * @return
 	 */
 	public List<Integer> getProviderIds() {
-		return new ArrayList<Integer>(this.clients.keySet());
+		return new ArrayList<>(this.clients.keySet());
 	}
 
 	/**
@@ -495,15 +492,9 @@ public class ConsumerX implements BinaryClientEventListener {
 				}
 			}
 			// 创建动态代理类
-			Object newProxyInstance = ReflectionUtil.newProxy(clazz, new InvocationHandler() {
-
-				@Override
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					return proxyExecute(serviceName, proxy, method.getName(),
-							ReflectionUtil.getMethodOverloadName(method), args, ConsumerX.this.config.getSelector(),
-							null);
-				}
-			});
+			Object newProxyInstance = ReflectionUtil.newProxy(clazz, (InvocationHandler) (proxy, method, args) -> proxyExecute(serviceName, proxy, method.getName(),
+                    ReflectionUtil.getMethodOverloadName(method), args, ConsumerX.this.config.getSelector(),
+                    null));
 			if (serviceProxyClasses.containsKey(serviceName)) {
 				throw new ServiceXProxyException("服务名重复:" + serviceName);
 			}
@@ -618,22 +609,18 @@ public class ConsumerX implements BinaryClientEventListener {
 		}
 		// 发送消息
 		try {
-			binaryClient.sendMessage(msg, new SendMessageListener() {
-
-				@Override
-				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-					if (!isSuccess) {
-						futures.remove(msg.getRequestId());
-						try {
-							throw new ServiceXIOException("动态代理方法：" + methodOverloadName + "，服务器：" + selectServer
-									+ "失败！网络未连接！" + "，id：" + msg.getRequestId());
-						} catch (ServiceXIOException e) {
-							log.error(e, e);
-							log.error(cause, cause);
-						}
-					}
-				}
-			});
+			binaryClient.sendMessage(msg, (isSuccess, cause, channel) -> {
+                if (!isSuccess) {
+                    futures.remove(msg.getRequestId());
+                    try {
+                        throw new ServiceXIOException("动态代理方法：" + methodOverloadName + "，服务器：" + selectServer
+                                + "失败！网络未连接！" + "，id：" + msg.getRequestId());
+                    } catch (ServiceXIOException e) {
+                        log.error(e, e);
+                        log.error(cause, cause);
+                    }
+                }
+            });
 		} catch (Exception e) {
 			log.error(e, e);
 		}

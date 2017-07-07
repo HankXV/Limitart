@@ -46,7 +46,7 @@ public final class HttpServerConfig {
 
 		public HttpServerConfigBuilder port(int port) {
 			if (port < 1024) {
-				port = 8888;
+				this.port = 8888;
 			} else {
 				this.port = port;
 			}

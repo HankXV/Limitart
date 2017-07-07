@@ -49,7 +49,6 @@ public class ServiceCenterX {
 	private ConcurrentHashMap<Integer, ServiceXServerSession> rpcServers = new ConcurrentHashMap<>();
 	// RPC客户端组<客户端ChannelId,session>
 	private ConcurrentHashMap<String, ServiceXClientSession> rpcClients = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, Channel> allSession = new ConcurrentHashMap<>();
 	// 服务名称-服务器集合(ProviderId)
 	private ConcurrentHashMap<String, ConcurrentHashSet<Integer>> service2Providers = new ConcurrentHashMap<>();
 	// 定时任务集合
@@ -71,7 +70,6 @@ public class ServiceCenterX {
 
 			@Override
 			public void onChannelUnregistered(Channel channel) {
-				allSession.remove(channel.id().asLongText());
 				onDisconnect(channel);
 			}
 
@@ -97,7 +95,6 @@ public class ServiceCenterX {
 
 			@Override
 			public void onConnectionEffective(Channel channel) {
-				allSession.put(channel.id().asLongText(), channel);
 			}
 
 			@Override
@@ -137,7 +134,7 @@ public class ServiceCenterX {
 		for (String serviceName : servicesName) {
 			ConcurrentHashSet<Integer> rpcServiceLBData = service2Providers.get(serviceName);
 			if (rpcServiceLBData == null) {
-				rpcServiceLBData = new ConcurrentHashSet<Integer>();
+				rpcServiceLBData = new ConcurrentHashSet<>();
 				ConcurrentHashSet<Integer> putIfAbsent = service2Providers.putIfAbsent(serviceName, rpcServiceLBData);
 				if (putIfAbsent != null) {
 					rpcServiceLBData = putIfAbsent;

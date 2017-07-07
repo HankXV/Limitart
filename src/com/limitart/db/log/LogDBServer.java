@@ -69,7 +69,7 @@ public class LogDBServer {
 		}
 		// 初始化任务线程池
 		if (this.config.getCustomInsertThreadPool() == null) {
-			this.logTaskQueue = new LinkedBlockingQueue<Runnable>();
+			this.logTaskQueue = new LinkedBlockingQueue<>();
 			this.threadPool = new ThreadPoolExecutor(this.config.getThreadCorePoolSize(),
 					this.config.getThreadMaximumPoolSize(), 0, TimeUnit.MILLISECONDS, logTaskQueue,
 					new NamedThreadFactory() {
@@ -282,16 +282,10 @@ public class LogDBServer {
 				}
 				result.add(newInstance);
 			}
-			if (executeQuery != null) {
-				executeQuery.close();
-			}
-			if (prepareStatement != null) {
-				prepareStatement.close();
-			}
+			executeQuery.close();
+			prepareStatement.close();
 		} finally {
-			if (connection != null) {
-				connection.close();
-			}
+			connection.close();
 		}
 		return result;
 	}

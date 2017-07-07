@@ -14,7 +14,6 @@ import com.limitart.net.binary.client.BinaryClient;
 import com.limitart.net.binary.client.config.BinaryClientConfig.BinaryClientConfigBuilder;
 import com.limitart.net.binary.client.listener.BinaryClientEventListener;
 import com.limitart.net.binary.handler.IHandler;
-import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.server.BinaryServer;
@@ -44,9 +43,8 @@ import io.netty.channel.Channel;
 
 /**
  * RPC服务提供者
- * 
- * @author hank
  *
+ * @author hank
  */
 public class ProviderX implements BinaryServerEventListener {
 	private static Logger log = LogManager.getLogger();
@@ -189,7 +187,7 @@ public class ProviderX implements BinaryServerEventListener {
 
 	/**
 	 * 扫描本地服务
-	 * 
+	 *
 	 * @param packageName
 	 * @throws ServiceXProxyException
 	 * @throws IOException
@@ -308,49 +306,56 @@ public class ProviderX implements BinaryServerEventListener {
 
 	/**
 	 * 执行RPC消费者请求的方法
-	 * 
+	 *
 	 * @param context
 	 * @param requestId
 	 * @param moduleName
 	 * @param methodName
 	 * @param params
 	 */
-	private void executeRPC(Channel channel, int requestId, String moduleName, String methodName, List<Object> params) {
+	private void executeRPC(Channel channel, int requestId, String moduleName, String methodName, List<Object> params)
+			throws Exception {
 		RpcResultServerMessage msg = new RpcResultServerMessage();
 		msg.setRequestId(requestId);
 		msg.setErrorCode(0);
-		RpcServiceInstance serviceInstanceData = services.get(moduleName);
-		if (serviceInstanceData == null) {
-			log.error(new ServiceXExecuteException("RPC消费者：" + channel.remoteAddress() + "发送了未知的服务名：" + moduleName));
-			msg.setErrorCode(ServiceError.SERVER_HAS_NO_MODULE);
-		}
-		Method method = serviceInstanceData.getMethods().get(methodName);
-		if (method == null) {
-			log.error(new ServiceXExecuteException(
-					"RPC消费者：" + channel.remoteAddress() + "发送了未知的方法名：" + methodName + "，服务名为：" + moduleName));
-			msg.setErrorCode(ServiceError.SERVER_HAS_NO_METHOD);
-		}
-		if (msg.getErrorCode() == 0) {
-			try {
-				Object result = method.invoke(serviceInstanceData.self(), params.toArray());
-				if (result != null) {
-					msg.setReturnType(result.getClass().getName());
-					msg.setReturnVal(result);
+		try {
+			RpcServiceInstance serviceInstanceData = services.get(moduleName);
+			if (serviceInstanceData == null) {
+				log.error(
+						new ServiceXExecuteException("RPC消费者：" + channel.remoteAddress() + "发送了未知的服务名：" + moduleName));
+				msg.setErrorCode(ServiceError.SERVER_HAS_NO_MODULE);
+				return;
+			}
+			Method method = serviceInstanceData.getMethods().get(methodName);
+			if (method == null) {
+				log.error(new ServiceXExecuteException(
+						"RPC消费者：" + channel.remoteAddress() + "发送了未知的方法名：" + methodName + "，服务名为：" + moduleName));
+				msg.setErrorCode(ServiceError.SERVER_HAS_NO_METHOD);
+				return;
+			}
+			if (msg.getErrorCode() == 0) {
+				try {
+					Object result = method.invoke(serviceInstanceData.self(), params.toArray());
+					if (result != null) {
+						msg.setReturnType(result.getClass().getName());
+						msg.setReturnVal(result);
+					}
+				} catch (Exception e) {
+					log.error(e, e);
 				}
+			}
+		} finally {
+			try {
+				server.sendMessage(channel, msg, null);
 			} catch (Exception e) {
 				log.error(e, e);
 			}
-		}
-		try {
-			server.sendMessage(channel, msg, null);
-		} catch (Exception e) {
-			log.error(e, e);
 		}
 	}
 
 	/**
 	 * 直接返回服务列表给客户端
-	 * 
+	 *
 	 * @param context
 	 */
 	private void directPushServices(Channel channel) {
@@ -386,7 +391,7 @@ public class ProviderX implements BinaryServerEventListener {
 
 	/**
 	 * 获取服务实体
-	 * 
+	 *
 	 * @param provider
 	 * @param clazz
 	 * @return
@@ -407,7 +412,7 @@ public class ProviderX implements BinaryServerEventListener {
 
 	/**
 	 * 发布定时任务
-	 * 
+	 *
 	 * @param job
 	 * @throws Exception
 	 */
@@ -428,16 +433,12 @@ public class ProviderX implements BinaryServerEventListener {
 		msg.setIntervalInSeconds(job.getIntervalInSeconds());
 		msg.setIntervalInMillis(job.getIntervalInMillis());
 		msg.setRepeatCount(job.getRepeatCount());
-		serviceCenterClient.sendMessage(msg, new SendMessageListener() {
-
-			@Override
-			public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-				if (isSuccess) {
-					scheduleJobs.put(jobName, job);
-					log.info("注册一个定时任务到服务中心：" + job.toString());
-				} else {
-					log.error("注册定时任务到服务中心失败：" + job.toString());
-				}
+		serviceCenterClient.sendMessage(msg, (isSuccess, cause, channel) -> {
+			if (isSuccess) {
+				scheduleJobs.put(jobName, job);
+				log.info("注册一个定时任务到服务中心：" + job.toString());
+			} else {
+				log.error("注册定时任务到服务中心失败：" + job.toString());
 			}
 		});
 	}
@@ -464,7 +465,12 @@ public class ProviderX implements BinaryServerEventListener {
 			String moduleName = msg.getModuleName();
 			String methodName = msg.getMethodName();
 			List<Object> params = msg.getParams();
-			((ProviderX) message.getExtra()).executeRPC(msg.getChannel(), requestId, moduleName, methodName, params);
+			try {
+				((ProviderX) message.getExtra()).executeRPC(msg.getChannel(), requestId, moduleName, methodName,
+						params);
+			} catch (Exception e) {
+				log.error(e, e);
+			}
 		}
 	}
 

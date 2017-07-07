@@ -5,7 +5,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -111,9 +110,9 @@ public abstract class MessageMeta {
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
-			return new ArrayList<T>();
+			return new ArrayList<>();
 		} else {
-			List<T> list = new ArrayList<T>();
+			List<T> list = new ArrayList<>();
 			for (int i = 0; i < len; ++i) {
 				T messageMeta = getMessageMeta(clazz);
 				list.add(messageMeta);
@@ -536,7 +535,7 @@ public abstract class MessageMeta {
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
-			return new ArrayList<byte[]>();
+			return new ArrayList<>();
 		} else {
 			List<byte[]> list = new ArrayList<>();
 			list.add(getByteArray());
@@ -730,9 +729,9 @@ public abstract class MessageMeta {
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
-			return new ArrayList<Float>();
+			return new ArrayList<>();
 		} else {
-			List<Float> list = new ArrayList<Float>();
+			List<Float> list = new ArrayList<>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getFloat());
 			}
@@ -1214,7 +1213,7 @@ public abstract class MessageMeta {
 			putCharArray((char[]) object);
 		} else if (type.equals("java.util.ArrayList") || type.equals("java.util.List")) {
 			List<Object> objs = (List<Object>) object;
-			if (objs == null || objs.isEmpty()) {
+			if (objs.isEmpty()) {
 				putShort((short) 0);
 			} else {
 				putShort((short) objs.size());
@@ -1226,14 +1225,12 @@ public abstract class MessageMeta {
 			}
 		} else if (type.equals("java.util.HashMap") || type.equals("java.util.Map")) {
 			Map<Object, Object> map = (Map<Object, Object>) object;
-			if (map == null || map.isEmpty()) {
+			if (map.isEmpty()) {
 				putShort((short) 0);
 			} else {
 				putShort((short) map.size());
 				boolean f = false;
-				Iterator<Entry<Object, Object>> iterator = map.entrySet().iterator();
-				while (iterator.hasNext()) {
-					Entry<Object, Object> next = iterator.next();
+				for (Entry<Object, Object> next : map.entrySet()) {
 					if (!f) {
 						f = true;
 						putString(next.getKey().getClass().getName());
@@ -1245,7 +1242,7 @@ public abstract class MessageMeta {
 			}
 		} else if (type.equals("java.util.HashSet") || type.equals("java.util.Set")) {
 			Set<Object> set = (Set<Object>) object;
-			if (set == null || set.isEmpty()) {
+			if (set.isEmpty()) {
 				putShort((short) 0);
 			} else {
 				putShort((short) set.size());
