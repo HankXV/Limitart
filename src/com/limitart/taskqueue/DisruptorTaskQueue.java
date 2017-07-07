@@ -129,7 +129,11 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 			if (DisruptorTaskQueue.this.handler.intercept(event.getMsg())) {
 				return;
 			}
-			DisruptorTaskQueue.this.handler.handle(event.getMsg());
+			try {
+				DisruptorTaskQueue.this.handler.handle(event.getMsg());
+			} catch (Exception e) {
+				log.error(e, e);
+			}
 		}
 	}
 
