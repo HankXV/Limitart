@@ -92,11 +92,10 @@ Jdk8及以上
 为上面的消息创建一个处理器，这里我们就简单的打印传输过来的内容即可。
 ```java
 
-	public class BinaryHandlerDemo implements IHandler {
+	public class BinaryHandlerDemo implements IHandler<BinaryMessageDemo> {
 	
 		@Override
-		public void handle(Message message) {
-			BinaryMessageDemo msg = (BinaryMessageDemo) message;
+		public void handle(BinaryMessageDemo msg) {
 			System.out.println("server received message:" + msg.info);
 		}
 	
@@ -107,7 +106,7 @@ Jdk8及以上
 ```java
 
 	MessageFactory factory = new MessageFactory();
-	factory.registerMsg(BinaryMessageDemo.class, BinaryHandlerDemo.class);
+	factory.registerMsg(BinaryHandlerDemo.class);
 		
 ```
 最后初始化一个服务器实例并绑定，收工！
