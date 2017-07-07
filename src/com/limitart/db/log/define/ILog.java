@@ -6,5 +6,5 @@ public interface ILog {
 	 * 
 	 * @return
 	 */
-	public abstract LogRollType getLogRollType();
+    LogRollType getLogRollType();
 }

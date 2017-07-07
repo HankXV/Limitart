@@ -9,5 +9,5 @@ import com.limitart.game.item.AbstractItem;
  *
  */
 public interface IItemFilter {
-	public boolean filter(AbstractItem item);
+	boolean filter(AbstractItem item);
 }

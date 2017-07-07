@@ -465,7 +465,7 @@ public final class SecurityUtil {
 
 			throw new InvalidBase64CharacterException(
 					String.format("Bad Base64 input character decimal %d in array position %d",
-							new Object[] { Integer.valueOf(source[i] & 0xFF), Integer.valueOf(i) }));
+                            Integer.valueOf(source[i] & 0xFF), Integer.valueOf(i)));
 		}
 
 		byte[] out = new byte[outBuffPosn];

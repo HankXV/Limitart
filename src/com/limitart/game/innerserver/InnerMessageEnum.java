@@ -8,7 +8,7 @@ public enum InnerMessageEnum {
 	ResFightServerQuitMaster2GameMessage((short)-105);
 	private short messageId;
 
-	private InnerMessageEnum(short messageId) {
+	InnerMessageEnum(short messageId) {
 		this.messageId = messageId;
 	}
 

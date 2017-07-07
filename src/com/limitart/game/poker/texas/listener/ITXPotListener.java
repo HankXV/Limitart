@@ -13,5 +13,5 @@ public interface ITXPotListener {
 	 * @param winOrReturn
 	 *            是赢的还是返还的
 	 */
-	public void onAward(String potKey, List<Integer> potRoles, long sumChips);
+    void onAward(String potKey, List<Integer> potRoles, long sumChips);
 }

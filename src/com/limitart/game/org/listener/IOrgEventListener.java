@@ -11,15 +11,15 @@ import com.limitart.game.org.OrgMember;
  *
  */
 public interface IOrgEventListener {
-	public void onChangeCreator(Org org, OrgMember oldCreator, OrgMember newCreator);
+	void onChangeCreator(Org org, OrgMember oldCreator, OrgMember newCreator);
 
-	public void onChangeJob(Org org, OrgMember handler, OrgMember target, Job oldJob, Job newJob);
+	void onChangeJob(Org org, OrgMember handler, OrgMember target, Job oldJob, Job newJob);
 
-	public void onQuit(Org org, OrgMember quiter);
+	void onQuit(Org org, OrgMember quiter);
 
-	public void onJoin(Org org, OrgMember joiner);
+	void onJoin(Org org, OrgMember joiner);
 
-	public void onAddJob(Org org, Job job);
+	void onAddJob(Org org, Job job);
 
-	public void onRemoveJob(Org org, Job job);
+	void onRemoveJob(Org org, Job job);
 }

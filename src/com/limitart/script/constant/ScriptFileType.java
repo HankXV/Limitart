@@ -4,7 +4,7 @@ public enum ScriptFileType {
 	JAVA("java"), GROOVY("groovy"),;
 	private String value;
 
-	private ScriptFileType(String value) {
+	ScriptFileType(String value) {
 		this.value = value;
 	}
 

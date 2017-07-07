@@ -7,5 +7,5 @@ package com.limitart.game.org;
  *
  */
 public interface IAuth {
-	public int getAuthID();
+	int getAuthID();
 }

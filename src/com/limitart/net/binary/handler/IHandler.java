@@ -10,6 +10,6 @@ import com.limitart.net.binary.message.Message;
  */
 public interface IHandler {
 
-	public void handle(Message message);
+	void handle(Message message);
 
 }

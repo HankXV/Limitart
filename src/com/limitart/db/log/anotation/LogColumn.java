@@ -23,19 +23,19 @@ public @interface LogColumn {
 	 * 
 	 * @return sql类型
 	 */
-	public abstract SqlColumnType type() default SqlColumnType.MYSQL_int;
+    SqlColumnType type() default SqlColumnType.MYSQL_int;
 
 	/**
 	 * 大小
 	 * 
 	 * @return 大小
 	 */
-	public abstract int size() default 0;
+    int size() default 0;
 
 	/**
 	 * 列注释
 	 * 
 	 * @return 列注释
 	 */
-	public abstract String comment() default "N/A";
+    String comment() default "N/A";
 }

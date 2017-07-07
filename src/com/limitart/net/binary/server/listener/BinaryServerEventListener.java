@@ -12,9 +12,9 @@ import io.netty.channel.Channel;
  *
  */
 public interface BinaryServerEventListener extends NettyEventListener {
-	public void onServerBind(Channel channel);
+	void onServerBind(Channel channel);
 
-	public void onConnectionEffective(Channel channel);
+	void onConnectionEffective(Channel channel);
 
-	public void dispatchMessage(Message message);
+	void dispatchMessage(Message message);
 }

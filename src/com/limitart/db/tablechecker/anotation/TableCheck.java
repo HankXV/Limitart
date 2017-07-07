@@ -19,7 +19,7 @@ public @interface TableCheck {
 	 * 
 	 * @return
 	 */
-	public String value() default "";
+    String value() default "";
 
-	public String charset() default "utf-8";
+	String charset() default "utf-8";
 }

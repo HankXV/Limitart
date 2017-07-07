@@ -102,12 +102,9 @@ public final class TimeUtil {
 		int herYear = herCal.get(Calendar.YEAR);
 		int herMonth = herCal.get(Calendar.MONTH);
 		int herDay = herCal.get(Calendar.DAY_OF_MONTH);
-		if (nowYear == herYear && nowMonth == herMonth && nowDay == herDay) {
-			return true;
-		}
-		return false;
+        return nowYear == herYear && nowMonth == herMonth && nowDay == herDay;
 
-	}
+    }
 
 	/**
 	 * 是否是同一个月
@@ -124,11 +121,8 @@ public final class TimeUtil {
 		int nowMonth = nowCal.get(Calendar.MONTH);
 		int herYear = herCal.get(Calendar.YEAR);
 		int herMonth = herCal.get(Calendar.MONTH);
-		if (nowYear == herYear && nowMonth == herMonth) {
-			return true;
-		}
-		return false;
-	}
+        return nowYear == herYear && nowMonth == herMonth;
+    }
 
 	/**
 	 * 是否是同一年
@@ -143,11 +137,8 @@ public final class TimeUtil {
 		herCal.setTime(date);
 		int nowYear = nowCal.get(Calendar.YEAR);
 		int herYear = herCal.get(Calendar.YEAR);
-		if (nowYear == herYear) {
-			return true;
-		}
-		return false;
-	}
+        return nowYear == herYear;
+    }
 
 	public static long str2Date(String str) {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.SIMPLIFIED_CHINESE);

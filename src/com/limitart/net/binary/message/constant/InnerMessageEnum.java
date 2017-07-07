@@ -23,7 +23,7 @@ public enum InnerMessageEnum {
 
 	private short messageId;
 
-	private InnerMessageEnum(short messageId) {
+	InnerMessageEnum(short messageId) {
 		this.messageId = messageId;
 	}
 

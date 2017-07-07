@@ -24,7 +24,7 @@ class AccessClassLoader extends ClassLoader {
 	static {
 		try {
 			defineClassMethod = ClassLoader.class.getDeclaredMethod("defineClass",
-					new Class[] { String.class, byte[].class, int.class, int.class, ProtectionDomain.class });
+                    String.class, byte[].class, int.class, int.class, ProtectionDomain.class);
 			defineClassMethod.setAccessible(true);
 		} catch (Exception ignored) {
 		}
@@ -106,8 +106,8 @@ class AccessClassLoader extends ClassLoader {
 		try {
 			// Attempt to load the access class in the same loader, which makes
 			// protected and default access members accessible.
-			return (Class<?>) getDefineClassMethod().invoke(getParent(), new Object[] { name, bytes, Integer.valueOf(0),
-					Integer.valueOf(bytes.length), getClass().getProtectionDomain() });
+			return (Class<?>) getDefineClassMethod().invoke(getParent(), name, bytes, Integer.valueOf(0),
+                    Integer.valueOf(bytes.length), getClass().getProtectionDomain());
 		} catch (Exception ignored) {
 			// continue with the definition in the current loader (won't have
 			// access to protected and package-protected members)

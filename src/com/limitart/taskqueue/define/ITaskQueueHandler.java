@@ -7,8 +7,8 @@ import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.message.Message;
 
 public interface ITaskQueueHandler<T> {
-	static Logger log = LogManager.getLogger();
-	public final static ITaskQueueHandler<Message> MESSAGE_HANDLER = new ITaskQueueHandler<Message>() {
+	Logger log = LogManager.getLogger();
+	ITaskQueueHandler<Message> MESSAGE_HANDLER = new ITaskQueueHandler<Message>() {
 
 		@Override
 		public void handle(Message t) {
@@ -35,7 +35,7 @@ public interface ITaskQueueHandler<T> {
 		}
 	};
 
-	public boolean intercept(T t);
+	boolean intercept(T t);
 
-	public void handle(T t);
+	void handle(T t);
 }

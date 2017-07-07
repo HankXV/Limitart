@@ -10,17 +10,17 @@ import com.limitart.net.binary.message.Message;
  *
  */
 public interface BinaryClientEventListener {
-	public void onChannelActive(BinaryClient client);
+	void onChannelActive(BinaryClient client);
 
-	public void onChannelInactive(BinaryClient client);
+	void onChannelInactive(BinaryClient client);
 
-	public void onExceptionCaught(BinaryClient client, Throwable cause);
+	void onExceptionCaught(BinaryClient client, Throwable cause);
 
-	public void onChannelRegistered(BinaryClient client);
+	void onChannelRegistered(BinaryClient client);
 
-	public void onChannelUnregistered(BinaryClient client);
+	void onChannelUnregistered(BinaryClient client);
 
-	public void onConnectionEffective(BinaryClient client);
+	void onConnectionEffective(BinaryClient client);
 
-	public void dispatchMessage(Message message);
+	void dispatchMessage(Message message);
 }

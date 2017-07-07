@@ -15,7 +15,7 @@ import io.netty.handler.codec.http.HttpMessage;
  *
  */
 public interface HttpServerEventListener extends NettyEventListener {
-	public void dispatchMessage(UrlMessage<String> message, HttpHandler handler, ConstraintMap<String> map);
+	void dispatchMessage(UrlMessage<String> message, HttpHandler handler, ConstraintMap<String> map);
 
 	/**
 	 * 当消息超标时会调用此函数
@@ -23,7 +23,7 @@ public interface HttpServerEventListener extends NettyEventListener {
 	 * @param ctx
 	 * @param oversized
 	 */
-	public void onMessageOverSize(Channel channel, HttpMessage oversized);
+    void onMessageOverSize(Channel channel, HttpMessage oversized);
 
-	public void onServerBind(Channel channel);
+	void onServerBind(Channel channel);
 }

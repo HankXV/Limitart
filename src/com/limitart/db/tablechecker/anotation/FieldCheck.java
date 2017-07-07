@@ -22,23 +22,23 @@ public @interface FieldCheck {
 	 * 
 	 * @return
 	 */
-	public String value() default "";
+    String value() default "";
 
 	/**
 	 * 在sql里的类型
 	 * 
 	 * @return
 	 */
-	public SqlColumnType type() default SqlColumnType.MYSQL_int;
+    SqlColumnType type() default SqlColumnType.MYSQL_int;
 
-	public int size() default 0;
+	int size() default 0;
 
-	public boolean isNullable() default true;
+	boolean isNullable() default true;
 
 	/**
 	 * 是否是主键
 	 * 
 	 * @return
 	 */
-	public boolean primary() default false;
+    boolean primary() default false;
 }

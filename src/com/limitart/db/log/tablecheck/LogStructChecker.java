@@ -314,11 +314,8 @@ public class LogStructChecker {
 		if ((now.getType().equals(SqlColumnType.MYSQL_tinyint.getValue())) && (old.getType().equals(now.getType()))) {
 			return true;
 		}
-		if ((now.getType().equals(old.getType())) && (now.getSize() <= old.getSize())) {
-			return true;
-		}
-		return false;
-	}
+        return (now.getType().equals(old.getType())) && (now.getSize() <= old.getSize());
+    }
 
 	private boolean ableChange(ColumnInfo info, ColumnInfo info2) {
 		SqlColumnType typeByValue = SqlColumnType.getTypeByValue(info.getType());

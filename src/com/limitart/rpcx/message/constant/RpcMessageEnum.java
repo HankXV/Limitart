@@ -49,7 +49,7 @@ public enum RpcMessageEnum {
 	TriggerScheduleServiceCenterToProviderServiceCenterMessage((short)-110),;
 	private short messageId;
 
-	private RpcMessageEnum(short messageId) {
+	RpcMessageEnum(short messageId) {
 		this.messageId = messageId;
 	}
 

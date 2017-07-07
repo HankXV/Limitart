@@ -23,7 +23,7 @@ public enum ContentTypes {
 	application_json("application/json; charset=UTF-8");
 	private String value;
 
-	private ContentTypes(String value) {
+	ContentTypes(String value) {
 		this.value = value;
 	}
 

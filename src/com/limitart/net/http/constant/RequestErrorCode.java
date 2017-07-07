@@ -57,7 +57,7 @@ public enum RequestErrorCode {
 	ERROR_POST_ERROR(1012),;
 	private int value;
 
-	private RequestErrorCode(int value) {
+	RequestErrorCode(int value) {
 		this.value = value;
 	}
 

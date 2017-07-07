@@ -9,5 +9,5 @@ import javax.sql.DataSource;
  *
  */
 public interface IDataSourceFactory {
-	public DataSource getDataSource();
+	DataSource getDataSource();
 }

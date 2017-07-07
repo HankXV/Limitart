@@ -143,7 +143,7 @@ public abstract class FieldAccess {
 		Class[] fieldTypes = new Class[fields.size()];
 		int i = 0;
 		for (int n = fieldNames.length; i < n; ++i) {
-			fieldNames[i] = ((Field) fields.get(i)).getName();
+			fieldNames[i] = fields.get(i).getName();
 			fieldTypes[i] = ((Field) fields.get(i)).getType();
 		}
 

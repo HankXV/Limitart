@@ -154,7 +154,7 @@ public class ConstraintMap<K> {
 	}
 
 	public boolean getBoolean(K key) {
-		return getInt2(key) == 1 ? true : false;
+		return getInt2(key) == 1;
 	}
 
 	public void putString(K key, String value) {

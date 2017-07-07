@@ -390,11 +390,8 @@ public class LogDBUtil {
 				if (FieldFilter.isStatic(field)) {
 					return false;
 				}
-				if (field.getAnnotation(LogColumn.class) == null) {
-					return false;
-				}
-				return true;
-			}
+                return field.getAnnotation(LogColumn.class) != null;
+            }
 		});
 		logFieldCache.put(logClass, fieldAccessV2);
 		return fieldAccessV2;

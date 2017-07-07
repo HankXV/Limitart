@@ -8,6 +8,6 @@ package com.limitart.rpcx.consumerx.define;
  */
 public interface IServiceAsyncCallback {
 
-	public void action(Object returnVal);
+	void action(Object returnVal);
 
 }

@@ -76,8 +76,8 @@ public class LRUHashMap<K, V> {
 	}
 
 	public interface LRUListener {
-		public void onRemove(Object key, Object value);
+		void onRemove(Object key, Object value);
 
-		public boolean canRemoveWithoutLRU(Object key, Object value);
+		boolean canRemoveWithoutLRU(Object key, Object value);
 	}
 }

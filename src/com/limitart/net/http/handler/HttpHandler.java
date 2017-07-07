@@ -10,5 +10,5 @@ import com.limitart.net.http.message.UrlMessage;
  */
 public interface HttpHandler {
 
-	public abstract UrlMessage<Integer> doServer(UrlMessage<String> message) throws Exception;
+	UrlMessage<Integer> doServer(UrlMessage<String> message) throws Exception;
 }

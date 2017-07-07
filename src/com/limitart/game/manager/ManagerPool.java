@@ -48,7 +48,7 @@ public class ManagerPool {
 		INSTANCE;
 		private ManagerPool value;
 
-		private InstanceHolder() {
+		InstanceHolder() {
 			value = new ManagerPool();
 		}
 	}
