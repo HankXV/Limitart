@@ -1,5 +1,6 @@
 package com.limitart.net.binary.message;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 
@@ -11,6 +12,8 @@ import com.limitart.net.binary.message.define.IMessagePool;
 import com.limitart.reflectasm.ConstructorAccess;
 import com.limitart.util.ReflectionUtil;
 
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+
 /**
  * 消息工厂 注意：这里的handler是单例，一定不能往里存成员变量
  * 
@@ -21,7 +24,7 @@ public class MessageFactory {
 	private static Logger log = LogManager.getLogger();
 	// !!这里的asm应用经测试在JAVA8下最优
 	private final HashMap<Short, ConstructorAccess<? extends Message>> msgs = new HashMap<>();
-	private final HashMap<Short, IHandler> handlers = new HashMap<>();
+	private final HashMap<Short, IHandler<? extends Message>> handlers = new HashMap<>();
 
 	/**
 	 * 通过反射调用具有IMessagePool接口的消息构造
@@ -42,7 +45,20 @@ public class MessageFactory {
 		return messageFactory;
 	}
 
-	public synchronized MessageFactory registerMsg(Class<? extends Message> msgClass, IHandler handler) {
+	public synchronized MessageFactory registerMsg(IHandler<? extends Message> handler) {
+		Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
+		ParameterizedTypeImpl handlerInterface = null;
+		for (Type temp : genericInterfaces) {
+			if (temp instanceof ParameterizedTypeImpl) {
+				ParameterizedTypeImpl ttemp = (ParameterizedTypeImpl) temp;
+				if (ttemp.getRawType() == IHandler.class) {
+					handlerInterface = ttemp;
+					break;
+				}
+			}
+		}
+		@SuppressWarnings("unchecked")
+		Class<? extends Message> msgClass = (Class<? extends Message>) handlerInterface.getActualTypeArguments()[0];
 		// 这里先实例化一个出来获取其ID
 		Message newInstance = null;
 		try {
@@ -71,9 +87,9 @@ public class MessageFactory {
 		return this;
 	}
 
-	public synchronized MessageFactory registerMsg(Class<? extends Message> msgClass,
-			Class<? extends IHandler> handlerClass) throws InstantiationException, IllegalAccessException {
-		return registerMsg(msgClass, handlerClass.newInstance());
+	public synchronized MessageFactory registerMsg(Class<? extends IHandler<? extends Message>> handlerClass)
+			throws InstantiationException, IllegalAccessException {
+		return registerMsg(handlerClass.newInstance());
 	}
 
 	public Message getMessage(short msgId) throws InstantiationException, IllegalAccessException {
@@ -84,7 +100,7 @@ public class MessageFactory {
 		return constructorAccess.newInstance();
 	}
 
-	public IHandler getHandler(short msgId) throws InstantiationException, IllegalAccessException {
+	public IHandler<? extends Message> getHandler(short msgId) throws InstantiationException, IllegalAccessException {
 		return handlers.get(msgId);
 	}
 

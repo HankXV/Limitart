@@ -105,10 +105,8 @@ public class ConsumerX implements BinaryClientEventListener {
 				throw new ServiceXIOException("need service center's Ip or direct provider remote Ip!");
 			}
 			MessageFactory centryFactory = new MessageFactory();
-			centryFactory.registerMsg(SubscribeServiceResultServiceCenterMessage.class,
-					new SubscribeServiceResultServiceCenterHandler());
-			centryFactory.registerMsg(NoticeProviderDisconnectedServiceCenterMessage.class,
-					new NoticeProviderDisconnectedServiceCenterHandler());
+			centryFactory.registerMsg(new SubscribeServiceResultServiceCenterHandler());
+			centryFactory.registerMsg(new NoticeProviderDisconnectedServiceCenterHandler());
 			BinaryClientConfigBuilder serviceCenterBuilder = new BinaryClientConfigBuilder();
 			serviceCenterBuilder.autoReconnect(config.getAutoConnectInterval()).remoteIp(config.getServiceCenterIp())
 					.remotePort(config.getServiceCenterPort()).clientName("RPC-Consumer");
@@ -169,9 +167,8 @@ public class ConsumerX implements BinaryClientEventListener {
 
 	private BinaryClient createRpcClient(String providerIp, int providerPort, boolean isDirectLink) throws Exception {
 		MessageFactory rpcMessageFacotry = new MessageFactory();
-		rpcMessageFacotry.registerMsg(RpcResultServerMessage.class, new RpcResultServerHandler());
-		rpcMessageFacotry.registerMsg(DirectFetchProviderServicesResultMessage.class,
-				new DirectFetchProviderServicesResultHandler());
+		rpcMessageFacotry.registerMsg(new RpcResultServerHandler());
+		rpcMessageFacotry.registerMsg(new DirectFetchProviderServicesResultHandler());
 		BinaryClient client = new BinaryClient(new BinaryClientConfigBuilder().remoteIp(providerIp)
 				.remotePort(providerPort).autoReconnect(config.getAutoConnectInterval()).build(), this,
 				rpcMessageFacotry);
@@ -492,9 +489,10 @@ public class ConsumerX implements BinaryClientEventListener {
 				}
 			}
 			// 创建动态代理类
-			Object newProxyInstance = ReflectionUtil.newProxy(clazz, (InvocationHandler) (proxy, method, args) -> proxyExecute(serviceName, proxy, method.getName(),
-                    ReflectionUtil.getMethodOverloadName(method), args, ConsumerX.this.config.getSelector(),
-                    null));
+			Object newProxyInstance = ReflectionUtil.newProxy(clazz,
+					(InvocationHandler) (proxy, method, args) -> proxyExecute(serviceName, proxy, method.getName(),
+							ReflectionUtil.getMethodOverloadName(method), args, ConsumerX.this.config.getSelector(),
+							null));
 			if (serviceProxyClasses.containsKey(serviceName)) {
 				throw new ServiceXProxyException("服务名重复:" + serviceName);
 			}
@@ -610,17 +608,17 @@ public class ConsumerX implements BinaryClientEventListener {
 		// 发送消息
 		try {
 			binaryClient.sendMessage(msg, (isSuccess, cause, channel) -> {
-                if (!isSuccess) {
-                    futures.remove(msg.getRequestId());
-                    try {
-                        throw new ServiceXIOException("动态代理方法：" + methodOverloadName + "，服务器：" + selectServer
-                                + "失败！网络未连接！" + "，id：" + msg.getRequestId());
-                    } catch (ServiceXIOException e) {
-                        log.error(e, e);
-                        log.error(cause, cause);
-                    }
-                }
-            });
+				if (!isSuccess) {
+					futures.remove(msg.getRequestId());
+					try {
+						throw new ServiceXIOException("动态代理方法：" + methodOverloadName + "，服务器：" + selectServer
+								+ "失败！网络未连接！" + "，id：" + msg.getRequestId());
+					} catch (ServiceXIOException e) {
+						log.error(e, e);
+						log.error(cause, cause);
+					}
+				}
+			});
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -656,45 +654,43 @@ public class ConsumerX implements BinaryClientEventListener {
 		}
 	}
 
-	private class RpcResultServerHandler implements IHandler {
+	private class RpcResultServerHandler implements IHandler<RpcResultServerMessage> {
 
 		@Override
-		public void handle(Message message) {
-			RpcResultServerMessage msg = (RpcResultServerMessage) message;
-			((ConsumerX) message.getExtra()).onRPCResonse(msg);
+		public void handle(RpcResultServerMessage msg) {
+			((ConsumerX) msg.getExtra()).onRPCResonse(msg);
 		}
 
 	}
 
-	private class DirectFetchProviderServicesResultHandler implements IHandler {
+	private class DirectFetchProviderServicesResultHandler
+			implements IHandler<DirectFetchProviderServicesResultMessage> {
 
 		@Override
-		public void handle(Message message) {
-			DirectFetchProviderServicesResultMessage msg = (DirectFetchProviderServicesResultMessage) message;
+		public void handle(DirectFetchProviderServicesResultMessage msg) {
 			int providerId = msg.getProviderId();
 			List<String> services = msg.getServices();
-			((ConsumerX) message.getExtra()).onDirectFetchProviderServices(message.getClient(), providerId, services);
+			((ConsumerX) msg.getExtra()).onDirectFetchProviderServices(msg.getClient(), providerId, services);
 		}
 	}
 
-	private class SubscribeServiceResultServiceCenterHandler implements IHandler {
+	private class SubscribeServiceResultServiceCenterHandler
+			implements IHandler<SubscribeServiceResultServiceCenterMessage> {
 
 		@Override
-		public void handle(Message message) {
-			SubscribeServiceResultServiceCenterMessage msg = (SubscribeServiceResultServiceCenterMessage) message;
+		public void handle(SubscribeServiceResultServiceCenterMessage msg) {
 			List<ProviderServiceMeta> services = msg.getServices();
-			((ConsumerX) message.getExtra()).onSubsribeServicesCome(services);
+			((ConsumerX) msg.getExtra()).onSubsribeServicesCome(services);
 		}
 
 	}
 
-	private class NoticeProviderDisconnectedServiceCenterHandler implements IHandler {
+	private class NoticeProviderDisconnectedServiceCenterHandler
+			implements IHandler<NoticeProviderDisconnectedServiceCenterMessage> {
 
 		@Override
-		public void handle(Message message) {
-			NoticeProviderDisconnectedServiceCenterMessage msg = (NoticeProviderDisconnectedServiceCenterMessage) message;
-			int providerUID = msg.getProviderUID();
-			((ConsumerX) message.getExtra()).onNoticeProviderDisconnected(providerUID);
+		public void handle(NoticeProviderDisconnectedServiceCenterMessage msg) {
+			((ConsumerX) msg.getExtra()).onNoticeProviderDisconnected(msg.getProviderUID());
 		}
 
 	}

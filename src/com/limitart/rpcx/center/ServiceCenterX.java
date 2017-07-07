@@ -101,13 +101,9 @@ public class ServiceCenterX {
 			public void onServerBind(Channel channel) {
 
 			}
-		}, new MessageFactory()
-				.registerMsg(SubscribeServiceFromServiceCenterConsumerMessage.class,
-						new SubscribeServiceFromServiceCenterConsumerHandler())
-				.registerMsg(PushServiceToServiceCenterProviderMessage.class,
-						new PushServiceToServiceCenterProviderHandler())
-				.registerMsg(AddScheduleToServiceCenterProviderMessage.class,
-						new AddScheduleToServiceCenterProviderHandler()));
+		}, new MessageFactory().registerMsg(new SubscribeServiceFromServiceCenterConsumerHandler())
+				.registerMsg(new PushServiceToServiceCenterProviderHandler())
+				.registerMsg(new AddScheduleToServiceCenterProviderHandler()));
 	}
 
 	public ServiceCenterX bind() throws Exception {
@@ -378,33 +374,34 @@ public class ServiceCenterX {
 		}
 	}
 
-	private class SubscribeServiceFromServiceCenterConsumerHandler implements IHandler {
+	private class SubscribeServiceFromServiceCenterConsumerHandler
+			implements IHandler<SubscribeServiceFromServiceCenterConsumerMessage> {
 
 		@Override
-		public void handle(Message message) {
-			registerClientSession(message.getChannel());
-			((ServiceCenterX) message.getExtra()).sendAllServiceProviderInfo2Consumer(message.getChannel());
+		public void handle(SubscribeServiceFromServiceCenterConsumerMessage msg) {
+			registerClientSession(msg.getChannel());
+			((ServiceCenterX) msg.getExtra()).sendAllServiceProviderInfo2Consumer(msg.getChannel());
 		}
 
 	}
 
-	private class PushServiceToServiceCenterProviderHandler implements IHandler {
+	private class PushServiceToServiceCenterProviderHandler
+			implements IHandler<PushServiceToServiceCenterProviderMessage> {
 
 		@Override
-		public void handle(Message message) {
-			PushServiceToServiceCenterProviderMessage msg = (PushServiceToServiceCenterProviderMessage) message;
-			((ServiceCenterX) message.getExtra()).onProviderPublicServices(message.getChannel(), msg.getProviderUID(),
+		public void handle(PushServiceToServiceCenterProviderMessage msg) {
+			((ServiceCenterX) msg.getExtra()).onProviderPublicServices(msg.getChannel(), msg.getProviderUID(),
 					msg.getMyIp(), msg.getMyPort(), msg.getServices());
 		}
 
 	}
 
-	private class AddScheduleToServiceCenterProviderHandler implements IHandler {
+	private class AddScheduleToServiceCenterProviderHandler
+			implements IHandler<AddScheduleToServiceCenterProviderMessage> {
 
 		@Override
-		public void handle(Message message) {
-			AddScheduleToServiceCenterProviderMessage msg = (AddScheduleToServiceCenterProviderMessage) message;
-			((ServiceCenterX) message.getExtra()).onAddSchedule(msg.getJobName(), msg.getProviderId(),
+		public void handle(AddScheduleToServiceCenterProviderMessage msg) {
+			((ServiceCenterX) msg.getExtra()).onAddSchedule(msg.getJobName(), msg.getProviderId(),
 					msg.getCronExpression(), msg.getIntervalInHours(), msg.getIntervalInMinutes(),
 					msg.getIntervalInSeconds(), msg.getIntervalInMillis(), msg.getRepeatCount());
 		}

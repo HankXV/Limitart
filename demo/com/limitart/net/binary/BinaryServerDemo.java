@@ -61,7 +61,7 @@ public class BinaryServerDemo {
 			}
 		};
 		MessageFactory factory = new MessageFactory();
-		factory.registerMsg(BinaryMessageDemo.class, BinaryHandlerDemo.class);
+		factory.registerMsg(BinaryHandlerDemo.class);
 		BinaryServer server = new BinaryServer(build, binaryServerEventListener, factory);
 		server.bind();
 	}

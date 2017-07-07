@@ -22,7 +22,7 @@ public abstract class Message extends MessageMeta {
 	// 预留参数
 	private transient Object extra;
 	private transient Object extra1;
-	private transient IHandler handler;
+	private transient IHandler<Message> handler;
 
 	public abstract short getMessageId();
 
@@ -58,11 +58,11 @@ public abstract class Message extends MessageMeta {
 		this.extra = extra;
 	}
 
-	public IHandler getHandler() {
+	public IHandler<Message> getHandler() {
 		return handler;
 	}
 
-	public void setHandler(IHandler handler) {
+	public void setHandler(IHandler<Message> handler) {
 		this.handler = handler;
 	}
 

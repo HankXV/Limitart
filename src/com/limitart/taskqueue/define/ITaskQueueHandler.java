@@ -12,7 +12,7 @@ public interface ITaskQueueHandler<T> {
 
 		@Override
 		public void handle(Message t) {
-			IHandler handler = t.getHandler();
+			IHandler<Message> handler = t.getHandler();
 			if (handler == null) {
 				log.error(t.getClass().getName() + " has no handler!");
 				return;

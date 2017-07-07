@@ -39,8 +39,8 @@ public class InnerMasterServer implements BinaryServerEventListener {
 	private BinaryServer server;
 
 	public InnerMasterServer(int masterPort, MessageFactory facotry) {
-		facotry.registerMsg(ReqConnectionReportSlave2MasterMessage.class, new ReqConnectionReportSlave2MasterHandler());
-		facotry.registerMsg(ReqServerLoadSlave2MasterMessage.class, new ReqServerLoadSlave2MasterHandler());
+		facotry.registerMsg(new ReqConnectionReportSlave2MasterHandler());
+		facotry.registerMsg(new ReqServerLoadSlave2MasterHandler());
 		server = new BinaryServer(
 				new BinaryServerConfig.BinaryServerConfigBuilder().connectionPass(InnerServerUtil.getInnerPass())
 						.port(masterPort).serverName("Master-Inner-Server").build(),
@@ -170,15 +170,13 @@ public class InnerMasterServer implements BinaryServerEventListener {
 			}
 			try {
 				server.sendMessage(msg.getChannel(), fsjm, (isSuccess, cause, channel) -> {
-                    if (isSuccess) {
-                        log.info("tell fight servers info to game server success,game server Id:"
-                                + data.getServerId());
-                    } else {
-                        log.error(
-                                "tell fight servers info to game server fail,game server Id:" + data.getServerId(),
-                                cause);
-                    }
-                });
+					if (isSuccess) {
+						log.info("tell fight servers info to game server success,game server Id:" + data.getServerId());
+					} else {
+						log.error("tell fight servers info to game server fail,game server Id:" + data.getServerId(),
+								cause);
+					}
+				});
 			} catch (Exception e) {
 				log.error(e, e);
 			}

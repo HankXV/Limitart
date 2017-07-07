@@ -2,8 +2,6 @@ package com.limitart.collections.define;
 
 import java.util.List;
 
-import com.limitart.collections.define.IRankObj;
-
 public interface IRankMap<K, V extends IRankObj<K>> {
 
 	/**

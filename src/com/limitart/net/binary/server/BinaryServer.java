@@ -87,8 +87,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		this.serverEventListener = serverEventListener;
 		this.config = config;
 		// 初始化内部消息
-		this.messageFactory = msgFactory.registerMsg(ConnectionValidateClientMessage.class,
-				new ConnectionValidateClientHandler());
+		this.messageFactory = msgFactory.registerMsg(new ConnectionValidateClientHandler());
 		// 初始化加密工具
 		try {
 			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(BinaryServer.this.config.getConnectionPass(),
@@ -289,7 +288,8 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 			msg.buffer(buffer);
 			msg.decode();
 			msg.buffer(null);
-			IHandler handler = messageFactory.getHandler(messageId);
+			@SuppressWarnings("unchecked")
+			IHandler<Message> handler = (IHandler<Message>) messageFactory.getHandler(messageId);
 			if (handler == null) {
 				throw new Exception(config.getServerName() + " can not find handler for message,id:" + messageId);
 			}
@@ -356,13 +356,12 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		}
 	}
 
-	private class ConnectionValidateClientHandler implements IHandler {
+	private class ConnectionValidateClientHandler implements IHandler<ConnectionValidateClientMessage> {
 
 		@Override
-		public void handle(Message message) {
-			ConnectionValidateClientMessage msg = (ConnectionValidateClientMessage) message;
+		public void handle(ConnectionValidateClientMessage msg) {
 			int validateRandom = msg.getValidateRandom();
-			msg.getServer().onClientConnectionValidate(message.getChannel(), validateRandom);
+			msg.getServer().onClientConnectionValidate(msg.getChannel(), validateRandom);
 		}
 	}
 }

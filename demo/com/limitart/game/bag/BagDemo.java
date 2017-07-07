@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.limitart.game.bag.Bag;
 import com.limitart.game.bag.exception.BagFullException;
 import com.limitart.game.bag.exception.BagGridOcuppiedException;
 import com.limitart.game.bag.exception.ItemNotExistException;

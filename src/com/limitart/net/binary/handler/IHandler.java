@@ -8,8 +8,8 @@ import com.limitart.net.binary.message.Message;
  * @author Hank
  *
  */
-public interface IHandler {
+public interface IHandler<T extends Message> {
 
-	void handle(Message message);
+	void handle(T msg);
 
 }

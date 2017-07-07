@@ -81,9 +81,8 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		this.clientConfig = config;
 		this.clientEventListener = clientEventListener;
 		// 内部消息注册
-		this.messageFactory = messageFactory
-				.registerMsg(ConnectionValidateServerMessage.class, new ConnectionValidateServerHandler()).registerMsg(
-						ConnectionValidateSuccessServerMessage.class, new ConnectionValidateSuccessServerHandler());
+		this.messageFactory = messageFactory.registerMsg(new ConnectionValidateServerHandler())
+				.registerMsg(new ConnectionValidateSuccessServerHandler());
 		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(clientConfig.getConnectionPass());
 		bootstrap = new Bootstrap();
 		if (Epoll.isAvailable()) {
@@ -151,20 +150,21 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		try {
 			bootstrap.connect(this.clientConfig.getRemoteIp(), this.clientConfig.getRemotePort())
 					.addListener((ChannelFutureListener) channelFuture -> {
-                        channel = channelFuture.channel();
-                        if (channelFuture.isSuccess()) {
-                            log.info(clientConfig.getClientName() + " connect server："
-                                    + BinaryClient.this.clientConfig.getRemoteIp() + ":"
-                                    + BinaryClient.this.clientConfig.getRemotePort() + " success！");
-                        } else {
-                            log.error(clientConfig.getClientName() + " try connect server："
-                                    + clientConfig.getRemoteIp() + ":" + clientConfig.getRemotePort() + " fail",
-                                    channelFuture.cause().getMessage());
-                            if (clientConfig.getAutoReconnect() > 0) {
-                                tryReconnect(clientConfig.getAutoReconnect());
-                            }
-                        }
-                    }).sync();
+						channel = channelFuture.channel();
+						if (channelFuture.isSuccess()) {
+							log.info(clientConfig.getClientName() + " connect server："
+									+ BinaryClient.this.clientConfig.getRemoteIp() + ":"
+									+ BinaryClient.this.clientConfig.getRemotePort() + " success！");
+						} else {
+							log.error(
+									clientConfig.getClientName() + " try connect server：" + clientConfig.getRemoteIp()
+											+ ":" + clientConfig.getRemotePort() + " fail",
+									channelFuture.cause().getMessage());
+							if (clientConfig.getAutoReconnect() > 0) {
+								tryReconnect(clientConfig.getAutoReconnect());
+							}
+						}
+					}).sync();
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -234,7 +234,8 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			msg.buffer(buffer);
 			msg.decode();
 			msg.buffer(null);
-			IHandler handler = BinaryClient.this.messageFactory.getHandler(messageId);
+			@SuppressWarnings("unchecked")
+			IHandler<Message> handler = (IHandler<Message>) BinaryClient.this.messageFactory.getHandler(messageId);
 			if (handler == null) {
 				throw new Exception(clientConfig.getClientName() + " can not find handler for message,id:" + messageId);
 			}
@@ -280,22 +281,21 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		this.clientEventListener.onChannelUnregistered(this);
 	}
 
-	private class ConnectionValidateServerHandler implements IHandler {
+	private class ConnectionValidateServerHandler implements IHandler<ConnectionValidateServerMessage> {
 
 		@Override
-		public void handle(Message message) {
-			ConnectionValidateServerMessage msg = (ConnectionValidateServerMessage) message;
+		public void handle(ConnectionValidateServerMessage msg) {
 			String validateStr = msg.getValidateStr();
 			msg.getClient().decodeConnectionValidateData(validateStr);
 		}
 
 	}
 
-	private class ConnectionValidateSuccessServerHandler implements IHandler {
+	private class ConnectionValidateSuccessServerHandler implements IHandler<ConnectionValidateSuccessServerMessage> {
 
 		@Override
-		public void handle(Message message) {
-			message.getClient().onConnectionValidateSeccuss(message.getChannel().remoteAddress().toString());
+		public void handle(ConnectionValidateSuccessServerMessage msg) {
+			msg.getClient().onConnectionValidateSeccuss(msg.getChannel().remoteAddress().toString());
 		}
 	}
 }

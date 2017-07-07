@@ -3,9 +3,6 @@ package com.limitart.game.org;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.limitart.game.org.Job;
-import com.limitart.game.org.Org;
-import com.limitart.game.org.OrgMember;
 import com.limitart.game.org.exception.AlreadyJoinException;
 import com.limitart.game.org.exception.AuthIDErrorException;
 import com.limitart.game.org.exception.JobIDDuplicatedException;

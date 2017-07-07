@@ -68,16 +68,15 @@ public class ProviderX implements BinaryServerEventListener {
 		this.config = config;
 		MessageFactory factory = new MessageFactory();
 		// 初始化内部消息
-		factory.registerMsg(RpcExecuteClientMessage.class, new RpcExecuteClientHandler());
-		factory.registerMsg(DirectFetchProviderServicesMessage.class, new DirectFetchProverServicesHandler());
+		factory.registerMsg(new RpcExecuteClientHandler());
+		factory.registerMsg(new DirectFetchProverServicesHandler());
 		server = new BinaryServer(
 				new BinaryServerConfigBuilder().port(config.getMyPort()).serverName("RPC-Provider").build(), this,
 				factory);
 		// 处理服务中心模式
 		if (this.config.getServiceCenterIp() != null) {
 			MessageFactory centerFacotry = new MessageFactory();
-			centerFacotry.registerMsg(TriggerScheduleServiceCenterToProviderServiceCenterMessage.class,
-					new TriggerScheduleServiceCenterToProviderServiceCenterHandler());
+			centerFacotry.registerMsg(new TriggerScheduleServiceCenterToProviderServiceCenterHandler());
 			BinaryClientConfigBuilder centerBuilder = new BinaryClientConfigBuilder();
 			centerBuilder.autoReconnect(5).remoteIp(this.config.getServiceCenterIp())
 					.remotePort(this.config.getServiceCenterPort());
@@ -456,40 +455,38 @@ public class ProviderX implements BinaryServerEventListener {
 		providerJob.getListener().action();
 	}
 
-	private class RpcExecuteClientHandler implements IHandler {
+	private class RpcExecuteClientHandler implements IHandler<RpcExecuteClientMessage> {
 
 		@Override
-		public void handle(Message message) {
-			RpcExecuteClientMessage msg = (RpcExecuteClientMessage) message;
+		public void handle(RpcExecuteClientMessage msg) {
 			int requestId = msg.getRequestId();
 			String moduleName = msg.getModuleName();
 			String methodName = msg.getMethodName();
 			List<Object> params = msg.getParams();
 			try {
-				((ProviderX) message.getExtra()).executeRPC(msg.getChannel(), requestId, moduleName, methodName,
-						params);
+				((ProviderX) msg.getExtra()).executeRPC(msg.getChannel(), requestId, moduleName, methodName, params);
 			} catch (Exception e) {
 				log.error(e, e);
 			}
 		}
 	}
 
-	private class DirectFetchProverServicesHandler implements IHandler {
+	private class DirectFetchProverServicesHandler implements IHandler<DirectFetchProviderServicesMessage> {
 
 		@Override
-		public void handle(Message message) {
-			((ProviderX) message.getExtra()).directPushServices(message.getChannel());
+		public void handle(DirectFetchProviderServicesMessage msg) {
+			((ProviderX) msg.getExtra()).directPushServices(msg.getChannel());
 		}
 
 	}
 
-	private class TriggerScheduleServiceCenterToProviderServiceCenterHandler implements IHandler {
+	private class TriggerScheduleServiceCenterToProviderServiceCenterHandler
+			implements IHandler<TriggerScheduleServiceCenterToProviderServiceCenterMessage> {
 
 		@Override
-		public void handle(Message message) {
-			TriggerScheduleServiceCenterToProviderServiceCenterMessage msg = (TriggerScheduleServiceCenterToProviderServiceCenterMessage) message;
+		public void handle(TriggerScheduleServiceCenterToProviderServiceCenterMessage msg) {
 			String jobName = msg.getJobName();
-			((ProviderX) message.getExtra()).onScheduleTrigger(jobName, msg.isEnd());
+			((ProviderX) msg.getExtra()).onScheduleTrigger(jobName, msg.isEnd());
 		}
 	}
 }

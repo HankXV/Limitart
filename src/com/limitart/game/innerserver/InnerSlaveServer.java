@@ -9,11 +9,8 @@ import com.limitart.game.innerserver.handler.ReqConnectionReportGame2FightHandle
 import com.limitart.game.innerserver.handler.ResFightServerJoinMaster2GameHandler;
 import com.limitart.game.innerserver.handler.ResFightServerQuitMaster2GameHandler;
 import com.limitart.game.innerserver.msg.InnerServerInfo;
-import com.limitart.game.innerserver.msg.ReqConnectionReportGame2FightMessage;
 import com.limitart.game.innerserver.msg.ReqConnectionReportSlave2MasterMessage;
 import com.limitart.game.innerserver.msg.ReqServerLoadSlave2MasterMessage;
-import com.limitart.game.innerserver.msg.ResFightServerJoinMaster2GameMessage;
-import com.limitart.game.innerserver.msg.ResFightServerQuitMaster2GameMessage;
 import com.limitart.game.innerserver.util.InnerServerUtil;
 import com.limitart.net.binary.client.BinaryClient;
 import com.limitart.net.binary.client.config.BinaryClientConfig;
@@ -48,12 +45,9 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener {
 		this.innerPort = innerPort;
 		this.outPass = outPass;
 		this.factory = factory;
-		this.factory.registerMsg(ResFightServerJoinMaster2GameMessage.class,
-				new ResFightServerJoinMaster2GameHandler());
-		this.factory.registerMsg(ResFightServerQuitMaster2GameMessage.class,
-				ResFightServerQuitMaster2GameHandler.class);
-		this.factory.registerMsg(ReqConnectionReportGame2FightMessage.class,
-				new ReqConnectionReportGame2FightHandler());
+		this.factory.registerMsg(new ResFightServerJoinMaster2GameHandler());
+		this.factory.registerMsg(new ResFightServerQuitMaster2GameHandler());
+		this.factory.registerMsg(new ReqConnectionReportGame2FightHandler());
 		toMaster = new BinaryClient(new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5)
 				.clientName("Slave-Inner-Client").connectionPass(InnerServerUtil.getInnerPass()).remoteIp(innerMasterIp)
 				.remotePort(innerMasterPort).build(), this, factory);
@@ -106,34 +100,34 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener {
 		msg.serverInfo = info;
 		try {
 			client.sendMessage(msg, (isSuccess, cause, channel) -> {
-                if (isSuccess) {
-                    log.info("report my server info to master success:" + info);
-                } else {
-                    log.error("report my server info to master fail:" + info, cause);
-                }
-            });
+				if (isSuccess) {
+					log.info("report my server info to master success:" + info);
+				} else {
+					log.error("report my server info to master fail:" + info, cause);
+				}
+			});
 		} catch (Exception e) {
 			log.error(e, e);
 		}
 		toMaster.schedule(() -> {
-            ReqServerLoadSlave2MasterMessage slm = new ReqServerLoadSlave2MasterMessage();
-            slm.load = serverLoad();
-            try {
-                toMaster.sendMessage(slm, new SendMessageListener() {
+			ReqServerLoadSlave2MasterMessage slm = new ReqServerLoadSlave2MasterMessage();
+			slm.load = serverLoad();
+			try {
+				toMaster.sendMessage(slm, new SendMessageListener() {
 
-                    @Override
-                    public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-                        if (isSuccess) {
-                            log.debug("send server load to master success,current load:{}", slm.load);
-                        } else {
-                            log.error("send server load to master fail,current load:{}", slm.load);
-                        }
-                    }
-                });
-            } catch (Exception e) {
-                log.error(e, e);
-            }
-        }, 5, 5, TimeUnit.SECONDS);
+					@Override
+					public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
+						if (isSuccess) {
+							log.debug("send server load to master success,current load:{}", slm.load);
+						} else {
+							log.error("send server load to master fail,current load:{}", slm.load);
+						}
+					}
+				});
+			} catch (Exception e) {
+				log.error(e, e);
+			}
+		}, 5, 5, TimeUnit.SECONDS);
 	}
 
 	@Override

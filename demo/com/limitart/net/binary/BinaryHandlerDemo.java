@@ -1,13 +1,11 @@
 package com.limitart.net.binary;
 
 import com.limitart.net.binary.handler.IHandler;
-import com.limitart.net.binary.message.Message;
 
-public class BinaryHandlerDemo implements IHandler {
+public class BinaryHandlerDemo implements IHandler<BinaryMessageDemo> {
 
 	@Override
-	public void handle(Message message) {
-		BinaryMessageDemo msg = (BinaryMessageDemo) message;
+	public void handle(BinaryMessageDemo msg) {
 		System.out.println("server received message:" + msg.info);
 	}
 
