@@ -6,6 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.crypto.NoSuchPaddingException;
@@ -25,6 +27,7 @@ import com.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessSe
 import com.limitart.net.binary.server.config.BinaryServerConfig;
 import com.limitart.net.binary.server.listener.BinaryServerEventListener;
 import com.limitart.net.binary.util.SendMessageUtil;
+import com.limitart.thread.NamedThreadFactory;
 import com.limitart.util.RandomUtil;
 import com.limitart.util.SymmetricEncryptionUtil;
 
@@ -63,6 +66,13 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 	protected BinaryServerEventListener serverEventListener;
 	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
 	private SymmetricEncryptionUtil encrypUtil;
+	private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory() {
+
+		@Override
+		public String getThreadName() {
+			return "Server-Scheduler";
+		}
+	});
 	static {
 		if (Epoll.isAvailable()) {
 			bossGroup = new EpollEventLoopGroup();
@@ -114,15 +124,15 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializerImpl(this));
-		schedule(() -> clearUnvalidatedConnection(), 0, 1, TimeUnit.SECONDS);
+		scheduler.scheduleAtFixedRate(() -> clearUnvalidatedConnection(), 0, 1, TimeUnit.SECONDS);
 	}
 
 	public void schedule(Runnable command, long delay, TimeUnit unit) {
-		workerGroup.schedule(command, delay, unit);
+		scheduler.schedule(command, delay, unit);
 	}
 
 	public void schedule(Runnable command, long delay, long period, TimeUnit unit) {
-		workerGroup.scheduleAtFixedRate(command, delay, period, unit);
+		scheduler.scheduleAtFixedRate(command, delay, period, unit);
 	}
 
 	public void sendMessage(Channel channel, Message msg, SendMessageListener listener) throws Exception {
