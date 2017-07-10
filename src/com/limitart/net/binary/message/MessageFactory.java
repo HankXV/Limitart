@@ -57,6 +57,9 @@ public class MessageFactory {
 				}
 			}
 		}
+		if (handlerInterface == null) {
+			return this;
+		}
 		@SuppressWarnings("unchecked")
 		Class<? extends Message> msgClass = (Class<? extends Message>) handlerInterface.getActualTypeArguments()[0];
 		// 这里先实例化一个出来获取其ID
