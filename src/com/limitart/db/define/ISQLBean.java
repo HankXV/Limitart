@@ -1,5 +1,5 @@
 package com.limitart.db.define;
 
-public interface ISQLSaveBean {
+public interface ISQLBean {
 
 }

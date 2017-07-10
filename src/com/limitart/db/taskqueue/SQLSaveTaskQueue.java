@@ -5,7 +5,7 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.limitart.db.define.ISQLSaveBean;
+import com.limitart.db.define.ISQLBean;
 import com.limitart.db.define.ISQLSaveDao;
 import com.limitart.taskqueue.DisruptorTaskQueue;
 import com.limitart.taskqueue.define.ITaskQueue;
@@ -19,21 +19,21 @@ import com.limitart.util.StringUtil;
  * @author Hank
  *
  */
-public class SqlSaveTaskQueue implements ITaskQueue<ISQLSaveBean> {
+public class SQLSaveTaskQueue implements ITaskQueue<ISQLBean> {
 	private static Logger log = LogManager.getLogger();
-	private HashMap<Class<? extends ISQLSaveBean>, ISQLSaveDao> daos = new HashMap<>();
-	private ITaskQueue<ISQLSaveBean> taskQueue;
+	private HashMap<Class<? extends ISQLBean>, ISQLSaveDao> daos = new HashMap<>();
+	private ITaskQueue<ISQLBean> taskQueue;
 
-	public SqlSaveTaskQueue(String threadName) {
-		this.taskQueue = new DisruptorTaskQueue<>(threadName, new ITaskQueueHandler<ISQLSaveBean>() {
+	public SQLSaveTaskQueue(String threadName) {
+		this.taskQueue = new DisruptorTaskQueue<>(threadName, new ITaskQueueHandler<ISQLBean>() {
 
 			@Override
-			public boolean intercept(ISQLSaveBean t) {
+			public boolean intercept(ISQLBean t) {
 				return false;
 			}
 
 			@Override
-			public void handle(ISQLSaveBean t) {
+			public void handle(ISQLBean t) {
 				ISQLSaveDao baseDao = daos.get(t.getClass());
 				if (baseDao == null) {
 					log.error("dao not exist:" + t.getClass().getName());
@@ -49,7 +49,7 @@ public class SqlSaveTaskQueue implements ITaskQueue<ISQLSaveBean> {
 		});
 	}
 
-	public void register(Class<? extends ISQLSaveBean> beanClass, Class<? extends ISQLSaveDao> daoClass) {
+	public synchronized void register(Class<? extends ISQLBean> beanClass, Class<? extends ISQLSaveDao> daoClass) {
 		try {
 			daos.put(beanClass, daoClass.newInstance());
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -73,7 +73,7 @@ public class SqlSaveTaskQueue implements ITaskQueue<ISQLSaveBean> {
 	}
 
 	@Override
-	public void addCommand(ISQLSaveBean bean) throws TaskQueueException {
+	public void addCommand(ISQLBean bean) throws TaskQueueException {
 		taskQueue.addCommand(bean);
 	}
 }

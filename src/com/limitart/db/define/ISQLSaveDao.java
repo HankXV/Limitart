@@ -13,7 +13,7 @@ public interface ISQLSaveDao {
 	 * @param bean
 	 * @return
 	 */
-	int insert(ISQLSaveBean bean);
+	int insert(ISQLBean bean);
 
 	/**
 	 * 更新
@@ -21,5 +21,5 @@ public interface ISQLSaveDao {
 	 * @param bean
 	 * @return
 	 */
-	int update(ISQLSaveBean bean);
+	int update(ISQLBean bean);
 }
