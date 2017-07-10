@@ -3,7 +3,7 @@
 # 环境要求(Environment)
 Jdk8及以上
 
-More than JDK8
+Jdk8 and above.
 # 快速开始(Quick start)
 使用服务器框架我们首先就是要关心如何快速的搭建出服务器的原始模型。我们需要构造一些必要的参数：端口和服务器名称。
 ```java
