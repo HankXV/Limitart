@@ -56,6 +56,9 @@ public abstract class InnerGameServer extends InnerSlaveServer {
 	 */
 	public synchronized void resFightServerJoinMaster2Game(ResFightServerJoinMaster2GameMessage msg) {
 		for (InnerServerInfo info : msg.serverInfo) {
+			if (fightServers.containsKey(info.serverId)) {
+				continue;
+			}
 			try {
 				BinaryClient client = new BinaryClient(
 						new BinaryClientConfig.BinaryClientConfigBuilder().clientName("Game-Fight-Inner-Client")
@@ -125,12 +128,12 @@ public abstract class InnerGameServer extends InnerSlaveServer {
 		msg.serverId = super.serverId;
 		try {
 			client.sendMessage(msg, (isSuccess, cause, channel) -> {
-                if (isSuccess) {
-                    log.info("report game server info to fight server seccess:" + msg.serverId);
-                } else {
-                    log.error("report game server info to fight server fail:" + msg.serverId, cause);
-                }
-            });
+				if (isSuccess) {
+					log.info("report game server info to fight server seccess:" + msg.serverId);
+				} else {
+					log.error("report game server info to fight server fail:" + msg.serverId, cause);
+				}
+			});
 		} catch (Exception e) {
 			log.error(e, e);
 		}
