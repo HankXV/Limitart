@@ -1,15 +1,21 @@
 package com.limitart.net.http.server.config;
 
+import java.util.HashSet;
+
+import com.limitart.util.StringUtil;
+
 public final class HttpServerConfig {
 	private String serverName;
 	private int port;
 	// 消息聚合最大（1024KB）,即Content-Length
 	private int httpObjectAggregatorMax;
-
+	private HashSet<String> whiteList;
+	
 	private HttpServerConfig(HttpServerConfigBuilder builder) {
 		this.port = builder.port;
 		this.httpObjectAggregatorMax = builder.httpObjectAggregatorMax;
 		this.serverName = builder.serverName;
+		this.whiteList = builder.whiteList;
 	}
 
 	public String getServerName() {
@@ -23,16 +29,22 @@ public final class HttpServerConfig {
 	public int getHttpObjectAggregatorMax() {
 		return httpObjectAggregatorMax;
 	}
+	
+	public HashSet<String> getWhiteList() {
+		return whiteList;
+	}
 
 	public static class HttpServerConfigBuilder {
 		private String serverName;
 		private int port;
 		private int httpObjectAggregatorMax;
+		private HashSet<String> whiteList;
 
 		public HttpServerConfigBuilder() {
 			this.serverName = "Http-Server";
 			this.port = 8888;
 			this.httpObjectAggregatorMax = 1024 * 1024;
+			this.whiteList = new HashSet<>();
 		}
 
 		public HttpServerConfig build() {
@@ -55,6 +67,15 @@ public final class HttpServerConfig {
 
 		public HttpServerConfigBuilder httpObjectAggregatorMax(int httpObjectAggregatorMax) {
 			this.httpObjectAggregatorMax = Math.max(512, httpObjectAggregatorMax);
+			return this;
+		}
+		
+		public HttpServerConfigBuilder whiteList(HashSet<String> whiteList){
+			for(String ip : whiteList){
+				if(StringUtil.isIp(ip)){
+					this.whiteList.add(ip);
+				}
+			}
 			return this;
 		}
 

@@ -4,6 +4,7 @@ import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpMethod.POST;
 
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -59,7 +60,6 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 @Sharable
 public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 	private static Logger log = LogManager.getLogger();
-	private final static String INNERADDRESS = "171.88.164.37";
 	private static EventLoopGroup bossGroup;
 	private static EventLoopGroup workerGroup;
 	private HttpServerEventListener serverEventListener;
@@ -152,13 +152,17 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 
 	@Override
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-		String remoteAddress = insocket.getAddress().getHostAddress();
-		if(StringUtil.isIp(remoteAddress)){
-			if(remoteAddress.equals(INNERADDRESS)){
-				this.serverEventListener.onChannelRegistered(ctx.channel());
+		HashSet<String> whiteList = config.getWhiteList();
+		if(whiteList != null && !config.getWhiteList().isEmpty()){
+			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+			String remoteAddress = insocket.getAddress().getHostAddress();
+			if(!whiteList.contains(remoteAddress)){
+				ctx.channel().close();
+				log.info("ip: "+remoteAddress+" rejected link!");
+				return;
 			}
 		}
+		this.serverEventListener.onChannelRegistered(ctx.channel());
 	}
 
 	@Override
