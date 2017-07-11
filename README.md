@@ -279,6 +279,6 @@ Map内存Object类型，Map的Key为指定类型，此Map没有特殊性，只�
 ### 唯一ID生成工具(UniqueIdUtil)
 生成Java自带的UUID或者使用`createUUID`来创建一个long型的唯一ID，后者的唯一ID按照区域划分，最多支持16位区域数量和每秒16位数量的并发。
 ### 计时器(TimerUtil)
-粗略的间隔执行计时器，单线程执行，内部其实是一个`ScheduledThreadPoolExecutor`，不满足需求请自己使用ScheduledThreadPoolExecutor实现。
+粗略的间隔执行计时器，单线程执行。
 ### 定时任务作业(SchedulerUtil)
 内部使用quartz实现，支持cron表达式和时分秒配置，计时比较精确。
