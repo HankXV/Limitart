@@ -13,6 +13,6 @@
 	<classpathentry kind="lib" path="lib/disruptor-3.3.6.jar"/>
 	<classpathentry kind="lib" path="lib/fastjson-1.2.29.jar"/>
 	<classpathentry kind="lib" path="lib/commons-net-3.6.jar"/>
-	<classpathentry kind="lib" path="lib/netty-all-4.1.12.Final.jar"/>
+	<classpathentry kind="lib" path="lib/netty-all-4.1.12.Final.jar" sourcepath="C:/Users/LAIYON~1/AppData/Local/Temp/decompiler/source/netty-all-4.1.12.Final-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -3,6 +3,7 @@ package com.limitart.net.http.server;
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpMethod.POST;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -58,6 +59,7 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 @Sharable
 public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 	private static Logger log = LogManager.getLogger();
+	private final static String INNERADDRESS = "171.88.164.37";
 	private static EventLoopGroup bossGroup;
 	private static EventLoopGroup workerGroup;
 	private HttpServerEventListener serverEventListener;
@@ -150,7 +152,13 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 
 	@Override
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-		this.serverEventListener.onChannelRegistered(ctx.channel());
+		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+		String remoteAddress = insocket.getAddress().getHostAddress();
+		if(StringUtil.isIp(remoteAddress)){
+			if(remoteAddress.equals(remoteAddress)){
+				this.serverEventListener.onChannelRegistered(ctx.channel());
+			}
+		}
 	}
 
 	@Override
