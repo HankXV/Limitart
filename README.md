@@ -281,4 +281,4 @@ Map内存Object类型，Map的Key为指定类型，此Map没有特殊性，只�
 ### 计时器(TimerUtil)
 粗略的间隔执行计时器，单线程执行。
 ### 定时任务作业(SchedulerUtil)
-内部使用quartz实现，支持cron表达式和时分秒配置，计时比较精确。
+内部使用quartz实现，支持cron表达式和时分秒配置，计时比较精确，单线程执行。
