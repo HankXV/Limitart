@@ -154,16 +154,6 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 	}
 
 	@Override
-	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-		this.serverEventListener.onChannelRegistered(ctx.channel());
-	}
-
-	@Override
-	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-		this.serverEventListener.onChannelUnregistered(ctx.channel());
-	}
-
-	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
 		if (!msg.decoderResult().isSuccess()) {
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_DECODE_FAIL);

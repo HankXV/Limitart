@@ -71,17 +71,8 @@ public class ServiceCenterX {
 			}
 
 			@Override
-			public void onChannelUnregistered(Channel channel) {
-				onDisconnect(channel);
-			}
-
-			@Override
-			public void onChannelRegistered(Channel channel) {
-			}
-
-			@Override
 			public void onChannelInactive(Channel channel) {
-
+				onDisconnect(channel);
 			}
 
 			@Override

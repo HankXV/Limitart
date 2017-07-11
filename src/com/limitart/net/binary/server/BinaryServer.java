@@ -319,6 +319,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		log.info(ctx.channel().remoteAddress() + " disconnected！");
 		this.serverEventListener.onChannelInactive(ctx.channel());
 	}
 
@@ -330,13 +331,6 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 	@Override
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
 		this.startConnectionValidate(ctx.channel());
-		this.serverEventListener.onChannelRegistered(ctx.channel());
-	}
-
-	@Override
-	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-		log.info(ctx.channel().remoteAddress() + " disconnected！");
-		this.serverEventListener.onChannelUnregistered(ctx.channel());
 	}
 
 	public BinaryServerConfig getConfig() {

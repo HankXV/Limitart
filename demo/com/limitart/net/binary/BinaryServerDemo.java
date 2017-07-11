@@ -21,24 +21,12 @@ public class BinaryServerDemo {
 				cause.printStackTrace();
 			}
 
-			// 当一个Channel从内存注销时
-			@Override
-			public void onChannelUnregistered(Channel channel) {
-
-			}
-
-			// 当一个Channel注册到内存时
-			@Override
-			public void onChannelRegistered(Channel channel) {
-
-			}
-
-			// 当一个Channel闲置时
+			// 当一个Channel断开时
 			@Override
 			public void onChannelInactive(Channel channel) {
 			}
 
-			// 当一个Channel活跃时
+			// 当一个Channel连接时
 			@Override
 			public void onChannelActive(Channel channel) {
 

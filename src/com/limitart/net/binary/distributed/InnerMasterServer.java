@@ -87,21 +87,6 @@ public abstract class InnerMasterServer implements BinaryServerEventListener, IS
 
 	@Override
 	public void onChannelInactive(Channel channel) {
-
-	}
-
-	@Override
-	public void onExceptionCaught(Channel channel, Throwable cause) {
-		log.error("session:" + channel, cause);
-	}
-
-	@Override
-	public void onChannelRegistered(Channel channel) {
-
-	}
-
-	@Override
-	public void onChannelUnregistered(Channel channel) {
 		Integer serverType = InnerServerUtil.getServerType(channel);
 		Integer serverId = InnerServerUtil.getServerId(channel);
 		if (serverType != null && serverId != null) {
@@ -128,6 +113,11 @@ public abstract class InnerMasterServer implements BinaryServerEventListener, IS
 				}
 			}
 		}
+	}
+
+	@Override
+	public void onExceptionCaught(Channel channel, Throwable cause) {
+		log.error("session:" + channel, cause);
 	}
 
 	@Override
