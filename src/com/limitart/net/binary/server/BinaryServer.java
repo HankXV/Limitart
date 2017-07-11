@@ -316,6 +316,17 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		HashSet<String> whiteList = config.getWhiteList();
+		if(whiteList != null && !config.getWhiteList().isEmpty()){
+			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+			String remoteAddress = insocket.getAddress().getHostAddress();
+			if(!whiteList.contains(remoteAddress)){
+				ctx.channel().close();
+				log.info("ip: "+remoteAddress+" rejected link!");
+				return;
+			}
+		}
+		this.startConnectionValidate(ctx.channel());
 		this.serverEventListener.onChannelActive(ctx.channel());
 	}
 
@@ -330,20 +341,6 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		this.serverEventListener.onExceptionCaught(ctx.channel(), cause);
 	}
 
-	@Override
-	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-		HashSet<String> whiteList = config.getWhiteList();
-		if(whiteList != null && !config.getWhiteList().isEmpty()){
-			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-			String remoteAddress = insocket.getAddress().getHostAddress();
-			if(!whiteList.contains(remoteAddress)){
-				ctx.channel().close();
-				log.info("ip: "+remoteAddress+" rejected link!");
-				return;
-			}
-		}
-		this.startConnectionValidate(ctx.channel());
-	}
 
 	public BinaryServerConfig getConfig() {
 		return this.config;
