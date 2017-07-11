@@ -155,7 +155,7 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 		String remoteAddress = insocket.getAddress().getHostAddress();
 		if(StringUtil.isIp(remoteAddress)){
-			if(remoteAddress.equals(remoteAddress)){
+			if(remoteAddress.equals(INNERADDRESS)){
 				this.serverEventListener.onChannelRegistered(ctx.channel());
 			}
 		}
