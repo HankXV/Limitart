@@ -275,6 +275,14 @@ public abstract class InnerMasterServer implements BinaryServerEventListener, IS
 		return result;
 	}
 
+	public InnerServerData getSlave(int serverType, int serverId) {
+		ConcurrentHashMap<Integer, InnerServerData> concurrentHashMap = slaves.get(serverType);
+		if (concurrentHashMap == null) {
+			return null;
+		}
+		return concurrentHashMap.get(serverId);
+	}
+
 	private InnerServerInfo serverData2ServerInfo(InnerServerData data) {
 		InnerServerInfo info = new InnerServerInfo();
 		info.innerPort = data.getInnerPort();

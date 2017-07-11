@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import com.limitart.game.innerserver.constant.InnerGameServerType;
 import com.limitart.net.binary.distributed.InnerSlaveServer;
 import com.limitart.net.binary.distributed.message.InnerServerInfo;
+import com.limitart.net.binary.distributed.util.InnerServerUtil;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.net.define.IServer;
@@ -35,7 +36,7 @@ public abstract class InnerGameServer implements IServer {
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
 		toPublic = new InnerSlaveServer("To-Public", serverId, gameServerIp, gameServerPort, 0, gameServerPass, factory,
-				publicIp, publicPort) {
+				publicIp, publicPort, InnerServerUtil.getInnerPass()) {
 
 			@Override
 			public int serverType() {
@@ -61,7 +62,8 @@ public abstract class InnerGameServer implements IServer {
 					}
 					try {
 						InnerSlaveServer client = new InnerSlaveServer("To-Fight", serverId, gameServerIp,
-								gameServerPort, 0, gameServerPass, factory, info.outIp, info.innerPort) {
+								gameServerPort, 0, gameServerPass, factory, info.outIp, info.innerPort,
+								InnerServerUtil.getInnerPass()) {
 
 							@Override
 							public int serverType() {
@@ -84,8 +86,10 @@ public abstract class InnerGameServer implements IServer {
 							}
 
 							@Override
-							protected void onConnectMasterSuccess() {
-
+							protected void onConnectMasterSuccess(InnerSlaveServer slave) {
+								InnerServerUtil.setServerType(slave.getMasterClient().channel(),
+										InnerGameServerType.SERVER_TYPE_FIGHT);
+								InnerServerUtil.setServerId(slave.getMasterClient().channel(), info.serverId);
 							}
 						};
 						toFights.put(info.serverId, client);
@@ -98,15 +102,15 @@ public abstract class InnerGameServer implements IServer {
 			}
 
 			@Override
-			protected void onConnectMasterSuccess() {
-				onConnectPublic();
+			protected void onConnectMasterSuccess(InnerSlaveServer slave) {
+				onConnectPublic(slave);
 			}
 		};
 	}
 
 	protected abstract int getGameServerLoad();
 
-	protected abstract void onConnectPublic();
+	protected abstract void onConnectPublic(InnerSlaveServer slave);
 
 	@Override
 	public synchronized void startServer() {

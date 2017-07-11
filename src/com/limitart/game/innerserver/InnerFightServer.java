@@ -15,6 +15,7 @@ import com.limitart.net.binary.distributed.InnerMasterServer;
 import com.limitart.net.binary.distributed.InnerSlaveServer;
 import com.limitart.net.binary.distributed.message.InnerServerInfo;
 import com.limitart.net.binary.distributed.struct.InnerServerData;
+import com.limitart.net.binary.distributed.util.InnerServerUtil;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.net.define.IServer;
@@ -52,7 +53,7 @@ public abstract class InnerFightServer implements IServer {
 			}
 		};
 		toMaster = new InnerSlaveServer("To-Public", serverId, fightServerIp, fightServerPort, FightServerInnerPort,
-				fightServerPass, factory, publicIp, publicPort) {
+				fightServerPass, factory, publicIp, publicPort, InnerServerUtil.getInnerPass()) {
 
 			@Override
 			public int serverType() {
@@ -75,9 +76,9 @@ public abstract class InnerFightServer implements IServer {
 			}
 
 			@Override
-			protected void onConnectMasterSuccess() {
+			protected void onConnectMasterSuccess(InnerSlaveServer slave) {
 				server.startServer();
-				onConnectPublic();
+				onConnectPublic(slave);
 			}
 		};
 	}
@@ -95,14 +96,14 @@ public abstract class InnerFightServer implements IServer {
 
 	protected abstract int getFightServerLoad();
 
-	protected abstract void onConnectPublic();
+	protected abstract void onConnectPublic(InnerSlaveServer slave);
 
 	public InnerSlaveServer getPublicClient() {
 		return this.toMaster;
 	}
 
 	public InnerServerData getGameServer(int serverId) {
-		return server.getSlaves(InnerGameServerType.SERVER_TYPE_GAME).get(serverId);
+		return server.getSlave(InnerGameServerType.SERVER_TYPE_GAME, serverId);
 	}
 
 	public List<InnerServerData> getGameServers() {
