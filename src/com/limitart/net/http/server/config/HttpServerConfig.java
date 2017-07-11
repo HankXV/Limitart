@@ -70,8 +70,8 @@ public final class HttpServerConfig {
 			return this;
 		}
 		
-		public HttpServerConfigBuilder whiteList(HashSet<String> whiteList){
-			for(String ip : whiteList){
+		public HttpServerConfigBuilder whiteList(String ... remoteAddress){
+			for(String ip : remoteAddress){
 				if(StringUtil.isIp(ip)){
 					this.whiteList.add(ip);
 				}
