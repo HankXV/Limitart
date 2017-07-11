@@ -1,5 +1,6 @@
 package com.limitart.net.binary.message;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.message.define.IMessagePool;
+import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.reflectasm.ConstructorAccess;
 import com.limitart.util.ReflectionUtil;
 
@@ -31,10 +33,16 @@ public class MessageFactory {
 	 * 
 	 * @param packageName
 	 * @return
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 * @throws MessageIDDuplicatedException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
 	 * @throws Exception
 	 * @see {@link IMessagePool}
 	 */
-	public static MessageFactory createByPackage(String packageName) throws Exception {
+	public static MessageFactory createByPackage(String packageName) throws ClassNotFoundException, IOException,
+			MessageIDDuplicatedException, InstantiationException, IllegalAccessException {
 		MessageFactory messageFactory = new MessageFactory();
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, IMessagePool.class);
 		for (Class<?> clzz : classesByPackage) {
@@ -45,7 +53,8 @@ public class MessageFactory {
 		return messageFactory;
 	}
 
-	public synchronized MessageFactory registerMsg(IHandler<? extends Message> handler) {
+	public synchronized MessageFactory registerMsg(IHandler<? extends Message> handler)
+			throws MessageIDDuplicatedException {
 		Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
 		ParameterizedTypeImpl handlerInterface = null;
 		for (Type temp : genericInterfaces) {
@@ -74,14 +83,14 @@ public class MessageFactory {
 		if (msgs.containsKey(id)) {
 			Class<? extends Message> class1 = msgs.get(id).newInstance().getClass();
 			if (!class1.getName().equals(msgClass.getName())) {
-				throw new IllegalArgumentException("message id duplicated:" + id + ",class old:" + class1.getName()
+				throw new MessageIDDuplicatedException("message id duplicated:" + id + ",class old:" + class1.getName()
 						+ ",class new:" + msgClass.getName());
 			} else {
 				return this;
 			}
 		}
 		if (handlers.containsKey(id)) {
-			throw new IllegalArgumentException("handler id duplicated:" + id);
+			throw new MessageIDDuplicatedException("handler id duplicated:" + id);
 		}
 		ConstructorAccess<? extends Message> constructorAccess = ConstructorAccess.get(msgClass);
 		msgs.put(id, constructorAccess);
@@ -91,7 +100,7 @@ public class MessageFactory {
 	}
 
 	public synchronized MessageFactory registerMsg(Class<? extends IHandler<? extends Message>> handlerClass)
-			throws InstantiationException, IllegalAccessException {
+			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
 		return registerMsg(handlerClass.newInstance());
 	}
 

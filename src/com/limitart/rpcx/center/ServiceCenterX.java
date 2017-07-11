@@ -15,6 +15,7 @@ import com.limitart.collections.ConcurrentHashSet;
 import com.limitart.net.binary.handler.IHandler;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
+import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.net.binary.server.BinaryServer;
 import com.limitart.net.binary.server.config.BinaryServerConfig;
 import com.limitart.net.binary.server.listener.BinaryServerEventListener;
@@ -54,7 +55,8 @@ public class ServiceCenterX {
 	// 定时任务集合
 	private ConcurrentHashMap<String, ConcurrentHashSet<Integer>> schedules = new ConcurrentHashMap<>();
 
-	public ServiceCenterX(ServiceCenterXConfig config) throws InstantiationException, IllegalAccessException {
+	public ServiceCenterX(ServiceCenterXConfig config)
+			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("ServiceCenterXConfig");
 		}
@@ -107,12 +109,12 @@ public class ServiceCenterX {
 	}
 
 	public ServiceCenterX bind() throws Exception {
-		binaryServer.bind();
+		binaryServer.startServer();
 		return this;
 	}
 
 	public ServiceCenterX stop() {
-		binaryServer.stop();
+		binaryServer.stopServer();
 		return this;
 	}
 

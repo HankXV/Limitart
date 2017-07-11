@@ -37,7 +37,7 @@ public class SQLSaveTaskQueue implements ITaskQueue<ISQLBean> {
 
 			@Override
 			public void handle(SQLBeanWrap t) {
-				ISQLSaveDao baseDao = daos.get(t.getClass());
+				ISQLSaveDao baseDao = daos.get(t.bean.getClass());
 				if (baseDao == null) {
 					log.error("dao not exist:" + t.getClass().getName());
 					return;
@@ -70,12 +70,12 @@ public class SQLSaveTaskQueue implements ITaskQueue<ISQLBean> {
 	}
 
 	@Override
-	public void startServer() {
+	public void startServer() throws Exception {
 		taskQueue.startServer();
 	}
 
 	@Override
-	public void stopServer() {
+	public void stopServer() throws Exception {
 		taskQueue.stopServer();
 	}
 

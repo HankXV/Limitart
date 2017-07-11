@@ -1,4 +1,4 @@
-package com.limitart.game.innerserver.struct;
+package com.limitart.net.binary.distributed.struct;
 
 import com.limitart.net.binary.client.BinaryClient;
 
@@ -13,6 +13,7 @@ import io.netty.channel.Channel;
 public class InnerServerData {
 	// 服务器Id
 	private int serverId;
+	private int serverType;
 	// 对客户端开放服务器Ip
 	private String outIp;
 	// 对客户端开放端口
@@ -94,6 +95,14 @@ public class InnerServerData {
 
 	public void setBinaryClient(BinaryClient binaryClient) {
 		this.binaryClient = binaryClient;
+	}
+
+	public int getServerType() {
+		return serverType;
+	}
+
+	public void setServerType(int serverType) {
+		this.serverType = serverType;
 	}
 
 }

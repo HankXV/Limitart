@@ -23,9 +23,11 @@ import com.limitart.db.log.anotation.LogColumn;
 import com.limitart.db.log.config.LogDBServerConfig;
 import com.limitart.db.log.define.IDataSourceFactory;
 import com.limitart.db.log.define.ILog;
+import com.limitart.db.log.exception.LogDBServerAlreadyStopException;
 import com.limitart.db.log.tablecheck.LogStructChecker;
 import com.limitart.db.log.util.LogDBUtil;
 import com.limitart.db.log.util.LogDBUtil.QueryConditionBuilder;
+import com.limitart.net.define.IServer;
 import com.limitart.reflectasm.FieldAccess;
 import com.limitart.thread.NamedThreadFactory;
 
@@ -35,7 +37,7 @@ import com.limitart.thread.NamedThreadFactory;
  * @author hank
  *
  */
-public class LogDBServer {
+public class LogDBServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	private LogDBServerConfig config;
 	private ThreadPoolExecutor threadPool;
@@ -49,81 +51,6 @@ public class LogDBServer {
 	public LogDBServer(LogDBServerConfig config, IDataSourceFactory dataSourceFactory) {
 		this.config = config;
 		this.dataSourceFactory = dataSourceFactory;
-	}
-
-	/**
-	 * 开启服务器
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	public LogDBServer start() throws Exception {
-		if (this.config == null) {
-			throw new Exception("please init server first!");
-		}
-		if (this.dataSourceFactory == null) {
-			throw new Exception("please set a DBConnection!");
-		}
-		if (!isStop) {
-			throw new Exception("server has already start!");
-		}
-		// 初始化任务线程池
-		if (this.config.getCustomInsertThreadPool() == null) {
-			this.logTaskQueue = new LinkedBlockingQueue<>();
-			this.threadPool = new ThreadPoolExecutor(this.config.getThreadCorePoolSize(),
-					this.config.getThreadMaximumPoolSize(), 0, TimeUnit.MILLISECONDS, logTaskQueue,
-					new NamedThreadFactory() {
-
-						@Override
-						public String getThreadName() {
-							return "LogDBServer-Insert-" + threadPool.getPoolSize();
-						}
-					});
-		} else {
-			this.logTaskQueue = this.config.getCustomInsertThreadPool().getQueue();
-			this.threadPool = this.config.getCustomInsertThreadPool();
-		}
-		// 检查所有表的变更状况
-		if (checker != null) {
-			// 添加默认日志
-			if (config.getScanPackages() != null && config.getScanPackages().length > 0) {
-				for (String packageName : config.getScanPackages()) {
-					checker.registTable(packageName);
-				}
-			}
-			// 启动时，执行表格结构检查
-			Connection connection = this.dataSourceFactory.getDataSource().getConnection();
-			checker.executeCheck(connection);
-			connection.close();
-		}
-		this.isStop = false;
-		return this;
-	}
-
-	/**
-	 * 停止服务器
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	public LogDBServer stop() throws Exception {
-		if (isStop) {
-			throw new Exception("server already stopped!");
-		}
-		this.isStop = true;
-		List<Runnable> shutdownNow = threadPool.shutdownNow();
-		// 完成剩余的任务
-		for (Runnable task : shutdownNow) {
-			try {
-				task.run();
-				log.info("保存文件日志队列第" + shutdownNow.size() + "条完成");
-			} catch (Exception e) {
-				log.error(e, e);
-			}
-		}
-		shutdownNow.clear();
-		log.info("日志系统关闭完成");
-		return this;
 	}
 
 	/**
@@ -405,5 +332,68 @@ public class LogDBServer {
 			}
 
 		}
+	}
+
+	@Override
+	public void startServer() throws Exception {
+		if (this.config == null) {
+			throw new NullPointerException("please init server first!");
+		}
+		if (this.dataSourceFactory == null) {
+			throw new NullPointerException("please set a DBConnection!");
+		}
+		if (!isStop) {
+			throw new NullPointerException("server has already start!");
+		}
+		// 初始化任务线程池
+		if (this.config.getCustomInsertThreadPool() == null) {
+			this.logTaskQueue = new LinkedBlockingQueue<>();
+			this.threadPool = new ThreadPoolExecutor(this.config.getThreadCorePoolSize(),
+					this.config.getThreadMaximumPoolSize(), 0, TimeUnit.MILLISECONDS, logTaskQueue,
+					new NamedThreadFactory() {
+
+						@Override
+						public String getThreadName() {
+							return "LogDBServer-Insert-" + threadPool.getPoolSize();
+						}
+					});
+		} else {
+			this.logTaskQueue = this.config.getCustomInsertThreadPool().getQueue();
+			this.threadPool = this.config.getCustomInsertThreadPool();
+		}
+		// 检查所有表的变更状况
+		if (checker != null) {
+			// 添加默认日志
+			if (config.getScanPackages() != null && config.getScanPackages().length > 0) {
+				for (String packageName : config.getScanPackages()) {
+					checker.registTable(packageName);
+				}
+			}
+			// 启动时，执行表格结构检查
+			Connection connection = this.dataSourceFactory.getDataSource().getConnection();
+			checker.executeCheck(connection);
+			connection.close();
+		}
+		this.isStop = false;
+	}
+
+	@Override
+	public void stopServer() throws Exception {
+		if (isStop) {
+			throw new LogDBServerAlreadyStopException();
+		}
+		this.isStop = true;
+		List<Runnable> shutdownNow = threadPool.shutdownNow();
+		// 完成剩余的任务
+		for (Runnable task : shutdownNow) {
+			try {
+				task.run();
+				log.info("保存文件日志队列第" + shutdownNow.size() + "条完成");
+			} catch (Exception e) {
+				log.error(e, e);
+			}
+		}
+		shutdownNow.clear();
+		log.info("日志系统关闭完成");
 	}
 }

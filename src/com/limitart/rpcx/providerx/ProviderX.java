@@ -134,7 +134,7 @@ public class ProviderX implements BinaryServerEventListener {
 		if (serviceCenterClient != null) {
 			serviceCenterClient.connect();
 		}
-		server.bind();
+		server.startServer();
 	}
 
 	public void stop() {
@@ -142,7 +142,7 @@ public class ProviderX implements BinaryServerEventListener {
 			serviceCenterClient.disConnect();
 		}
 		if (server != null) {
-			server.stop();
+			server.stopServer();
 		}
 	}
 

@@ -1,7 +1,7 @@
-package com.limitart.game.innerserver.handler;
+package com.limitart.net.binary.distributed.handler;
 
-import com.limitart.game.innerserver.InnerMasterServer;
-import com.limitart.game.innerserver.msg.ReqServerLoadSlave2MasterMessage;
+import com.limitart.net.binary.distributed.InnerMasterServer;
+import com.limitart.net.binary.distributed.message.ReqServerLoadSlave2MasterMessage;
 import com.limitart.net.binary.handler.IHandler;
 
 public class ReqServerLoadSlave2MasterHandler implements IHandler<ReqServerLoadSlave2MasterMessage> {

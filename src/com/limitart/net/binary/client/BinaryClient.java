@@ -21,6 +21,7 @@ import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.message.constant.InnerMessageEnum;
+import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
@@ -68,7 +69,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 	public BinaryClient(BinaryClientConfig config, BinaryClientEventListener clientEventListener,
 			MessageFactory messageFactory) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException {
+			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("BinaryClientConfig");
 		}
@@ -274,6 +275,10 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
 		this.clientEventListener.onChannelUnregistered(this);
+	}
+
+	public BinaryClientConfig getConfig() {
+		return this.clientConfig;
 	}
 
 	private class ConnectionValidateServerHandler implements IHandler<ConnectionValidateServerMessage> {
