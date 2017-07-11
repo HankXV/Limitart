@@ -8,8 +8,4 @@ public interface NettyEventListener {
 	void onChannelInactive(Channel channel);
 
 	void onExceptionCaught(Channel channel, Throwable cause);
-
-	void onChannelRegistered(Channel channel);
-
-	void onChannelUnregistered(Channel channel);
 }

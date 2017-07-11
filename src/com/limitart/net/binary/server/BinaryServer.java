@@ -7,8 +7,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import javax.crypto.NoSuchPaddingException;
 
@@ -21,14 +21,17 @@ import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.message.constant.InnerMessageEnum;
+import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
 import com.limitart.net.binary.server.config.BinaryServerConfig;
 import com.limitart.net.binary.server.listener.BinaryServerEventListener;
 import com.limitart.net.binary.util.SendMessageUtil;
+import com.limitart.net.define.IServer;
 import com.limitart.util.RandomUtil;
 import com.limitart.util.SymmetricEncryptionUtil;
+import com.limitart.util.TimerUtil;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -54,7 +57,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author Hank
  *
  */
-public class BinaryServer extends ChannelInboundHandlerAdapter {
+public class BinaryServer extends ChannelInboundHandlerAdapter implements IServer {
 	private static Logger log = LogManager.getLogger();
 	private ServerBootstrap boot;
 	private Channel channel;
@@ -65,6 +68,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 	protected BinaryServerEventListener serverEventListener;
 	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
 	private SymmetricEncryptionUtil encrypUtil;
+	private TimerTask clearTask;
 	static {
 		if (Epoll.isAvailable()) {
 			bossGroup = new EpollEventLoopGroup();
@@ -76,7 +80,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 	}
 
 	public BinaryServer(BinaryServerConfig config, BinaryServerEventListener serverEventListener,
-			MessageFactory msgFactory) {
+			MessageFactory msgFactory) throws MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("BinaryServerConfig");
 		}
@@ -116,26 +120,18 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializerImpl(this));
-		schedule(() -> clearUnvalidatedConnection(), 0, 1, TimeUnit.SECONDS);
+		clearTask = new TimerTask() {
+
+			@Override
+			public void run() {
+				clearUnvalidatedConnection();
+			}
+		};
+		TimerUtil.scheduleGlobal(1000, clearTask);
 	}
 
-	public void schedule(Runnable command, long delay, TimeUnit unit) {
-		workerGroup.schedule(command, delay, unit);
-	}
-
-	public void schedule(Runnable command, long delay, long period, TimeUnit unit) {
-		workerGroup.scheduleAtFixedRate(command, delay, period, unit);
-	}
-
-	public void sendMessage(Channel channel, Message msg, SendMessageListener listener) throws Exception {
-		SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, listener);
-	}
-
-	public void sendMessage(List<Channel> channels, Message msg, SendMessageListener listener) throws Exception {
-		SendMessageUtil.sendMessage(this.config.getEncoder(), channels, msg, listener);
-	}
-
-	public void bind() {
+	@Override
+	public void startServer() {
 		new Thread(() -> {
 			try {
 				boot.bind(config.getPort()).addListener((ChannelFuture arg0) -> {
@@ -147,11 +143,24 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 				}).sync().channel().closeFuture().sync();
 			} catch (InterruptedException e) {
 				log.error(e, e);
-			} finally {
-				bossGroup.shutdownGracefully();
-				workerGroup.shutdownGracefully();
 			}
 		}, config.getServerName() + "-Binder").start();
+	}
+
+	@Override
+	public void stopServer() {
+		if (channel != null) {
+			channel.close();
+		}
+		TimerUtil.unScheduleGlobal(clearTask);
+	}
+
+	public void sendMessage(Channel channel, Message msg, SendMessageListener listener) throws Exception {
+		SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, listener);
+	}
+
+	public void sendMessage(List<Channel> channels, Message msg, SendMessageListener listener) throws Exception {
+		SendMessageUtil.sendMessage(this.config.getEncoder(), channels, msg, listener);
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
@@ -170,15 +179,6 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 							decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()))
 					.addLast(this.server);
 		}
-	}
-
-	public BinaryServer stop() {
-		bossGroup.shutdownGracefully();
-		workerGroup.shutdownGracefully();
-		if (channel != null) {
-			channel.close();
-		}
-		return this;
 	}
 
 	/**
@@ -321,6 +321,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		log.info(ctx.channel().remoteAddress() + " disconnected！");
 		this.serverEventListener.onChannelInactive(ctx.channel());
 	}
 
@@ -342,13 +343,10 @@ public class BinaryServer extends ChannelInboundHandlerAdapter {
 			}
 		}
 		this.startConnectionValidate(ctx.channel());
-		this.serverEventListener.onChannelRegistered(ctx.channel());
 	}
 
-	@Override
-	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-		log.info(ctx.channel().remoteAddress() + " disconnected！");
-		this.serverEventListener.onChannelUnregistered(ctx.channel());
+	public BinaryServerConfig getConfig() {
+		return this.config;
 	}
 
 	@Override

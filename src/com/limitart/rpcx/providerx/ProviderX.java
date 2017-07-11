@@ -134,7 +134,7 @@ public class ProviderX implements BinaryServerEventListener {
 		if (serviceCenterClient != null) {
 			serviceCenterClient.connect();
 		}
-		server.bind();
+		server.startServer();
 	}
 
 	public void stop() {
@@ -142,21 +142,13 @@ public class ProviderX implements BinaryServerEventListener {
 			serviceCenterClient.disConnect();
 		}
 		if (server != null) {
-			server.stop();
+			server.stopServer();
 		}
 	}
 
 	@Override
 	public void onExceptionCaught(Channel channel, Throwable cause) {
 		log.error(cause, cause);
-	}
-
-	@Override
-	public void onChannelUnregistered(Channel channel) {
-	}
-
-	@Override
-	public void onChannelRegistered(Channel channel) {
 	}
 
 	@Override

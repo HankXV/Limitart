@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.limitart.collections.ConstraintMap;
+import com.limitart.net.define.IServer;
 import com.limitart.net.http.codec.QueryStringDecoderV2;
 import com.limitart.net.http.constant.QueryMethod;
 import com.limitart.net.http.constant.RequestErrorCode;
@@ -58,8 +59,9 @@ import io.netty.handler.stream.ChunkedWriteHandler;
  *
  */
 @Sharable
-public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> implements IServer {
 	private static Logger log = LogManager.getLogger();
+	private ServerBootstrap boot;
 	private static EventLoopGroup bossGroup;
 	private static EventLoopGroup workerGroup;
 	private HttpServerEventListener serverEventListener;
@@ -76,7 +78,7 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 		}
 	}
 
-	public HttpServer(HttpServerEventListener serverEventListener, HttpServerConfig config,
+	public HttpServer(HttpServerConfig config, HttpServerEventListener serverEventListener,
 			UrlMessageFactory urlFactory) {
 		if (serverEventListener == null || config == null || urlFactory == null) {
 			throw new NullPointerException("init error!");
@@ -84,59 +86,72 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 		this.serverEventListener = serverEventListener;
 		this.config = config;
 		this.urlFactory = urlFactory;
-	}
-
-	public HttpServer bind() {
-		try {
-			ServerBootstrap boot = new ServerBootstrap();
-			if (Epoll.isAvailable()) {
-				boot.channel(EpollServerSocketChannel.class).option(ChannelOption.SO_BACKLOG, 1024);
-				log.info(this.config.getServerName() + " epoll init");
-			} else {
-				boot.channel(NioServerSocketChannel.class);
-				log.info(this.config.getServerName() + " nio init");
-			}
-			boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-					.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-					.childHandler(new ChannelInitializer<SocketChannel>() {
-
-						@Override
-						protected void initChannel(SocketChannel ch) throws Exception {
-							ch.pipeline().addLast(new HttpRequestDecoder())
-									.addLast(new HttpObjectAggregatorCustom(config.getHttpObjectAggregatorMax(),
-											serverEventListener))
-									.addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
-									.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
-									.addLast(HttpServer.this);
-						}
-					}).bind(this.config.getPort()).addListener((ChannelFutureListener) channelFuture -> {
-                        if (channelFuture.isSuccess()) {
-                            channel = channelFuture.channel();
-                            log.info(config.getServerName() + " bind at port:" + config.getPort());
-                            HttpServer.this.serverEventListener.onServerBind(channel);
-                        }
-                    }).sync().channel().closeFuture().sync();
-		} catch (InterruptedException e) {
-			log.error(e, e);
-		} finally {
-			bossGroup.shutdownGracefully();
-			workerGroup.shutdownGracefully();
+		boot = new ServerBootstrap();
+		if (Epoll.isAvailable()) {
+			boot.channel(EpollServerSocketChannel.class).option(ChannelOption.SO_BACKLOG, 1024);
+			log.info(this.config.getServerName() + " epoll init");
+		} else {
+			boot.channel(NioServerSocketChannel.class);
+			log.info(this.config.getServerName() + " nio init");
 		}
-		return this;
+		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+				.childHandler(new ChannelInitializer<SocketChannel>() {
+
+					@Override
+					protected void initChannel(SocketChannel ch) throws Exception {
+						ch.pipeline().addLast(new HttpRequestDecoder())
+								.addLast(new HttpObjectAggregatorCustom(config.getHttpObjectAggregatorMax(),
+										serverEventListener))
+								.addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
+								.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
+								.addLast(HttpServer.this);
+					}
+				});
 	}
 
-	public HttpServer stop() {
+	@Override
+	public void startServer() {
+		new Thread(() -> {
+			try {
+				boot.bind(this.config.getPort()).addListener((ChannelFutureListener) channelFuture -> {
+					if (channelFuture.isSuccess()) {
+						channel = channelFuture.channel();
+						log.info(config.getServerName() + " bind at port:" + config.getPort());
+						HttpServer.this.serverEventListener.onServerBind(channel);
+					}
+				}).sync().channel().closeFuture().sync();
+			} catch (InterruptedException e) {
+				log.error(e, e);
+			} finally {
+				bossGroup.shutdownGracefully();
+				workerGroup.shutdownGracefully();
+			}
+		}, config.getServerName() + "-Binder").start();
+	}
+
+	@Override
+	public void stopServer() {
 		bossGroup.shutdownGracefully();
 		workerGroup.shutdownGracefully();
 		if (channel != null) {
 			channel.close();
 			channel = null;
 		}
-		return this;
 	}
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    HashSet<String> whiteList = config.getWhiteList();
+		if(whiteList != null && !config.getWhiteList().isEmpty()){
+			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+			String remoteAddress = insocket.getAddress().getHostAddress();
+			if(!whiteList.contains(remoteAddress)){
+				ctx.channel().close();
+				log.error("ip: "+remoteAddress+" rejected link!");
+				return;
+			}
+		}
 		this.serverEventListener.onChannelActive(ctx.channel());
 	}
 
@@ -150,27 +165,6 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> {
 		this.serverEventListener.onExceptionCaught(ctx.channel(), cause);
 	}
 
-	@Override
-	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-		HashSet<String> whiteList = config.getWhiteList();
-		if(whiteList != null && !config.getWhiteList().isEmpty()){
-			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-			String remoteAddress = insocket.getAddress().getHostAddress();
-			if(!whiteList.contains(remoteAddress)){
-				ctx.channel().close();
-				log.info("ip: "+remoteAddress+" rejected link!");
-				return;
-			}
-		}
-		this.serverEventListener.onChannelRegistered(ctx.channel());
-	}
-
-	@Override
-	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-		this.serverEventListener.onChannelUnregistered(ctx.channel());
-	}
-
-	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
 		if (!msg.decoderResult().isSuccess()) {
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_DECODE_FAIL);

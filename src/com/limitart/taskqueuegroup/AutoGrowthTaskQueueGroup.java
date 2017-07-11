@@ -27,7 +27,7 @@ public class AutoGrowthTaskQueueGroup<T> {
 	private ITaskQueueFactory<T> taskQueueFactory;
 
 	public AutoGrowthTaskQueueGroup(int entityCountPerThread, int coreThreadCount, int initThreadCount,
-			int maxThreadCount, ITaskQueueFactory<T> taskQueueFactory) {
+			int maxThreadCount, ITaskQueueFactory<T> taskQueueFactory) throws Exception {
 		if (taskQueueFactory == null) {
 			throw new NullPointerException("taskQueueFactory");
 		}
@@ -51,7 +51,7 @@ public class AutoGrowthTaskQueueGroup<T> {
 		}
 	}
 
-	public synchronized void registerEntity(AutoGrowthEntity entity) throws TaskQueueException {
+	public synchronized void registerEntity(AutoGrowthEntity entity) throws Exception {
 		if (entity.getThreadIndex() > 0) {
 			throw new TaskQueueException("entity has already registered!");
 		}
@@ -87,7 +87,7 @@ public class AutoGrowthTaskQueueGroup<T> {
 		this.threads.get(entity.getThreadIndex()).getThread().addCommand(t);
 	}
 
-	public synchronized void unregisterEntity(AutoGrowthEntity entity) throws TaskQueueException {
+	public synchronized void unregisterEntity(AutoGrowthEntity entity) throws Exception {
 		int threadIndex = entity.getThreadIndex();
 		if (threadIndex == 0) {
 			return;
@@ -115,7 +115,7 @@ public class AutoGrowthTaskQueueGroup<T> {
 		}
 	}
 
-	private AutoGrowthSegment<T> newGrowthThread() {
+	private AutoGrowthSegment<T> newGrowthThread() throws Exception {
 		int id = threadId.incrementAndGet();
 		AutoGrowthSegment<T> data = new AutoGrowthSegment<>();
 		data.setThread(this.taskQueueFactory.newTaskQueue(id));

@@ -2,6 +2,7 @@ package com.limitart.net.binary;
 
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
+import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.net.binary.server.BinaryServer;
 import com.limitart.net.binary.server.config.BinaryServerConfig;
 import com.limitart.net.binary.server.config.BinaryServerConfig.BinaryServerConfigBuilder;
@@ -10,7 +11,8 @@ import com.limitart.net.binary.server.listener.BinaryServerEventListener;
 import io.netty.channel.Channel;
 
 public class BinaryServerDemo {
-	public static void main(String[] args) throws InstantiationException, IllegalAccessException {
+	public static void main(String[] args)
+			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
 		BinaryServerConfig build = new BinaryServerConfigBuilder().port(8888).serverName("BinaryServerDemo").build();
 		BinaryServerEventListener binaryServerEventListener = new BinaryServerEventListener() {
 			// 当网络模块发生错误时
@@ -19,24 +21,12 @@ public class BinaryServerDemo {
 				cause.printStackTrace();
 			}
 
-			// 当一个Channel从内存注销时
-			@Override
-			public void onChannelUnregistered(Channel channel) {
-
-			}
-
-			// 当一个Channel注册到内存时
-			@Override
-			public void onChannelRegistered(Channel channel) {
-
-			}
-
-			// 当一个Channel闲置时
+			// 当一个Channel断开时
 			@Override
 			public void onChannelInactive(Channel channel) {
 			}
 
-			// 当一个Channel活跃时
+			// 当一个Channel连接时
 			@Override
 			public void onChannelActive(Channel channel) {
 
@@ -63,6 +53,6 @@ public class BinaryServerDemo {
 		MessageFactory factory = new MessageFactory();
 		factory.registerMsg(BinaryHandlerDemo.class);
 		BinaryServer server = new BinaryServer(build, binaryServerEventListener, factory);
-		server.bind();
+		server.startServer();
 	}
 }

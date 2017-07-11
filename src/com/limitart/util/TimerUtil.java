@@ -1,13 +1,7 @@
 package com.limitart.util;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.limitart.thread.NamedThreadFactory;
-import com.limitart.util.listener.ITimerListener;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * 大概计时管理(更精确计时请用SchedulerUtil) 用计时器的时候请注意线程问题
@@ -17,40 +11,25 @@ import com.limitart.util.listener.ITimerListener;
  *
  */
 public final class TimerUtil {
-	private static Logger log = LogManager.getLogger();
-	private static ScheduledThreadPoolExecutor globalTimer = new ScheduledThreadPoolExecutor(1,
-			new NamedThreadFactory() {
-
-				@Override
-				public String getThreadName() {
-					return "Global-Timer";
-				}
-			});
+	private static Timer timer = new Timer("Limitart-Timer");
 
 	private TimerUtil() {
 	}
 
-	public static void scheduleGlobal(long delay, long interval, ITimerListener listener) {
-		globalTimer.scheduleAtFixedRate(() -> {
-            try {
-                listener.action();
-            } catch (Exception e) {
-                log.error(e, e);
-            }
-        }, delay, interval, TimeUnit.MILLISECONDS);
+	public static void unScheduleGlobal(TimerTask listener) {
+		listener.cancel();
+		timer.purge();
 	}
 
-	public static void scheduleGlobal(long delay, ITimerListener listener) {
-		globalTimer.schedule(() -> {
-            try {
-                listener.action();
-            } catch (Exception e) {
-                log.error(e, e);
-            }
-        }, delay, TimeUnit.MILLISECONDS);
+	public static void scheduleGlobal(long delay, long interval, TimerTask listener) {
+		timer.schedule(listener, delay, interval);
+	}
+
+	public static void scheduleGlobal(long delay, TimerTask listener) {
+		timer.schedule(listener, delay);
 	}
 
 	public static void shutdown() {
-		globalTimer.shutdown();
+		timer.cancel();
 	}
 }

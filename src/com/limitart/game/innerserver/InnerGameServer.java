@@ -1,23 +1,24 @@
 package com.limitart.game.innerserver;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.limitart.game.innerserver.msg.InnerServerInfo;
-import com.limitart.game.innerserver.msg.ReqConnectionReportGame2FightMessage;
-import com.limitart.game.innerserver.msg.ResFightServerJoinMaster2GameMessage;
-import com.limitart.game.innerserver.msg.ResFightServerQuitMaster2GameMessage;
-import com.limitart.game.innerserver.struct.InnerServerData;
-import com.limitart.game.innerserver.util.InnerServerUtil;
-import com.limitart.net.binary.client.BinaryClient;
-import com.limitart.net.binary.client.config.BinaryClientConfig;
-import com.limitart.net.binary.client.listener.BinaryClientEventListener;
-import com.limitart.net.binary.message.Message;
+import com.limitart.game.innerserver.constant.InnerGameServerType;
+import com.limitart.net.binary.distributed.InnerSlaveServer;
+import com.limitart.net.binary.distributed.message.InnerServerInfo;
+import com.limitart.net.binary.distributed.util.InnerServerUtil;
 import com.limitart.net.binary.message.MessageFactory;
-
-import io.netty.channel.Channel;
+import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
+import com.limitart.net.define.IServer;
 
 /**
  * 内部游戏服务器
@@ -25,143 +26,115 @@ import io.netty.channel.Channel;
  * @author Hank
  *
  */
-public abstract class InnerGameServer extends InnerSlaveServer {
+public abstract class InnerGameServer implements IServer {
 	private static Logger log = LogManager.getLogger();
-	private ConcurrentHashMap<Integer, InnerServerData> fightServers = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<Integer, InnerSlaveServer> toFights = new ConcurrentHashMap<>();
+	private InnerSlaveServer toPublic;
 
-	public InnerGameServer(int serverId, String outIp, int outPort, String outPass, MessageFactory factory,
-			String innerMasterIp, int innerMasterPort) throws Exception {
-		super(serverId, outIp, outPort, 0, outPass, factory, innerMasterIp, innerMasterPort);
+	public InnerGameServer(int serverId, String gameServerIp, int gameServerPort, String gameServerPass,
+			String publicIp, int publicPort, MessageFactory factory)
+			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
+		toPublic = new InnerSlaveServer("Game-To-Public", serverId, gameServerIp, gameServerPort, gameServerPass, 0, "",
+				publicIp, 0, "", publicPort, InnerServerUtil.getInnerPass(), factory) {
+			@Override
+			public int serverType() {
+				return InnerGameServerType.SERVER_TYPE_GAME;
+			}
+
+			@Override
+			public int serverLoad() {
+				return getGameServerLoad();
+			}
+
+			@Override
+			public void onNewSlaveQuit(int serverType, int serverId) {
+				if (serverType == InnerGameServerType.SERVER_TYPE_FIGHT) {
+					InnerSlaveServer innerSlaveServer = toFights.remove(serverId);
+					if (innerSlaveServer != null) {
+						innerSlaveServer.stopServer();
+					}
+				}
+			}
+
+			@Override
+			public void onNewSlaveJoin(InnerServerInfo info) {
+				// 有战斗服加入，主动去连接
+				if (info.serverType == InnerGameServerType.SERVER_TYPE_FIGHT) {
+					if (toFights.containsKey(info.serverId)) {
+						return;
+					}
+					try {
+						InnerSlaveServer client = new InnerSlaveServer("Game-To-Fight", serverId, gameServerIp,
+								gameServerPort, gameServerPass, 0, "", info.outIp, info.outPort, info.outPass,
+								info.innerPort, InnerServerUtil.getInnerPass(), factory) {
+
+							@Override
+							public int serverType() {
+								return InnerGameServerType.SERVER_TYPE_GAME;
+							}
+
+							@Override
+							public int serverLoad() {
+								return getGameServerLoad();
+							}
+
+							@Override
+							public void onNewSlaveQuit(int serverType, int serverId) {
+
+							}
+
+							@Override
+							public void onNewSlaveJoin(InnerServerInfo info) {
+
+							}
+
+							@Override
+							protected void onConnectMasterSuccess(InnerSlaveServer slave) {
+								InnerServerUtil.setServerType(slave.getMasterClient().channel(),
+										InnerGameServerType.SERVER_TYPE_FIGHT);
+								InnerServerUtil.setServerId(slave.getMasterClient().channel(), info.serverId);
+							}
+						};
+						toFights.put(info.serverId, client);
+						client.startServer();
+					} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+							| InvalidAlgorithmParameterException | MessageIDDuplicatedException e) {
+						log.error(e, e);
+					}
+				}
+			}
+
+			@Override
+			protected void onConnectMasterSuccess(InnerSlaveServer slave) {
+				onConnectPublic(slave);
+			}
+		};
+	}
+
+	protected abstract int getGameServerLoad();
+
+	protected abstract void onConnectPublic(InnerSlaveServer slave);
+
+	@Override
+	public synchronized void startServer() {
+		toPublic.startServer();
 	}
 
 	@Override
-	public int serverType() {
-		return InnerServerUtil.SERVER_TYPE_GAME;
+	public synchronized void stopServer() {
+		toPublic.stopServer();
 	}
 
-	public synchronized void start() {
-		log.info("inner game server start...");
-		connectMaster();
+	public InnerSlaveServer getPublicClient() {
+		return this.toPublic;
 	}
 
-	public synchronized void stop() {
-		log.info("inner game server stop...");
-		disconnectMaster();
+	public InnerSlaveServer getFightClient(int serverId) {
+		return toFights.get(serverId);
 	}
 
-	/**
-	 * master通知新的战斗服加入
-	 * 
-	 * @param msg
-	 */
-	public synchronized void resFightServerJoinMaster2Game(ResFightServerJoinMaster2GameMessage msg) {
-		for (InnerServerInfo info : msg.serverInfo) {
-			try {
-				BinaryClient client = new BinaryClient(
-						new BinaryClientConfig.BinaryClientConfigBuilder().clientName("Game-Fight-Inner-Client")
-								.autoReconnect(5).connectionPass(InnerServerUtil.getInnerPass()).remoteIp(info.outIp)
-								.remotePort(info.innerPort).build(),
-						new BinaryClientEventListener() {
-
-							@Override
-							public void onExceptionCaught(BinaryClient client, Throwable cause) {
-								log.error("session:" + client.channel(), cause);
-							}
-
-							@Override
-							public void onConnectionEffective(BinaryClient client) {
-								InnerServerUtil.setServerId(client.channel(), info.serverId);
-								InnerServerData data = serverInfo2ServerData(client.channel(), info);
-								data.setBinaryClient(client);
-								fightServers.put(info.serverId, data);
-								log.info("connect fight server success,fight server id:" + info.serverId);
-								reportServerToFightServer(client);
-							}
-
-							@Override
-							public void onChannelUnregistered(BinaryClient client) {
-								Channel channel = client.channel();
-								if (channel != null) {
-									Integer serverId = InnerServerUtil.getServerId(channel);
-									if (serverId != null) {
-										InnerServerData remove = fightServers.remove(serverId);
-										if (remove != null) {
-											log.info("fight server disconnected,fight server id:" + serverId);
-										}
-									}
-								}
-							}
-
-							@Override
-							public void onChannelRegistered(BinaryClient client) {
-
-							}
-
-							@Override
-							public void onChannelInactive(BinaryClient client) {
-
-							}
-
-							@Override
-							public void onChannelActive(BinaryClient client) {
-
-							}
-
-							@Override
-							public void dispatchMessage(Message message) {
-								message.setExtra(InnerGameServer.this);
-								message.getHandler().handle(message);
-							}
-						}, factory);
-				client.connect();
-			} catch (Exception e) {
-				log.error(e, e);
-			}
-		}
-	}
-
-	private void reportServerToFightServer(BinaryClient client) {
-		ReqConnectionReportGame2FightMessage msg = new ReqConnectionReportGame2FightMessage();
-		msg.serverId = super.serverId;
-		try {
-			client.sendMessage(msg, (isSuccess, cause, channel) -> {
-                if (isSuccess) {
-                    log.info("report game server info to fight server seccess:" + msg.serverId);
-                } else {
-                    log.error("report game server info to fight server fail:" + msg.serverId, cause);
-                }
-            });
-		} catch (Exception e) {
-			log.error(e, e);
-		}
-	}
-
-	/**
-	 * master通知战斗服下线
-	 * 
-	 * @param msg
-	 */
-	public void resFightServerQuitMaster2Game(ResFightServerQuitMaster2GameMessage msg) {
-		int fightServerId = msg.fightServerId;
-		InnerServerData innerServerData = this.fightServers.remove(fightServerId);
-		if (innerServerData != null) {
-			innerServerData.getBinaryClient().disConnect();
-			log.info("master notice fight server quit,cancel auto connect,fight server id:" + fightServerId);
-		}
-	}
-
-	public ConcurrentHashMap<Integer, InnerServerData> getFightServers() {
-		return this.fightServers;
-	}
-
-	private InnerServerData serverInfo2ServerData(Channel channel, InnerServerInfo info) {
-		InnerServerData data = new InnerServerData();
-		data.setChannel(channel);
-		data.setInnerPort(info.innerPort);
-		data.setOutIp(info.outIp);
-		data.setOutPass(info.outPass);
-		data.setOutPort(info.outPort);
-		data.setServerId(info.serverId);
-		return data;
+	public List<InnerSlaveServer> getFightClients() {
+		return new ArrayList<>(toFights.values());
 	}
 }

@@ -4,7 +4,7 @@ import java.net.SocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.TimeUnit;
+import java.util.TimerTask;
 
 import javax.crypto.NoSuchPaddingException;
 
@@ -19,11 +19,13 @@ import com.limitart.net.binary.listener.SendMessageListener;
 import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.message.constant.InnerMessageEnum;
+import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
 import com.limitart.net.binary.util.SendMessageUtil;
 import com.limitart.util.SymmetricEncryptionUtil;
+import com.limitart.util.TimerUtil;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -35,9 +37,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -54,21 +53,15 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	private BinaryClientEventListener clientEventListener;
 	private MessageFactory messageFactory;
 	private BinaryClientConfig clientConfig;
-	private static EventLoopGroup group;
+	private static EventLoopGroup group = new NioEventLoopGroup();
 	private Bootstrap bootstrap;
 	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
-	static {
-		if (Epoll.isAvailable()) {
-			group = new EpollEventLoopGroup();
-		} else {
-			group = new NioEventLoopGroup();
-		}
-	}
+	private TimerTask reconnectTask;
 
 	public BinaryClient(BinaryClientConfig config, BinaryClientEventListener clientEventListener,
 			MessageFactory messageFactory) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException {
+			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("BinaryClientConfig");
 		}
@@ -85,15 +78,17 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 				.registerMsg(new ConnectionValidateSuccessServerHandler());
 		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(clientConfig.getConnectionPass());
 		bootstrap = new Bootstrap();
-		if (Epoll.isAvailable()) {
-			bootstrap.channel(EpollServerSocketChannel.class);
-		} else {
-			bootstrap.channel(NioSocketChannel.class);
-			log.info(clientConfig.getClientName() + " nio init");
-		}
-
+		bootstrap.channel(NioSocketChannel.class);
+		log.info(clientConfig.getClientName() + " nio init");
 		bootstrap.group(group).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.handler(new ChannelInitializerImpl(this));
+		reconnectTask = new TimerTask() {
+
+			@Override
+			public void run() {
+				connect0();
+			}
+		};
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
@@ -115,20 +110,11 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 	}
 
-	public void schedule(Runnable command, long delay, TimeUnit unit) {
-		group.schedule(command, delay, unit);
-	}
-
-	public void schedule(Runnable command, long delay, long period, TimeUnit unit) {
-		group.scheduleAtFixedRate(command, delay, period, unit);
-	}
-
 	public void sendMessage(Message msg, SendMessageListener listener) throws Exception {
 		SendMessageUtil.sendMessage(this.clientConfig.getEncoder(), channel, msg, listener);
 	}
 
 	public BinaryClient disConnect() {
-		group.shutdownGracefully();
 		if (channel != null) {
 			channel.close();
 			channel = null;
@@ -181,7 +167,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			channel = null;
 		}
 		if (waitSeconds > 0) {
-			schedule(() -> connect0(), waitSeconds, TimeUnit.SECONDS);
+			TimerUtil.scheduleGlobal(waitSeconds * 1000, reconnectTask);
 		} else {
 			connect0();
 		}
@@ -261,9 +247,6 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		this.clientEventListener.onChannelInactive(this);
-		if (clientConfig.getAutoReconnect() > 0) {
-			tryReconnect(clientConfig.getAutoReconnect());
-		}
 	}
 
 	@Override
@@ -279,6 +262,10 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
 		this.clientEventListener.onChannelUnregistered(this);
+	}
+
+	public BinaryClientConfig getConfig() {
+		return this.clientConfig;
 	}
 
 	private class ConnectionValidateServerHandler implements IHandler<ConnectionValidateServerMessage> {
