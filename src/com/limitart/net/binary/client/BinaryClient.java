@@ -4,9 +4,7 @@ import java.net.SocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.TimerTask;
 
 import javax.crypto.NoSuchPaddingException;
 
@@ -26,8 +24,8 @@ import com.limitart.net.binary.message.impl.validate.ConnectionValidateClientMes
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import com.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
 import com.limitart.net.binary.util.SendMessageUtil;
-import com.limitart.thread.NamedThreadFactory;
 import com.limitart.util.SymmetricEncryptionUtil;
+import com.limitart.util.TimerUtil;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -59,13 +57,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	private Bootstrap bootstrap;
 	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
-	private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory() {
-
-		@Override
-		public String getThreadName() {
-			return "Client-Scheduler";
-		}
-	});
+	private TimerTask reconnectTask;
 
 	public BinaryClient(BinaryClientConfig config, BinaryClientEventListener clientEventListener,
 			MessageFactory messageFactory) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
@@ -90,6 +82,13 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		log.info(clientConfig.getClientName() + " nio init");
 		bootstrap.group(group).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.handler(new ChannelInitializerImpl(this));
+		reconnectTask = new TimerTask() {
+
+			@Override
+			public void run() {
+				connect0();
+			}
+		};
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
@@ -111,20 +110,11 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 	}
 
-	public void schedule(Runnable command, long delay, TimeUnit unit) {
-		scheduler.schedule(command, delay, unit);
-	}
-
-	public void schedule(Runnable command, long delay, long period, TimeUnit unit) {
-		scheduler.scheduleAtFixedRate(command, delay, period, unit);
-	}
-
 	public void sendMessage(Message msg, SendMessageListener listener) throws Exception {
 		SendMessageUtil.sendMessage(this.clientConfig.getEncoder(), channel, msg, listener);
 	}
 
 	public BinaryClient disConnect() {
-		group.shutdownGracefully();
 		if (channel != null) {
 			channel.close();
 			channel = null;
@@ -177,7 +167,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			channel = null;
 		}
 		if (waitSeconds > 0) {
-			scheduler.schedule(() -> connect0(), waitSeconds, TimeUnit.SECONDS);
+			TimerUtil.scheduleGlobal(waitSeconds * 1000, reconnectTask);
 		} else {
 			connect0();
 		}
@@ -257,9 +247,6 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		this.clientEventListener.onChannelInactive(this);
-		if (clientConfig.getAutoReconnect() > 0) {
-			tryReconnect(clientConfig.getAutoReconnect());
-		}
 	}
 
 	@Override

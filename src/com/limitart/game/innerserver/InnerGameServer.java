@@ -35,8 +35,8 @@ public abstract class InnerGameServer implements IServer {
 			MessageFactory factory, String publicIp, int publicPort)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
-		toPublic = new InnerSlaveServer("To-Public", serverId, gameServerIp, gameServerPort, 0, gameServerPass, factory,
-				publicIp, publicPort, InnerServerUtil.getInnerPass()) {
+		toPublic = new InnerSlaveServer("Game-To-Public", serverId, gameServerIp, gameServerPort, 0, gameServerPass,
+				factory, publicIp, publicPort, InnerServerUtil.getInnerPass()) {
 
 			@Override
 			public int serverType() {
@@ -50,7 +50,12 @@ public abstract class InnerGameServer implements IServer {
 
 			@Override
 			public void onNewSlaveQuit(int serverType, int serverId) {
-
+				if (serverType == InnerGameServerType.SERVER_TYPE_FIGHT) {
+					InnerSlaveServer innerSlaveServer = toFights.remove(serverId);
+					if (innerSlaveServer != null) {
+						innerSlaveServer.stopServer();
+					}
+				}
 			}
 
 			@Override
@@ -61,7 +66,7 @@ public abstract class InnerGameServer implements IServer {
 						return;
 					}
 					try {
-						InnerSlaveServer client = new InnerSlaveServer("To-Fight", serverId, gameServerIp,
+						InnerSlaveServer client = new InnerSlaveServer("Game-To-Fight", serverId, gameServerIp,
 								gameServerPort, 0, gameServerPass, factory, info.outIp, info.innerPort,
 								InnerServerUtil.getInnerPass()) {
 

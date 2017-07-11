@@ -5,10 +5,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.crypto.NoSuchPaddingException;
 
@@ -29,9 +27,9 @@ import com.limitart.net.binary.server.config.BinaryServerConfig;
 import com.limitart.net.binary.server.listener.BinaryServerEventListener;
 import com.limitart.net.binary.util.SendMessageUtil;
 import com.limitart.net.define.IServer;
-import com.limitart.thread.NamedThreadFactory;
 import com.limitart.util.RandomUtil;
 import com.limitart.util.SymmetricEncryptionUtil;
+import com.limitart.util.TimerUtil;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -68,13 +66,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 	protected BinaryServerEventListener serverEventListener;
 	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
 	private SymmetricEncryptionUtil encrypUtil;
-	private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory() {
-
-		@Override
-		public String getThreadName() {
-			return "Server-Scheduler";
-		}
-	});
+	private TimerTask clearTask;
 	static {
 		if (Epoll.isAvailable()) {
 			bossGroup = new EpollEventLoopGroup();
@@ -126,7 +118,14 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializerImpl(this));
-		scheduler.scheduleAtFixedRate(() -> clearUnvalidatedConnection(), 0, 1, TimeUnit.SECONDS);
+		clearTask = new TimerTask() {
+
+			@Override
+			public void run() {
+				clearUnvalidatedConnection();
+			}
+		};
+		TimerUtil.scheduleGlobal(1000, clearTask);
 	}
 
 	@Override
@@ -142,28 +141,16 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 				}).sync().channel().closeFuture().sync();
 			} catch (InterruptedException e) {
 				log.error(e, e);
-			} finally {
-				bossGroup.shutdownGracefully();
-				workerGroup.shutdownGracefully();
 			}
 		}, config.getServerName() + "-Binder").start();
 	}
 
 	@Override
 	public void stopServer() {
-		bossGroup.shutdownGracefully();
-		workerGroup.shutdownGracefully();
 		if (channel != null) {
 			channel.close();
 		}
-	}
-
-	public void schedule(Runnable command, long delay, TimeUnit unit) {
-		scheduler.schedule(command, delay, unit);
-	}
-
-	public void schedule(Runnable command, long delay, long period, TimeUnit unit) {
-		scheduler.scheduleAtFixedRate(command, delay, period, unit);
+		TimerUtil.unScheduleGlobal(clearTask);
 	}
 
 	public void sendMessage(Channel channel, Message msg, SendMessageListener listener) throws Exception {

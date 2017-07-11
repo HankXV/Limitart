@@ -3,7 +3,7 @@ package com.limitart.net.binary.distributed;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.TimeUnit;
+import java.util.TimerTask;
 
 import javax.crypto.NoSuchPaddingException;
 
@@ -25,6 +25,7 @@ import com.limitart.net.binary.message.Message;
 import com.limitart.net.binary.message.MessageFactory;
 import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.net.define.IServer;
+import com.limitart.util.TimerUtil;
 
 import io.netty.channel.Channel;
 
@@ -45,6 +46,7 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 	private int masterPort;
 	private String masterPass;
 	private BinaryClient toMaster;
+	private TimerTask reportTask;
 
 	public InnerSlaveServer(String serverName, int myServerId, String myIp, int myOutServerPort, int myInnerServerPort,
 			String myOutServerPass, MessageFactory factory, String masterIp, int masterPort, String masterPass)
@@ -60,10 +62,16 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 		this.masterPass = masterPass;
 		factory.registerMsg(new ResServerJoinMaster2SlaveHandler());
 		factory.registerMsg(new ResServerQuitMaster2SlaveHandler());
-		toMaster = new BinaryClient(
-				new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5).clientName(serverName + "-ToMaster")
-						.connectionPass(masterPass).remoteIp(masterIp).remotePort(masterPort).build(),
+		toMaster = new BinaryClient(new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5)
+				.clientName(serverName).connectionPass(masterPass).remoteIp(masterIp).remotePort(masterPort).build(),
 				this, factory);
+		reportTask = new TimerTask() {
+
+			@Override
+			public void run() {
+				reportLoad();
+			}
+		};
 	}
 
 	@Override
@@ -73,6 +81,7 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 
 	@Override
 	public void stopServer() {
+		TimerUtil.unScheduleGlobal(reportTask);
 		toMaster.disConnect();
 	}
 
@@ -125,27 +134,28 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 		} catch (Exception e) {
 			log.error(e, e);
 		}
-		toMaster.schedule(() -> {
-			ReqServerLoadSlave2MasterMessage slm = new ReqServerLoadSlave2MasterMessage();
-			slm.load = serverLoad();
-			try {
-				toMaster.sendMessage(slm, new SendMessageListener() {
-
-					@Override
-					public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-						if (isSuccess) {
-							log.debug("send server load to master {} success,current load:{}", client.channel(),
-									slm.load);
-						} else {
-							log.error("send server load to master {} fail,current load:{}", client.channel(), slm.load);
-						}
-					}
-				});
-			} catch (Exception e) {
-				log.error(e, e);
-			}
-		}, 5, 5, TimeUnit.SECONDS);
+		TimerUtil.scheduleGlobal(5000, 5000, reportTask);
 		onConnectMasterSuccess(this);
+	}
+
+	private void reportLoad() {
+		ReqServerLoadSlave2MasterMessage slm = new ReqServerLoadSlave2MasterMessage();
+		slm.load = serverLoad();
+		try {
+			toMaster.sendMessage(slm, new SendMessageListener() {
+
+				@Override
+				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
+					if (isSuccess) {
+						log.debug("send server load to master {} success,current load:{}", channel, slm.load);
+					} else {
+						log.error("send server load to master {} fail,current load:{}", channel, slm.load);
+					}
+				}
+			});
+		} catch (Exception e) {
+			log.error(e, e);
+		}
 	}
 
 	@Override
