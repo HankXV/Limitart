@@ -338,7 +338,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 			String remoteAddress = insocket.getAddress().getHostAddress();
 			if(!whiteList.contains(remoteAddress)){
 				ctx.channel().close();
-				log.info("ip: "+remoteAddress+" rejected link!");
+				log.error("ip: "+remoteAddress+" rejected link!");
 				return;
 			}
 		}
