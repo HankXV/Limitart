@@ -142,8 +142,8 @@ public final class BinaryServerConfig {
 			return this;
 		}
 		
-		public BinaryServerConfigBuilder whiteList(HashSet<String> whiteList){
-			for(String ip : whiteList){
+		public BinaryServerConfigBuilder whiteList(String ... remoteAddress){
+			for(String ip : remoteAddress){
 				if(StringUtil.isIp(ip)){
 					this.whiteList.add(ip);
 				}
