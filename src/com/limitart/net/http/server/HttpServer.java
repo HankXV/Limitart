@@ -123,17 +123,12 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 				}).sync().channel().closeFuture().sync();
 			} catch (InterruptedException e) {
 				log.error(e, e);
-			} finally {
-				bossGroup.shutdownGracefully();
-				workerGroup.shutdownGracefully();
 			}
 		}, config.getServerName() + "-Binder").start();
 	}
 
 	@Override
 	public void stopServer() {
-		bossGroup.shutdownGracefully();
-		workerGroup.shutdownGracefully();
 		if (channel != null) {
 			channel.close();
 			channel = null;
@@ -142,13 +137,13 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    HashSet<String> whiteList = config.getWhiteList();
-		if(whiteList != null && !config.getWhiteList().isEmpty()){
+		HashSet<String> whiteList = config.getWhiteList();
+		if (whiteList != null && !config.getWhiteList().isEmpty()) {
 			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 			String remoteAddress = insocket.getAddress().getHostAddress();
-			if(!whiteList.contains(remoteAddress)){
+			if (!whiteList.contains(remoteAddress)) {
 				ctx.channel().close();
-				log.error("ip: "+remoteAddress+" rejected link!");
+				log.error("ip: " + remoteAddress + " rejected link!");
 				return;
 			}
 		}
