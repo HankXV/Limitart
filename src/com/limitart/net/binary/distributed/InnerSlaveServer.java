@@ -39,31 +39,39 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 	private static Logger log = LogManager.getLogger();
 	private int myServerId;
 	private String myIp;
-	private int myOutServerPort;
-	private String myOutServerPass;
+	private int myServerPort;
+	private String myServerPass;
+	private String myInnerServerPass;
 	private int myInnerServerPort;
 	private String masterIp;
-	private int masterPort;
-	private String masterPass;
+	private int masterServerPort;
+	private String masterServerPass;
+	private int masterInnerPort;
+	private String masterInnerPass;
 	private BinaryClient toMaster;
 	private TimerTask reportTask;
 
-	public InnerSlaveServer(String serverName, int myServerId, String myIp, int myOutServerPort, int myInnerServerPort,
-			String myOutServerPass, MessageFactory factory, String masterIp, int masterPort, String masterPass)
+	public InnerSlaveServer(String slaveName, int myServerId, String myIp, int myServerPort, String myServerPass,
+			int myInnerServerPort, String myInnerServerPass, String masterIp, int masterServerPort,
+			String masterServerPass, int masterInnerPort, String masterInnerPass, MessageFactory factory)
 			throws MessageIDDuplicatedException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidAlgorithmParameterException {
 		this.myServerId = myServerId;
 		this.myIp = myIp;
-		this.myOutServerPort = myOutServerPort;
+		this.myServerPort = myServerPort;
+		this.myServerPass = myServerPass;
+		this.myInnerServerPass = myInnerServerPass;
 		this.myInnerServerPort = myInnerServerPort;
-		this.myOutServerPass = myOutServerPass;
 		this.masterIp = masterIp;
-		this.masterPort = masterPort;
-		this.masterPass = masterPass;
+		this.masterServerPort = masterServerPort;
+		this.masterServerPass = masterServerPass;
+		this.masterInnerPort = masterInnerPort;
+		this.masterInnerPass = masterInnerPass;
 		factory.registerMsg(new ResServerJoinMaster2SlaveHandler());
 		factory.registerMsg(new ResServerQuitMaster2SlaveHandler());
-		toMaster = new BinaryClient(new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5)
-				.clientName(serverName).connectionPass(masterPass).remoteIp(masterIp).remotePort(masterPort).build(),
+		toMaster = new BinaryClient(
+				new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5).clientName(slaveName)
+						.connectionPass(masterInnerPass).remoteIp(masterIp).remotePort(masterInnerPort).build(),
 				this, factory);
 		reportTask = new TimerTask() {
 
@@ -117,8 +125,8 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 		InnerServerInfo info = new InnerServerInfo();
 		info.innerPort = this.myInnerServerPort;
 		info.outIp = this.myIp;
-		info.outPass = this.myOutServerPass;
-		info.outPort = this.myOutServerPort;
+		info.outPass = this.myServerPass;
+		info.outPort = this.myServerPort;
 		info.serverId = this.myServerId;
 		info.serverType = serverType();
 		msg.serverInfo = info;
@@ -186,12 +194,16 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 		return myIp;
 	}
 
-	public int getMyOutServerPort() {
-		return myOutServerPort;
+	public int getMyServerPort() {
+		return myServerPort;
 	}
 
-	public String getMyOutServerPass() {
-		return myOutServerPass;
+	public String getMyServerPass() {
+		return myServerPass;
+	}
+
+	public String getMyInnerServerPass() {
+		return myInnerServerPass;
 	}
 
 	public int getMyInnerServerPort() {
@@ -202,12 +214,20 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 		return masterIp;
 	}
 
-	public int getMasterPort() {
-		return masterPort;
+	public int getMasterServerPort() {
+		return masterServerPort;
 	}
 
-	public String getMasterPass() {
-		return masterPass;
+	public String getMasterServerPass() {
+		return masterServerPass;
+	}
+
+	public int getMasterInnerPort() {
+		return masterInnerPort;
+	}
+
+	public String getMasterInnerPass() {
+		return masterInnerPass;
 	}
 
 	public abstract int serverType();

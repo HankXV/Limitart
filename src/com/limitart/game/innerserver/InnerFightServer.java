@@ -52,8 +52,9 @@ public abstract class InnerFightServer implements IServer {
 
 			}
 		};
-		toMaster = new InnerSlaveServer("Fight-To-Public", serverId, fightServerIp, fightServerPort, FightServerInnerPort,
-				fightServerPass, factory, publicIp, publicPort, InnerServerUtil.getInnerPass()) {
+		toMaster = new InnerSlaveServer("Fight-To-Public", serverId, fightServerIp, fightServerPort, fightServerPass,
+				FightServerInnerPort, InnerServerUtil.getInnerPass(), publicIp, 0, "", publicPort,
+				InnerServerUtil.getInnerPass(), factory) {
 
 			@Override
 			public int serverType() {
