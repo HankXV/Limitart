@@ -1,7 +1,10 @@
 package com.limitart.net.binary.server.config;
 
+import java.util.HashSet;
+
 import com.limitart.net.binary.codec.AbstractBinaryDecoder;
 import com.limitart.net.binary.codec.AbstractBinaryEncoder;
+import com.limitart.util.StringUtil;
 
 /**
  * 二进制服务器配置
@@ -16,6 +19,7 @@ public final class BinaryServerConfig {
 	private int connectionValidateTimeInSec;
 	private AbstractBinaryDecoder decoder;
 	private AbstractBinaryEncoder encoder;
+	private HashSet<String> whiteList;
 
 	private BinaryServerConfig(BinaryServerConfigBuilder builder) {
 		this.serverName = builder.serverName;
@@ -24,6 +28,7 @@ public final class BinaryServerConfig {
 		this.connectionValidateTimeInSec = builder.connectionValidateTimeInSec;
 		this.decoder = builder.decoder;
 		this.encoder = builder.encoder;
+		this.whiteList = builder.whiteList;
 	}
 
 	public String getServerName() {
@@ -50,6 +55,9 @@ public final class BinaryServerConfig {
 		return encoder;
 	}
 
+	public HashSet<String> getWhiteList() {
+		return whiteList;
+	}
 	public static class BinaryServerConfigBuilder {
 		private String serverName;
 		private int port;
@@ -57,6 +65,7 @@ public final class BinaryServerConfig {
 		private int connectionValidateTimeInSec;
 		private AbstractBinaryDecoder decoder;
 		private AbstractBinaryEncoder encoder;
+		private HashSet<String> whiteList;
 
 		public BinaryServerConfigBuilder() {
 			this.serverName = "Binary-Server";
@@ -65,6 +74,7 @@ public final class BinaryServerConfig {
 			this.connectionValidateTimeInSec = 20;
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
+			this.whiteList = new HashSet<>();
 		}
 
 		/**
@@ -129,6 +139,15 @@ public final class BinaryServerConfig {
 		 */
 		public BinaryServerConfigBuilder connectionValidateTimeInSec(int connectionValidateTimeInSec) {
 			this.connectionValidateTimeInSec = connectionValidateTimeInSec;
+			return this;
+		}
+		
+		public BinaryServerConfigBuilder whiteList(HashSet<String> whiteList){
+			for(String ip : whiteList){
+				if(StringUtil.isIp(ip)){
+					this.whiteList.add(ip);
+				}
+			}
 			return this;
 		}
 	}

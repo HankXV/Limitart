@@ -11,7 +11,14 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 public final class StringUtil {
 	private static String PHONE_REG = "^((1[0-9][0-9]))\\d{8}$";
 	private static String EMAIL_REG = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
-
+	private final static String IP_REG = "([1-9]|[1-9][0-9]|1\\d\\d|2[0-4]\\d|25[0-5])\\."
+			+ "([1-9]|[1-9][0-9]|1\\d\\d|2[0-4]\\d|25[0-5])\\." + "([1-9]|[1-9][0-9]|1\\d\\d|2[0-4]\\d|25[0-5])\\."
+			+ "([1-9]|[1-9][0-9]|1\\d\\d|2[0-4]\\d|25[0-5])";
+	
+	
+	public boolean isInnerAddress(String remoteAddress){
+		return false;
+	}
 	private StringUtil() {
 	}
 
@@ -37,6 +44,16 @@ public final class StringUtil {
 	 */
 	public static boolean isMail(String value) {
 		return matchReg(value, EMAIL_REG);
+	}
+	
+	/**
+	 * 是否是ip地址
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static boolean isIp(String value) {
+		return matchReg(value, IP_REG);
 	}
 
 	/**

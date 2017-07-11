@@ -3,6 +3,8 @@ package com.limitart.net.http.server;
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpMethod.POST;
 
+import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -140,6 +142,16 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    HashSet<String> whiteList = config.getWhiteList();
+		if(whiteList != null && !config.getWhiteList().isEmpty()){
+			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+			String remoteAddress = insocket.getAddress().getHostAddress();
+			if(!whiteList.contains(remoteAddress)){
+				ctx.channel().close();
+				log.error("ip: "+remoteAddress+" rejected link!");
+				return;
+			}
+		}
 		this.serverEventListener.onChannelActive(ctx.channel());
 	}
 
@@ -153,7 +165,6 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 		this.serverEventListener.onExceptionCaught(ctx.channel(), cause);
 	}
 
-	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
 		if (!msg.decoderResult().isSuccess()) {
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_DECODE_FAIL);

@@ -1,8 +1,10 @@
 package com.limitart.net.binary.server;
 
+import java.net.InetSocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimerTask;
@@ -330,6 +332,16 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 
 	@Override
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+		HashSet<String> whiteList = config.getWhiteList();
+		if(whiteList != null && !config.getWhiteList().isEmpty()){
+			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+			String remoteAddress = insocket.getAddress().getHostAddress();
+			if(!whiteList.contains(remoteAddress)){
+				ctx.channel().close();
+				log.info("ip: "+remoteAddress+" rejected link!");
+				return;
+			}
+		}
 		this.startConnectionValidate(ctx.channel());
 	}
 
