@@ -2,8 +2,8 @@ package com.limitart.net.http.message;
 
 import java.util.HashMap;
 
-import com.limitart.collections.ConstraintMap;
 import com.limitart.net.http.constant.QueryMethod;
+import com.limitart.net.http.handler.HttpHandler;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -12,15 +12,12 @@ public abstract class UrlMessage<URL> {
 
 	private transient Channel channel;
 	private transient FullHttpRequest request;
-	private HashMap<String, byte[]> files = new HashMap<>();
+	private transient HashMap<String, byte[]> files = new HashMap<>();
+	private transient HttpHandler<UrlMessage<String>> handler;
 
 	public abstract URL getUrl();
 
 	public abstract QueryMethod getMethod();
-
-	public abstract void readMessage(ConstraintMap<String> buf);
-
-	public abstract void writeMessage(ConstraintMap<String> buf) throws Exception;
 
 	public FullHttpRequest getRequest() {
 		return request;
@@ -40,5 +37,13 @@ public abstract class UrlMessage<URL> {
 
 	public HashMap<String, byte[]> getFiles() {
 		return files;
+	}
+
+	public HttpHandler<UrlMessage<String>> getHandler() {
+		return handler;
+	}
+
+	public void setHandler(HttpHandler<UrlMessage<String>> handler) {
+		this.handler = handler;
 	}
 }

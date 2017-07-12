@@ -3,6 +3,8 @@ package com.limitart.net.http.server;
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpMethod.POST;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +23,7 @@ import com.limitart.net.http.message.UrlMessageFactory;
 import com.limitart.net.http.server.config.HttpServerConfig;
 import com.limitart.net.http.server.event.HttpServerEventListener;
 import com.limitart.net.http.server.filter.HttpObjectAggregatorCustom;
-import com.limitart.util.HttpUtil;
+import com.limitart.net.http.util.HttpUtil;
 import com.limitart.util.StringUtil;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -200,13 +202,15 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_METHOD_ERROR);
 			return;
 		}
-		HttpHandler handler = this.urlFactory.getHandler(url);
+		@SuppressWarnings("unchecked")
+		HttpHandler<UrlMessage<String>> handler = (HttpHandler<UrlMessage<String>>) this.urlFactory.getHandler(url);
 		if (handler == null) {
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_URL_FORBBIDEN);
 			return;
 		}
 		message.setChannel(ctx.channel());
 		message.setRequest(msg);
+		message.setHandler(handler);
 		// 如果是POST，最后再来解析参数
 		if (msg.method() == POST) {
 			try {
@@ -236,11 +240,21 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 			}
 		}
 		try {
-			message.readMessage(params);
+			Field[] declaredFields = message.getClass().getDeclaredFields();
+			for (Field field : declaredFields) {
+				if (Modifier.isTransient(field.getModifiers())) {
+					continue;
+				}
+				field.setAccessible(true);
+				Object object = params.getObject(field.getName());
+				if (object != null) {
+					field.set(message, object);
+				}
+			}
 		} catch (Exception e) {
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_MESSAGE_PARSE, e.getMessage());
 			return;
 		}
-		this.serverEventListener.dispatchMessage(message, handler, params);
+		this.serverEventListener.dispatchMessage(message, params);
 	}
 }

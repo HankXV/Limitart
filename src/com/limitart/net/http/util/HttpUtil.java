@@ -1,9 +1,11 @@
-package com.limitart.util;
+package com.limitart.net.http.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -13,6 +15,8 @@ import com.limitart.collections.ConstraintMap;
 import com.limitart.net.http.constant.ContentTypes;
 import com.limitart.net.http.constant.RequestErrorCode;
 import com.limitart.net.http.message.UrlMessage;
+import com.limitart.util.SecurityUtil;
+import com.limitart.util.StringUtil;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -107,7 +111,16 @@ public final class HttpUtil {
 	public static ByteBuf urlMessage2bytes(UrlMessage<Integer> msg) throws Exception {
 		String[] data = new String[2];
 		ConstraintMap<String> map = new ConstraintMap<String>();
-		msg.writeMessage(map);
+		Field[] declaredFields = msg.getClass().getDeclaredFields();
+		for (Field field : declaredFields) {
+			if (Modifier.isTransient(field.getModifiers())) {
+				continue;
+			}
+			Object object = field.get(msg);
+			if (object != null) {
+				map.putObject(field.getName(), object);
+			}
+		}
 		// String map2QueryParam = HttpUtil.map2QueryParam(map);
 		data[0] = msg.getUrl() + "";
 		data[1] = SecurityUtil.base64Encode2(map.toJSON());

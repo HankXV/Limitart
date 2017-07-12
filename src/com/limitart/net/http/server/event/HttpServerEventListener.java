@@ -1,7 +1,6 @@
 package com.limitart.net.http.server.event;
 
 import com.limitart.collections.ConstraintMap;
-import com.limitart.net.http.handler.HttpHandler;
 import com.limitart.net.http.message.UrlMessage;
 import com.limitart.net.listener.NettyEventListener;
 
@@ -15,7 +14,7 @@ import io.netty.handler.codec.http.HttpMessage;
  *
  */
 public interface HttpServerEventListener extends NettyEventListener {
-	void dispatchMessage(UrlMessage<String> message, HttpHandler handler, ConstraintMap<String> map);
+	void dispatchMessage(UrlMessage<String> message, ConstraintMap<String> map);
 
 	/**
 	 * 当消息超标时会调用此函数
@@ -23,7 +22,7 @@ public interface HttpServerEventListener extends NettyEventListener {
 	 * @param ctx
 	 * @param oversized
 	 */
-    void onMessageOverSize(Channel channel, HttpMessage oversized);
+	void onMessageOverSize(Channel channel, HttpMessage oversized);
 
 	void onServerBind(Channel channel);
 }

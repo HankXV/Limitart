@@ -1,5 +1,6 @@
 package com.limitart.net.http.handler;
 
+import com.limitart.collections.ConstraintMap;
 import com.limitart.net.http.message.UrlMessage;
 
 /**
@@ -8,7 +9,7 @@ import com.limitart.net.http.message.UrlMessage;
  * @author hank
  *
  */
-public interface HttpHandler {
+public interface HttpHandler<T extends UrlMessage<String>> {
 
-	UrlMessage<Integer> doServer(UrlMessage<String> message) throws Exception;
+	ConstraintMap<String> doServer(T msg) throws Exception;
 }
