@@ -135,16 +135,6 @@ Jdk8 and above.
 			}
 
 			@Override
-			public void onChannelUnregistered(BinaryClient client) {
-
-			}
-
-			@Override
-			public void onChannelRegistered(BinaryClient client) {
-
-			}
-
-			@Override
 			public void onChannelInactive(BinaryClient client) {
 
 			}
@@ -251,7 +241,7 @@ Jdk8 and above.
 ### 二进制消息处理器（Message Handler）
 每个处理器必须要实现IHandler接口，然后注册进消息工厂(`MessageFactory`)与相应的消息(`Message`)所对应，IHandler被认为是单例模式，所以不要在`IHandler`的实现类里缓存任何非全局的数据。
 ### 反射构造消息工厂(Constructing A MessageFactory By Reflection)
-在实际开发中，我们都知道按模块来区分代码是非常有必要的事，各个模块的消息可以注册到各个模块自己的消息池(`IMessagePool`)里，这样可以避免所有消息混在一起，修改和查看显得非常麻烦，通过调用消息工厂(`MessageFactory`)的`createByPackage`方法可以使指定包下所有的消息池(`IMessagePool`)组合成一个消息工厂(`MessageFactory`)。
+在实际开发中，总是去关心注册消息很麻烦，这里提供了一个扫描包并且自动注册的功能(`MessageFactory.createByPackage`),这个方法会去扫描指定包内的所有`Ihandler`(不会包含内部类和匿名类)。
 ### 二进制服务器配置(Binary Server Config)
 `BinaryServerConfig`是构造二进制服务器(`BinaryServer`)必要的配置选项，主要用于确定端口、编码解码器以及链接验证码公钥(见上文链接过程中提到的验证码)。在二进制服务器(`BinaryServer`)中会有各种事件的回调函数，包括Netty原生回调和自定义回调：1.`onServerBind` 服务器绑定端口成功 2.`onConnectionEffective` 客户端链接验证成功，一个链接是否有效，或者说要判断此链接的消息是否可以正式交由本服务器处理，都建议从这里开始 3.`dispatchMessage` 这里就是分发消息的回调了，因为不同的应用线程模型不同，所以我们需要把消息放到不同线程来执行(参考taskqueue)，并且可能会对消息有统计行为，比如arpg游戏的大概模型就会按地图来分线程，那么这里就很可能会去寻找相应的地图线程来执行消息。
 ### 二进制客户端配置(Binary Client Config)
