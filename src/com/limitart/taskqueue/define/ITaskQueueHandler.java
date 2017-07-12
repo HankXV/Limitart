@@ -33,6 +33,18 @@ public interface ITaskQueueHandler<T> {
 			return false;
 		}
 	};
+	ITaskQueueHandler<Runnable> RUNNABLE_HANDLER = new ITaskQueueHandler<Runnable>() {
+
+		@Override
+		public boolean intercept(Runnable t) {
+			return false;
+		}
+
+		@Override
+		public void handle(Runnable t) {
+			t.run();
+		}
+	};
 
 	boolean intercept(T t);
 

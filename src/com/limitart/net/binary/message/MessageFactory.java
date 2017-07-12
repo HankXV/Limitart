@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.limitart.net.binary.handler.IHandler;
-import com.limitart.net.binary.message.define.IMessagePool;
 import com.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import com.limitart.reflectasm.ConstructorAccess;
 import com.limitart.util.ReflectionUtil;
@@ -29,26 +28,23 @@ public class MessageFactory {
 	private final HashMap<Short, IHandler<? extends Message>> handlers = new HashMap<>();
 
 	/**
-	 * 通过反射调用具有IMessagePool接口的消息构造
+	 * 通过反射包来加载所有handler
 	 * 
 	 * @param packageName
 	 * @return
-	 * @throws IOException
 	 * @throws ClassNotFoundException
+	 * @throws IOException
 	 * @throws MessageIDDuplicatedException
-	 * @throws IllegalAccessException
 	 * @throws InstantiationException
-	 * @throws Exception
-	 * @see {@link IMessagePool}
+	 * @throws IllegalAccessException
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static MessageFactory createByPackage(String packageName) throws ClassNotFoundException, IOException,
 			MessageIDDuplicatedException, InstantiationException, IllegalAccessException {
 		MessageFactory messageFactory = new MessageFactory();
-		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, IMessagePool.class);
+		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, IHandler.class);
 		for (Class<?> clzz : classesByPackage) {
-			IMessagePool newInstance = (IMessagePool) clzz.newInstance();
-			log.info("start register message pool：" + clzz.getSimpleName());
-			newInstance.register(messageFactory);
+			messageFactory.registerMsg((IHandler) clzz.newInstance());
 		}
 		return messageFactory;
 	}
@@ -95,7 +91,7 @@ public class MessageFactory {
 		ConstructorAccess<? extends Message> constructorAccess = ConstructorAccess.get(msgClass);
 		msgs.put(id, constructorAccess);
 		handlers.put(id, handler);
-		log.debug("regist msg: {}，handler:{}", msgClass.getSimpleName(), handler.getClass().getSimpleName());
+		log.info("regist msg: {}，handler:{}", msgClass.getSimpleName(), handler.getClass().getSimpleName());
 		return this;
 	}
 
