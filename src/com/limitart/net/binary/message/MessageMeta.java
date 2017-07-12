@@ -74,6 +74,7 @@ public abstract class MessageMeta {
 		T newInstance = createInstance(clazz);
 		newInstance.buffer(this.buffer);
 		newInstance.decode();
+		newInstance.buffer(null);
 		return newInstance;
 	}
 
