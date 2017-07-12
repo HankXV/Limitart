@@ -310,7 +310,8 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 				this.serverEventListener.dispatchMessage(msg);
 			}
 		} catch (Exception e) {
-			log.error("close session:" + ctx.channel().close(), e);
+			ctx.channel().close();
+			log.error("close session:" + ctx.channel(), e);
 		} finally {
 			buffer.release();
 		}
