@@ -278,7 +278,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 	}
 
 	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object arg) throws Exception {
+	public void channelRead(ChannelHandlerContext ctx, Object arg) {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
@@ -309,6 +309,8 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 				}
 				this.serverEventListener.dispatchMessage(msg);
 			}
+		} catch (Exception e) {
+			log.error("close session:" + ctx.channel().close(), e);
 		} finally {
 			buffer.release();
 		}
@@ -317,12 +319,12 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		HashSet<String> whiteList = config.getWhiteList();
-		if(whiteList != null && !config.getWhiteList().isEmpty()){
+		if (whiteList != null && !config.getWhiteList().isEmpty()) {
 			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 			String remoteAddress = insocket.getAddress().getHostAddress();
-			if(!whiteList.contains(remoteAddress)){
+			if (!whiteList.contains(remoteAddress)) {
 				ctx.channel().close();
-				log.info("ip: "+remoteAddress+" rejected link!");
+				log.info("ip: " + remoteAddress + " rejected link!");
 				return;
 			}
 		}
@@ -340,7 +342,6 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		this.serverEventListener.onExceptionCaught(ctx.channel(), cause);
 	}
-
 
 	public BinaryServerConfig getConfig() {
 		return this.config;
