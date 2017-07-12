@@ -72,10 +72,10 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 	private Channel channel;
 	static {
 		if (Epoll.isAvailable()) {
-			bossGroup = new EpollEventLoopGroup();
+			bossGroup = new EpollEventLoopGroup(1);
 			workerGroup = new EpollEventLoopGroup();
 		} else {
-			bossGroup = new NioEventLoopGroup();
+			bossGroup = new NioEventLoopGroup(1);
 			workerGroup = new NioEventLoopGroup();
 		}
 	}

@@ -71,10 +71,10 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 	private TimerTask clearTask;
 	static {
 		if (Epoll.isAvailable()) {
-			bossGroup = new EpollEventLoopGroup();
+			bossGroup = new EpollEventLoopGroup(1);
 			workerGroup = new EpollEventLoopGroup();
 		} else {
-			bossGroup = new NioEventLoopGroup();
+			bossGroup = new NioEventLoopGroup(1);
 			workerGroup = new NioEventLoopGroup();
 		}
 	}
@@ -108,8 +108,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 			workerGroup = new EpollEventLoopGroup();
 			boot.option(ChannelOption.SO_BACKLOG, 1024).channel(EpollServerSocketChannel.class)
 					.childOption(ChannelOption.SO_LINGER, 0).childOption(ChannelOption.SO_REUSEADDR, true)
-					.childOption(ChannelOption.SO_KEEPALIVE, true).childOption(ChannelOption.SO_SNDBUF, 32 * 1024)
-					.childOption(ChannelOption.SO_RCVBUF, 32 * 1024);
+					.childOption(ChannelOption.SO_KEEPALIVE, true);
 			log.info(config.getServerName() + " epoll init");
 		} else {
 			bossGroup = new NioEventLoopGroup();
