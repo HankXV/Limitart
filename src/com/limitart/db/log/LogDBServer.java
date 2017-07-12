@@ -109,21 +109,13 @@ public class LogDBServer implements IServer {
 		if (isStop) {
 			throw new Exception("server is stopped!");
 		}
-		Connection connection = this.dataSourceFactory.getDataSource().getConnection();
-		if (connection == null) {
-			return 0;
-		}
-		try {
-			String buildSelectTableSql = LogDBUtil.buildSelectCountTableSql_MYSQL(builder);
-			PreparedStatement prepareStatement = connection.prepareStatement(buildSelectTableSql);
-			ResultSet executeQuery = prepareStatement.executeQuery();
+		String buildSelectTableSql = LogDBUtil.buildSelectCountTableSql_MYSQL(builder);
+		try (Connection connection = this.dataSourceFactory.getDataSource().getConnection();
+				PreparedStatement prepareStatement = connection.prepareStatement(buildSelectTableSql);
+				ResultSet executeQuery = prepareStatement.executeQuery();) {
 			executeQuery.next();
 			int count = executeQuery.getInt(1);
-			executeQuery.close();
-			prepareStatement.cancel();
 			return count;
-		} finally {
-			connection.close();
 		}
 	}
 
@@ -133,15 +125,12 @@ public class LogDBServer implements IServer {
 		Set<String> relativeTableNames = LogDBUtil.getRelativeTableNames(clss, startTime, endTime);
 		// 筛选不存在的表
 		Iterator<String> iterator2 = relativeTableNames.iterator();
-		Connection connection = this.dataSourceFactory.getDataSource().getConnection();
-		if (connection == null) {
-			return null;
-		}
-		List<String> tableNames = LogDBUtil.getTableNames(connection);
-		connection.close();
-		for (; iterator2.hasNext();) {
-			if (!tableNames.contains(iterator2.next())) {
-				iterator2.remove();
+		try (Connection connection = this.dataSourceFactory.getDataSource().getConnection();) {
+			List<String> tableNames = LogDBUtil.getTableNames(connection);
+			for (; iterator2.hasNext();) {
+				if (!tableNames.contains(iterator2.next())) {
+					iterator2.remove();
+				}
 			}
 		}
 		return relativeTableNames;
@@ -182,15 +171,10 @@ public class LogDBServer implements IServer {
 			throw new Exception("server is stopped!");
 		}
 		List<T> result = new ArrayList<>();
-		Connection connection = this.dataSourceFactory.getDataSource().getConnection();
-		if (connection == null) {
-			return result;
-		}
-		try {
-			String buildSelectTableSql = LogDBUtil.buildSelectTableSql_MYSQL(builder);
-			PreparedStatement prepareStatement = null;
-			prepareStatement = connection.prepareStatement(buildSelectTableSql);
-			ResultSet executeQuery = prepareStatement.executeQuery();
+		String buildSelectTableSql = LogDBUtil.buildSelectTableSql_MYSQL(builder);
+		try (Connection connection = this.dataSourceFactory.getDataSource().getConnection();
+				PreparedStatement prepareStatement = connection.prepareStatement(buildSelectTableSql);
+				ResultSet executeQuery = prepareStatement.executeQuery();) {
 			while (executeQuery.next()) {
 				T newInstance = clss.newInstance();
 				FieldAccess logFields = LogDBUtil.getLogFields(clss);
@@ -209,10 +193,6 @@ public class LogDBServer implements IServer {
 				}
 				result.add(newInstance);
 			}
-			executeQuery.close();
-			prepareStatement.close();
-		} finally {
-			connection.close();
 		}
 		return result;
 	}
@@ -273,64 +253,40 @@ public class LogDBServer implements IServer {
 		}
 
 		public void run() {
-			Connection con = null;
-			PreparedStatement existStatement = null;
-			PreparedStatement createStatement = null;
-			PreparedStatement insertStatement = null;
-			try {
-				con = LogDBServer.this.getDataSourceFactory().getDataSource().getConnection();
+			try (Connection con = LogDBServer.this.getDataSourceFactory().getDataSource().getConnection();) {
 				long now = System.currentTimeMillis();
 				if (this.alog == null) {
 					return;
 				}
 				String buildExistTableSql_MYSQL = LogDBUtil
 						.buildExistTableSql_MYSQL(LogDBUtil.getLogTableName(alog, now));
-				existStatement = con.prepareStatement(buildExistTableSql_MYSQL);
-				ResultSet executeQuery = existStatement.executeQuery();
-				if (!executeQuery.next()) {
-					String buildCreateTableSql = LogDBUtil.buildCreateTableSql_MYSQL(alog,
-							LogDBServer.this.getConfig().getDbEngine(), LogDBServer.this.getConfig().getCharset());
-					createStatement = con.prepareStatement(buildCreateTableSql);
-					// 执行创建表
-					createStatement.executeUpdate();
+				try (PreparedStatement existStatement = con.prepareStatement(buildExistTableSql_MYSQL);
+						ResultSet executeQuery = existStatement.executeQuery();) {
+					if (!executeQuery.next()) {
+						String buildCreateTableSql = LogDBUtil.buildCreateTableSql_MYSQL(alog,
+								LogDBServer.this.getConfig().getDbEngine(), LogDBServer.this.getConfig().getCharset());
+						try (PreparedStatement createStatement = con.prepareStatement(buildCreateTableSql);) {
+							// 执行创建表
+							createStatement.executeUpdate();
+						}
+
+					}
 				}
 				String buildInsertTableSql = LogDBUtil.buildInsertTableSql_MYSQL(alog);
-				// 执行插入
-				insertStatement = con.prepareStatement(buildInsertTableSql);
-				if (insertStatement.executeUpdate() > 0) {
-					LogDBServer.this.increaseDoneLogNum();
-				} else {
-					log.error(LogDBUtil.log2JSON(alog));
-					LogDBServer.this.increaseLostLogNum();
+				try (PreparedStatement insertStatement = con.prepareStatement(buildInsertTableSql);) {
+					// 执行插入
+					if (insertStatement.executeUpdate() > 0) {
+						LogDBServer.this.increaseDoneLogNum();
+					} else {
+						log.error(LogDBUtil.log2JSON(alog));
+						LogDBServer.this.increaseLostLogNum();
+					}
 				}
 			} catch (Exception e) {
 				log.error(e, e);
 				log.error(LogDBUtil.log2JSON(alog));
 				LogDBServer.this.increaseLostLogNum();
-			} finally {
-				try {
-					if (createStatement != null) {
-						createStatement.close();
-					}
-				} catch (SQLException e) {
-					log.error(e, e);
-				}
-				try {
-					if (insertStatement != null) {
-						insertStatement.close();
-					}
-				} catch (SQLException e) {
-					log.error(e, e);
-				}
-				try {
-					if (con != null) {
-						con.close();
-					}
-				} catch (SQLException e) {
-					log.error(e, e);
-				}
 			}
-
 		}
 	}
 
@@ -370,9 +326,9 @@ public class LogDBServer implements IServer {
 				}
 			}
 			// 启动时，执行表格结构检查
-			Connection connection = this.dataSourceFactory.getDataSource().getConnection();
-			checker.executeCheck(connection);
-			connection.close();
+			try (Connection connection = this.dataSourceFactory.getDataSource().getConnection();) {
+				checker.executeCheck(connection);
+			}
 		}
 		this.isStop = false;
 	}

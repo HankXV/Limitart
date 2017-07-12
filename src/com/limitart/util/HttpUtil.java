@@ -36,38 +36,37 @@ public final class HttpUtil {
 			throws IOException {
 		HttpURLConnection conn = null;
 		URL url = new URL(hostUrl);
-		try {
-			conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setRequestMethod("POST");
-			conn.setDoOutput(true);
-			conn.setDoInput(true);
-			if (requestProperty != null) {
-				for (Entry<String, String> entry : requestProperty.entrySet()) {
-					conn.setRequestProperty(entry.getKey(), entry.getValue());
-				}
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setConnectTimeout(5000);
+		conn.setRequestMethod("POST");
+		conn.setDoOutput(true);
+		conn.setDoInput(true);
+		if (requestProperty != null) {
+			for (Entry<String, String> entry : requestProperty.entrySet()) {
+				conn.setRequestProperty(entry.getKey(), entry.getValue());
 			}
-			DataOutputStream ds = new DataOutputStream(conn.getOutputStream());
+		}
+		try (DataOutputStream ds = new DataOutputStream(conn.getOutputStream());) {
 			ds.write(HttpUtil.map2QueryParam(param).getBytes("utf-8"));
-			// 判断是否正常响应数据
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				return null;
-			}
-			DataInputStream inputStream = new DataInputStream(conn.getInputStream());
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		}
+		// 判断是否正常响应数据
+		if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+			return null;
+		}
+		try (DataInputStream inputStream = new DataInputStream(conn.getInputStream());
+				ByteArrayOutputStream buffer = new ByteArrayOutputStream();) {
 			byte[] b = new byte[1024];
 			int l;
 			while ((l = inputStream.read(b)) > 0) {
 				buffer.write(b, 0, l);
 			}
-			inputStream.close();
-			buffer.close();
 			return buffer.toByteArray();
 		} finally {
 			if (conn != null) {
 				conn.disconnect(); // 中断连接
 			}
 		}
+
 	}
 
 	public static byte[] get(String hostUrl) throws IOException {
@@ -77,29 +76,26 @@ public final class HttpUtil {
 	public static byte[] get(String hostUrl, ConstraintMap<String> param) throws IOException {
 		HttpURLConnection conn = null;
 		URL url;
-		try {
-			if (param == null) {
-				url = new URL(hostUrl);
-			} else {
-				url = new URL(hostUrl + "?" + map2QueryParam(param));
-			}
-			conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setRequestMethod("GET");
-			conn.connect();
-			// 判断是否正常响应数据
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				return null;
-			}
-			DataInputStream inputStream = new DataInputStream(conn.getInputStream());
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		if (param == null) {
+			url = new URL(hostUrl);
+		} else {
+			url = new URL(hostUrl + "?" + map2QueryParam(param));
+		}
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setConnectTimeout(5000);
+		conn.setRequestMethod("GET");
+		conn.connect();
+		// 判断是否正常响应数据
+		if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+			return null;
+		}
+		try (DataInputStream inputStream = new DataInputStream(conn.getInputStream());
+				ByteArrayOutputStream buffer = new ByteArrayOutputStream();) {
 			byte[] b = new byte[1024];
 			int l;
 			while ((l = inputStream.read(b)) > 0) {
 				buffer.write(b, 0, l);
 			}
-			inputStream.close();
-			buffer.close();
 			return buffer.toByteArray();
 		} finally {
 			if (conn != null) {

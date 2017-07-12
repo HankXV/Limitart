@@ -23,11 +23,9 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		if (!file.exists()) {
 			throw new IOException("file not exist:" + jarName);
 		}
-		JarFile jarFile = new JarFile(file);
-		URLClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI().toURL() },
-				Thread.currentThread().getContextClassLoader());
 		ConcurrentHashMap<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<KEY, IScript<KEY>>();
-		try {
+		try (URLClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI().toURL() },
+				Thread.currentThread().getContextClassLoader()); JarFile jarFile = new JarFile(file);) {
 			Enumeration<JarEntry> entrys = jarFile.entries();
 			while (entrys.hasMoreElements()) {
 				JarEntry jarEntry = entrys.nextElement();
@@ -63,9 +61,6 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 				}
 			}
 			this.scriptMap = scriptMap_new;
-		} finally {
-			classLoader.close();
-			jarFile.close();
 		}
 		return this;
 	}

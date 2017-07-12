@@ -26,7 +26,6 @@ import com.limitart.reflectasm.FieldAccess;
 import com.limitart.util.ReflectionUtil;
 import com.limitart.util.filter.FieldFilter;
 
-
 /**
  * 日志表结构变动检查器
  * 
@@ -223,10 +222,8 @@ public class LogStructChecker {
 			}
 
 			for (ColumnInfo col : increaseList) {
-				PreparedStatement prepareStatement = null;
-				try {
-					prepareStatement = con.prepareStatement(LogDBUtil.buildColumnIncreaseSql_MYSQL(logTableName,
-							col.getTableFieldName(), col.getType(), col.getSize(), col.getComment()));
+				try (PreparedStatement prepareStatement = con.prepareStatement(LogDBUtil.buildColumnIncreaseSql_MYSQL(
+						logTableName, col.getTableFieldName(), col.getType(), col.getSize(), col.getComment()));) {
 					if (prepareStatement.executeUpdate() == 0) {
 						SQLException sqlException = new SQLException("表列增加变动失败，表：" + logTableName + "-----列："
 								+ col.getTableFieldName() + " " + col.getType() + " " + col.getSize());
@@ -237,17 +234,11 @@ public class LogStructChecker {
 					}
 				} catch (Exception e) {
 					log.error(e, e);
-				} finally {
-					if (prepareStatement != null) {
-						prepareStatement.close();
-					}
 				}
 			}
 			for (String colName : decreaseList) {
-				PreparedStatement prepareStatement = null;
-				try {
-					prepareStatement = con
-							.prepareStatement(LogDBUtil.buildColumnDecreaseSql_MYSQL(logTableName, colName));
+				try (PreparedStatement prepareStatement = con
+						.prepareStatement(LogDBUtil.buildColumnDecreaseSql_MYSQL(logTableName, colName));) {
 					if (prepareStatement.executeUpdate() == 0) {
 						SQLException sqlException = new SQLException(
 								"表列删除变动失败，表：" + logTableName + "-----列：" + colName);
@@ -257,18 +248,12 @@ public class LogStructChecker {
 					}
 				} catch (Exception e) {
 					log.error(e, e);
-				} finally {
-					if (prepareStatement != null) {
-						prepareStatement.close();
-					}
 				}
 
 			}
 			for (ColumnInfo col : modifyList) {
-				PreparedStatement prepareStatement = null;
-				try {
-					prepareStatement = con.prepareStatement(LogDBUtil.buildColumnModifySql_MYSQL(logTableName,
-							col.getTableFieldName(), col.getType(), col.getSize(), col.getComment()));
+				try (PreparedStatement prepareStatement = con.prepareStatement(LogDBUtil.buildColumnModifySql_MYSQL(
+						logTableName, col.getTableFieldName(), col.getType(), col.getSize(), col.getComment()));) {
 					if (prepareStatement.executeUpdate() == 0) {
 						SQLException sqlException = new SQLException("表列类型变动失败，表：" + logTableName + "-----列："
 								+ col.getTableFieldName() + " " + col.getType() + " " + col.getSize());
@@ -279,10 +264,6 @@ public class LogStructChecker {
 					}
 				} catch (Exception e) {
 					log.error(e, e);
-				} finally {
-					if (prepareStatement != null) {
-						prepareStatement.close();
-					}
 				}
 			}
 			log.info("表结构：" + logTableName + "检查完成！");
@@ -314,8 +295,8 @@ public class LogStructChecker {
 		if ((now.getType().equals(SqlColumnType.MYSQL_tinyint.getValue())) && (old.getType().equals(now.getType()))) {
 			return true;
 		}
-        return (now.getType().equals(old.getType())) && (now.getSize() <= old.getSize());
-    }
+		return (now.getType().equals(old.getType())) && (now.getSize() <= old.getSize());
+	}
 
 	private boolean ableChange(ColumnInfo info, ColumnInfo info2) {
 		SqlColumnType typeByValue = SqlColumnType.getTypeByValue(info.getType());

@@ -28,11 +28,11 @@ public final class FTPUtil {
 			FTPFile[] fs = ftp.listFiles();
 			for (FTPFile ff : fs) {
 				if (ff.getName().equals(fileName)) {
-					ByteArrayOutputStream is = new ByteArrayOutputStream();
-					ftp.retrieveFile(ff.getName(), is);
-					byte[] result = is.toByteArray();
-					is.close();
-					return result;
+					try (ByteArrayOutputStream is = new ByteArrayOutputStream();) {
+						ftp.retrieveFile(ff.getName(), is);
+						byte[] result = is.toByteArray();
+						return result;
+					}
 				}
 			}
 
@@ -62,10 +62,10 @@ public final class FTPUtil {
 			FTPFile[] fs = ftp.listFiles();
 			for (FTPFile ff : fs) {
 				if (ff.getName().endsWith("." + filePattern)) {
-					ByteArrayOutputStream is = new ByteArrayOutputStream();
-					ftp.retrieveFile(ff.getName(), is);
-					result.add(is.toByteArray());
-					is.close();
+					try (ByteArrayOutputStream is = new ByteArrayOutputStream();) {
+						ftp.retrieveFile(ff.getName(), is);
+						result.add(is.toByteArray());
+					}
 				}
 			}
 

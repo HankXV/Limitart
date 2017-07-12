@@ -116,8 +116,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			throws IOException, InstantiationException, IllegalAccessException, ScriptException {
 		ConcurrentHashMap<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<>();
 		ConcurrentHashMap<KEY, File> scriptPath_new = new ConcurrentHashMap<>();
-		GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader());
-		try {
+		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader());) {
 			File dir_root = new File(dir);
 			if (!dir_root.exists()) {
 				throw new IOException("scripts root dir does not exist:" + dir);
@@ -157,12 +156,6 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			}
 			this.scriptMap = scriptMap_new;
 			this.scriptPath = scriptPath_new;
-		} finally {
-			try {
-				loader.close();
-			} catch (IOException e) {
-				log.error(e, e);
-			}
 		}
 		return this;
 	}
