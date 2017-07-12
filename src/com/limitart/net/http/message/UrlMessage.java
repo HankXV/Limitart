@@ -6,26 +6,16 @@ import com.limitart.net.http.constant.QueryMethod;
 import com.limitart.net.http.handler.HttpHandler;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.FullHttpRequest;
 
-public abstract class UrlMessage<URL> {
+public abstract class UrlMessage {
 
 	private transient Channel channel;
-	private transient FullHttpRequest request;
 	private transient HashMap<String, byte[]> files = new HashMap<>();
-	private transient HttpHandler<UrlMessage<String>> handler;
+	private transient HttpHandler<UrlMessage> handler;
 
-	public abstract URL getUrl();
+	public abstract String getUrl();
 
 	public abstract QueryMethod getMethod();
-
-	public FullHttpRequest getRequest() {
-		return request;
-	}
-
-	public void setRequest(FullHttpRequest request) {
-		this.request = request;
-	}
 
 	public Channel getChannel() {
 		return channel;
@@ -39,11 +29,11 @@ public abstract class UrlMessage<URL> {
 		return files;
 	}
 
-	public HttpHandler<UrlMessage<String>> getHandler() {
+	public HttpHandler<UrlMessage> getHandler() {
 		return handler;
 	}
 
-	public void setHandler(HttpHandler<UrlMessage<String>> handler) {
+	public void setHandler(HttpHandler<UrlMessage> handler) {
 		this.handler = handler;
 	}
 }

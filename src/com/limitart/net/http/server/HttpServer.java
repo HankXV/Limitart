@@ -187,7 +187,7 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 			HttpUtil.sendResponse(ctx.channel(), HttpResponseStatus.OK, "hello~stupid!", true);
 			return;
 		}
-		UrlMessage<String> message = this.urlFactory.getMessage(url);
+		UrlMessage message = this.urlFactory.getMessage(url);
 		if (message == null) {
 			log.error("消息不存在:" + url);
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_URL_FORBBIDEN);
@@ -203,13 +203,12 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 			return;
 		}
 		@SuppressWarnings("unchecked")
-		HttpHandler<UrlMessage<String>> handler = (HttpHandler<UrlMessage<String>>) this.urlFactory.getHandler(url);
+		HttpHandler<UrlMessage> handler = (HttpHandler<UrlMessage>) this.urlFactory.getHandler(url);
 		if (handler == null) {
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_URL_FORBBIDEN);
 			return;
 		}
 		message.setChannel(ctx.channel());
-		message.setRequest(msg);
 		message.setHandler(handler);
 		// 如果是POST，最后再来解析参数
 		if (msg.method() == POST) {

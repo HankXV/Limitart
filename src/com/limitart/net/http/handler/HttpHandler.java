@@ -9,7 +9,7 @@ import com.limitart.net.http.message.UrlMessage;
  * @author hank
  *
  */
-public interface HttpHandler<T extends UrlMessage<String>> {
+public interface HttpHandler<T extends UrlMessage> {
 
 	ConstraintMap<String> doServer(T msg) throws Exception;
 }

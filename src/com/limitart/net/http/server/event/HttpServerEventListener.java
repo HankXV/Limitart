@@ -14,7 +14,7 @@ import io.netty.handler.codec.http.HttpMessage;
  *
  */
 public interface HttpServerEventListener extends NettyEventListener {
-	void dispatchMessage(UrlMessage<String> message, ConstraintMap<String> map);
+	void dispatchMessage(UrlMessage message, ConstraintMap<String> map);
 
 	/**
 	 * 当消息超标时会调用此函数
