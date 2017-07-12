@@ -89,33 +89,22 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 
 	@Override
 	public void stopServer() {
-		TimerUtil.unScheduleGlobal(reportTask);
 		toMaster.disConnect();
 	}
 
 	@Override
 	public void onChannelActive(BinaryClient client) {
-
 	}
 
 	@Override
 	public void onChannelInactive(BinaryClient client) {
-
+		TimerUtil.unScheduleGlobal(reportTask);
+		log.error(toMaster.getConfig().getClientName() + " server disconnected," + client.channel());
 	}
 
 	@Override
 	public void onExceptionCaught(BinaryClient client, Throwable cause) {
 		log.error("session:" + client.channel(), cause);
-	}
-
-	@Override
-	public void onChannelRegistered(BinaryClient client) {
-
-	}
-
-	@Override
-	public void onChannelUnregistered(BinaryClient client) {
-		log.error(toMaster.getConfig().getClientName() + " server disconnected," + client.channel());
 	}
 
 	@Override

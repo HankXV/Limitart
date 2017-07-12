@@ -138,16 +138,6 @@ public class ConsumerX implements BinaryClientEventListener {
 		}
 
 		@Override
-		public void onChannelUnregistered(BinaryClient client) {
-
-		}
-
-		@Override
-		public void onChannelRegistered(BinaryClient client) {
-
-		}
-
-		@Override
 		public void onChannelInactive(BinaryClient client) {
 
 		}
@@ -181,17 +171,8 @@ public class ConsumerX implements BinaryClientEventListener {
 	}
 
 	@Override
-	public void onChannelUnregistered(BinaryClient client) {
-		clearOnDisconnected(client);
-	}
-
-	@Override
-	public void onChannelRegistered(BinaryClient client) {
-	}
-
-	@Override
 	public void onChannelInactive(BinaryClient ctx) {
-
+		clearOnDisconnected(ctx);
 	}
 
 	@Override

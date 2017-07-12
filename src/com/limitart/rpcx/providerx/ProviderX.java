@@ -107,14 +107,6 @@ public class ProviderX implements BinaryServerEventListener {
 		}
 
 		@Override
-		public void onChannelUnregistered(BinaryClient client) {
-		}
-
-		@Override
-		public void onChannelRegistered(BinaryClient client) {
-		}
-
-		@Override
 		public void onChannelInactive(BinaryClient client) {
 		}
 

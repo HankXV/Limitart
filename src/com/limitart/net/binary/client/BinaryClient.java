@@ -254,16 +254,6 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		this.clientEventListener.onExceptionCaught(this, cause);
 	}
 
-	@Override
-	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-		this.clientEventListener.onChannelRegistered(this);
-	}
-
-	@Override
-	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-		this.clientEventListener.onChannelUnregistered(this);
-	}
-
 	public BinaryClientConfig getConfig() {
 		return this.clientConfig;
 	}

@@ -16,10 +16,6 @@ public interface BinaryClientEventListener {
 
 	void onExceptionCaught(BinaryClient client, Throwable cause);
 
-	void onChannelRegistered(BinaryClient client);
-
-	void onChannelUnregistered(BinaryClient client);
-
 	void onConnectionEffective(BinaryClient client);
 
 	void dispatchMessage(Message message);
