@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.net.http.message;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
@@ -12,8 +13,6 @@ import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedEx
 import org.slingerxv.limitart.net.http.handler.HttpHandler;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.util.ReflectionUtil;
-
-import com.alibaba.fastjson.util.ParameterizedTypeImpl;
 
 
 /**
@@ -45,10 +44,10 @@ public class UrlMessageFactory {
 	public synchronized UrlMessageFactory registerMsg(HttpHandler<? extends UrlMessage> handler)
 			throws InstantiationException, IllegalAccessException {
 		Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
-		ParameterizedTypeImpl handlerInterface = null;
+		ParameterizedType handlerInterface = null;
 		for (Type temp : genericInterfaces) {
-			if (temp instanceof ParameterizedTypeImpl) {
-				ParameterizedTypeImpl ttemp = (ParameterizedTypeImpl) temp;
+			if (temp instanceof ParameterizedType) {
+				ParameterizedType ttemp = (ParameterizedType) temp;
 				if (ttemp.getRawType() == HttpHandler.class) {
 					handlerInterface = ttemp;
 					break;
