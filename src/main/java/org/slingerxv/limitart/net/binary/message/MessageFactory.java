@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.net.binary.message;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +12,6 @@ import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.util.ReflectionUtil;
-
-import com.alibaba.fastjson.util.ParameterizedTypeImpl;
 
 
 /**
@@ -56,10 +55,10 @@ public class MessageFactory {
 	public synchronized MessageFactory registerMsg(IHandler<? extends Message> handler)
 			throws MessageIDDuplicatedException {
 		Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
-		ParameterizedTypeImpl handlerInterface = null;
+		ParameterizedType handlerInterface = null;
 		for (Type temp : genericInterfaces) {
-			if (temp instanceof ParameterizedTypeImpl) {
-				ParameterizedTypeImpl ttemp = (ParameterizedTypeImpl) temp;
+			if (temp instanceof ParameterizedType) {
+				ParameterizedType ttemp = (ParameterizedType) temp;
 				if (ttemp.getRawType() == IHandler.class) {
 					handlerInterface = ttemp;
 					break;
