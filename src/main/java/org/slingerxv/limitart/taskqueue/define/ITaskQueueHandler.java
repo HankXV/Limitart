@@ -1,8 +1,10 @@
 package org.slingerxv.limitart.taskqueue.define;
 
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
+import org.slingerxv.limitart.net.binary.message.Message;
 
 public interface ITaskQueueHandler<T> {
 	static Logger log = LogManager.getLogger();

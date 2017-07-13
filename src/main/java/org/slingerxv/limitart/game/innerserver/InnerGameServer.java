@@ -6,14 +6,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.LogManager;
 
 import javax.crypto.NoSuchPaddingException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.game.innerserver.constant.InnerGameServerType;
 import org.slingerxv.limitart.net.binary.distributed.InnerSlaveServer;
 import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
 

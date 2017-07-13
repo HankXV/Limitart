@@ -1,5 +1,6 @@
 package org.slingerxv.limitart.net.binary.distributed.util;
 
+import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
 public class InnerServerUtil {

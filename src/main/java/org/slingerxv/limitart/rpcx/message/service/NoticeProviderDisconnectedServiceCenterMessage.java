@@ -1,5 +1,6 @@
 package org.slingerxv.limitart.rpcx.message.service;
 
+import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.rpcx.message.constant.RpcMessageEnum;
 
 public class NoticeProviderDisconnectedServiceCenterMessage extends Message {

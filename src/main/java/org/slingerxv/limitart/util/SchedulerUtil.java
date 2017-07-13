@@ -2,9 +2,11 @@ package org.slingerxv.limitart.util;
 
 import java.util.Collection;
 import java.util.Properties;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.CronScheduleBuilder;
+import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
@@ -15,7 +17,6 @@ import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
-import org.slingerxv.limitart.game.org.Job;
 
 /**
  * 定时任务作业

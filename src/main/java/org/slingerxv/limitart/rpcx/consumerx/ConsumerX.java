@@ -13,13 +13,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig.BinaryClientConfigBuilder;
 import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListener;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
+import org.slingerxv.limitart.net.binary.message.Message;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.rpcx.consumerx.config.ConsumerXConfig;
 import org.slingerxv.limitart.rpcx.consumerx.define.IServiceAsyncCallback;
 import org.slingerxv.limitart.rpcx.consumerx.listener.IConsumerListener;

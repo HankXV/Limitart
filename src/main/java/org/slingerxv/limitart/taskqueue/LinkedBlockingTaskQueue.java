@@ -1,8 +1,9 @@
 package org.slingerxv.limitart.taskqueue;
 
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueueHandler;
 

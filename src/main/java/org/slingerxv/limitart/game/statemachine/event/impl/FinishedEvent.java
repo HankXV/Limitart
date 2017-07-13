@@ -2,6 +2,7 @@ package org.slingerxv.limitart.game.statemachine.event.impl;
 
 import org.slingerxv.limitart.game.statemachine.StateMachine;
 import org.slingerxv.limitart.game.statemachine.event.IEvent;
+import org.slingerxv.limitart.game.statemachine.state.State;
 
 /**
  * 状态完成事件

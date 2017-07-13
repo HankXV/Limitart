@@ -1,5 +1,7 @@
 package org.slingerxv.limitart.net.binary;
 
+import org.slingerxv.limitart.net.binary.message.Message;
+
 public class BinaryMessageDemo extends Message {
 	public String info;
 

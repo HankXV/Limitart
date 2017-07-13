@@ -1,8 +1,9 @@
 package org.slingerxv.limitart.db.taskqueue;
 
 import java.util.HashMap;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.db.define.ISQLBean;
 import org.slingerxv.limitart.db.define.ISQLSaveDao;
 import org.slingerxv.limitart.taskqueue.DisruptorTaskQueue;

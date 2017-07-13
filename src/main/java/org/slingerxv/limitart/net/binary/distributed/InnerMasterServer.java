@@ -16,6 +16,7 @@ import org.slingerxv.limitart.net.binary.distributed.message.ResServerJoinMaster
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
+import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
@@ -24,6 +25,7 @@ import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListen
 import org.slingerxv.limitart.net.define.IServer;
 
 import io.netty.channel.Channel;
+
 
 /**
  * 内部主服务器

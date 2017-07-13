@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import org.slingerxv.limitart.rpcx.bean.PersonInfo;
 import org.slingerxv.limitart.rpcx.define.ServiceX;
-import org.slingexv.limitart.rpcx.bean.PersonInfo;
 
 
 @ServiceX(provider = "limitart", module = "RPCDemo")

@@ -12,6 +12,7 @@ import java.util.jar.JarFile;
 import org.slingerxv.limitart.script.define.AbstractScriptLoader;
 import org.slingerxv.limitart.script.define.IDynamicCode;
 import org.slingerxv.limitart.script.define.IScript;
+import org.slingerxv.limitart.script.exception.ScriptException;
 import org.slingerxv.limitart.util.FTPUtil;
 import org.slingerxv.limitart.util.FileUtil;
 

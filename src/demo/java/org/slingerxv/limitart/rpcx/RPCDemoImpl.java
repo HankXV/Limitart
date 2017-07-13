@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.slingexv.limitart.rpcx.bean.PersonInfo;
+import org.slingerxv.limitart.rpcx.bean.PersonInfo;
 
 
 public class RPCDemoImpl implements IRPCDemo {

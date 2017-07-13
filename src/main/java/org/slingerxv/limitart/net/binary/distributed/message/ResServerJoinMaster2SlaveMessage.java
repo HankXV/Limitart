@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.slingerxv.limitart.net.binary.distributed.message.constant.DistributedMessageEnum;
+import org.slingerxv.limitart.net.binary.message.Message;
 
 public class ResServerJoinMaster2SlaveMessage extends Message {
 	public List<InnerServerInfo> infos = new ArrayList<>();

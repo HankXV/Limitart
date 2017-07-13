@@ -1,5 +1,7 @@
 package org.slingerxv.limitart.net.listener;
 
+import io.netty.channel.Channel;
+
 public interface NettyEventListener {
 	void onChannelActive(Channel channel);
 

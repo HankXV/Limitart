@@ -4,6 +4,7 @@ import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.net.http.message.UrlMessage;
 import org.slingerxv.limitart.net.listener.NettyEventListener;
 
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpMessage;
 
 /**

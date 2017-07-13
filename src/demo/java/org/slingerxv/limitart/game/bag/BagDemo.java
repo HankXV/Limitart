@@ -2,8 +2,9 @@ package org.slingerxv.limitart.game.bag;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.game.bag.Bag;
 import org.slingerxv.limitart.game.bag.exception.BagFullException;
 import org.slingerxv.limitart.game.bag.exception.BagGridOcuppiedException;

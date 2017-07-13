@@ -1,14 +1,16 @@
 package org.slingerxv.limitart.taskqueue;
 
 import java.util.concurrent.TimeUnit;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueueHandler;
 import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
 import org.slingerxv.limitart.thread.NamedThreadFactory;
 
 import com.lmax.disruptor.EventFactory;
+import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.EventTranslatorOneArg;
 import com.lmax.disruptor.LiteTimeoutBlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;

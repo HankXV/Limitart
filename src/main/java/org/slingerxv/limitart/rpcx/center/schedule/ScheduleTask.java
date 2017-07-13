@@ -2,8 +2,9 @@ package org.slingerxv.limitart.rpcx.center.schedule;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;

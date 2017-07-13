@@ -4,10 +4,11 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.TimerTask;
-import java.util.logging.LogManager;
 
 import javax.crypto.NoSuchPaddingException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig;
 import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListener;
@@ -18,7 +19,8 @@ import org.slingerxv.limitart.net.binary.distributed.message.ReqConnectionReport
 import org.slingerxv.limitart.net.binary.distributed.message.ReqServerLoadSlave2MasterMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerJoinMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster2SlaveMessage;
-import org.slingerxv.limitart.net.binary.listener.SendMessageListener;
+import org.slingerxv.limitart.net.binary.message.Message;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.util.TimerUtil;
@@ -133,15 +135,11 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 		ReqServerLoadSlave2MasterMessage slm = new ReqServerLoadSlave2MasterMessage();
 		slm.load = serverLoad();
 		try {
-			toMaster.sendMessage(slm, new SendMessageListener() {
-
-				@Override
-				public void onComplete(boolean isSuccess, Throwable cause, Channel channel) {
-					if (isSuccess) {
-						log.debug("send server load to master {} success,current load:{}", channel, slm.load);
-					} else {
-						log.error("send server load to master {} fail,current load:{}", channel, slm.load);
-					}
+			toMaster.sendMessage(slm, (isSuccess, cause, channel) -> {
+				if (isSuccess) {
+					log.debug("send server load to master {} success,current load:{}", channel, slm.load);
+				} else {
+					log.error("send server load to master {} fail,current load:{}", channel, slm.load);
 				}
 			});
 		} catch (Exception e) {

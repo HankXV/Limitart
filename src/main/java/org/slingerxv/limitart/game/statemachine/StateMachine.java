@@ -4,11 +4,13 @@ import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.game.statemachine.event.IEvent;
 import org.slingerxv.limitart.game.statemachine.exception.StateException;
+import org.slingerxv.limitart.game.statemachine.state.State;
 
 /**
  * 状态机代理

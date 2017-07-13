@@ -1,10 +1,8 @@
 package org.slingerxv.limitart.game.org;
 
-import java.util.logging.LogManager;
 
-import org.slingerxv.limitart.game.org.Job;
-import org.slingerxv.limitart.game.org.Org;
-import org.slingerxv.limitart.game.org.OrgMember;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.game.org.exception.AlreadyJoinException;
 import org.slingerxv.limitart.game.org.exception.AuthIDErrorException;
 import org.slingerxv.limitart.game.org.exception.JobIDDuplicatedException;

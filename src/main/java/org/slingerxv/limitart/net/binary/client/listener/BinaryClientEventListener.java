@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.net.binary.client.listener;
 
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
+import org.slingerxv.limitart.net.binary.message.Message;
 
 /**
  * 服务器事件

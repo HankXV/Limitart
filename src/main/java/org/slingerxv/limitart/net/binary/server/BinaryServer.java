@@ -1,7 +1,6 @@
 package org.slingerxv.limitart.net.binary.server;
 
 import java.net.InetSocketAddress;
-import java.nio.channels.SocketChannel;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -10,13 +9,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.LogManager;
 
 import javax.crypto.NoSuchPaddingException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.listener.SendMessageListener;
+import org.slingerxv.limitart.net.binary.message.Message;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
@@ -33,6 +35,7 @@ import org.slingerxv.limitart.util.TimerUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -43,6 +46,7 @@ import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 

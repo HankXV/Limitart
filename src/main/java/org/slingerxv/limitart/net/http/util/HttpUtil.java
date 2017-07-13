@@ -16,6 +16,7 @@ import org.slingerxv.limitart.util.StringUtil;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;

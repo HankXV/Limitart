@@ -7,14 +7,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.script.constant.ScriptFileType;
+import org.slingerxv.limitart.script.exception.ScriptException;
 
 import groovy.lang.GroovyClassLoader;
 
 /**
  * 服务器脚本管理
+ * 
+ * @author hank
+ *
+ * @param <KEY>
+ *            脚本Id
  */
 public abstract class AbstractScriptLoader<KEY> {
 	protected static final Logger log = LogManager.getLogger();
@@ -90,8 +97,9 @@ public abstract class AbstractScriptLoader<KEY> {
 	 * @throws IllegalArgumentException
 	 * @throws InvocationTargetException
 	 */
-	public AbstractScriptLoader<KEY> executeCommand(List<String> importList, String commandLines) throws InstantiationException,
-			IllegalAccessException, IOException, ScriptException, IllegalArgumentException, InvocationTargetException {
+	public AbstractScriptLoader<KEY> executeCommand(List<String> importList, String commandLines)
+			throws InstantiationException, IllegalAccessException, IOException, ScriptException,
+			IllegalArgumentException, InvocationTargetException {
 		StringBuilder importBuffer = new StringBuilder();
 		if (importList != null) {
 			for (String temp : importList) {

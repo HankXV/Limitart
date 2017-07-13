@@ -5,13 +5,16 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
+import org.slingerxv.limitart.net.http.handler.HttpHandler;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.util.ReflectionUtil;
 
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+import com.alibaba.fastjson.util.ParameterizedTypeImpl;
+
 
 /**
  * 消息工厂 注意：这里的handler是单例，一定不能往里存成员变量

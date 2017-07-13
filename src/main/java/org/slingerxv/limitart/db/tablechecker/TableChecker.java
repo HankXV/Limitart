@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.db.log.struct.ColumnInfo;
 import org.slingerxv.limitart.db.log.struct.TableInfo;
 import org.slingerxv.limitart.db.log.tablecheck.LogStructChecker;

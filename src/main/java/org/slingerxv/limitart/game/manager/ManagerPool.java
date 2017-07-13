@@ -1,8 +1,9 @@
 package org.slingerxv.limitart.game.manager;
 
 import java.util.LinkedHashMap;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.game.manager.define.IManager;
 
 public class ManagerPool {

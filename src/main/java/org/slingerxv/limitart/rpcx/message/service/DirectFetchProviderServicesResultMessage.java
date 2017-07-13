@@ -3,6 +3,7 @@ package org.slingerxv.limitart.rpcx.message.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.rpcx.message.constant.RpcMessageEnum;
 
 /**

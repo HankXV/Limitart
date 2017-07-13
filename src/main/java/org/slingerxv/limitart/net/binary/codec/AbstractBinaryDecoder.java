@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.net.binary.codec;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 
 /**
  * 二进制解码器

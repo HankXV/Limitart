@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.game.innerserver;
 
 import org.slingerxv.limitart.net.binary.distributed.InnerMasterServer;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 
 /**

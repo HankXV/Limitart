@@ -2,6 +2,8 @@ package org.slingerxv.limitart.net.binary.distributed.struct;
 
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
 
+import io.netty.channel.Channel;
+
 /**
  * 服务器数据
  * 

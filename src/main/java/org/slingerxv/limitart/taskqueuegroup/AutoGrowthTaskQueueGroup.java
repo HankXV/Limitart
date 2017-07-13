@@ -2,8 +2,9 @@ package org.slingerxv.limitart.taskqueuegroup;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.LogManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
 import org.slingerxv.limitart.taskqueuegroup.define.ITaskQueueFactory;
 import org.slingerxv.limitart.taskqueuegroup.struct.AutoGrowthEntity;

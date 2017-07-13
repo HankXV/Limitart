@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.listener.SendMessageListener;
+import org.slingerxv.limitart.net.binary.message.Message;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 

@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.game.statemachine.event;
 
 import org.slingerxv.limitart.game.statemachine.StateMachine;
+import org.slingerxv.limitart.game.statemachine.state.State;
 
 /**
  * 事件

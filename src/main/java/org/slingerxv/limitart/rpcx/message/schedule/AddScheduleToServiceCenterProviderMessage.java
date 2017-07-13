@@ -1,5 +1,6 @@
 package org.slingerxv.limitart.rpcx.message.schedule;
 
+import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.rpcx.message.constant.RpcMessageEnum;
 
 /**

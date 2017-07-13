@@ -1,5 +1,7 @@
 package org.slingerxv.limitart.rpcx.center.struct;
 
+import io.netty.channel.Channel;
+
 /**
  * RPC服务器会话
  * 

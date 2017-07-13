@@ -3,6 +3,9 @@ package org.slingerxv.limitart.net.http.message;
 import java.util.HashMap;
 
 import org.slingerxv.limitart.net.http.constant.QueryMethod;
+import org.slingerxv.limitart.net.http.handler.HttpHandler;
+
+import io.netty.channel.Channel;
 
 public abstract class UrlMessage {
 

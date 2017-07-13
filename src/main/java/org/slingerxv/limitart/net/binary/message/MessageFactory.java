@@ -9,10 +9,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
+import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.util.ReflectionUtil;
 
 import com.alibaba.fastjson.util.ParameterizedTypeImpl;
-import com.esotericsoftware.reflectasm.ConstructorAccess;
 
 
 /**
