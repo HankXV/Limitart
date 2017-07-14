@@ -2,9 +2,13 @@ package org.slingerxv.limitart.net.binary.server.config;
 
 import java.util.HashSet;
 
+import org.slingerxv.limitart.funcs.Proc1;
+import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.util.StringUtil;
+
+import io.netty.channel.Channel;
 
 /**
  * 二进制服务器配置
@@ -20,6 +24,14 @@ public final class BinaryServerConfig {
 	private AbstractBinaryDecoder decoder;
 	private AbstractBinaryEncoder encoder;
 	private HashSet<String> whiteList;
+
+	// ---listener
+	private Proc1<Channel> onChannelActive;;
+	private Proc1<Channel> onChannelInactive;
+	private Proc2<Channel, Throwable> onExceptionCaught;
+	private Proc1<Channel> onServerBind;
+	private Proc1<Channel> onConnectionEffective;
+	private Proc1<Channel> dispatchMessage;;
 
 	private BinaryServerConfig(BinaryServerConfigBuilder builder) {
 		this.serverName = builder.serverName;
@@ -58,6 +70,7 @@ public final class BinaryServerConfig {
 	public HashSet<String> getWhiteList() {
 		return whiteList;
 	}
+
 	public static class BinaryServerConfigBuilder {
 		private String serverName;
 		private int port;
@@ -141,10 +154,10 @@ public final class BinaryServerConfig {
 			this.connectionValidateTimeInSec = connectionValidateTimeInSec;
 			return this;
 		}
-		
-		public BinaryServerConfigBuilder whiteList(String ... remoteAddress){
-			for(String ip : remoteAddress){
-				if(StringUtil.isIp(ip)){
+
+		public BinaryServerConfigBuilder whiteList(String... remoteAddress) {
+			for (String ip : remoteAddress) {
+				if (StringUtil.isIp(ip)) {
 					this.whiteList.add(ip);
 				}
 			}
