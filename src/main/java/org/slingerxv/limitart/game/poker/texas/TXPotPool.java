@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slingerxv.limitart.game.poker.texas.listener.ITXPotListener;
+import org.slingerxv.limitart.funcs.Proc3;
 
 /**
  * 德州扑克奖池
@@ -15,11 +15,6 @@ import org.slingerxv.limitart.game.poker.texas.listener.ITXPotListener;
  */
 public class TXPotPool {
 	Map<String, TXPot> pots = new HashMap<>();
-	ITXPotListener listener;
-
-	public TXPotPool(ITXPotListener listener) {
-		this.listener = listener;
-	}
 
 	/**
 	 * 每轮触发的计算
@@ -82,9 +77,9 @@ public class TXPotPool {
 	/**
 	 * 触发发奖
 	 */
-	public void flushAward() {
+	public void flushAward(Proc3<String, List<Integer>, Long> listener) {
 		for (TXPot pot : pots.values()) {
-			listener.onAward(pot.key, pot.roles, pot.chips);
+			listener.run(pot.key, pot.roles, pot.chips);
 		}
 	}
 

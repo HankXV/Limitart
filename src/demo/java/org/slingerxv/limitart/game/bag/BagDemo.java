@@ -5,13 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.game.bag.Bag;
 import org.slingerxv.limitart.game.bag.exception.BagFullException;
 import org.slingerxv.limitart.game.bag.exception.BagGridOcuppiedException;
 import org.slingerxv.limitart.game.bag.exception.ItemNotExistException;
 import org.slingerxv.limitart.game.bag.exception.ItemZeroNumException;
 import org.slingerxv.limitart.game.item.AbstractItem;
-
 
 public class BagDemo extends Bag {
 	private Logger log = LogManager.getLogger();

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slingerxv.limitart.funcs.Func1;
 import org.slingerxv.limitart.game.bag.exception.BagFullException;
 import org.slingerxv.limitart.game.bag.exception.BagGridOcuppiedException;
 import org.slingerxv.limitart.game.bag.exception.ItemNotExistException;
@@ -15,7 +16,6 @@ import org.slingerxv.limitart.game.bag.exception.ItemNotSameTypeException;
 import org.slingerxv.limitart.game.bag.exception.ItemOverStackException;
 import org.slingerxv.limitart.game.bag.exception.ItemSliptNotEnoughNumException;
 import org.slingerxv.limitart.game.bag.exception.ItemZeroNumException;
-import org.slingerxv.limitart.game.bag.filter.IItemFilter;
 import org.slingerxv.limitart.game.item.AbstractItem;
 
 /**
@@ -57,7 +57,8 @@ public abstract class Bag {
 	 * @throws BagFullException
 	 * @throws ItemNotExistException
 	 */
-	public void canAddItems(List<AbstractItem> items) throws ItemZeroNumException, BagFullException, ItemNotExistException {
+	public void canAddItems(List<AbstractItem> items)
+			throws ItemZeroNumException, BagFullException, ItemNotExistException {
 		if (items.isEmpty()) {
 			throw new ItemNotExistException();
 		}
@@ -151,12 +152,12 @@ public abstract class Bag {
 	 * @param filter
 	 * @return
 	 */
-	public List<AbstractItem> removeItems(IItemFilter filter) {
+	public List<AbstractItem> removeItems(Func1<AbstractItem, Boolean> filter) {
 		List<AbstractItem> result = new ArrayList<>();
 		Iterator<Entry<Integer, AbstractItem>> iterator = bag().entrySet().iterator();
 		for (; iterator.hasNext();) {
 			Entry<Integer, AbstractItem> next = iterator.next();
-			if (filter.filter(next.getValue())) {
+			if (filter.run(next.getValue())) {
 				iterator.remove();
 				result.add(next.getValue());
 				onItemRemoved(next.getKey(), next.getValue());
@@ -182,10 +183,10 @@ public abstract class Bag {
 	 * @param filter
 	 * @return
 	 */
-	public List<AbstractItem> getItems(IItemFilter filter) {
+	public List<AbstractItem> getItems(Func1<AbstractItem, Boolean> filter) {
 		List<AbstractItem> result = new ArrayList<>();
 		for (AbstractItem item : bag().values()) {
-			if (filter.filter(item)) {
+			if (filter.run(item)) {
 				result.add(item);
 			}
 		}
@@ -199,10 +200,10 @@ public abstract class Bag {
 	 * @param filter
 	 * @return
 	 */
-	public int getItemCount(IItemFilter filter) {
+	public int getItemCount(Func1<AbstractItem, Boolean> filter) {
 		int count = 0;
 		for (AbstractItem item : bag().values()) {
-			if (filter.filter(item)) {
+			if (filter.run(item)) {
 				count += item.getNum();
 			}
 		}
