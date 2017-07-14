@@ -2,6 +2,10 @@ package org.slingerxv.limitart.game.org;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slingerxv.limitart.funcs.Proc1;
+import org.slingerxv.limitart.funcs.Proc2;
+import org.slingerxv.limitart.funcs.Proc3;
+import org.slingerxv.limitart.funcs.Proc5;
 import org.slingerxv.limitart.game.org.authes.ChangeJobAuth;
 import org.slingerxv.limitart.game.org.exception.AlreadyJoinException;
 import org.slingerxv.limitart.game.org.exception.AuthIDErrorException;
@@ -14,8 +18,6 @@ import org.slingerxv.limitart.game.org.exception.JobNotExistException;
 import org.slingerxv.limitart.game.org.exception.NoAuthException;
 import org.slingerxv.limitart.game.org.exception.OrgMaxMemberException;
 import org.slingerxv.limitart.game.org.exception.OrgMemberNotExistException;
-import org.slingerxv.limitart.game.org.listener.IOrgEventListener;
-import org.slingerxv.limitart.game.org.listener.IOrgMemberScaner;
 import org.slingerxv.limitart.util.StringUtil;
 
 /**
@@ -27,9 +29,14 @@ import org.slingerxv.limitart.util.StringUtil;
 public abstract class Org {
 	private long OrgId;
 	private long creatorId;
-	private transient IOrgEventListener listener;
 	private ConcurrentHashMap<Integer, Job> jobs = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<Long, OrgMember> members = new ConcurrentHashMap<>();
+	private transient Proc3<Org, OrgMember, OrgMember> onChangeCreator;
+	private transient Proc5<Org, OrgMember, OrgMember, Job, Job> onChangeJob;
+	private transient Proc2<Org, OrgMember> onQuit;
+	private transient Proc2<Org, OrgMember> onJoin;
+	private transient Proc2<Org, Job> onAddJob;
+	private transient Proc2<Org, Job> onRemoveJob;
 
 	/**
 	 * 初始化
@@ -39,15 +46,11 @@ public abstract class Org {
 	 * @throws OrgMaxMemberException
 	 * @throws AlreadyJoinException
 	 */
-	public void initOrg(long orgId, OrgMember creator, IOrgEventListener listener)
-			throws AlreadyJoinException, OrgMaxMemberException {
-		if (listener == null) {
-			throw new NullPointerException("listener");
-		}
+	public Org initOrg(long orgId, OrgMember creator) throws AlreadyJoinException, OrgMaxMemberException {
 		this.OrgId = orgId;
 		this.creatorId = creator.getMemberId();
-		this.listener = listener;
 		join(creator);
+		return this;
 	}
 
 	/**
@@ -59,7 +62,7 @@ public abstract class Org {
 	 * @throws JobNameEmptyException
 	 * @throws JobIDErrorException
 	 */
-	public void registerJob(OrgMember handler, Job job)
+	public Org registerJob(OrgMember handler, Job job)
 			throws JobIDDuplicatedException, NoAuthException, JobNameEmptyException, JobIDErrorException {
 		if (handler.getMemberId() != this.creatorId) {
 			throw new NoAuthException();
@@ -74,7 +77,10 @@ public abstract class Org {
 			throw new JobIDDuplicatedException();
 		}
 		this.jobs.put(job.getJobId(), job);
-		this.listener.onAddJob(this, job);
+		if (onAddJob != null) {
+			onAddJob.run(this, job);
+		}
+		return this;
 	}
 
 	/**
@@ -86,18 +92,21 @@ public abstract class Org {
 	 * @throws AuthIDErrorException
 	 * @throws JobMemberMaxException
 	 */
-	public void unregisterJob(OrgMember handler, int jobId)
+	public Org unregisterJob(OrgMember handler, int jobId)
 			throws NoAuthException, JobMemberMaxException, AuthIDErrorException, JobNotExistException {
 		if (handler.getMemberId() != this.creatorId) {
 			throw new NoAuthException();
 		}
 		Job remove = this.jobs.remove(jobId);
 		if (remove != null) {
-			this.listener.onRemoveJob(this, remove);
+			if (onRemoveJob != null) {
+				onRemoveJob.run(this, remove);
+			}
 			for (OrgMember member : this.members.values()) {
 				giveMemberJob(handler, member, Job.NONE_JOB_ID);
 			}
 		}
+		return this;
 	}
 
 	/**
@@ -107,7 +116,7 @@ public abstract class Org {
 	 * @throws AlreadyJoinException
 	 * @throws OrgMaxMemberException
 	 */
-	public void join(OrgMember member) throws AlreadyJoinException, OrgMaxMemberException {
+	public Org join(OrgMember member) throws AlreadyJoinException, OrgMaxMemberException {
 		if (this.members.containsKey(member.getMemberId())) {
 			throw new AlreadyJoinException();
 		}
@@ -115,7 +124,10 @@ public abstract class Org {
 			throw new OrgMaxMemberException();
 		}
 		this.members.put(member.getMemberId(), member);
-		this.listener.onJoin(this, member);
+		if (onJoin != null) {
+			onJoin.run(this, member);
+		}
+		return this;
 	}
 
 	/**
@@ -123,10 +135,11 @@ public abstract class Org {
 	 * 
 	 * @param listener
 	 */
-	public void scanMember(IOrgMemberScaner listener) {
+	public Org scanMember(Proc1<OrgMember> listener) {
 		for (OrgMember member : this.members.values()) {
-			listener.scan(member);
+			listener.run(member);
 		}
+		return this;
 	}
 
 	/**
@@ -144,14 +157,17 @@ public abstract class Org {
 	 * @param member
 	 * @throws CreatorCanNotQuitException
 	 */
-	public void quit(OrgMember member) throws CreatorCanNotQuitException {
+	public Org quit(OrgMember member) throws CreatorCanNotQuitException {
 		if (member.getMemberId() == this.creatorId) {
 			throw new CreatorCanNotQuitException();
 		}
 		OrgMember remove = members.remove(member.getMemberId());
 		if (remove != null) {
-			this.listener.onQuit(this, remove);
+			if (onQuit != null) {
+				onQuit.run(this, remove);
+			}
 		}
+		return this;
 	}
 
 	/**
@@ -162,11 +178,12 @@ public abstract class Org {
 	 * @throws NoAuthException
 	 * @throws OrgMemberNotExistException
 	 */
-	public void replaceCreator(long handlerId, long extenderId) throws NoAuthException, OrgMemberNotExistException {
+	public Org replaceCreator(long handlerId, long extenderId) throws NoAuthException, OrgMemberNotExistException {
 		if (handlerId != this.creatorId) {
 			throw new NoAuthException();
 		}
 		forceRepalceCreator(extenderId);
+		return this;
 	}
 
 	/**
@@ -175,14 +192,17 @@ public abstract class Org {
 	 * @param extenderId
 	 * @throws OrgMemberNotExistException
 	 */
-	public void forceRepalceCreator(long extenderId) throws OrgMemberNotExistException {
+	public Org forceRepalceCreator(long extenderId) throws OrgMemberNotExistException {
 		OrgMember orgMember = getOrgMember(extenderId);
 		if (orgMember == null) {
 			throw new OrgMemberNotExistException();
 		}
 		OrgMember oldCreator = getOrgMember(this.creatorId);
 		this.creatorId = extenderId;
-		this.listener.onChangeCreator(this, oldCreator, orgMember);
+		if (onChangeCreator != null) {
+			onChangeCreator.run(this, oldCreator, orgMember);
+		}
+		return this;
 	}
 
 	/**
@@ -196,7 +216,7 @@ public abstract class Org {
 	 * @throws NoAuthException
 	 * @throws JobNotExistException
 	 */
-	public void giveMemberJob(OrgMember handler, OrgMember target, int jobId)
+	public Org giveMemberJob(OrgMember handler, OrgMember target, int jobId)
 			throws AuthIDErrorException, NoAuthException, JobNotExistException, JobMemberMaxException {
 		if (!hasAuth(new ChangeJobAuth(), handler, target)) {
 			throw new NoAuthException();
@@ -211,7 +231,10 @@ public abstract class Org {
 		}
 		int oldJobId = target.getJobId();
 		target.setJobId(jobId);
-		this.listener.onChangeJob(this, handler, target, getJob(oldJobId), job);
+		if (onChangeJob != null) {
+			onChangeJob.run(this, handler, target, getJob(oldJobId), job);
+		}
+		return this;
 	}
 
 	/**
@@ -281,6 +304,36 @@ public abstract class Org {
 
 	public long getCreatorId() {
 		return creatorId;
+	}
+
+	public Org onChangeCreator(Proc3<Org, OrgMember, OrgMember> listener) {
+		this.onChangeCreator = listener;
+		return this;
+	}
+
+	public Org onChangeJob(Proc5<Org, OrgMember, OrgMember, Job, Job> listener) {
+		this.onChangeJob = listener;
+		return this;
+	}
+
+	public Org onQuit(Proc2<Org, OrgMember> listener) {
+		this.onQuit = listener;
+		return this;
+	}
+
+	public Org onJoin(Proc2<Org, OrgMember> listener) {
+		this.onJoin = listener;
+		return this;
+	}
+
+	public Org onAddJob(Proc2<Org, Job> listener) {
+		this.onAddJob = listener;
+		return this;
+	}
+
+	public Org onRemoveJob(Proc2<Org, Job> listener) {
+		this.onRemoveJob = listener;
+		return this;
 	}
 
 	public abstract int capacity();
