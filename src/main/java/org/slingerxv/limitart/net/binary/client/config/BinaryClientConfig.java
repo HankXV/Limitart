@@ -1,7 +1,11 @@
 package org.slingerxv.limitart.net.binary.client.config;
 
+import org.slingerxv.limitart.funcs.Proc1;
+import org.slingerxv.limitart.funcs.Proc2;
+import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
+import org.slingerxv.limitart.net.binary.message.Message;
 
 /**
  * 二进制通信客户端配置
@@ -17,6 +21,12 @@ public final class BinaryClientConfig {
 	private String connectionPass;
 	private AbstractBinaryDecoder decoder;
 	private AbstractBinaryEncoder encoder;
+	// ----listener
+	private Proc1<BinaryClient> onChannelActive;
+	private Proc1<BinaryClient> onChannelInactive;
+	private Proc2<BinaryClient, Throwable> onExceptionCaught;
+	private Proc1<BinaryClient> onConnectionEffective;
+	private Proc1<Message> dispatchMessage;
 
 	private BinaryClientConfig(BinaryClientConfigBuilder builder) {
 		this.clientName = builder.clientName;

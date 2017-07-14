@@ -3,6 +3,8 @@ package org.slingerxv.limitart.collections;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+import org.slingerxv.limitart.funcs.Func2;
+
 /**
  * LRU非线程安全型Map
  * 
@@ -14,7 +16,8 @@ import java.util.Map.Entry;
 public class LRUHashMap<K, V> {
 	private int cacheSize;
 	private LinkedHashMap<K, V> cacheMap = null;
-	private LRUListener listener = null;
+	private Func2<K, V, Void> onRemove;
+	private Func2<K, V, Boolean> canRemoveWithoutLRU;
 
 	public LRUHashMap(int size) {
 		this.cacheSize = size;
@@ -26,20 +29,25 @@ public class LRUHashMap<K, V> {
 				boolean canRemove = false;
 				if (size() > cacheSize) {
 					canRemove = true;
-				} else if (listener != null && listener.canRemoveWithoutLRU(eldest.getKey(), eldest.getValue())) {
+				} else if (canRemoveWithoutLRU != null && canRemoveWithoutLRU.run(eldest.getKey(), eldest.getValue())) {
 					canRemove = true;
 				}
-				if (canRemove && listener != null) {
-					listener.onRemove(eldest.getKey(), eldest.getValue());
+				if (canRemove && onRemove != null) {
+					onRemove.run(eldest.getKey(), eldest.getValue());
 				}
 				return canRemove;
 			}
 		};
 	}
 
-	public LRUHashMap(int size, LRUListener listener) {
-		this(size);
-		this.listener = listener;
+	public LRUHashMap<K, V> onRemove(Func2<K, V, Void> func) {
+		this.onRemove = func;
+		return this;
+	}
+
+	public LRUHashMap<K, V> canRemoveWithoutLRU(Func2<K, V, Boolean> func) {
+		this.canRemoveWithoutLRU = func;
+		return this;
 	}
 
 	public V put(K key, V value) {
@@ -52,8 +60,8 @@ public class LRUHashMap<K, V> {
 
 	public V remove(K key) {
 		V remove = cacheMap.remove(key);
-		if (remove != null && listener != null) {
-			listener.onRemove(key, remove);
+		if (remove != null && onRemove != null) {
+			onRemove.run(key, remove);
 		}
 		return remove;
 	}
@@ -63,9 +71,9 @@ public class LRUHashMap<K, V> {
 	}
 
 	public void clear() {
-		if (listener != null) {
+		if (onRemove != null) {
 			for (Entry<K, V> entry : cacheMap.entrySet()) {
-				listener.onRemove(entry.getKey(), entry.getValue());
+				onRemove.run(entry.getKey(), entry.getValue());
 			}
 		}
 		cacheMap.clear();
@@ -73,11 +81,5 @@ public class LRUHashMap<K, V> {
 
 	public int size() {
 		return cacheMap.size();
-	}
-
-	public interface LRUListener {
-		void onRemove(Object key, Object value);
-
-		boolean canRemoveWithoutLRU(Object key, Object value);
 	}
 }

@@ -14,9 +14,9 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
-import org.slingerxv.limitart.net.binary.listener.SendMessageListener;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
@@ -153,11 +153,13 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		TimerUtil.unScheduleGlobal(clearTask);
 	}
 
-	public void sendMessage(Channel channel, Message msg, SendMessageListener listener) throws Exception {
+	public void sendMessage(Channel channel, Message msg, Proc3<Boolean, Throwable, Channel> listener)
+			throws Exception {
 		SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, listener);
 	}
 
-	public void sendMessage(List<Channel> channels, Message msg, SendMessageListener listener) throws Exception {
+	public void sendMessage(List<Channel> channels, Message msg, Proc3<Boolean, Throwable, Channel> listener)
+			throws Exception {
 		SendMessageUtil.sendMessage(this.config.getEncoder(), channels, msg, listener);
 	}
 

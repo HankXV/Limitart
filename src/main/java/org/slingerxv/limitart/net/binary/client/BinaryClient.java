@@ -10,11 +10,11 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig;
 import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListener;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
-import org.slingerxv.limitart.net.binary.listener.SendMessageListener;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
@@ -109,7 +109,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 	}
 
-	public void sendMessage(Message msg, SendMessageListener listener) throws Exception {
+	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) throws Exception {
 		SendMessageUtil.sendMessage(this.clientConfig.getEncoder(), channel, msg, listener);
 	}
 
