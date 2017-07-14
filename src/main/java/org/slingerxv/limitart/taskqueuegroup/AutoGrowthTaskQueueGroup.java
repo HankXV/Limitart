@@ -5,8 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Func1;
+import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
-import org.slingerxv.limitart.taskqueuegroup.define.ITaskQueueFactory;
 import org.slingerxv.limitart.taskqueuegroup.struct.AutoGrowthEntity;
 import org.slingerxv.limitart.taskqueuegroup.struct.AutoGrowthSegment;
 
@@ -23,14 +24,14 @@ public class AutoGrowthTaskQueueGroup<T> {
 	private int entityCountPerThread;
 	private int coreThreadCount;
 	private int maxThreadCount;
-	private ITaskQueueFactory<T> taskQueueFactory;
+	private Func1<Integer, ITaskQueue<T>> newTaskQueue;
 
 	public AutoGrowthTaskQueueGroup(int entityCountPerThread, int coreThreadCount, int initThreadCount,
-			int maxThreadCount, ITaskQueueFactory<T> taskQueueFactory) throws Exception {
-		if (taskQueueFactory == null) {
+			int maxThreadCount, Func1<Integer, ITaskQueue<T>> newTaskQueue) throws Exception {
+		if (newTaskQueue == null) {
 			throw new NullPointerException("taskQueueFactory");
 		}
-		this.taskQueueFactory = taskQueueFactory;
+		this.newTaskQueue = newTaskQueue;
 		this.maxThreadCount = maxThreadCount;
 		this.entityCountPerThread = entityCountPerThread;
 		this.coreThreadCount = Math.min(coreThreadCount, this.maxThreadCount);
@@ -117,7 +118,7 @@ public class AutoGrowthTaskQueueGroup<T> {
 	private AutoGrowthSegment<T> newGrowthThread() throws Exception {
 		int id = threadId.incrementAndGet();
 		AutoGrowthSegment<T> data = new AutoGrowthSegment<>();
-		data.setThread(this.taskQueueFactory.newTaskQueue(id));
+		data.setThread(this.newTaskQueue.run(id));
 		data.setThreadIndex(id);
 		data.getThread().startServer();
 		this.threads.put(data.getThreadIndex(), data);

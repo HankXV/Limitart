@@ -8,5 +8,4 @@ public interface ITaskQueue<T> extends IServer {
 	void addCommand(T t) throws TaskQueueException;
 
 	String getThreadName();
-
 }

@@ -4,8 +4,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Func1;
+import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
-import org.slingerxv.limitart.taskqueue.define.ITaskQueueHandler;
 
 /**
  * 普通消息队列(TaskQueue更好)
@@ -18,14 +19,21 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 	private static Logger log = LogManager.getLogger();
 	private LinkedBlockingQueue<T> queue = new LinkedBlockingQueue<>();
 	private boolean start = false;
-	private ITaskQueueHandler<T> handler;
+	private Func1<T, Boolean> intercept;
+	private Proc1<T> handle;
 
-	public LinkedBlockingTaskQueue(String threadName, ITaskQueueHandler<T> handler) {
-		if (handler == null) {
-			throw new NullPointerException("handler");
-		}
-		this.handler = handler;
+	public LinkedBlockingTaskQueue(String threadName) {
 		setName(threadName);
+	}
+
+	public ITaskQueue<T> intercept(Func1<T, Boolean> intercept) {
+		this.intercept = intercept;
+		return this;
+	}
+
+	public ITaskQueue<T> handle(Proc1<T> handle) {
+		this.handle = handle;
+		return this;
 	}
 
 	@Override
@@ -38,8 +46,13 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 			} catch (InterruptedException e) {
 				log.error(e, e);
 			}
+			if (intercept != null && intercept.run(take)) {
+				continue;
+			}
 			try {
-				handler.handle(take);
+				if (handle != null) {
+					handle.run(take);
+				}
 			} catch (Exception e) {
 				log.error(e, e);
 			}

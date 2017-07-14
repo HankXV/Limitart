@@ -8,7 +8,6 @@ import org.slingerxv.limitart.db.define.ISQLBean;
 import org.slingerxv.limitart.db.define.ISQLSaveDao;
 import org.slingerxv.limitart.taskqueue.DisruptorTaskQueue;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
-import org.slingerxv.limitart.taskqueue.define.ITaskQueueHandler;
 import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
 import org.slingerxv.limitart.util.StringUtil;
 
@@ -24,36 +23,28 @@ public class SQLSaveTaskQueue implements ITaskQueue<ISQLBean> {
 	public static final int MIXED = 2;
 	private static Logger log = LogManager.getLogger();
 	private HashMap<Class<? extends ISQLBean>, ISQLSaveDao> daos = new HashMap<>();
-	private ITaskQueue<SQLBeanWrap> taskQueue;
+	private DisruptorTaskQueue<SQLBeanWrap> taskQueue;
 
 	public SQLSaveTaskQueue(String threadName) {
-		this.taskQueue = new DisruptorTaskQueue<>(threadName, new ITaskQueueHandler<SQLBeanWrap>() {
-
-			@Override
-			public boolean intercept(SQLBeanWrap t) {
-				return false;
+		this.taskQueue = new DisruptorTaskQueue<>(threadName);
+		this.taskQueue.handle(t -> {
+			ISQLSaveDao baseDao = daos.get(t.bean.getClass());
+			if (baseDao == null) {
+				log.error("dao not exist:" + t.getClass().getName());
+				return;
 			}
-
-			@Override
-			public void handle(SQLBeanWrap t) {
-				ISQLSaveDao baseDao = daos.get(t.bean.getClass());
-				if (baseDao == null) {
-					log.error("dao not exist:" + t.getClass().getName());
-					return;
+			if (t.dealType == INSERT) {
+				if (baseDao.insert(t.bean) == 0) {
+					log.error(getClass().getSimpleName() + " insert bean error,bean:"
+							+ StringUtil.toJSONWithClassInfo(t));
 				}
-				if (t.dealType == INSERT) {
+			} else if (t.dealType == UPDATE) {
+				baseDao.update(t.bean);
+			} else if (t.dealType == MIXED) {
+				if (baseDao.update(t.bean) == 0) {
 					if (baseDao.insert(t.bean) == 0) {
-						log.error(getClass().getSimpleName() + " insert bean error,bean:"
+						log.error(getClass().getSimpleName() + " update bean error,bean:"
 								+ StringUtil.toJSONWithClassInfo(t));
-					}
-				} else if (t.dealType == UPDATE) {
-					baseDao.update(t.bean);
-				} else if (t.dealType == MIXED) {
-					if (baseDao.update(t.bean) == 0) {
-						if (baseDao.insert(t.bean) == 0) {
-							log.error(getClass().getSimpleName() + " update bean error,bean:"
-									+ StringUtil.toJSONWithClassInfo(t));
-						}
 					}
 				}
 			}

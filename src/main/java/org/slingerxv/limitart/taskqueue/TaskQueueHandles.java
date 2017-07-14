@@ -1,16 +1,17 @@
-package org.slingerxv.limitart.taskqueue.define;
-
+package org.slingerxv.limitart.taskqueue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 
-public interface ITaskQueueHandler<T> {
-	static Logger log = LogManager.getLogger();
-	ITaskQueueHandler<Message> MESSAGE_HANDLER = new ITaskQueueHandler<Message>() {
+public class TaskQueueHandles {
+	private static Logger log = LogManager.getLogger();
+	public static final Proc1<Message> MESSAGE_HANDLER = new Proc1<Message>() {
+
 		@Override
-		public void handle(Message t) {
+		public void run(Message t) {
 			IHandler<Message> handler = t.getHandler();
 			if (handler == null) {
 				log.error(t.getClass().getName() + " has no handler!");
@@ -27,26 +28,12 @@ public interface ITaskQueueHandler<T> {
 				log.warn("handler:" + handler.getClass().getName() + " handle time > 100");
 			}
 		}
-
-		@Override
-		public boolean intercept(Message t) {
-			return false;
-		}
 	};
-	ITaskQueueHandler<Runnable> RUNNABLE_HANDLER = new ITaskQueueHandler<Runnable>() {
+	public static final Proc1<Runnable> RUNNABLE_HANDLER = new Proc1<Runnable>() {
 
 		@Override
-		public boolean intercept(Runnable t) {
-			return false;
-		}
-
-		@Override
-		public void handle(Runnable t) {
+		public void run(Runnable t) {
 			t.run();
 		}
 	};
-
-	boolean intercept(T t);
-
-	void handle(T t);
 }

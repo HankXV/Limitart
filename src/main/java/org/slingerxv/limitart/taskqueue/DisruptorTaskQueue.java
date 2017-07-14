@@ -4,8 +4,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Func1;
+import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
-import org.slingerxv.limitart.taskqueue.define.ITaskQueueHandler;
 import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
 import org.slingerxv.limitart.thread.NamedThreadFactory;
 
@@ -28,10 +29,11 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	private Disruptor<DisruptorTaskQueueEvent> disruptor;
 	private NamedThreadFactory threadFactory;
 	private TaskQueueEventProducerWithTraslator traslator;
-	private ITaskQueueHandler<T> handler;
+	private Func1<T, Boolean> intercept;
+	private Proc1<T> handle;
 
-	public DisruptorTaskQueue(String threadName, ITaskQueueHandler<T> handler) {
-		this(threadName, 2048, handler);
+	public DisruptorTaskQueue(String threadName) {
+		this(threadName, 2048);
 	}
 
 	/**
@@ -43,11 +45,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	 * @param handler
 	 */
 	@SuppressWarnings("unchecked")
-	public DisruptorTaskQueue(String threadName, int bufferSize, ITaskQueueHandler<T> handler) {
-		if (handler == null) {
-			throw new NullPointerException("handler");
-		}
-		this.handler = handler;
+	public DisruptorTaskQueue(String threadName, int bufferSize) {
 		this.threadFactory = new NamedThreadFactory() {
 
 			@Override
@@ -67,6 +65,16 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 			}
 		});
 		traslator = new TaskQueueEventProducerWithTraslator(disruptor.getRingBuffer());
+	}
+
+	public ITaskQueue<T> intercept(Func1<T, Boolean> intercept) {
+		this.intercept = intercept;
+		return this;
+	}
+
+	public ITaskQueue<T> handle(Proc1<T> handle) {
+		this.handle = handle;
+		return this;
 	}
 
 	@Override
@@ -126,11 +134,13 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 
 		@Override
 		public void onEvent(DisruptorTaskQueueEvent event, long paramLong, boolean paramBoolean) throws Exception {
-			if (DisruptorTaskQueue.this.handler.intercept(event.getMsg())) {
+			if (DisruptorTaskQueue.this.intercept != null && DisruptorTaskQueue.this.intercept.run(event.getMsg())) {
 				return;
 			}
 			try {
-				DisruptorTaskQueue.this.handler.handle(event.getMsg());
+				if (DisruptorTaskQueue.this.handle != null) {
+					DisruptorTaskQueue.this.handle.run(event.getMsg());
+				}
 			} catch (Exception e) {
 				log.error(e, e);
 			}
