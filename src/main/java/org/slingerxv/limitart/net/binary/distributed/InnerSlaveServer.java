@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig;
 import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListener;
+import org.slingerxv.limitart.net.binary.distributed.config.InnerSlaveServerConfig;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerJoinMaster2SlaveHandler;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerQuitMaster2SlaveHandler;
 import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
@@ -20,7 +21,6 @@ import org.slingerxv.limitart.net.binary.distributed.message.ReqServerLoadSlave2
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerJoinMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.message.Message;
-import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.util.TimerUtil;
@@ -33,42 +33,18 @@ import org.slingerxv.limitart.util.TimerUtil;
  */
 public abstract class InnerSlaveServer implements BinaryClientEventListener, IServer {
 	private static Logger log = LogManager.getLogger();
-	private int myServerId;
-	private String myIp;
-	private int myServerPort;
-	private String myServerPass;
-	private String myInnerServerPass;
-	private int myInnerServerPort;
-	private String masterIp;
-	private int masterServerPort;
-	private String masterServerPass;
-	private int masterInnerPort;
-	private String masterInnerPass;
+	private InnerSlaveServerConfig config;
 	private BinaryClient toMaster;
 	private TimerTask reportTask;
 
-	public InnerSlaveServer(String slaveName, int myServerId, String myIp, int myServerPort, String myServerPass,
-			int myInnerServerPort, String myInnerServerPass, String masterIp, int masterServerPort,
-			String masterServerPass, int masterInnerPort, String masterInnerPass, MessageFactory factory)
-			throws MessageIDDuplicatedException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException {
-		this.myServerId = myServerId;
-		this.myIp = myIp;
-		this.myServerPort = myServerPort;
-		this.myServerPass = myServerPass;
-		this.myInnerServerPass = myInnerServerPass;
-		this.myInnerServerPort = myInnerServerPort;
-		this.masterIp = masterIp;
-		this.masterServerPort = masterServerPort;
-		this.masterServerPass = masterServerPass;
-		this.masterInnerPort = masterInnerPort;
-		this.masterInnerPass = masterInnerPass;
-		factory.registerMsg(new ResServerJoinMaster2SlaveHandler());
-		factory.registerMsg(new ResServerQuitMaster2SlaveHandler());
-		toMaster = new BinaryClient(
-				new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5).clientName(slaveName)
-						.connectionPass(masterInnerPass).remoteIp(masterIp).remotePort(masterInnerPort).build(),
-				this, factory);
+	public InnerSlaveServer(InnerSlaveServerConfig config) throws MessageIDDuplicatedException, InvalidKeyException,
+			NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+		config.getFactory().registerMsg(new ResServerJoinMaster2SlaveHandler())
+				.registerMsg(new ResServerQuitMaster2SlaveHandler());
+		toMaster = new BinaryClient(new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5)
+				.clientName(config.getSlaveName()).connectionPass(config.getMasterInnerPass())
+				.remoteIp(config.getMasterIp()).remotePort(config.getMasterInnerPort()).build(), this,
+				config.getFactory());
 		reportTask = new TimerTask() {
 
 			@Override
@@ -108,11 +84,11 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 		// 链接成功,上报本服务器的服务端口等信息
 		ReqConnectionReportSlave2MasterMessage msg = new ReqConnectionReportSlave2MasterMessage();
 		InnerServerInfo info = new InnerServerInfo();
-		info.innerPort = this.myInnerServerPort;
-		info.outIp = this.myIp;
-		info.outPass = this.myServerPass;
-		info.outPort = this.myServerPort;
-		info.serverId = this.myServerId;
+		info.innerPort = config.getMyInnerServerPort();
+		info.outIp = config.getMyIp();
+		info.outPass = config.getMyServerPass();
+		info.outPort = config.getMyServerPort();
+		info.serverId = config.getMyServerId();
 		info.serverType = serverType();
 		msg.serverInfo = info;
 		try {
@@ -167,48 +143,8 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 		return this.toMaster;
 	}
 
-	public int getMyServerId() {
-		return myServerId;
-	}
-
-	public String getMyIp() {
-		return myIp;
-	}
-
-	public int getMyServerPort() {
-		return myServerPort;
-	}
-
-	public String getMyServerPass() {
-		return myServerPass;
-	}
-
-	public String getMyInnerServerPass() {
-		return myInnerServerPass;
-	}
-
-	public int getMyInnerServerPort() {
-		return myInnerServerPort;
-	}
-
-	public String getMasterIp() {
-		return masterIp;
-	}
-
-	public int getMasterServerPort() {
-		return masterServerPort;
-	}
-
-	public String getMasterServerPass() {
-		return masterServerPass;
-	}
-
-	public int getMasterInnerPort() {
-		return masterInnerPort;
-	}
-
-	public String getMasterInnerPass() {
-		return masterInnerPass;
+	public InnerSlaveServerConfig getConfig() {
+		return config;
 	}
 
 	public abstract int serverType();

@@ -9,13 +9,15 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.game.innerserver.config.InnerFightServerConfig;
 import org.slingerxv.limitart.game.innerserver.constant.InnerGameServerType;
 import org.slingerxv.limitart.net.binary.distributed.InnerMasterServer;
 import org.slingerxv.limitart.net.binary.distributed.InnerSlaveServer;
+import org.slingerxv.limitart.net.binary.distributed.config.InnerMasterServerConfig.InnerMasterServerConfigBuilder;
+import org.slingerxv.limitart.net.binary.distributed.config.InnerSlaveServerConfig.InnerSlaveServerConfigBuilder;
 import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
-import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
 
@@ -30,11 +32,10 @@ public abstract class InnerFightServer implements IServer {
 	private InnerMasterServer server;
 	private InnerSlaveServer toMaster;
 
-	public InnerFightServer(int serverId, String fightServerIp, int fightServerPort, int FightServerInnerPort,
-			String fightServerPass, MessageFactory factory, String publicIp, int publicPort)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
-		server = new InnerMasterServer("Fight", FightServerInnerPort, factory) {
+	public InnerFightServer(InnerFightServerConfig config) throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, InvalidAlgorithmParameterException, MessageIDDuplicatedException {
+		server = new InnerMasterServer(new InnerMasterServerConfigBuilder().serverName("Fight")
+				.masterPort(config.getFightServerInnerPort()).factory(config.getFactory()).build()) {
 
 			@Override
 			protected void onSlaveConnected(InnerServerData data) {
@@ -51,9 +52,13 @@ public abstract class InnerFightServer implements IServer {
 
 			}
 		};
-		toMaster = new InnerSlaveServer("Fight-To-Public", serverId, fightServerIp, fightServerPort, fightServerPass,
-				FightServerInnerPort, InnerServerUtil.getInnerPass(), publicIp, 0, "", publicPort,
-				InnerServerUtil.getInnerPass(), factory) {
+
+		toMaster = new InnerSlaveServer(new InnerSlaveServerConfigBuilder().slaveName("Fight-To-Public")
+				.myServerId(config.getServerId()).myServerIp(config.getFightServerIp())
+				.myServerPort(config.getFightServerPort()).myServerPass(config.getFightServerPass())
+				.myInnerServerPort(config.getFightServerInnerPort()).myInnerServerPass(InnerServerUtil.getInnerPass())
+				.masterIp(config.getPublicIp()).masterServerPort(config.getPublicPort())
+				.masterInnerPass(InnerServerUtil.getInnerPass()).facotry(config.getFactory()).build()) {
 
 			@Override
 			public int serverType() {

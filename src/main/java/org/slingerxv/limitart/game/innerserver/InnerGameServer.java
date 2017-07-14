@@ -11,11 +11,12 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.game.innerserver.config.InnerGameServerConfig;
 import org.slingerxv.limitart.game.innerserver.constant.InnerGameServerType;
 import org.slingerxv.limitart.net.binary.distributed.InnerSlaveServer;
+import org.slingerxv.limitart.net.binary.distributed.config.InnerSlaveServerConfig.InnerSlaveServerConfigBuilder;
 import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
-import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
 
@@ -30,12 +31,13 @@ public abstract class InnerGameServer implements IServer {
 	private ConcurrentHashMap<Integer, InnerSlaveServer> toFights = new ConcurrentHashMap<>();
 	private InnerSlaveServer toPublic;
 
-	public InnerGameServer(int serverId, String gameServerIp, int gameServerPort, String gameServerPass,
-			String publicIp, int publicPort, MessageFactory factory)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
-		toPublic = new InnerSlaveServer("Game-To-Public", serverId, gameServerIp, gameServerPort, gameServerPass, 0, "",
-				publicIp, 0, "", publicPort, InnerServerUtil.getInnerPass(), factory) {
+	public InnerGameServer(InnerGameServerConfig config) throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, InvalidAlgorithmParameterException, MessageIDDuplicatedException {
+		toPublic = new InnerSlaveServer(new InnerSlaveServerConfigBuilder().slaveName("Game-To-Public")
+				.myServerId(config.getServerId()).myServerIp(config.getGameServerIp())
+				.myServerPort(config.getGameServerPort()).myServerPass(config.getGameServerPass())
+				.masterIp(config.getPublicIp()).masterServerPort(config.getPublicPort())
+				.masterInnerPass(InnerServerUtil.getInnerPass()).facotry(config.getFactory()).build()) {
 			@Override
 			public int serverType() {
 				return InnerGameServerType.SERVER_TYPE_GAME;
@@ -64,9 +66,13 @@ public abstract class InnerGameServer implements IServer {
 						return;
 					}
 					try {
-						InnerSlaveServer client = new InnerSlaveServer("Game-To-Fight", serverId, gameServerIp,
-								gameServerPort, gameServerPass, 0, "", info.outIp, info.outPort, info.outPass,
-								info.innerPort, InnerServerUtil.getInnerPass(), factory) {
+
+						InnerSlaveServer client = new InnerSlaveServer(new InnerSlaveServerConfigBuilder()
+								.slaveName("Game-To-Fight").myServerId(config.getServerId())
+								.myServerIp(config.getGameServerIp()).myServerPort(config.getGameServerPort())
+								.myServerPass(config.getGameServerPass()).masterIp(info.outIp)
+								.masterServerPort(info.innerPort).masterInnerPass(InnerServerUtil.getInnerPass())
+								.facotry(config.getFactory()).build()) {
 
 							@Override
 							public int serverType() {

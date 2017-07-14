@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.net.binary.distributed.config.InnerMasterServerConfig;
 import org.slingerxv.limitart.net.binary.distributed.handler.ReqConnectionReportSlave2MasterHandler;
 import org.slingerxv.limitart.net.binary.distributed.handler.ReqServerLoadSlave2MasterHandler;
 import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
@@ -17,7 +18,6 @@ import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
 import org.slingerxv.limitart.net.binary.message.Message;
-import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
@@ -25,7 +25,6 @@ import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListen
 import org.slingerxv.limitart.net.define.IServer;
 
 import io.netty.channel.Channel;
-
 
 /**
  * 内部主服务器
@@ -39,13 +38,13 @@ public abstract class InnerMasterServer implements BinaryServerEventListener, IS
 	private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, InnerServerData>> slaves = new ConcurrentHashMap<>();
 	private BinaryServer server;
 
-	public InnerMasterServer(String serverName, int masterPort, MessageFactory facotry)
-			throws MessageIDDuplicatedException {
-		facotry.registerMsg(new ReqConnectionReportSlave2MasterHandler());
-		facotry.registerMsg(new ReqServerLoadSlave2MasterHandler());
-		server = new BinaryServer(new BinaryServerConfig.BinaryServerConfigBuilder()
-				.connectionPass(InnerServerUtil.getInnerPass()).port(masterPort).serverName(serverName).build(), this,
-				facotry);
+	public InnerMasterServer(InnerMasterServerConfig config) throws MessageIDDuplicatedException {
+		config.getFactory().registerMsg(new ReqConnectionReportSlave2MasterHandler());
+		config.getFactory().registerMsg(new ReqServerLoadSlave2MasterHandler());
+		server = new BinaryServer(
+				new BinaryServerConfig.BinaryServerConfigBuilder().connectionPass(InnerServerUtil.getInnerPass())
+						.port(config.getMasterPort()).serverName(config.getServerName()).build(),
+				this, config.getFactory());
 	}
 
 	/**
