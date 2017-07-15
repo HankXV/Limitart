@@ -3,21 +3,21 @@
 # 简介(Brief Introduction)
 一个旨在帮助快速搭建**Java中小型游戏服务器**的框架，通信底层采用Netty4.X，数据库采用MySql相关(框架其实并未与Mysql产生太多耦合，但建议使用Mysql)，生产消费者采用Disruptor等。**有想共同参与的或者向我吐槽的，留言**。
 
-A framework designed to help building **Java midrange game server** quickly, the communication using Netty4.X, database using MySql (frame and Mysql actually did not have much coupling, it is recommended that you use Mysql), TaskQueue(MessageQueue) powered by Disruptor., please consider as appropriate. **Some want to participate in, or give me your advice, leave a message**.
+This is a framework that designed to help to build a **Java Midrange Game Server** quickly. Its communicating interface based on Netty4.X, the database is using MySql (This framework is actually not much coupling with MySql, but it still recommonded to use MySql.), and the TaskQueue(MessageQueue) based on Disruptor. **If one have some advice or want be one of us, please leave any messages to us, and we are always welcome**
 # 环境要求(Environment)
 Jdk8或以上
 
 Jdk8 or above.
 # 快速开始(Quick start)
 使用服务器框架我们首先就是要关心如何快速的搭建出服务器的原始模型。我们需要构造一些必要的参数：端口和服务器名称。
-Using the server framework, we first need to be concerned with how to quickly build the original model of the server. We need to construct some of the necessary parameters: port and server name.
+For using the server's framework, how to build the original model of the server as quick as possible is the first thing we must care about. First, we need to construct some necessary parameters such as port and server's name.
 ```java
 
 	BinaryServerConfig build = new BinaryServerConfigBuilder().port(8888).serverName("BinaryServerDemo").build();
 
 ```
 然后我们需要构造一个监听器。
-Then we need to construct a listener.
+Second, we need to construct a listener.
 ```java
 
 	BinaryServerEventListener binaryServerEventListener = new BinaryServerEventListener() {
@@ -59,7 +59,7 @@ Then we need to construct a listener.
 
 ```
 倒数第二步我们需要确定服务器可以处理哪些消息。让我们来创建第一个消息。
-In the last second steps, we need to determine what messages the server can handle. Let's create the first message.
+Next, we neet to determine which messages the server can handle. Let's create a message.
 ```java
 
 	public class BinaryMessageDemo extends Message {
@@ -87,7 +87,7 @@ In the last second steps, we need to determine what messages the server can hand
 
 ```
 为上面的消息创建一个处理器，这里我们就简单的打印传输过来的内容即可。
-Create a Handler for the message above, where we simply print the contents of the transmission.
+Create a Handler for the message. Here, we just simply print the contents of transmission.
 ```java
 
 	public class BinaryHandlerDemo implements IHandler<BinaryMessageDemo> {
