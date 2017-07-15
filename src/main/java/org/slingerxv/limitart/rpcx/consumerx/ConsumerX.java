@@ -23,6 +23,7 @@ import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListen
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
+import org.slingerxv.limitart.net.strct.AddressPair;
 import org.slingerxv.limitart.rpcx.consumerx.config.ConsumerXConfig;
 import org.slingerxv.limitart.rpcx.consumerx.define.IServiceAsyncCallback;
 import org.slingerxv.limitart.rpcx.consumerx.listener.IConsumerListener;
@@ -107,8 +108,9 @@ public class ConsumerX implements BinaryClientEventListener {
 			centryFactory.registerMsg(new SubscribeServiceResultServiceCenterHandler());
 			centryFactory.registerMsg(new NoticeProviderDisconnectedServiceCenterHandler());
 			BinaryClientConfigBuilder serviceCenterBuilder = new BinaryClientConfigBuilder();
-			serviceCenterBuilder.autoReconnect(config.getAutoConnectInterval()).remoteIp(config.getServiceCenterIp())
-					.remotePort(config.getServiceCenterPort()).clientName("RPC-Consumer");
+			serviceCenterBuilder.autoReconnect(config.getAutoConnectInterval())
+					.remoteAddress(new AddressPair(config.getServiceCenterIp(), config.getServiceCenterPort(), null))
+					.clientName("RPC-Consumer");
 			serviceCenterClient = new BinaryClient(serviceCenterBuilder.build(), new serviceCenterListener(this),
 					centryFactory);
 			serviceCenterClient.connect();
@@ -158,9 +160,10 @@ public class ConsumerX implements BinaryClientEventListener {
 		MessageFactory rpcMessageFacotry = new MessageFactory();
 		rpcMessageFacotry.registerMsg(new RpcResultServerHandler());
 		rpcMessageFacotry.registerMsg(new DirectFetchProviderServicesResultHandler());
-		BinaryClient client = new BinaryClient(new BinaryClientConfigBuilder().remoteIp(providerIp)
-				.remotePort(providerPort).autoReconnect(config.getAutoConnectInterval()).build(), this,
-				rpcMessageFacotry);
+		BinaryClient client = new BinaryClient(
+				new BinaryClientConfigBuilder().remoteAddress(new AddressPair(providerIp, providerPort))
+						.autoReconnect(config.getAutoConnectInterval()).build(),
+				this, rpcMessageFacotry);
 		return client;
 	}
 

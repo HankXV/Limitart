@@ -6,6 +6,7 @@ import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.message.Message;
+import org.slingerxv.limitart.net.strct.AddressPair;
 
 /**
  * 二进制通信客户端配置
@@ -15,8 +16,7 @@ import org.slingerxv.limitart.net.binary.message.Message;
  */
 public final class BinaryClientConfig {
 	private String clientName;
-	private String remoteIp;
-	private int remotePort;
+	private AddressPair remoteAddress;
 	private int autoReconnect;
 	private String connectionPass;
 	private AbstractBinaryDecoder decoder;
@@ -30,8 +30,7 @@ public final class BinaryClientConfig {
 
 	private BinaryClientConfig(BinaryClientConfigBuilder builder) {
 		this.clientName = builder.clientName;
-		this.remoteIp = builder.remoteIp;
-		this.remotePort = builder.remotePort;
+		this.remoteAddress = builder.remoteAddress;
 		this.autoReconnect = builder.autoReconnect;
 		this.connectionPass = builder.connectionPass;
 		this.decoder = builder.decoder;
@@ -42,12 +41,8 @@ public final class BinaryClientConfig {
 		return this.clientName;
 	}
 
-	public String getRemoteIp() {
-		return remoteIp;
-	}
-
-	public int getRemotePort() {
-		return remotePort;
+	public AddressPair getRemoteAddress() {
+		return remoteAddress;
 	}
 
 	public int getAutoReconnect() {
@@ -68,8 +63,7 @@ public final class BinaryClientConfig {
 
 	public static class BinaryClientConfigBuilder {
 		private String clientName;
-		private String remoteIp;
-		private int remotePort;
+		private AddressPair remoteAddress;
 		private int autoReconnect;
 		private String connectionPass;
 		private AbstractBinaryDecoder decoder;
@@ -77,8 +71,7 @@ public final class BinaryClientConfig {
 
 		public BinaryClientConfigBuilder() {
 			this.clientName = "Binary-Client";
-			this.remoteIp = "127.0.0.1";
-			this.remotePort = 8888;
+			this.remoteAddress = new AddressPair("127.0.0.1", 8888);
 			this.autoReconnect = 0;
 			this.connectionPass = "limitart-core";
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
@@ -115,19 +108,8 @@ public final class BinaryClientConfig {
 		 * @param remoteIp
 		 * @return
 		 */
-		public BinaryClientConfigBuilder remoteIp(String remoteIp) {
-			this.remoteIp = remoteIp;
-			return this;
-		}
-
-		/**
-		 * 服务器端口
-		 * 
-		 * @param remotePort
-		 * @return
-		 */
-		public BinaryClientConfigBuilder remotePort(int remotePort) {
-			this.remotePort = remotePort;
+		public BinaryClientConfigBuilder remoteAddress(AddressPair remoteAddress) {
+			this.remoteAddress = remoteAddress;
 			return this;
 		}
 

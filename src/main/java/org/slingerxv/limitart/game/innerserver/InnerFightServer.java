@@ -57,7 +57,7 @@ public abstract class InnerFightServer implements IServer {
 				.myServerId(config.getServerId()).myServerIp(config.getFightServerIp())
 				.myServerPort(config.getFightServerPort()).myServerPass(config.getFightServerPass())
 				.myInnerServerPort(config.getFightServerInnerPort()).myInnerServerPass(InnerServerUtil.getInnerPass())
-				.masterIp(config.getPublicIp()).masterServerPort(config.getPublicPort())
+				.masterIp(config.getPublicIp()).masterInnerPort(config.getPublicPort())
 				.masterInnerPass(InnerServerUtil.getInnerPass()).facotry(config.getFactory()).build()) {
 
 			@Override

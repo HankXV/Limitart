@@ -130,20 +130,21 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		if (channel != null && channel.isWritable()) {
 			return;
 		}
-		log.info(clientConfig.getClientName() + " start connect server：" + this.clientConfig.getRemoteIp() + ":"
-				+ this.clientConfig.getRemotePort() + "...");
+		log.info(clientConfig.getClientName() + " start connect server：" + clientConfig.getRemoteAddress().getIp() + ":"
+				+ clientConfig.getRemoteAddress().getPort() + "...");
 		try {
-			bootstrap.connect(this.clientConfig.getRemoteIp(), this.clientConfig.getRemotePort())
+			bootstrap.connect(clientConfig.getRemoteAddress().getIp(), clientConfig.getRemoteAddress().getPort())
 					.addListener((ChannelFutureListener) channelFuture -> {
 						channel = channelFuture.channel();
 						if (channelFuture.isSuccess()) {
 							log.info(clientConfig.getClientName() + " connect server："
-									+ BinaryClient.this.clientConfig.getRemoteIp() + ":"
-									+ BinaryClient.this.clientConfig.getRemotePort() + " success！");
+									+ clientConfig.getRemoteAddress().getIp() + ":"
+									+ clientConfig.getRemoteAddress().getPort() + " success！");
 						} else {
 							log.error(
-									clientConfig.getClientName() + " try connect server：" + clientConfig.getRemoteIp()
-											+ ":" + clientConfig.getRemotePort() + " fail",
+									clientConfig.getClientName() + " try connect server："
+											+ clientConfig.getRemoteAddress().getIp() + ":"
+											+ clientConfig.getRemoteAddress().getPort() + " fail",
 									channelFuture.cause().getMessage());
 							if (clientConfig.getAutoReconnect() > 0) {
 								tryReconnect(clientConfig.getAutoReconnect());

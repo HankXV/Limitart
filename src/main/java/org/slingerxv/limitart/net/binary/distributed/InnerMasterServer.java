@@ -23,6 +23,7 @@ import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
 import org.slingerxv.limitart.net.define.IServer;
+import org.slingerxv.limitart.net.strct.AddressPair;
 
 import io.netty.channel.Channel;
 
@@ -37,14 +38,15 @@ public abstract class InnerMasterServer implements BinaryServerEventListener, IS
 	// 从服务器集合
 	private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, InnerServerData>> slaves = new ConcurrentHashMap<>();
 	private BinaryServer server;
+	private InnerMasterServerConfig config;
 
 	public InnerMasterServer(InnerMasterServerConfig config) throws MessageIDDuplicatedException {
+		this.config = config;
 		config.getFactory().registerMsg(new ReqConnectionReportSlave2MasterHandler());
 		config.getFactory().registerMsg(new ReqServerLoadSlave2MasterHandler());
-		server = new BinaryServer(
-				new BinaryServerConfig.BinaryServerConfigBuilder().connectionPass(InnerServerUtil.getInnerPass())
-						.port(config.getMasterPort()).serverName(config.getServerName()).build(),
-				this, config.getFactory());
+		server = new BinaryServer(new BinaryServerConfig.BinaryServerConfigBuilder()
+				.addressPair(new AddressPair(config.getMasterPort(), InnerServerUtil.getInnerPass()))
+				.serverName(config.getServerName()).build(), this, config.getFactory());
 	}
 
 	/**
@@ -270,6 +272,10 @@ public abstract class InnerMasterServer implements BinaryServerEventListener, IS
 			return null;
 		}
 		return concurrentHashMap.get(serverId);
+	}
+
+	public InnerMasterServerConfig getConfig() {
+		return config;
 	}
 
 	private InnerServerInfo serverData2ServerInfo(InnerServerData data) {

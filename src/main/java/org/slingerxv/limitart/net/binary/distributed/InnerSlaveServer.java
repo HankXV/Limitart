@@ -23,6 +23,7 @@ import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
+import org.slingerxv.limitart.net.strct.AddressPair;
 import org.slingerxv.limitart.util.TimerUtil;
 
 /**
@@ -39,12 +40,14 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 
 	public InnerSlaveServer(InnerSlaveServerConfig config) throws MessageIDDuplicatedException, InvalidKeyException,
 			NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+		this.config = config;
 		config.getFactory().registerMsg(new ResServerJoinMaster2SlaveHandler())
 				.registerMsg(new ResServerQuitMaster2SlaveHandler());
-		toMaster = new BinaryClient(new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5)
-				.clientName(config.getSlaveName()).connectionPass(config.getMasterInnerPass())
-				.remoteIp(config.getMasterIp()).remotePort(config.getMasterInnerPort()).build(), this,
-				config.getFactory());
+		toMaster = new BinaryClient(
+				new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5).clientName(config.getSlaveName())
+						.connectionPass(config.getMasterInnerPass())
+						.remoteAddress(new AddressPair(config.getMasterIp(), config.getMasterInnerPort())).build(),
+				this, config.getFactory());
 		reportTask = new TimerTask() {
 
 			@Override

@@ -6,10 +6,11 @@ import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig.Binary
 import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListener;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
+import org.slingerxv.limitart.net.strct.AddressPair;
 
 public class BinaryClientDemo {
 	public static void main(String[] args) throws Exception {
-		BinaryClientConfig build = new BinaryClientConfigBuilder().remoteIp("127.0.0.1").remotePort(8888)
+		BinaryClientConfig build = new BinaryClientConfigBuilder().remoteAddress(new AddressPair("127.0.0.1", 8888))
 				.clientName("BinaryClientDemo").build();
 		MessageFactory factory = new MessageFactory();
 		BinaryClientEventListener binaryClientEventListener = new BinaryClientEventListener() {

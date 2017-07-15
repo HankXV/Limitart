@@ -6,6 +6,7 @@ import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
+import org.slingerxv.limitart.net.strct.AddressPair;
 import org.slingerxv.limitart.util.StringUtil;
 
 import io.netty.channel.Channel;
@@ -18,8 +19,7 @@ import io.netty.channel.Channel;
  */
 public final class BinaryServerConfig {
 	private String serverName;
-	private int port;
-	private String connectionPass;
+	private AddressPair addressPair;
 	private int connectionValidateTimeInSec;
 	private AbstractBinaryDecoder decoder;
 	private AbstractBinaryEncoder encoder;
@@ -35,8 +35,7 @@ public final class BinaryServerConfig {
 
 	private BinaryServerConfig(BinaryServerConfigBuilder builder) {
 		this.serverName = builder.serverName;
-		this.port = builder.port;
-		this.connectionPass = builder.connectionPass;
+		this.addressPair = builder.addressPair;
 		this.connectionValidateTimeInSec = builder.connectionValidateTimeInSec;
 		this.decoder = builder.decoder;
 		this.encoder = builder.encoder;
@@ -51,12 +50,8 @@ public final class BinaryServerConfig {
 		return connectionValidateTimeInSec;
 	}
 
-	public String getConnectionPass() {
-		return connectionPass;
-	}
-
-	public int getPort() {
-		return port;
+	public AddressPair getAddressPair() {
+		return addressPair;
 	}
 
 	public AbstractBinaryDecoder getDecoder() {
@@ -73,8 +68,7 @@ public final class BinaryServerConfig {
 
 	public static class BinaryServerConfigBuilder {
 		private String serverName;
-		private int port;
-		private String connectionPass;
+		private AddressPair addressPair;
 		private int connectionValidateTimeInSec;
 		private AbstractBinaryDecoder decoder;
 		private AbstractBinaryEncoder encoder;
@@ -82,8 +76,7 @@ public final class BinaryServerConfig {
 
 		public BinaryServerConfigBuilder() {
 			this.serverName = "Binary-Server";
-			this.port = 8888;
-			this.connectionPass = "limitart-core";
+			this.addressPair = new AddressPair(8888, "limitart-core");
 			this.connectionValidateTimeInSec = 20;
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
@@ -126,21 +119,8 @@ public final class BinaryServerConfig {
 		 * @param port
 		 * @return
 		 */
-		public BinaryServerConfigBuilder port(int port) {
-			if (port >= 1024) {
-				this.port = port;
-			}
-			return this;
-		}
-
-		/**
-		 * 链接验证密码
-		 * 
-		 * @param connectionPass
-		 * @return
-		 */
-		public BinaryServerConfigBuilder connectionPass(String connectionPass) {
-			this.connectionPass = connectionPass;
+		public BinaryServerConfigBuilder addressPair(AddressPair addressPair) {
+			this.addressPair = addressPair;
 			return this;
 		}
 

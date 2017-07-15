@@ -18,6 +18,7 @@ import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedEx
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
+import org.slingerxv.limitart.net.strct.AddressPair;
 import org.slingerxv.limitart.rpcx.center.config.ServiceCenterXConfig;
 import org.slingerxv.limitart.rpcx.center.schedule.ScheduleTask;
 import org.slingerxv.limitart.rpcx.center.struct.ServiceXClientSession;
@@ -60,8 +61,8 @@ public class ServiceCenterX {
 			throw new NullPointerException("ServiceCenterXConfig");
 		}
 		this.config = config;
-		BinaryServerConfig serverConfig = new BinaryServerConfig.BinaryServerConfigBuilder().port(this.config.getPort())
-				.build();
+		BinaryServerConfig serverConfig = new BinaryServerConfig.BinaryServerConfigBuilder()
+				.addressPair(new AddressPair(config.getPort())).build();
 		binaryServer = new BinaryServer(serverConfig, new BinaryServerEventListener() {
 
 			@Override
@@ -106,6 +107,10 @@ public class ServiceCenterX {
 	public ServiceCenterX stop() {
 		binaryServer.stopServer();
 		return this;
+	}
+
+	public ServiceCenterXConfig getConfig() {
+		return config;
 	}
 
 	/**

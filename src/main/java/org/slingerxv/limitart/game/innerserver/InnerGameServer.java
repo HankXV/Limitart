@@ -36,7 +36,7 @@ public abstract class InnerGameServer implements IServer {
 		toPublic = new InnerSlaveServer(new InnerSlaveServerConfigBuilder().slaveName("Game-To-Public")
 				.myServerId(config.getServerId()).myServerIp(config.getGameServerIp())
 				.myServerPort(config.getGameServerPort()).myServerPass(config.getGameServerPass())
-				.masterIp(config.getPublicIp()).masterServerPort(config.getPublicPort())
+				.masterIp(config.getPublicIp()).masterInnerPort(config.getPublicPort())
 				.masterInnerPass(InnerServerUtil.getInnerPass()).facotry(config.getFactory()).build()) {
 			@Override
 			public int serverType() {
@@ -71,7 +71,7 @@ public abstract class InnerGameServer implements IServer {
 								.slaveName("Game-To-Fight").myServerId(config.getServerId())
 								.myServerIp(config.getGameServerIp()).myServerPort(config.getGameServerPort())
 								.myServerPass(config.getGameServerPass()).masterIp(info.outIp)
-								.masterServerPort(info.innerPort).masterInnerPass(InnerServerUtil.getInnerPass())
+								.masterInnerPort(info.innerPort).masterInnerPass(InnerServerUtil.getInnerPass())
 								.facotry(config.getFactory()).build()) {
 
 							@Override

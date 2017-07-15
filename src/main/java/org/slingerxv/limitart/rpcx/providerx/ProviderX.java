@@ -18,6 +18,7 @@ import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig.BinaryServerConfigBuilder;
 import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
+import org.slingerxv.limitart.net.strct.AddressPair;
 import org.slingerxv.limitart.rpcx.define.ServiceX;
 import org.slingerxv.limitart.rpcx.exception.ServiceError;
 import org.slingerxv.limitart.rpcx.exception.ServiceXExecuteException;
@@ -69,18 +70,18 @@ public class ProviderX implements BinaryServerEventListener {
 		// 初始化内部消息
 		factory.registerMsg(new RpcExecuteClientHandler());
 		factory.registerMsg(new DirectFetchProverServicesHandler());
-		server = new BinaryServer(
-				new BinaryServerConfigBuilder().port(config.getMyPort()).serverName("RPC-Provider").build(), this,
-				factory);
+		server = new BinaryServer(new BinaryServerConfigBuilder().addressPair(new AddressPair(config.getMyPort()))
+				.serverName("RPC-Provider").build(), this, factory);
 		// 处理服务中心模式
 		if (this.config.getServiceCenterIp() != null) {
 			MessageFactory centerFacotry = new MessageFactory();
 			centerFacotry.registerMsg(new TriggerScheduleServiceCenterToProviderServiceCenterHandler());
-			BinaryClientConfigBuilder centerBuilder = new BinaryClientConfigBuilder();
-			centerBuilder.autoReconnect(5).remoteIp(this.config.getServiceCenterIp())
-					.remotePort(this.config.getServiceCenterPort());
-			serviceCenterClient = new BinaryClient(centerBuilder.build(), new ServiceCenterClientListener(this),
-					centerFacotry);
+			serviceCenterClient = new BinaryClient(
+					new BinaryClientConfigBuilder().autoReconnect(5)
+							.remoteAddress(new AddressPair(this.config.getServiceCenterIp(),
+									this.config.getServiceCenterPort()))
+							.build(),
+					new ServiceCenterClientListener(this), centerFacotry);
 		}
 	}
 

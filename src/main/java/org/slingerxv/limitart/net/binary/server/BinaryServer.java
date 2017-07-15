@@ -95,8 +95,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		this.messageFactory = msgFactory.registerMsg(new ConnectionValidateClientHandler());
 		// 初始化加密工具
 		try {
-			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(BinaryServer.this.config.getConnectionPass(),
-					"20170106");
+			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(config.getAddressPair().getPass(), "20170106");
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 				| InvalidAlgorithmParameterException e) {
 			log.error(e, e);
@@ -132,10 +131,10 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 	public void startServer() {
 		new Thread(() -> {
 			try {
-				boot.bind(config.getPort()).addListener((ChannelFuture arg0) -> {
+				boot.bind(config.getAddressPair().getPort()).addListener((ChannelFuture arg0) -> {
 					if (arg0.isSuccess()) {
 						channel = arg0.channel();
-						log.info(config.getServerName() + " bind at port:" + config.getPort());
+						log.info(config.getServerName() + " bind at port:" + config.getAddressPair().getPort());
 						serverEventListener.onServerBind(arg0.channel());
 					}
 				}).sync().channel().closeFuture().sync();

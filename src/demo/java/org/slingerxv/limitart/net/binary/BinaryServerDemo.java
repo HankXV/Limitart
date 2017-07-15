@@ -7,13 +7,15 @@ import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig.BinaryServerConfigBuilder;
 import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
+import org.slingerxv.limitart.net.strct.AddressPair;
 
 import io.netty.channel.Channel;
 
 public class BinaryServerDemo {
 	public static void main(String[] args)
 			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
-		BinaryServerConfig build = new BinaryServerConfigBuilder().port(8888).serverName("BinaryServerDemo").build();
+		BinaryServerConfig build = new BinaryServerConfigBuilder().addressPair(new AddressPair(8888))
+				.serverName("BinaryServerDemo").build();
 		BinaryServerEventListener binaryServerEventListener = new BinaryServerEventListener() {
 			// 当网络模块发生错误时
 			@Override
