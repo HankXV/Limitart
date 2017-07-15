@@ -37,10 +37,22 @@ public final class BinaryServerConfig {
 
 	private BinaryServerConfig(BinaryServerConfigBuilder builder) {
 		this.serverName = builder.serverName;
+		if (builder.addressPair == null) {
+			throw new NullPointerException("addressPair");
+		}
 		this.addressPair = builder.addressPair;
 		this.connectionValidateTimeInSec = builder.connectionValidateTimeInSec;
+		if (builder.decoder == null) {
+			throw new NullPointerException("decoder");
+		}
 		this.decoder = builder.decoder;
+		if (builder.encoder == null) {
+			throw new NullPointerException("encoder");
+		}
 		this.encoder = builder.encoder;
+		if (builder.whiteList == null) {
+			throw new NullPointerException("whiteList");
+		}
 		this.whiteList = builder.whiteList;
 		if (builder.factory == null) {
 			throw new NullPointerException("factory");

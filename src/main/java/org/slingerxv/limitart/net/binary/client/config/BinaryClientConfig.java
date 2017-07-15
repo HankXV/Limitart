@@ -31,9 +31,18 @@ public final class BinaryClientConfig {
 
 	private BinaryClientConfig(BinaryClientConfigBuilder builder) {
 		this.clientName = builder.clientName;
+		if (builder.remoteAddress == null) {
+			throw new NullPointerException("remoteAddress");
+		}
 		this.remoteAddress = builder.remoteAddress;
 		this.autoReconnect = builder.autoReconnect;
+		if (builder.decoder == null) {
+			throw new NullPointerException("decoder");
+		}
 		this.decoder = builder.decoder;
+		if (builder.encoder == null) {
+			throw new NullPointerException("encoder");
+		}
 		this.encoder = builder.encoder;
 		if (builder.factory == null) {
 			throw new NullPointerException("factory");
