@@ -6,6 +6,7 @@ import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.StringUtil;
 
@@ -24,6 +25,7 @@ public final class BinaryServerConfig {
 	private AbstractBinaryDecoder decoder;
 	private AbstractBinaryEncoder encoder;
 	private HashSet<String> whiteList;
+	private MessageFactory factory;
 
 	// ---listener
 	private Proc1<Channel> onChannelActive;;
@@ -40,6 +42,10 @@ public final class BinaryServerConfig {
 		this.decoder = builder.decoder;
 		this.encoder = builder.encoder;
 		this.whiteList = builder.whiteList;
+		if (builder.factory == null) {
+			throw new NullPointerException("factory");
+		}
+		this.factory = builder.factory;
 	}
 
 	public String getServerName() {
@@ -66,6 +72,10 @@ public final class BinaryServerConfig {
 		return whiteList;
 	}
 
+	public MessageFactory getFactory() {
+		return factory;
+	}
+
 	public static class BinaryServerConfigBuilder {
 		private String serverName;
 		private AddressPair addressPair;
@@ -73,6 +83,7 @@ public final class BinaryServerConfig {
 		private AbstractBinaryDecoder decoder;
 		private AbstractBinaryEncoder encoder;
 		private HashSet<String> whiteList;
+		private MessageFactory factory;
 
 		public BinaryServerConfigBuilder() {
 			this.serverName = "Binary-Server";
@@ -121,6 +132,11 @@ public final class BinaryServerConfig {
 		 */
 		public BinaryServerConfigBuilder addressPair(AddressPair addressPair) {
 			this.addressPair = addressPair;
+			return this;
+		}
+
+		public BinaryServerConfigBuilder factory(MessageFactory factory) {
+			this.factory = factory;
 			return this;
 		}
 

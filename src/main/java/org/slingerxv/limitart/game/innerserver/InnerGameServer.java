@@ -71,6 +71,7 @@ public abstract class InnerGameServer implements IServer {
 								.slaveName("Game-To-Fight").myServerId(config.getServerId())
 								.myServerIp(config.getGameServerIp()).myServerPort(config.getGameServerPort())
 								.myServerPass(config.getGameServerPass()).masterIp(info.outIp)
+								.masterServerPort(info.outPort).masterServerPass(info.outPass)
 								.masterInnerPort(info.innerPort).masterInnerPass(InnerServerUtil.getInnerPass())
 								.facotry(config.getFactory()).build()) {
 

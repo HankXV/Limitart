@@ -110,9 +110,8 @@ public class ConsumerX implements BinaryClientEventListener {
 			BinaryClientConfigBuilder serviceCenterBuilder = new BinaryClientConfigBuilder();
 			serviceCenterBuilder.autoReconnect(config.getAutoConnectInterval())
 					.remoteAddress(new AddressPair(config.getServiceCenterIp(), config.getServiceCenterPort(), null))
-					.clientName("RPC-Consumer");
-			serviceCenterClient = new BinaryClient(serviceCenterBuilder.build(), new serviceCenterListener(this),
-					centryFactory);
+					.clientName("RPC-Consumer").factory(centryFactory);
+			serviceCenterClient = new BinaryClient(serviceCenterBuilder.build(), new serviceCenterListener(this));
 			serviceCenterClient.connect();
 		}
 	}
@@ -162,8 +161,8 @@ public class ConsumerX implements BinaryClientEventListener {
 		rpcMessageFacotry.registerMsg(new DirectFetchProviderServicesResultHandler());
 		BinaryClient client = new BinaryClient(
 				new BinaryClientConfigBuilder().remoteAddress(new AddressPair(providerIp, providerPort))
-						.autoReconnect(config.getAutoConnectInterval()).build(),
-				this, rpcMessageFacotry);
+						.autoReconnect(config.getAutoConnectInterval()).factory(rpcMessageFacotry).build(),
+				this);
 		return client;
 	}
 

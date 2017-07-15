@@ -15,7 +15,8 @@ public class BinaryServerDemo {
 	public static void main(String[] args)
 			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
 		BinaryServerConfig build = new BinaryServerConfigBuilder().addressPair(new AddressPair(8888))
-				.serverName("BinaryServerDemo").build();
+				.serverName("BinaryServerDemo").factory(new MessageFactory().registerMsg(BinaryHandlerDemo.class))
+				.build();
 		BinaryServerEventListener binaryServerEventListener = new BinaryServerEventListener() {
 			// 当网络模块发生错误时
 			@Override
@@ -52,9 +53,7 @@ public class BinaryServerDemo {
 				message.getHandler().handle(message);
 			}
 		};
-		MessageFactory factory = new MessageFactory();
-		factory.registerMsg(BinaryHandlerDemo.class);
-		BinaryServer server = new BinaryServer(build, binaryServerEventListener, factory);
+		BinaryServer server = new BinaryServer(build, binaryServerEventListener);
 		server.startServer();
 	}
 }

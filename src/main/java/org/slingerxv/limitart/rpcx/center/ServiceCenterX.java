@@ -62,7 +62,11 @@ public class ServiceCenterX {
 		}
 		this.config = config;
 		BinaryServerConfig serverConfig = new BinaryServerConfig.BinaryServerConfigBuilder()
-				.addressPair(new AddressPair(config.getPort())).build();
+				.addressPair(new AddressPair(config.getPort()))
+				.factory(new MessageFactory().registerMsg(new SubscribeServiceFromServiceCenterConsumerHandler())
+						.registerMsg(new PushServiceToServiceCenterProviderHandler())
+						.registerMsg(new AddScheduleToServiceCenterProviderHandler()))
+				.build();
 		binaryServer = new BinaryServer(serverConfig, new BinaryServerEventListener() {
 
 			@Override
@@ -94,9 +98,7 @@ public class ServiceCenterX {
 			public void onServerBind(Channel channel) {
 
 			}
-		}, new MessageFactory().registerMsg(new SubscribeServiceFromServiceCenterConsumerHandler())
-				.registerMsg(new PushServiceToServiceCenterProviderHandler())
-				.registerMsg(new AddScheduleToServiceCenterProviderHandler()));
+		});
 	}
 
 	public ServiceCenterX bind() throws Exception {

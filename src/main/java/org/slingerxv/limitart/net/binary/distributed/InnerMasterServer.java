@@ -46,7 +46,7 @@ public abstract class InnerMasterServer implements BinaryServerEventListener, IS
 		config.getFactory().registerMsg(new ReqServerLoadSlave2MasterHandler());
 		server = new BinaryServer(new BinaryServerConfig.BinaryServerConfigBuilder()
 				.addressPair(new AddressPair(config.getMasterPort(), InnerServerUtil.getInnerPass()))
-				.serverName(config.getServerName()).build(), this, config.getFactory());
+				.serverName(config.getServerName()).factory(config.getFactory()).build(), this);
 	}
 
 	/**

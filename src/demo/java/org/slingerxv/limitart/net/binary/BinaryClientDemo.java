@@ -10,9 +10,9 @@ import org.slingerxv.limitart.net.struct.AddressPair;
 
 public class BinaryClientDemo {
 	public static void main(String[] args) throws Exception {
-		BinaryClientConfig build = new BinaryClientConfigBuilder().remoteAddress(new AddressPair("127.0.0.1", 8888))
-				.clientName("BinaryClientDemo").build();
 		MessageFactory factory = new MessageFactory();
+		BinaryClientConfig build = new BinaryClientConfigBuilder().remoteAddress(new AddressPair("127.0.0.1", 8888))
+				.clientName("BinaryClientDemo").factory(factory).build();
 		BinaryClientEventListener binaryClientEventListener = new BinaryClientEventListener() {
 
 			@Override
@@ -46,7 +46,7 @@ public class BinaryClientDemo {
 				message.getHandler().handle(message);
 			}
 		};
-		BinaryClient client = new BinaryClient(build, binaryClientEventListener, factory);
+		BinaryClient client = new BinaryClient(build, binaryClientEventListener);
 		client.connect();
 	}
 }

@@ -173,6 +173,11 @@ public final class InnerSlaveServerConfig {
 			return this;
 		}
 
+		public InnerSlaveServerConfigBuilder masterServerPass(String masterServerPass) {
+			this.masterServerPass = masterServerPass;
+			return this;
+		}
+
 		public InnerSlaveServerConfigBuilder masterInnerPort(int masterInnerPort) {
 			if (masterInnerPort >= 1024) {
 				this.masterInnerPort = masterInnerPort;

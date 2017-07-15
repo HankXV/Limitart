@@ -43,11 +43,11 @@ public abstract class InnerSlaveServer implements BinaryClientEventListener, ISe
 		this.config = config;
 		config.getFactory().registerMsg(new ResServerJoinMaster2SlaveHandler())
 				.registerMsg(new ResServerQuitMaster2SlaveHandler());
-		toMaster = new BinaryClient(
-				new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5).clientName(config.getSlaveName())
-						.connectionPass(config.getMasterInnerPass())
-						.remoteAddress(new AddressPair(config.getMasterIp(), config.getMasterInnerPort())).build(),
-				this, config.getFactory());
+		toMaster = new BinaryClient(new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5)
+				.clientName(config.getSlaveName())
+				.remoteAddress(
+						new AddressPair(config.getMasterIp(), config.getMasterInnerPort(), config.getMasterInnerPass()))
+				.factory(config.getFactory()).build(), this);
 		reportTask = new TimerTask() {
 
 			@Override

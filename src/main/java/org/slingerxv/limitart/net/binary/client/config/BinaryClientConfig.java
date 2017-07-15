@@ -6,6 +6,7 @@ import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.message.Message;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
 
 /**
@@ -18,9 +19,9 @@ public final class BinaryClientConfig {
 	private String clientName;
 	private AddressPair remoteAddress;
 	private int autoReconnect;
-	private String connectionPass;
 	private AbstractBinaryDecoder decoder;
 	private AbstractBinaryEncoder encoder;
+	private MessageFactory factory;
 	// ----listener
 	private Proc1<BinaryClient> onChannelActive;
 	private Proc1<BinaryClient> onChannelInactive;
@@ -32,9 +33,12 @@ public final class BinaryClientConfig {
 		this.clientName = builder.clientName;
 		this.remoteAddress = builder.remoteAddress;
 		this.autoReconnect = builder.autoReconnect;
-		this.connectionPass = builder.connectionPass;
 		this.decoder = builder.decoder;
 		this.encoder = builder.encoder;
+		if (builder.factory == null) {
+			throw new NullPointerException("factory");
+		}
+		this.factory = builder.factory;
 	}
 
 	public String getClientName() {
@@ -49,10 +53,6 @@ public final class BinaryClientConfig {
 		return autoReconnect;
 	}
 
-	public String getConnectionPass() {
-		return connectionPass;
-	}
-
 	public AbstractBinaryDecoder getDecoder() {
 		return decoder;
 	}
@@ -61,19 +61,22 @@ public final class BinaryClientConfig {
 		return encoder;
 	}
 
+	public MessageFactory getFactory() {
+		return factory;
+	}
+
 	public static class BinaryClientConfigBuilder {
 		private String clientName;
 		private AddressPair remoteAddress;
 		private int autoReconnect;
-		private String connectionPass;
 		private AbstractBinaryDecoder decoder;
 		private AbstractBinaryEncoder encoder;
+		private MessageFactory factory;
 
 		public BinaryClientConfigBuilder() {
 			this.clientName = "Binary-Client";
 			this.remoteAddress = new AddressPair("127.0.0.1", 8888);
 			this.autoReconnect = 0;
-			this.connectionPass = "limitart-core";
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
 		}
@@ -124,14 +127,8 @@ public final class BinaryClientConfig {
 			return this;
 		}
 
-		/**
-		 * 链接验证密码
-		 * 
-		 * @param connectionPass
-		 * @return
-		 */
-		public BinaryClientConfigBuilder connectionPass(String connectionPass) {
-			this.connectionPass = connectionPass;
+		public BinaryClientConfigBuilder factory(MessageFactory factory) {
+			this.factory = factory;
 			return this;
 		}
 	}

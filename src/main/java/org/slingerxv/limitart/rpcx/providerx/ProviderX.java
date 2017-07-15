@@ -71,7 +71,7 @@ public class ProviderX implements BinaryServerEventListener {
 		factory.registerMsg(new RpcExecuteClientHandler());
 		factory.registerMsg(new DirectFetchProverServicesHandler());
 		server = new BinaryServer(new BinaryServerConfigBuilder().addressPair(new AddressPair(config.getMyPort()))
-				.serverName("RPC-Provider").build(), this, factory);
+				.serverName("RPC-Provider").factory(factory).build(), this);
 		// 处理服务中心模式
 		if (this.config.getServiceCenterIp() != null) {
 			MessageFactory centerFacotry = new MessageFactory();
@@ -80,8 +80,8 @@ public class ProviderX implements BinaryServerEventListener {
 					new BinaryClientConfigBuilder().autoReconnect(5)
 							.remoteAddress(new AddressPair(this.config.getServiceCenterIp(),
 									this.config.getServiceCenterPort()))
-							.build(),
-					new ServiceCenterClientListener(this), centerFacotry);
+							.factory(centerFacotry).build(),
+					new ServiceCenterClientListener(this));
 		}
 	}
 

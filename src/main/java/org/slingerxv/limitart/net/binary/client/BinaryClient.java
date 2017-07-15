@@ -16,7 +16,6 @@ import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListen
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
-import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
@@ -50,16 +49,15 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 public class BinaryClient extends ChannelInboundHandlerAdapter {
 	private static Logger log = LogManager.getLogger();
 	private BinaryClientEventListener clientEventListener;
-	private MessageFactory messageFactory;
-	private BinaryClientConfig clientConfig;
+	private BinaryClientConfig config;
 	private static EventLoopGroup group = new NioEventLoopGroup();
 	private Bootstrap bootstrap;
 	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
 	private TimerTask reconnectTask;
 
-	public BinaryClient(BinaryClientConfig config, BinaryClientEventListener clientEventListener,
-			MessageFactory messageFactory) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+	public BinaryClient(BinaryClientConfig config, BinaryClientEventListener clientEventListener)
+			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("BinaryClientConfig");
@@ -67,18 +65,18 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		if (clientEventListener == null) {
 			throw new NullPointerException("BinaryClientEventListener");
 		}
-		if (messageFactory == null) {
+		if (config.getFactory() == null) {
 			throw new NullPointerException("MessageFactory");
 		}
-		this.clientConfig = config;
+		this.config = config;
 		this.clientEventListener = clientEventListener;
 		// 内部消息注册
-		this.messageFactory = messageFactory.registerMsg(new ConnectionValidateServerHandler())
+		config.getFactory().registerMsg(new ConnectionValidateServerHandler())
 				.registerMsg(new ConnectionValidateSuccessServerHandler());
-		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(clientConfig.getConnectionPass());
+		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(config.getRemoteAddress().getPass());
 		bootstrap = new Bootstrap();
 		bootstrap.channel(NioSocketChannel.class);
-		log.info(clientConfig.getClientName() + " nio init");
+		log.info(config.getClientName() + " nio init");
 		bootstrap.group(group).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.handler(new ChannelInitializerImpl(this));
 		reconnectTask = new TimerTask() {
@@ -99,7 +97,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
-			AbstractBinaryDecoder decoder = clientConfig.getDecoder();
+			AbstractBinaryDecoder decoder = config.getDecoder();
 			ch.pipeline()
 					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
 							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
@@ -110,7 +108,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	}
 
 	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) throws Exception {
-		SendMessageUtil.sendMessage(this.clientConfig.getEncoder(), channel, msg, listener);
+		SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, listener);
 	}
 
 	public BinaryClient disConnect() {
@@ -130,24 +128,22 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		if (channel != null && channel.isWritable()) {
 			return;
 		}
-		log.info(clientConfig.getClientName() + " start connect server：" + clientConfig.getRemoteAddress().getIp() + ":"
-				+ clientConfig.getRemoteAddress().getPort() + "...");
+		log.info(config.getClientName() + " start connect server：" + config.getRemoteAddress().getIp() + ":"
+				+ config.getRemoteAddress().getPort() + "...");
 		try {
-			bootstrap.connect(clientConfig.getRemoteAddress().getIp(), clientConfig.getRemoteAddress().getPort())
+			bootstrap.connect(config.getRemoteAddress().getIp(), config.getRemoteAddress().getPort())
 					.addListener((ChannelFutureListener) channelFuture -> {
 						channel = channelFuture.channel();
 						if (channelFuture.isSuccess()) {
-							log.info(clientConfig.getClientName() + " connect server："
-									+ clientConfig.getRemoteAddress().getIp() + ":"
-									+ clientConfig.getRemoteAddress().getPort() + " success！");
+							log.info(config.getClientName() + " connect server：" + config.getRemoteAddress().getIp()
+									+ ":" + config.getRemoteAddress().getPort() + " success！");
 						} else {
 							log.error(
-									clientConfig.getClientName() + " try connect server："
-											+ clientConfig.getRemoteAddress().getIp() + ":"
-											+ clientConfig.getRemoteAddress().getPort() + " fail",
+									config.getClientName() + " try connect server：" + config.getRemoteAddress().getIp()
+											+ ":" + config.getRemoteAddress().getPort() + " fail",
 									channelFuture.cause().getMessage());
-							if (clientConfig.getAutoReconnect() > 0) {
-								tryReconnect(clientConfig.getAutoReconnect());
+							if (config.getAutoReconnect() > 0) {
+								tryReconnect(config.getAutoReconnect());
 							}
 						}
 					}).sync();
@@ -179,8 +175,8 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			int validateRandom = Integer.parseInt(decode);
 			ConnectionValidateClientMessage msg = new ConnectionValidateClientMessage();
 			msg.setValidateRandom(validateRandom);
-			SendMessageUtil.sendMessage(this.clientConfig.getEncoder(), channel, msg, null);
-			log.info(clientConfig.getClientName() + " parse validate code success，return result：" + validateRandom);
+			sendMessage(msg, null);
+			log.info(config.getClientName() + " parse validate code success，return result：" + validateRandom);
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -203,27 +199,23 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		return this.channel.remoteAddress();
 	}
 
-	public MessageFactory getMessageFactory() {
-		return messageFactory;
-	}
-
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object arg) throws Exception {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
-			short messageId = this.clientConfig.getDecoder().readMessageId(ctx.channel(), buffer);
-			Message msg = BinaryClient.this.messageFactory.getMessage(messageId);
+			short messageId = this.config.getDecoder().readMessageId(ctx.channel(), buffer);
+			Message msg = config.getFactory().getMessage(messageId);
 			if (msg == null) {
-				throw new Exception(clientConfig.getClientName() + " message empty,id:" + messageId);
+				throw new Exception(config.getClientName() + " message empty,id:" + messageId);
 			}
 			msg.buffer(buffer);
 			msg.decode();
 			msg.buffer(null);
 			@SuppressWarnings("unchecked")
-			IHandler<Message> handler = (IHandler<Message>) BinaryClient.this.messageFactory.getHandler(messageId);
+			IHandler<Message> handler = (IHandler<Message>) config.getFactory().getHandler(messageId);
 			if (handler == null) {
-				throw new Exception(clientConfig.getClientName() + " can not find handler for message,id:" + messageId);
+				throw new Exception(config.getClientName() + " can not find handler for message,id:" + messageId);
 			}
 			msg.setHandler(handler);
 			msg.setChannel(ctx.channel());
@@ -255,7 +247,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	}
 
 	public BinaryClientConfig getConfig() {
-		return this.clientConfig;
+		return this.config;
 	}
 
 	private class ConnectionValidateServerHandler implements IHandler<ConnectionValidateServerMessage> {

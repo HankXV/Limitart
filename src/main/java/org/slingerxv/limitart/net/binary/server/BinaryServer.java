@@ -18,7 +18,6 @@ import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
-import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
@@ -63,7 +62,6 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 	private static EventLoopGroup bossGroup;
 	private static EventLoopGroup workerGroup;
 	private BinaryServerConfig config;
-	protected MessageFactory messageFactory;
 	protected BinaryServerEventListener serverEventListener;
 	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
 	private SymmetricEncryptionUtil encrypUtil;
@@ -78,21 +76,21 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		}
 	}
 
-	public BinaryServer(BinaryServerConfig config, BinaryServerEventListener serverEventListener,
-			MessageFactory msgFactory) throws MessageIDDuplicatedException {
+	public BinaryServer(BinaryServerConfig config, BinaryServerEventListener serverEventListener)
+			throws MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("BinaryServerConfig");
 		}
 		if (serverEventListener == null) {
 			throw new NullPointerException("BinaryServerEventListener");
 		}
-		if (msgFactory == null) {
+		if (config.getFactory() == null) {
 			throw new NullPointerException("MessageFactory");
 		}
 		this.serverEventListener = serverEventListener;
 		this.config = config;
 		// 初始化内部消息
-		this.messageFactory = msgFactory.registerMsg(new ConnectionValidateClientHandler());
+		config.getFactory().registerMsg(new ConnectionValidateClientHandler());
 		// 初始化加密工具
 		try {
 			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(config.getAddressPair().getPass(), "20170106");
@@ -204,7 +202,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		}
 		msg.setValidateStr(encode);
 		try {
-			SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, (isSuccess, cause, channel1) -> {
+			sendMessage(channel, msg, (isSuccess, cause, channel1) -> {
 				if (isSuccess) {
 					log.info(config.getServerName() + " send client " + channel1.remoteAddress() + " validate token:"
 							+ encode + "success！");
@@ -268,8 +266,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		log.info(config.getServerName() + " remote connection " + channel.remoteAddress() + " validate success!");
 		// 通知客户端成功
 		try {
-			SendMessageUtil.sendMessage(this.config.getEncoder(), channel, new ConnectionValidateSuccessServerMessage(),
-					null);
+			sendMessage(channel, new ConnectionValidateSuccessServerMessage(), null);
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -282,7 +279,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		try {
 			// 消息id
 			short messageId = this.config.getDecoder().readMessageId(ctx.channel(), buffer);
-			Message msg = messageFactory.getMessage(messageId);
+			Message msg = config.getFactory().getMessage(messageId);
 			if (msg == null) {
 				throw new Exception(config.getServerName() + " message empty,id:" + messageId);
 			}
@@ -290,7 +287,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 			msg.decode();
 			msg.buffer(null);
 			@SuppressWarnings("unchecked")
-			IHandler<Message> handler = (IHandler<Message>) messageFactory.getHandler(messageId);
+			IHandler<Message> handler = (IHandler<Message>) config.getFactory().getHandler(messageId);
 			if (handler == null) {
 				throw new Exception(config.getServerName() + " can not find handler for message,id:" + messageId);
 			}

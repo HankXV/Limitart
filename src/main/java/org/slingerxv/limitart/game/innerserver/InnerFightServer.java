@@ -56,9 +56,10 @@ public abstract class InnerFightServer implements IServer {
 		toMaster = new InnerSlaveServer(new InnerSlaveServerConfigBuilder().slaveName("Fight-To-Public")
 				.myServerId(config.getServerId()).myServerIp(config.getFightServerIp())
 				.myServerPort(config.getFightServerPort()).myServerPass(config.getFightServerPass())
-				.myInnerServerPort(config.getFightServerInnerPort()).myInnerServerPass(InnerServerUtil.getInnerPass())
-				.masterIp(config.getPublicIp()).masterInnerPort(config.getPublicPort())
-				.masterInnerPass(InnerServerUtil.getInnerPass()).facotry(config.getFactory()).build()) {
+				.masterServerPort(config.getFightServerPort()).myInnerServerPort(config.getFightServerInnerPort())
+				.myInnerServerPass(InnerServerUtil.getInnerPass()).masterIp(config.getPublicIp())
+				.masterInnerPort(config.getPublicPort()).masterInnerPass(InnerServerUtil.getInnerPass())
+				.facotry(config.getFactory()).build()) {
 
 			@Override
 			public int serverType() {
