@@ -18,7 +18,7 @@ import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedEx
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
-import org.slingerxv.limitart.net.strct.AddressPair;
+import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.center.config.ServiceCenterXConfig;
 import org.slingerxv.limitart.rpcx.center.schedule.ScheduleTask;
 import org.slingerxv.limitart.rpcx.center.struct.ServiceXClientSession;

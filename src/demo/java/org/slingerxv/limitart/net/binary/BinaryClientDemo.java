@@ -6,7 +6,7 @@ import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig.Binary
 import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListener;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.strct.AddressPair;
+import org.slingerxv.limitart.net.struct.AddressPair;
 
 public class BinaryClientDemo {
 	public static void main(String[] args) throws Exception {

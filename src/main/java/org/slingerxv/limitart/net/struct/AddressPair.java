@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.net.strct;
+package org.slingerxv.limitart.net.struct;
 
 public class AddressPair {
 	private String ip;

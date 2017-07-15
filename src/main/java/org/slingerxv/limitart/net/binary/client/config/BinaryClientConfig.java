@@ -6,7 +6,7 @@ import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.message.Message;
-import org.slingerxv.limitart.net.strct.AddressPair;
+import org.slingerxv.limitart.net.struct.AddressPair;
 
 /**
  * 二进制通信客户端配置

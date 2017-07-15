@@ -23,7 +23,7 @@ import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
 import org.slingerxv.limitart.net.define.IServer;
-import org.slingerxv.limitart.net.strct.AddressPair;
+import org.slingerxv.limitart.net.struct.AddressPair;
 
 import io.netty.channel.Channel;
 

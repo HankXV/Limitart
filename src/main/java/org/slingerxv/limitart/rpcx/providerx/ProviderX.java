@@ -18,7 +18,7 @@ import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig.BinaryServerConfigBuilder;
 import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
-import org.slingerxv.limitart.net.strct.AddressPair;
+import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.define.ServiceX;
 import org.slingerxv.limitart.rpcx.exception.ServiceError;
 import org.slingerxv.limitart.rpcx.exception.ServiceXExecuteException;

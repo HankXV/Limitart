@@ -6,7 +6,7 @@ import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
-import org.slingerxv.limitart.net.strct.AddressPair;
+import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.StringUtil;
 
 import io.netty.channel.Channel;

@@ -23,7 +23,7 @@ import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
-import org.slingerxv.limitart.net.strct.AddressPair;
+import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.TimerUtil;
 
 /**

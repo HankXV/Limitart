@@ -23,7 +23,7 @@ import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListen
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.strct.AddressPair;
+import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.consumerx.config.ConsumerXConfig;
 import org.slingerxv.limitart.rpcx.consumerx.define.IServiceAsyncCallback;
 import org.slingerxv.limitart.rpcx.consumerx.listener.IConsumerListener;
