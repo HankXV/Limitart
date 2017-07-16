@@ -1,5 +1,7 @@
 package org.slingerxv.limitart.net.struct;
 
+import io.netty.util.internal.StringUtil;
+
 public class AddressPair {
 	private String ip;
 	private int port;
@@ -8,7 +10,9 @@ public class AddressPair {
 	public AddressPair(String ip, int port, String pass) {
 		this.ip = ip;
 		this.port = port;
-		this.pass = pass;
+		if (!StringUtil.isNullOrEmpty(pass)) {
+			this.pass = pass;
+		}
 	}
 
 	public AddressPair(int port) {
