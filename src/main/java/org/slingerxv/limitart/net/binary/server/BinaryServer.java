@@ -26,6 +26,7 @@ import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidat
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
 import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
+import org.slingerxv.limitart.net.define.AbstractNettyServer;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.util.RandomUtil;
 import org.slingerxv.limitart.util.SymmetricEncryptionUtil;
@@ -40,11 +41,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
@@ -55,26 +53,15 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author Hank
  *
  */
-public class BinaryServer extends ChannelInboundHandlerAdapter implements IServer {
+public class BinaryServer extends AbstractNettyServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	private ServerBootstrap boot;
 	private Channel channel;
-	private static EventLoopGroup bossGroup;
-	private static EventLoopGroup workerGroup;
 	private BinaryServerConfig config;
 	protected BinaryServerEventListener serverEventListener;
 	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
 	private SymmetricEncryptionUtil encrypUtil;
 	private TimerTask clearTask;
-	static {
-		if (Epoll.isAvailable()) {
-			bossGroup = new EpollEventLoopGroup(1);
-			workerGroup = new EpollEventLoopGroup();
-		} else {
-			bossGroup = new NioEventLoopGroup(1);
-			workerGroup = new NioEventLoopGroup();
-		}
-	}
 
 	public BinaryServer(BinaryServerConfig config, BinaryServerEventListener serverEventListener)
 			throws MessageIDDuplicatedException {
@@ -100,15 +87,11 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		}
 		boot = new ServerBootstrap();
 		if (Epoll.isAvailable()) {
-			bossGroup = new EpollEventLoopGroup();
-			workerGroup = new EpollEventLoopGroup();
 			boot.option(ChannelOption.SO_BACKLOG, 1024).channel(EpollServerSocketChannel.class)
 					.childOption(ChannelOption.SO_LINGER, 0).childOption(ChannelOption.SO_REUSEADDR, true)
 					.childOption(ChannelOption.SO_KEEPALIVE, true);
 			log.info(config.getServerName() + " epoll init");
 		} else {
-			bossGroup = new NioEventLoopGroup();
-			workerGroup = new NioEventLoopGroup();
 			boot.channel(NioServerSocketChannel.class);
 			log.info(config.getServerName() + " nio init");
 		}
@@ -174,7 +157,32 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
 							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
 							decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()))
-					.addLast(this.server);
+					.addLast(new ChannelInboundHandlerAdapter() {
+						@Override
+						public boolean isSharable() {
+							return true;
+						}
+
+						@Override
+						public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+							exceptionCaught0(ctx, cause);
+						}
+
+						@Override
+						public void channelActive(ChannelHandlerContext ctx) throws Exception {
+							channelActive0(ctx);
+						}
+
+						@Override
+						public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+							channelInactive0(ctx);
+						}
+
+						@Override
+						public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+							channelRead0(ctx, msg);
+						}
+					});
 		}
 	}
 
@@ -273,8 +281,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		this.serverEventListener.onConnectionEffective(channel);
 	}
 
-	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object arg) {
+	private void channelRead0(ChannelHandlerContext ctx, Object arg) {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
@@ -313,8 +320,7 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		}
 	}
 
-	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+	private void channelActive0(ChannelHandlerContext ctx) throws Exception {
 		HashSet<String> whiteList = config.getWhiteList();
 		if (whiteList != null && !config.getWhiteList().isEmpty()) {
 			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
@@ -329,24 +335,17 @@ public class BinaryServer extends ChannelInboundHandlerAdapter implements IServe
 		this.serverEventListener.onChannelActive(ctx.channel());
 	}
 
-	@Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+	private void channelInactive0(ChannelHandlerContext ctx) throws Exception {
 		log.info(ctx.channel().remoteAddress() + " disconnected！");
 		this.serverEventListener.onChannelInactive(ctx.channel());
 	}
 
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+	private void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		this.serverEventListener.onExceptionCaught(ctx.channel(), cause);
 	}
 
 	public BinaryServerConfig getConfig() {
 		return this.config;
-	}
-
-	@Override
-	public boolean isSharable() {
-		return true;
 	}
 
 	private class SessionValidateData {

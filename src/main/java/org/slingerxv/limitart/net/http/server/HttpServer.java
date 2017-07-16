@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.collections.ConstraintMap;
+import org.slingerxv.limitart.net.define.AbstractNettyServer;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.net.http.codec.QueryStringDecoderV2;
 import org.slingerxv.limitart.net.http.constant.QueryMethod;
@@ -33,12 +34,9 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -60,24 +58,13 @@ import io.netty.handler.stream.ChunkedWriteHandler;
  *
  */
 @Sharable
-public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> implements IServer {
+public class HttpServer extends AbstractNettyServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	private ServerBootstrap boot;
-	private static EventLoopGroup bossGroup;
-	private static EventLoopGroup workerGroup;
 	private HttpServerEventListener serverEventListener;
 	private UrlMessageFactory urlFactory;
 	private HttpServerConfig config;
 	private Channel channel;
-	static {
-		if (Epoll.isAvailable()) {
-			bossGroup = new EpollEventLoopGroup(1);
-			workerGroup = new EpollEventLoopGroup();
-		} else {
-			bossGroup = new NioEventLoopGroup(1);
-			workerGroup = new NioEventLoopGroup();
-		}
-	}
 
 	public HttpServer(HttpServerConfig config, HttpServerEventListener serverEventListener,
 			UrlMessageFactory urlFactory) {
@@ -106,7 +93,30 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 										serverEventListener))
 								.addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
 								.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
-								.addLast(HttpServer.this);
+								.addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
+
+									@Override
+									protected void channelRead0(ChannelHandlerContext arg0, FullHttpRequest arg1)
+											throws Exception {
+										channelRead00(arg0, arg1);
+									}
+
+									@Override
+									public void channelActive(ChannelHandlerContext ctx) throws Exception {
+										channelActive0(ctx);
+									}
+
+									@Override
+									public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+										channelInactive0(ctx);
+									}
+
+									@Override
+									public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+											throws Exception {
+										exceptionCaught0(ctx, cause);
+									}
+								});
 					}
 				});
 	}
@@ -136,8 +146,7 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 		}
 	}
 
-	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+	private void channelActive0(ChannelHandlerContext ctx) throws Exception {
 		HashSet<String> whiteList = config.getWhiteList();
 		if (whiteList != null && !config.getWhiteList().isEmpty()) {
 			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
@@ -151,17 +160,15 @@ public class HttpServer extends SimpleChannelInboundHandler<FullHttpRequest> imp
 		this.serverEventListener.onChannelActive(ctx.channel());
 	}
 
-	@Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+	private void channelInactive0(ChannelHandlerContext ctx) throws Exception {
 		this.serverEventListener.onChannelInactive(ctx.channel());
 	}
 
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+	private void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		this.serverEventListener.onExceptionCaught(ctx.channel(), cause);
 	}
 
-	protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
+	private void channelRead00(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
 		if (!msg.decoderResult().isSuccess()) {
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_DECODE_FAIL);
 			return;
