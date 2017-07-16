@@ -19,7 +19,6 @@ import org.slingerxv.limitart.net.http.constant.QueryMethod;
 import org.slingerxv.limitart.net.http.constant.RequestErrorCode;
 import org.slingerxv.limitart.net.http.handler.HttpHandler;
 import org.slingerxv.limitart.net.http.message.UrlMessage;
-import org.slingerxv.limitart.net.http.message.UrlMessageFactory;
 import org.slingerxv.limitart.net.http.server.config.HttpServerConfig;
 import org.slingerxv.limitart.net.http.server.event.HttpServerEventListener;
 import org.slingerxv.limitart.net.http.server.filter.HttpObjectAggregatorCustom;
@@ -62,18 +61,15 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	private ServerBootstrap boot;
 	private HttpServerEventListener serverEventListener;
-	private UrlMessageFactory urlFactory;
 	private HttpServerConfig config;
 	private Channel channel;
 
-	public HttpServer(HttpServerConfig config, HttpServerEventListener serverEventListener,
-			UrlMessageFactory urlFactory) {
-		if (serverEventListener == null || config == null || urlFactory == null) {
+	public HttpServer(HttpServerConfig config, HttpServerEventListener serverEventListener) {
+		if (serverEventListener == null || config == null) {
 			throw new NullPointerException("init error!");
 		}
 		this.serverEventListener = serverEventListener;
 		this.config = config;
-		this.urlFactory = urlFactory;
 		boot = new ServerBootstrap();
 		if (Epoll.isAvailable()) {
 			boot.channel(EpollServerSocketChannel.class).option(ChannelOption.SO_BACKLOG, 1024);
@@ -193,7 +189,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			HttpUtil.sendResponse(ctx.channel(), HttpResponseStatus.OK, "hello~stupid!", true);
 			return;
 		}
-		UrlMessage message = this.urlFactory.getMessage(url);
+		UrlMessage message = this.config.getFacotry().getMessage(url);
 		if (message == null) {
 			log.error("消息不存在:" + url);
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_URL_FORBBIDEN);
@@ -209,7 +205,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			return;
 		}
 		@SuppressWarnings("unchecked")
-		HttpHandler<UrlMessage> handler = (HttpHandler<UrlMessage>) this.urlFactory.getHandler(url);
+		HttpHandler<UrlMessage> handler = (HttpHandler<UrlMessage>) this.config.getFacotry().getHandler(url);
 		if (handler == null) {
 			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_URL_FORBBIDEN);
 			return;
