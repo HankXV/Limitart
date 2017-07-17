@@ -61,8 +61,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private SymmetricEncryptionUtil encrypUtil;
 	private TimerTask clearTask;
 
-	public BinaryServer(BinaryServerConfig config)
-			throws MessageIDDuplicatedException {
+	public BinaryServer(BinaryServerConfig config) throws MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("BinaryServerConfig");
 		}
@@ -110,7 +109,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					if (arg0.isSuccess()) {
 						channel = arg0.channel();
 						log.info(config.getServerName() + " bind at port:" + config.getAddressPair().getPort());
-						if(config.getOnServerBind() != null){
+						if (config.getOnServerBind() != null) {
 							config.getOnServerBind().run(arg0.channel());
 						}
 					}
@@ -161,17 +160,37 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 						@Override
 						public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-							exceptionCaught0(ctx, cause);
+							log.error(ctx.channel() + " cause:", cause);
+							if (config.getOnExceptionCaught() != null) {
+								config.getOnExceptionCaught().run(ctx.channel(), cause);
+							}
 						}
 
 						@Override
 						public void channelActive(ChannelHandlerContext ctx) throws Exception {
-							channelActive0(ctx);
+							log.info(ctx.channel().remoteAddress() + " connected！");
+							HashSet<String> whiteList = config.getWhiteList();
+							if (whiteList != null && !config.getWhiteList().isEmpty()) {
+								InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+								String remoteAddress = insocket.getAddress().getHostAddress();
+								if (!whiteList.contains(remoteAddress)) {
+									ctx.channel().close();
+									log.info("ip: " + remoteAddress + " rejected link!");
+									return;
+								}
+							}
+							startConnectionValidate(ctx.channel());
+							if (config.getOnChannelStateChanged() != null) {
+								config.getOnChannelStateChanged().run(ctx.channel(), true);
+							}
 						}
 
 						@Override
 						public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-							channelInactive0(ctx);
+							log.info(ctx.channel().remoteAddress() + " disconnected！");
+							if (config.getOnChannelStateChanged() != null) {
+								config.getOnChannelStateChanged().run(ctx.channel(), false);
+							}
 						}
 
 						@Override
@@ -274,7 +293,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		} catch (Exception e) {
 			log.error(e, e);
 		}
-		if(config.getOnConnectionEffective() != null){
+		if (config.getOnConnectionEffective() != null) {
 			config.getOnConnectionEffective().run(channel);
 		}
 	}
@@ -308,7 +327,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					log.error("channel " + ctx.channel() + " has not validate yet!");
 					return;
 				}
-				if(config.getDispatchMessage() != null){
+				if (config.getDispatchMessage() != null) {
 					config.getDispatchMessage().run(msg);
 				}
 			}
@@ -317,36 +336,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			log.error("close session:" + ctx.channel(), e);
 		} finally {
 			buffer.release();
-		}
-	}
-
-	private void channelActive0(ChannelHandlerContext ctx) throws Exception {
-		HashSet<String> whiteList = config.getWhiteList();
-		if (whiteList != null && !config.getWhiteList().isEmpty()) {
-			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-			String remoteAddress = insocket.getAddress().getHostAddress();
-			if (!whiteList.contains(remoteAddress)) {
-				ctx.channel().close();
-				log.info("ip: " + remoteAddress + " rejected link!");
-				return;
-			}
-		}
-		this.startConnectionValidate(ctx.channel());
-		if(config.getOnChannelStateChanged() != null){
-			config.getOnChannelStateChanged().run(ctx.channel(), true);
-		}
-	}
-
-	private void channelInactive0(ChannelHandlerContext ctx) throws Exception {
-		log.info(ctx.channel().remoteAddress() + " disconnected！");
-		if(config.getOnChannelStateChanged() != null){
-			config.getOnChannelStateChanged().run(ctx.channel(), false);
-		}
-	}
-
-	private void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		if(config.getOnExceptionCaught() != null){
-			config.getOnExceptionCaught().run(ctx.channel(), cause);
 		}
 	}
 

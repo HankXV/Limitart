@@ -80,18 +80,18 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
 						ch.pipeline().addLast(new HttpRequestDecoder())
-								.addLast(new HttpObjectAggregator(config.getHttpObjectAggregatorMax()){
+								.addLast(new HttpObjectAggregator(config.getHttpObjectAggregatorMax()) {
 									@Override
 									protected void handleOversizedMessage(ChannelHandlerContext ctx,
 											HttpMessage oversized) throws Exception {
-										if(config.getOnMessageOverSize() != null){
-											Exception e = new Exception(ctx.channel()+" : "+oversized+" is over size");
-											log.error(e,e);
+										Exception e = new Exception(
+												ctx.channel() + " : " + oversized + " is over size");
+										log.error(e, e);
+										if (config.getOnMessageOverSize() != null) {
 											config.getOnMessageOverSize().run(ctx.channel(), oversized);
 										}
 									}
-								})
-								.addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
+								}).addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
 								.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
 								.addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
 
@@ -103,7 +103,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 
 									@Override
 									public void channelActive(ChannelHandlerContext ctx) throws Exception {
-										if(config.getOnChannelStateChanged() != null){
+										if (config.getOnChannelStateChanged() != null) {
 											config.getOnChannelStateChanged().run(ctx.channel(), true);
 										}
 									}
@@ -112,7 +112,8 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 									public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 										HashSet<String> whiteList = config.getWhiteList();
 										if (whiteList != null && !config.getWhiteList().isEmpty()) {
-											InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+											InetSocketAddress insocket = (InetSocketAddress) ctx.channel()
+													.remoteAddress();
 											String remoteAddress = insocket.getAddress().getHostAddress();
 											if (!whiteList.contains(remoteAddress)) {
 												ctx.channel().close();
@@ -120,7 +121,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 												return;
 											}
 										}
-										if(config.getOnChannelStateChanged() != null){
+										if (config.getOnChannelStateChanged() != null) {
 											config.getOnChannelStateChanged().run(ctx.channel(), false);
 										}
 									}
@@ -128,7 +129,8 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 									@Override
 									public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 											throws Exception {
-										if(config.getOnExceptionCaught() != null){
+										log.error(ctx.channel() + " cause:", cause);
+										if (config.getOnExceptionCaught() != null) {
 											config.getOnExceptionCaught().run(ctx.channel(), cause);
 										}
 									}
@@ -145,7 +147,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 					if (channelFuture.isSuccess()) {
 						channel = channelFuture.channel();
 						log.info(config.getServerName() + " bind at port:" + config.getPort());
-						if(this.config.getOnServerBind() != null){
+						if (this.config.getOnServerBind() != null) {
 							this.config.getOnServerBind().run(channel);
 						}
 					}
@@ -256,7 +258,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_MESSAGE_PARSE, e.getMessage());
 			return;
 		}
-		if(this.config.getDispatchMessage() != null){
+		if (this.config.getDispatchMessage() != null) {
 			this.config.getDispatchMessage().run(message, params);
 		}
 	}

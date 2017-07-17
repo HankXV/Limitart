@@ -45,7 +45,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author hank
  *
  */
-public class BinaryClient extends ChannelInboundHandlerAdapter {
+public class BinaryClient {
 	private static Logger log = LogManager.getLogger();
 	private BinaryClientConfig config;
 	private static EventLoopGroup group = new NioEventLoopGroup();
@@ -54,9 +54,8 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	private SymmetricEncryptionUtil decodeUtil;
 	private TimerTask reconnectTask;
 
-	public BinaryClient(BinaryClientConfig config)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
+	public BinaryClient(BinaryClientConfig config) throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, InvalidAlgorithmParameterException, MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("BinaryClientConfig");
 		}
@@ -72,7 +71,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		bootstrap.channel(NioSocketChannel.class);
 		log.info(config.getClientName() + " nio init");
 		bootstrap.group(group).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-				.handler(new ChannelInitializerImpl(this));
+				.handler(new ChannelInitializerImpl());
 		reconnectTask = new TimerTask() {
 
 			@Override
@@ -83,11 +82,6 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
-		private BinaryClient client;
-
-		private ChannelInitializerImpl(BinaryClient client) {
-			this.client = client;
-		}
 
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
@@ -96,7 +90,39 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
 							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
 							decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()));
-			ch.pipeline().addLast(this.client);
+			ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+				@Override
+				public boolean isSharable() {
+					return true;
+				}
+
+				@Override
+				public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+					channelRead0(ctx, msg);
+				}
+
+				@Override
+				public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+					if (config.getOnChannelStateChanged() != null) {
+						config.getOnChannelStateChanged().run(BinaryClient.this, false);
+					}
+				}
+
+				@Override
+				public void channelActive(ChannelHandlerContext ctx) throws Exception {
+					if (config.getOnChannelStateChanged() != null) {
+						config.getOnChannelStateChanged().run(BinaryClient.this, true);
+					}
+				}
+
+				@Override
+				public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+					log.error(ctx.channel() + " cause:" + cause);
+					if (config.getOnExceptionCaught() != null) {
+						config.getOnExceptionCaught().run(BinaryClient.this, cause);
+					}
+				}
+			});
 		}
 
 	}
@@ -146,11 +172,6 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		}
 	}
 
-	@Override
-	public boolean isSharable() {
-		return true;
-	}
-
 	private void tryReconnect(int waitSeconds) {
 		if (channel != null) {
 			channel.close();
@@ -178,7 +199,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 	private void onConnectionValidateSeccuss(String remote) {
 		log.info("server validate success,remote:" + remote);
-		if(this.config.getOnConnectionEffective() != null){
+		if (this.config.getOnConnectionEffective() != null) {
 			this.config.getOnConnectionEffective().run(this);
 		}
 	}
@@ -195,8 +216,7 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 		return this.channel.remoteAddress();
 	}
 
-	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object arg) throws Exception {
+	private void channelRead0(ChannelHandlerContext ctx, Object arg) throws Exception {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
@@ -220,33 +240,12 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			if (InnerMessageEnum.getTypeByValue(messageId) != null) {
 				handler.handle(msg);
 			} else {
-				if(this.config.getDispatchMessage() != null){
+				if (this.config.getDispatchMessage() != null) {
 					this.config.getDispatchMessage().run(msg);
 				}
 			}
 		} finally {
 			buffer.release();
-		}
-	}
-
-	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		if(this.config.getOnChannelStateChanged() != null){
-			this.config.getOnChannelStateChanged().run(this, true);
-		}
-	}
-
-	@Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		if(this.config.getOnChannelStateChanged() != null){
-			this.config.getOnChannelStateChanged().run(this, false);
-		}
-	}
-
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		if(this.config.getOnExceptionCaught() != null){
-			this.config.getOnExceptionCaught().run(this, cause);
 		}
 	}
 
