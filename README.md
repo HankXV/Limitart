@@ -114,8 +114,12 @@ Start the client, the client link is successful, and the message is sent.The ser
 When the client and the server establish the Socket link, the server sends the encrypted authentication code to the client, and the client decrypts the result and sends it to the server. After the server is verified, the Socket will be stabilized. If the client is not a long time to send the right results, then kicked off the link. This measure is mainly to prevent invalid links too much, increase the cost of malicious attack server.
 ### 二进制消息（Binary Message）
 每个消息必须继承Message类，并且消息只支持基本类型和消息元类型(`MessageMeta`)以及前两者类型的List或数组。消息元类型就是所谓的消息里携带对象，List的长度不能超过一个short的长度。每个消息必须有一个唯一ID来标识，长度为一个short。消息里面的decode和encode编码必须顺序一致。二进制服务器构造的时候需要一个消息工厂(`MessageFactory`)，消息工厂里面需要初始化消息处理器(`IHandler`)。当二进制服务器收到消息时，会去寻找相应的消息处理器作为回调。
-
-Each message must inherit the Message class, and the message supports only the base type and the message meta type (`MessageMeta`), as well as the List or array of the previous two types. Message meta types are so-called message carrying objects, and the length of List cannot exceed the length of a short. Each message must have a unique ID to identify the length of a short. The decode and encode encoding in the message must be consistent in sequence. When a binary server is constructed, you need a message factory (`MessageFactory`) that requires the initialization of the message handler (`IHandler`) in the message factory. When a binary server receives a message, it looks for the corresponding message handler as a callback.
+### 二进制消息默认编码（Binary Message default decode/encode）
+message length(include message id,short)
+	+
+message id(short)
+	+
+message body
 ### 二进制消息ID(Binary Message ID)
 由于消息的ID是一个short类型的，所以我们建议消息ID的确定方式为模块编号+模块内消息编号。比如登录模块ID为1，登录消息ID为1，那么编号就应该为0X0101。再举个例子，战斗模块的ID为10，攻击消息的ID为1，那么编号就应该为0X0A01。
 
