@@ -20,8 +20,6 @@ import org.slingerxv.limitart.net.http.constant.RequestErrorCode;
 import org.slingerxv.limitart.net.http.handler.HttpHandler;
 import org.slingerxv.limitart.net.http.message.UrlMessage;
 import org.slingerxv.limitart.net.http.server.config.HttpServerConfig;
-import org.slingerxv.limitart.net.http.server.event.HttpServerEventListener;
-import org.slingerxv.limitart.net.http.server.filter.HttpObjectAggregatorCustom;
 import org.slingerxv.limitart.net.http.util.HttpUtil;
 import org.slingerxv.limitart.util.StringUtil;
 
@@ -41,6 +39,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpContentDecompressor;
+import io.netty.handler.codec.http.HttpMessage;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -60,15 +60,10 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 public class HttpServer extends AbstractNettyServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	private ServerBootstrap boot;
-	private HttpServerEventListener serverEventListener;
 	private HttpServerConfig config;
 	private Channel channel;
 
-	public HttpServer(HttpServerConfig config, HttpServerEventListener serverEventListener) {
-		if (serverEventListener == null || config == null) {
-			throw new NullPointerException("init error!");
-		}
-		this.serverEventListener = serverEventListener;
+	public HttpServer(HttpServerConfig config) {
 		this.config = config;
 		boot = new ServerBootstrap();
 		if (Epoll.isAvailable()) {
@@ -85,8 +80,17 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
 						ch.pipeline().addLast(new HttpRequestDecoder())
-								.addLast(new HttpObjectAggregatorCustom(config.getHttpObjectAggregatorMax(),
-										serverEventListener))
+								.addLast(new HttpObjectAggregator(config.getHttpObjectAggregatorMax()){
+									@Override
+									protected void handleOversizedMessage(ChannelHandlerContext ctx,
+											HttpMessage oversized) throws Exception {
+										if(config.getOnMessageOverSize() != null){
+											Exception e = new Exception(ctx.channel()+" : "+oversized+" is over size");
+											log.error(e,e);
+											config.getOnMessageOverSize().run(ctx.channel(), oversized);
+										}
+									}
+								})
 								.addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
 								.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
 								.addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
@@ -99,18 +103,34 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 
 									@Override
 									public void channelActive(ChannelHandlerContext ctx) throws Exception {
-										channelActive0(ctx);
+										if(config.getOnChannelStateChanged() != null){
+											config.getOnChannelStateChanged().run(ctx.channel(), true);
+										}
 									}
 
 									@Override
 									public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-										channelInactive0(ctx);
+										HashSet<String> whiteList = config.getWhiteList();
+										if (whiteList != null && !config.getWhiteList().isEmpty()) {
+											InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+											String remoteAddress = insocket.getAddress().getHostAddress();
+											if (!whiteList.contains(remoteAddress)) {
+												ctx.channel().close();
+												log.error("ip: " + remoteAddress + " rejected link!");
+												return;
+											}
+										}
+										if(config.getOnChannelStateChanged() != null){
+											config.getOnChannelStateChanged().run(ctx.channel(), false);
+										}
 									}
 
 									@Override
 									public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 											throws Exception {
-										exceptionCaught0(ctx, cause);
+										if(config.getOnExceptionCaught() != null){
+											config.getOnExceptionCaught().run(ctx.channel(), cause);
+										}
 									}
 								});
 					}
@@ -125,7 +145,9 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 					if (channelFuture.isSuccess()) {
 						channel = channelFuture.channel();
 						log.info(config.getServerName() + " bind at port:" + config.getPort());
-						HttpServer.this.serverEventListener.onServerBind(channel);
+						if(this.config.getOnServerBind() != null){
+							this.config.getOnServerBind().run(channel);
+						}
 					}
 				}).sync().channel().closeFuture().sync();
 			} catch (InterruptedException e) {
@@ -140,28 +162,6 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			channel.close();
 			channel = null;
 		}
-	}
-
-	private void channelActive0(ChannelHandlerContext ctx) throws Exception {
-		HashSet<String> whiteList = config.getWhiteList();
-		if (whiteList != null && !config.getWhiteList().isEmpty()) {
-			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-			String remoteAddress = insocket.getAddress().getHostAddress();
-			if (!whiteList.contains(remoteAddress)) {
-				ctx.channel().close();
-				log.error("ip: " + remoteAddress + " rejected link!");
-				return;
-			}
-		}
-		this.serverEventListener.onChannelStateChanged(ctx.channel(), true);
-	}
-
-	private void channelInactive0(ChannelHandlerContext ctx) throws Exception {
-		this.serverEventListener.onChannelStateChanged(ctx.channel(), false);
-	}
-
-	private void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		this.serverEventListener.onExceptionCaught(ctx.channel(), cause);
 	}
 
 	private void channelRead00(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
@@ -256,6 +256,8 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_MESSAGE_PARSE, e.getMessage());
 			return;
 		}
-		this.serverEventListener.dispatchMessage(message, params);
+		if(this.config.getDispatchMessage() != null){
+			this.config.getDispatchMessage().run(message, params);
+		}
 	}
 }
