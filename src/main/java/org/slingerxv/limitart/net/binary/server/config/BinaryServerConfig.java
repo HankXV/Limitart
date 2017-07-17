@@ -6,6 +6,7 @@ import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
+import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.StringUtil;
@@ -32,7 +33,7 @@ public final class BinaryServerConfig {
 	private Proc2<Channel, Throwable> onExceptionCaught;
 	private Proc1<Channel> onServerBind;
 	private Proc1<Channel> onConnectionEffective;
-	private Proc1<Channel> dispatchMessage;;
+	private Proc1<Message> dispatchMessage;
 
 	private BinaryServerConfig(BinaryServerConfigBuilder builder) {
 		this.serverName = builder.serverName;
@@ -57,6 +58,11 @@ public final class BinaryServerConfig {
 			throw new NullPointerException("factory");
 		}
 		this.factory = builder.factory;
+		this.onChannelStateChanged = builder.onChannelStateChanged;
+		this.onExceptionCaught = builder.onExceptionCaught;
+		this.onServerBind = builder.onServerBind;
+		this.onConnectionEffective = builder.onConnectionEffective;
+		this.dispatchMessage = builder.dispatchMessage;
 	}
 
 	public String getServerName() {
@@ -65,6 +71,26 @@ public final class BinaryServerConfig {
 
 	public int getConnectionValidateTimeInSec() {
 		return connectionValidateTimeInSec;
+	}
+
+	public Proc2<Channel, Boolean> getOnChannelStateChanged() {
+		return onChannelStateChanged;
+	}
+
+	public Proc2<Channel, Throwable> getOnExceptionCaught() {
+		return onExceptionCaught;
+	}
+
+	public Proc1<Channel> getOnServerBind() {
+		return onServerBind;
+	}
+
+	public Proc1<Channel> getOnConnectionEffective() {
+		return onConnectionEffective;
+	}
+
+	public Proc1<Message> getDispatchMessage() {
+		return dispatchMessage;
 	}
 
 	public AddressPair getAddressPair() {
@@ -86,7 +112,7 @@ public final class BinaryServerConfig {
 	public MessageFactory getFactory() {
 		return factory;
 	}
-
+	
 	public static class BinaryServerConfigBuilder {
 		private String serverName;
 		private AddressPair addressPair;
@@ -95,6 +121,12 @@ public final class BinaryServerConfig {
 		private AbstractBinaryEncoder encoder;
 		private HashSet<String> whiteList;
 		private MessageFactory factory;
+		// ---listener
+		private Proc2<Channel, Boolean> onChannelStateChanged;
+		private Proc2<Channel, Throwable> onExceptionCaught;
+		private Proc1<Channel> onServerBind;
+		private Proc1<Channel> onConnectionEffective;
+		private Proc1<Message> dispatchMessage;
 
 		public BinaryServerConfigBuilder() {
 			this.serverName = "Binary-Server";
@@ -168,6 +200,31 @@ public final class BinaryServerConfig {
 					this.whiteList.add(ip);
 				}
 			}
+			return this;
+		}
+		
+		public BinaryServerConfigBuilder onChannelStateChanged(Proc2<Channel, Boolean> onChannelStateChanged) {
+			this.onChannelStateChanged = onChannelStateChanged;
+			return this;
+		}
+
+		public BinaryServerConfigBuilder onExceptionCaught(Proc2<Channel, Throwable> onExceptionCaught) {
+			this.onExceptionCaught = onExceptionCaught;
+			return this;
+		}
+		
+		public BinaryServerConfigBuilder onServerBind(Proc1<Channel> onServerBind) {
+			this.onServerBind = onServerBind;
+			return this;
+		}
+		
+		public BinaryServerConfigBuilder onConnectionEffective(Proc1<Channel> onConnectionEffective) {
+			this.onConnectionEffective = onConnectionEffective;
+			return this;
+		}
+		
+		public BinaryServerConfigBuilder dispatchMessage(Proc1<Message> dispatchMessage) {
+			this.dispatchMessage = dispatchMessage;
 			return this;
 		}
 	}

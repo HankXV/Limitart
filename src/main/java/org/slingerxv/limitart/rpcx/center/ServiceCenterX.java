@@ -12,12 +12,10 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
-import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
-import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.center.config.ServiceCenterXConfig;
 import org.slingerxv.limitart.rpcx.center.schedule.ScheduleTask;
@@ -66,36 +64,17 @@ public class ServiceCenterX {
 				.factory(new MessageFactory().registerMsg(new SubscribeServiceFromServiceCenterConsumerHandler())
 						.registerMsg(new PushServiceToServiceCenterProviderHandler())
 						.registerMsg(new AddScheduleToServiceCenterProviderHandler()))
-				.build();
-		binaryServer = new BinaryServer(serverConfig, new BinaryServerEventListener() {
-
-			@Override
-			public void onExceptionCaught(Channel channel, Throwable cause) {
-				log.error(cause, cause);
-			}
-
-			@Override
-			public void onChannelStateChanged(Channel channel, boolean active) {
-				if (!active) {
-					onDisconnect(channel);
-				}
-			}
-
-			@Override
-			public void dispatchMessage(Message message) {
-				message.setExtra(this);
-				message.getHandler().handle(message);
-			}
-
-			@Override
-			public void onConnectionEffective(Channel channel) {
-			}
-
-			@Override
-			public void onServerBind(Channel channel) {
-
-			}
-		});
+				.onExceptionCaught((channel, cause) -> {
+					log.error(cause, cause);
+				}).onChannelStateChanged((channel, active) -> {
+					if (!active) {
+						onDisconnect(channel);
+					}
+				}).dispatchMessage(message -> {
+					message.setExtra(this);
+					message.getHandler().handle(message);
+				}).build();
+		binaryServer = new BinaryServer(serverConfig);
 	}
 
 	public ServiceCenterX bind() throws Exception {
@@ -371,7 +350,8 @@ public class ServiceCenterX {
 	}
 
 	private class SubscribeServiceFromServiceCenterConsumerHandler
-			implements IHandler<SubscribeServiceFromServiceCenterConsumerMessage> {
+			implements
+				IHandler<SubscribeServiceFromServiceCenterConsumerMessage> {
 
 		@Override
 		public void handle(SubscribeServiceFromServiceCenterConsumerMessage msg) {
@@ -382,7 +362,8 @@ public class ServiceCenterX {
 	}
 
 	private class PushServiceToServiceCenterProviderHandler
-			implements IHandler<PushServiceToServiceCenterProviderMessage> {
+			implements
+				IHandler<PushServiceToServiceCenterProviderMessage> {
 
 		@Override
 		public void handle(PushServiceToServiceCenterProviderMessage msg) {
@@ -393,7 +374,8 @@ public class ServiceCenterX {
 	}
 
 	private class AddScheduleToServiceCenterProviderHandler
-			implements IHandler<AddScheduleToServiceCenterProviderMessage> {
+			implements
+				IHandler<AddScheduleToServiceCenterProviderMessage> {
 
 		@Override
 		public void handle(AddScheduleToServiceCenterProviderMessage msg) {

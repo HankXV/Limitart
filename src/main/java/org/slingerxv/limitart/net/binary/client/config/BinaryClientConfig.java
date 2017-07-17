@@ -9,8 +9,6 @@ import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
 
-import io.netty.channel.Channel;
-
 /**
  * 二进制通信客户端配置
  * 
@@ -25,7 +23,7 @@ public final class BinaryClientConfig {
 	private AbstractBinaryEncoder encoder;
 	private MessageFactory factory;
 	// ----listener
-	private Proc2<Channel, Boolean> onChannelStateChanged;
+	private Proc2<BinaryClient, Boolean> onChannelStateChanged;
 	private Proc2<BinaryClient, Throwable> onExceptionCaught;
 	private Proc1<BinaryClient> onConnectionEffective;
 	private Proc1<Message> dispatchMessage;
@@ -49,6 +47,10 @@ public final class BinaryClientConfig {
 			throw new NullPointerException("factory");
 		}
 		this.factory = builder.factory;
+		this.onChannelStateChanged = builder.onChannelStateChanged;
+		this.onExceptionCaught = builder.onExceptionCaught;
+		this.onConnectionEffective = builder.onConnectionEffective;
+		this.dispatchMessage = builder.dispatchMessage;
 	}
 
 	public String getClientName() {
@@ -74,6 +76,22 @@ public final class BinaryClientConfig {
 	public MessageFactory getFactory() {
 		return factory;
 	}
+	
+	public Proc2<BinaryClient, Boolean> getOnChannelStateChanged() {
+		return onChannelStateChanged;
+	}
+
+	public Proc2<BinaryClient, Throwable> getOnExceptionCaught() {
+		return onExceptionCaught;
+	}
+
+	public Proc1<BinaryClient> getOnConnectionEffective() {
+		return onConnectionEffective;
+	}
+
+	public Proc1<Message> getDispatchMessage() {
+		return dispatchMessage;
+	}
 
 	public static class BinaryClientConfigBuilder {
 		private String clientName;
@@ -82,6 +100,11 @@ public final class BinaryClientConfig {
 		private AbstractBinaryDecoder decoder;
 		private AbstractBinaryEncoder encoder;
 		private MessageFactory factory;
+		// ----listener
+		private Proc2<BinaryClient, Boolean> onChannelStateChanged;
+		private Proc2<BinaryClient, Throwable> onExceptionCaught;
+		private Proc1<BinaryClient> onConnectionEffective;
+		private Proc1<Message> dispatchMessage;
 
 		public BinaryClientConfigBuilder() {
 			this.clientName = "Binary-Client";
@@ -139,6 +162,26 @@ public final class BinaryClientConfig {
 
 		public BinaryClientConfigBuilder factory(MessageFactory factory) {
 			this.factory = factory;
+			return this;
+		}
+		
+		public BinaryClientConfigBuilder onChannelStateChanged(Proc2<BinaryClient, Boolean> onChannelStateChanged) {
+			this.onChannelStateChanged = onChannelStateChanged;
+			return this;
+		}
+
+		public BinaryClientConfigBuilder onExceptionCaught(Proc2<BinaryClient, Throwable> onExceptionCaught) {
+			this.onExceptionCaught = onExceptionCaught;
+			return this;
+		}
+
+		public BinaryClientConfigBuilder onConnectionEffective(Proc1<BinaryClient> onConnectionEffective) {
+			this.onConnectionEffective = onConnectionEffective;
+			return this;
+		}
+		
+		public BinaryClientConfigBuilder dispatchMessage(Proc1<Message> dispatchMessage) {
+			this.dispatchMessage = dispatchMessage;
 			return this;
 		}
 	}

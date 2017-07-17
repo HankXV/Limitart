@@ -24,7 +24,6 @@ import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidat
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
-import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
 import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
 import org.slingerxv.limitart.net.define.AbstractNettyServer;
 import org.slingerxv.limitart.net.define.IServer;
@@ -58,23 +57,18 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private ServerBootstrap boot;
 	private Channel channel;
 	private BinaryServerConfig config;
-	protected BinaryServerEventListener serverEventListener;
 	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
 	private SymmetricEncryptionUtil encrypUtil;
 	private TimerTask clearTask;
 
-	public BinaryServer(BinaryServerConfig config, BinaryServerEventListener serverEventListener)
+	public BinaryServer(BinaryServerConfig config)
 			throws MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("BinaryServerConfig");
 		}
-		if (serverEventListener == null) {
-			throw new NullPointerException("BinaryServerEventListener");
-		}
 		if (config.getFactory() == null) {
 			throw new NullPointerException("MessageFactory");
 		}
-		this.serverEventListener = serverEventListener;
 		this.config = config;
 		// 初始化内部消息
 		config.getFactory().registerMsg(new ConnectionValidateClientHandler());
@@ -116,7 +110,9 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					if (arg0.isSuccess()) {
 						channel = arg0.channel();
 						log.info(config.getServerName() + " bind at port:" + config.getAddressPair().getPort());
-						serverEventListener.onServerBind(arg0.channel());
+						if(config.getOnServerBind() != null){
+							config.getOnServerBind().run(arg0.channel());
+						}
 					}
 				}).sync().channel().closeFuture().sync();
 			} catch (InterruptedException e) {
@@ -278,7 +274,9 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		} catch (Exception e) {
 			log.error(e, e);
 		}
-		this.serverEventListener.onConnectionEffective(channel);
+		if(config.getOnConnectionEffective() != null){
+			config.getOnConnectionEffective().run(channel);
+		}
 	}
 
 	private void channelRead0(ChannelHandlerContext ctx, Object arg) {
@@ -310,7 +308,9 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					log.error("channel " + ctx.channel() + " has not validate yet!");
 					return;
 				}
-				this.serverEventListener.dispatchMessage(msg);
+				if(config.getDispatchMessage() != null){
+					config.getDispatchMessage().run(msg);
+				}
 			}
 		} catch (Exception e) {
 			ctx.channel().close();
@@ -332,16 +332,22 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			}
 		}
 		this.startConnectionValidate(ctx.channel());
-		this.serverEventListener.onChannelStateChanged(ctx.channel(), true);
+		if(config.getOnChannelStateChanged() != null){
+			config.getOnChannelStateChanged().run(ctx.channel(), true);
+		}
 	}
 
 	private void channelInactive0(ChannelHandlerContext ctx) throws Exception {
 		log.info(ctx.channel().remoteAddress() + " disconnected！");
-		this.serverEventListener.onChannelStateChanged(ctx.channel(), false);
+		if(config.getOnChannelStateChanged() != null){
+			config.getOnChannelStateChanged().run(ctx.channel(), false);
+		}
 	}
 
 	private void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		this.serverEventListener.onExceptionCaught(ctx.channel(), cause);
+		if(config.getOnExceptionCaught() != null){
+			config.getOnExceptionCaught().run(ctx.channel(), cause);
+		}
 	}
 
 	public BinaryServerConfig getConfig() {

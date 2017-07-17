@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig;
-import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListener;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
@@ -48,7 +47,6 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  */
 public class BinaryClient extends ChannelInboundHandlerAdapter {
 	private static Logger log = LogManager.getLogger();
-	private BinaryClientEventListener clientEventListener;
 	private BinaryClientConfig config;
 	private static EventLoopGroup group = new NioEventLoopGroup();
 	private Bootstrap bootstrap;
@@ -56,20 +54,16 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 	private SymmetricEncryptionUtil decodeUtil;
 	private TimerTask reconnectTask;
 
-	public BinaryClient(BinaryClientConfig config, BinaryClientEventListener clientEventListener)
+	public BinaryClient(BinaryClientConfig config)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidAlgorithmParameterException, MessageIDDuplicatedException {
 		if (config == null) {
 			throw new NullPointerException("BinaryClientConfig");
 		}
-		if (clientEventListener == null) {
-			throw new NullPointerException("BinaryClientEventListener");
-		}
 		if (config.getFactory() == null) {
 			throw new NullPointerException("MessageFactory");
 		}
 		this.config = config;
-		this.clientEventListener = clientEventListener;
 		// 内部消息注册
 		config.getFactory().registerMsg(new ConnectionValidateServerHandler())
 				.registerMsg(new ConnectionValidateSuccessServerHandler());
@@ -184,7 +178,9 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 	private void onConnectionValidateSeccuss(String remote) {
 		log.info("server validate success,remote:" + remote);
-		this.clientEventListener.onConnectionEffective(this);
+		if(this.config.getOnConnectionEffective() != null){
+			this.config.getOnConnectionEffective().run(this);
+		}
 	}
 
 	public String channelLongID() {
@@ -224,7 +220,9 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 			if (InnerMessageEnum.getTypeByValue(messageId) != null) {
 				handler.handle(msg);
 			} else {
-				this.clientEventListener.dispatchMessage(msg);
+				if(this.config.getDispatchMessage() != null){
+					this.config.getDispatchMessage().run(msg);
+				}
 			}
 		} finally {
 			buffer.release();
@@ -233,17 +231,23 @@ public class BinaryClient extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		this.clientEventListener.onChannelActive(this);
+		if(this.config.getOnChannelStateChanged() != null){
+			this.config.getOnChannelStateChanged().run(this, true);
+		}
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		this.clientEventListener.onChannelInactive(this);
+		if(this.config.getOnChannelStateChanged() != null){
+			this.config.getOnChannelStateChanged().run(this, false);
+		}
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		this.clientEventListener.onExceptionCaught(this, cause);
+		if(this.config.getOnExceptionCaught() != null){
+			this.config.getOnExceptionCaught().run(this, cause);
+		}
 	}
 
 	public BinaryClientConfig getConfig() {
