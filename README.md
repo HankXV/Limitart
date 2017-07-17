@@ -99,25 +99,8 @@ To be finished！
 		client.connect();
 		
 ```
-让我们来看看效果吧,启动服务器，服务器绑定成功
-Let's take a look at the effect, start the server, and make the server binding successful
-```
-
-	[INFO][BinaryServer]BinaryServerDemo nio init
-	[INFO][BinaryServer]BinaryServerDemo bind at port:8888
-	
-```
-启动客户端，客户端链接成功，并发送了消息
-Start the client, the client link is successful, and the message is sent
-```
-
-	[INFO][BinaryClient]BinaryClientDemo nio init
-	[INFO][BinaryClient]BinaryClientDemo start connect server：127.0.0.1:8888...
-	[INFO][BinaryClient]BinaryClientDemo connect server：127.0.0.1:8888 success！
-
-```
-服务器验证链接成功并且收到了消息！是不是很棒！！！
-The server verified that the link was successful and received the message! cool!!!!
+让我们来看看效果吧,启动服务器，服务器绑定成功,启动客户端，客户端链接成功，并发送了消息,服务器验证链接成功并且收到了消息！是不是很棒！！！
+Start the client, the client link is successful, and the message is sent.The server verified that the link was successful and received the message! cool!!!!
 ```
 
 	server received message:Hello Limitart!
