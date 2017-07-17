@@ -329,6 +329,8 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 				}
 				if (config.getDispatchMessage() != null) {
 					config.getDispatchMessage().run(msg);
+				} else {
+					log.warn(config.getServerName() + " no dispatch message listener!");
 				}
 			}
 		} catch (Exception e) {

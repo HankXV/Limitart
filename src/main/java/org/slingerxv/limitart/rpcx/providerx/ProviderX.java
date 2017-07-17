@@ -68,9 +68,7 @@ public class ProviderX {
 		factory.registerMsg(new RpcExecuteClientHandler());
 		factory.registerMsg(new DirectFetchProverServicesHandler());
 		server = new BinaryServer(new BinaryServerConfigBuilder().addressPair(new AddressPair(config.getMyPort()))
-				.serverName("RPC-Provider").factory(factory).onExceptionCaught((channel, cause) -> {
-					log.error(cause, cause);
-				}).dispatchMessage(message -> {
+				.serverName("RPC-Provider").factory(factory).dispatchMessage(message -> {
 					message.setExtra(this);
 					message.getHandler().handle(message);
 				}).onServerBind(channel -> {
@@ -85,9 +83,7 @@ public class ProviderX {
 			serviceCenterClient = new BinaryClient(new BinaryClientConfigBuilder().autoReconnect(5)
 					.remoteAddress(
 							new AddressPair(this.config.getServiceCenterIp(), this.config.getServiceCenterPort()))
-					.factory(centerFacotry).onExceptionCaught((channel, cause) -> {
-						log.error(cause, cause);
-					}).onConnectionEffective(client -> {
+					.factory(centerFacotry).onConnectionEffective(client -> {
 						// 链接生效，发布服务
 						pushServicesToCenter();
 						if (this.providerListener != null) {
@@ -414,8 +410,7 @@ public class ProviderX {
 	}
 
 	private class TriggerScheduleServiceCenterToProviderServiceCenterHandler
-			implements
-				IHandler<TriggerScheduleServiceCenterToProviderServiceCenterMessage> {
+			implements IHandler<TriggerScheduleServiceCenterToProviderServiceCenterMessage> {
 
 		@Override
 		public void handle(TriggerScheduleServiceCenterToProviderServiceCenterMessage msg) {
