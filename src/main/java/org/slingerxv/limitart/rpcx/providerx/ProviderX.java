@@ -85,7 +85,7 @@ public class ProviderX {
 			serviceCenterClient = new BinaryClient(new BinaryClientConfigBuilder().autoReconnect(5)
 					.remoteAddress(
 							new AddressPair(this.config.getServiceCenterIp(), this.config.getServiceCenterPort()))
-					.factory(centerFacotry).onExceptionCaught((channel, cause) -> {
+					.factory(centerFacotry).onExceptionCaught((client, cause) -> {
 						log.error(cause, cause);
 					}).onConnectionEffective(client -> {
 						// 链接生效，发布服务
