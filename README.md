@@ -50,8 +50,8 @@ Create a Handler for the message. Here, we just simply print the contents of tra
 	}
 	
 ```
-构造一个消息工厂，把消息和对应的处理器注册进去。
-Construct a `MessageFactory` that registers messages and corresponding Handlers.
+构造一个消息工厂，把消息的处理器注册进去。
+Construct a `MessageFactory` that registers message's handler.
 ```java
 
 	MessageFactory factory = new MessageFactory();
