@@ -11,13 +11,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig.BinaryClientConfigBuilder;
-import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListener;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
-import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig.BinaryServerConfigBuilder;
-import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.define.ServiceX;
 import org.slingerxv.limitart.rpcx.exception.ServiceError;
@@ -46,7 +43,7 @@ import io.netty.channel.Channel;
  *
  * @author hank
  */
-public class ProviderX implements BinaryServerEventListener {
+public class ProviderX {
 	private static Logger log = LogManager.getLogger();
 	private BinaryServer server;
 	private BinaryClient serviceCenterClient;
@@ -71,53 +68,35 @@ public class ProviderX implements BinaryServerEventListener {
 		factory.registerMsg(new RpcExecuteClientHandler());
 		factory.registerMsg(new DirectFetchProverServicesHandler());
 		server = new BinaryServer(new BinaryServerConfigBuilder().addressPair(new AddressPair(config.getMyPort()))
-				.serverName("RPC-Provider").factory(factory).build(), this);
+				.serverName("RPC-Provider").factory(factory).onExceptionCaught((channel, cause) -> {
+					log.error(cause, cause);
+				}).dispatchMessage(message -> {
+					message.setExtra(this);
+					message.getHandler().handle(message);
+				}).onServerBind(channel -> {
+					if (this.providerListener != null) {
+						this.providerListener.onProviderBind(this);
+					}
+				}).build());
 		// 处理服务中心模式
 		if (this.config.getServiceCenterIp() != null) {
 			MessageFactory centerFacotry = new MessageFactory();
 			centerFacotry.registerMsg(new TriggerScheduleServiceCenterToProviderServiceCenterHandler());
-			serviceCenterClient = new BinaryClient(
-					new BinaryClientConfigBuilder().autoReconnect(5)
-							.remoteAddress(new AddressPair(this.config.getServiceCenterIp(),
-									this.config.getServiceCenterPort()))
-							.factory(centerFacotry).build(),
-					new ServiceCenterClientListener(this));
-		}
-	}
-
-	private class ServiceCenterClientListener implements BinaryClientEventListener {
-		private ProviderX provider;
-
-		private ServiceCenterClientListener(ProviderX provider) {
-			this.provider = provider;
-		}
-
-		@Override
-		public void onExceptionCaught(BinaryClient client, Throwable cause) {
-			log.error(cause, cause);
-		}
-
-		@Override
-		public void onConnectionEffective(BinaryClient client) {
-			// 链接生效，发布服务
-			pushServicesToCenter();
-			if (this.provider.providerListener != null) {
-				this.provider.providerListener.onServiceCenterConnected(this.provider);
-			}
-		}
-
-		@Override
-		public void onChannelInactive(BinaryClient client) {
-		}
-
-		@Override
-		public void onChannelActive(BinaryClient client) {
-		}
-
-		@Override
-		public void dispatchMessage(Message message) {
-			message.setExtra(this);
-			message.getHandler().handle(message);
+			serviceCenterClient = new BinaryClient(new BinaryClientConfigBuilder().autoReconnect(5)
+					.remoteAddress(
+							new AddressPair(this.config.getServiceCenterIp(), this.config.getServiceCenterPort()))
+					.factory(centerFacotry).onExceptionCaught((channel, cause) -> {
+						log.error(cause, cause);
+					}).onConnectionEffective(client -> {
+						// 链接生效，发布服务
+						pushServicesToCenter();
+						if (this.providerListener != null) {
+							this.providerListener.onServiceCenterConnected(ProviderX.this);
+						}
+					}).dispatchMessage(message -> {
+						message.setExtra(this);
+						message.getHandler().handle(message);
+					}).build());
 		}
 	}
 
@@ -135,33 +114,6 @@ public class ProviderX implements BinaryServerEventListener {
 		}
 		if (server != null) {
 			server.stopServer();
-		}
-	}
-
-	@Override
-	public void onExceptionCaught(Channel channel, Throwable cause) {
-		log.error(cause, cause);
-	}
-
-	@Override
-	public void onChannelStateChanged(Channel channel, boolean active) {
-
-	}
-
-	@Override
-	public void onConnectionEffective(Channel channel) {
-	}
-
-	@Override
-	public void dispatchMessage(Message message) {
-		message.setExtra(this);
-		message.getHandler().handle(message);
-	}
-
-	@Override
-	public void onServerBind(Channel channel) {
-		if (this.providerListener != null) {
-			this.providerListener.onProviderBind(this);
 		}
 	}
 
@@ -462,7 +414,8 @@ public class ProviderX implements BinaryServerEventListener {
 	}
 
 	private class TriggerScheduleServiceCenterToProviderServiceCenterHandler
-			implements IHandler<TriggerScheduleServiceCenterToProviderServiceCenterMessage> {
+			implements
+				IHandler<TriggerScheduleServiceCenterToProviderServiceCenterMessage> {
 
 		@Override
 		public void handle(TriggerScheduleServiceCenterToProviderServiceCenterMessage msg) {

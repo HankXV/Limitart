@@ -14,14 +14,11 @@ import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
 import org.slingerxv.limitart.net.binary.distributed.message.ReqConnectionReportSlave2MasterMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ReqServerLoadSlave2MasterMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerJoinMaster2SlaveMessage;
-import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
-import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
-import org.slingerxv.limitart.net.binary.server.listener.BinaryServerEventListener;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.net.struct.AddressPair;
 
@@ -33,7 +30,7 @@ import io.netty.channel.Channel;
  * @author Hank
  *
  */
-public abstract class InnerMasterServer implements BinaryServerEventListener, IServer {
+public abstract class InnerMasterServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	// 从服务器集合
 	private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, InnerServerData>> slaves = new ConcurrentHashMap<>();
@@ -46,7 +43,7 @@ public abstract class InnerMasterServer implements BinaryServerEventListener, IS
 		config.getFactory().registerMsg(new ReqServerLoadSlave2MasterHandler());
 		server = new BinaryServer(new BinaryServerConfig.BinaryServerConfigBuilder()
 				.addressPair(new AddressPair(config.getMasterPort(), InnerServerUtil.getInnerPass()))
-				.serverName(config.getServerName()).factory(config.getFactory()).build(), this);
+				.serverName(config.getServerName()).factory(config.getFactory()).build());
 	}
 
 	/**
@@ -79,59 +76,6 @@ public abstract class InnerMasterServer implements BinaryServerEventListener, IS
 	@Override
 	public void stopServer() {
 		server.stopServer();
-	}
-
-	@Override
-	public void onChannelStateChanged(Channel channel, boolean active) {
-		if (!active) {
-			Integer serverType = InnerServerUtil.getServerType(channel);
-			Integer serverId = InnerServerUtil.getServerId(channel);
-			if (serverType != null && serverId != null) {
-				ConcurrentHashMap<Integer, InnerServerData> concurrentHashMap = slaves.get(serverType);
-				if (concurrentHashMap != null) {
-					InnerServerData remove = concurrentHashMap.remove(serverId);
-					if (remove != null) {
-						log.info("slave server disconnected,type:" + serverType + ",serverId:" + serverId);
-						ResServerQuitMaster2SlaveMessage msg = new ResServerQuitMaster2SlaveMessage();
-						msg.serverId = remove.getServerId();
-						msg.serverType = remove.getServerType();
-						List<Channel> channelList = new ArrayList<>();
-						for (ConcurrentHashMap<Integer, InnerServerData> dats : slaves.values()) {
-							for (InnerServerData data : dats.values()) {
-								channelList.add(data.getChannel());
-							}
-						}
-						try {
-							server.sendMessage(channelList, msg, null);
-						} catch (Exception e) {
-							log.error(e, e);
-						}
-						onSlaveDisconnected(remove);
-					}
-				}
-			}
-		}
-	}
-
-	@Override
-	public void onExceptionCaught(Channel channel, Throwable cause) {
-		log.error("session:" + channel, cause);
-	}
-
-	@Override
-	public void onServerBind(Channel channel) {
-
-	}
-
-	@Override
-	public void onConnectionEffective(Channel channel) {
-
-	}
-
-	@Override
-	public void dispatchMessage(Message message) {
-		message.setExtra(this);
-		message.getHandler().handle(message);
 	}
 
 	protected abstract void onSlaveConnected(InnerServerData data);

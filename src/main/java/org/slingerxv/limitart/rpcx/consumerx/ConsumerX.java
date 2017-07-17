@@ -19,9 +19,7 @@ import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig.BinaryClientConfigBuilder;
-import org.slingerxv.limitart.net.binary.client.listener.BinaryClientEventListener;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
-import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.consumerx.config.ConsumerXConfig;
@@ -55,7 +53,7 @@ import org.slingerxv.limitart.util.StringUtil;
  * @author hank
  *
  */
-public class ConsumerX implements BinaryClientEventListener {
+public class ConsumerX {
 	private static Logger log = LogManager.getLogger();
 	// Rpc客户端到服务器链接集合,服务器分配Id
 	private ConcurrentHashMap<Integer, BinaryClient> clients = new ConcurrentHashMap<>();
@@ -96,7 +94,7 @@ public class ConsumerX implements BinaryClientEventListener {
 			isDirectLink = true;
 			// 直连模式
 			for (ProviderRemote remote : providerRemotes) {
-				createRpcClient(remote.getProviderIp(), remote.getProviderPort(), true).connect();
+				createRpcClient(remote.getProviderIp(), remote.getProviderPort()).connect();
 			}
 		} else {
 			// 服务中心模式
@@ -111,91 +109,47 @@ public class ConsumerX implements BinaryClientEventListener {
 			serviceCenterBuilder.autoReconnect(config.getAutoConnectInterval())
 					.remoteAddress(new AddressPair(config.getServiceCenterIp(), config.getServiceCenterPort(), null))
 					.clientName("RPC-Consumer").factory(centryFactory);
-			serviceCenterClient = new BinaryClient(serviceCenterBuilder.build(), new serviceCenterListener(this));
+			serviceCenterClient = new BinaryClient(serviceCenterBuilder.onExceptionCaught((client, cause) -> {
+				log.error(cause, cause);
+			}).onConnectionEffective(client -> {
+				if (listener != null) {
+					listener.onServiceCenterConnected(ConsumerX.this);
+				}
+				// 订阅服务
+				subscribeServicesFromServiceCenter();
+			}).dispatchMessage(message -> {
+				message.setExtra(ConsumerX.this);
+				message.getHandler().handle(message);
+			}).build());
 			serviceCenterClient.connect();
 		}
 	}
 
-	private class serviceCenterListener implements BinaryClientEventListener {
-		private ConsumerX client;
-
-		private serviceCenterListener(ConsumerX client) {
-			this.client = client;
-		}
-
-		@Override
-		public void onExceptionCaught(BinaryClient client, Throwable cause) {
-			log.error(cause, cause);
-		}
-
-		@Override
-		public void onConnectionEffective(BinaryClient client) {
-			if (listener != null) {
-				listener.onServiceCenterConnected(this.client);
-			}
-			// 订阅服务
-			subscribeServicesFromServiceCenter();
-		}
-
-		@Override
-		public void onChannelInactive(BinaryClient client) {
-
-		}
-
-		@Override
-		public void onChannelActive(BinaryClient client) {
-
-		}
-
-		@Override
-		public void dispatchMessage(Message message) {
-			message.setExtra(this.client);
-			message.getHandler().handle(message);
-		}
-
-	}
-
-	private BinaryClient createRpcClient(String providerIp, int providerPort, boolean isDirectLink) throws Exception {
+	private BinaryClient createRpcClient(String providerIp, int providerPort) throws Exception {
 		MessageFactory rpcMessageFacotry = new MessageFactory();
 		rpcMessageFacotry.registerMsg(new RpcResultServerHandler());
 		rpcMessageFacotry.registerMsg(new DirectFetchProviderServicesResultHandler());
-		BinaryClient client = new BinaryClient(
-				new BinaryClientConfigBuilder().remoteAddress(new AddressPair(providerIp, providerPort))
-						.autoReconnect(config.getAutoConnectInterval()).factory(rpcMessageFacotry).build(),
-				this);
+		BinaryClient client = new BinaryClient(new BinaryClientConfigBuilder()
+				.remoteAddress(new AddressPair(providerIp, providerPort)).autoReconnect(config.getAutoConnectInterval())
+				.factory(rpcMessageFacotry).onExceptionCaught((binaryClient, cause) -> {
+					log.error(cause, cause);
+				}).onChannelStateChanged((binaryClient, active) -> {
+					if (!active) {
+						clearOnDisconnected(binaryClient);
+					}
+				}).onConnectionEffective(binaryClient -> {
+					if (isDirectLink) {
+						// 当链接生效时，拉取对应服务器服务列表
+						directFetchProverServices(binaryClient);
+					}
+					if (this.listener != null) {
+						this.listener.onConsumerConnected(binaryClient);
+					}
+				}).dispatchMessage(message -> {
+					message.setExtra(this);
+					message.getHandler().handle(message);
+				}).build());
 		return client;
-	}
-
-	@Override
-	public void onExceptionCaught(BinaryClient client, Throwable cause) {
-		log.error(cause, cause);
-	}
-
-	@Override
-	public void onChannelInactive(BinaryClient ctx) {
-		clearOnDisconnected(ctx);
-	}
-
-	@Override
-	public void onChannelActive(BinaryClient ctx) {
-
-	}
-
-	@Override
-	public void onConnectionEffective(BinaryClient client) {
-		if (isDirectLink) {
-			// 当链接生效时，拉取对应服务器服务列表
-			directFetchProverServices(client);
-		}
-		if (this.listener != null) {
-			this.listener.onConsumerConnected(client);
-		}
-	}
-
-	@Override
-	public void dispatchMessage(Message message) {
-		message.setExtra(this);
-		message.getHandler().handle(message);
 	}
 
 	/**
@@ -294,7 +248,7 @@ public class ConsumerX implements BinaryClientEventListener {
 				BinaryClient binaryClient = clients.get(providerId);
 				if (binaryClient == null) {
 					try {
-						binaryClient = createRpcClient(temp.getIp(), temp.getPort(), false);
+						binaryClient = createRpcClient(temp.getIp(), temp.getPort());
 						BinaryClient putIfAbsent = clients.putIfAbsent(providerId, binaryClient);
 						if (putIfAbsent == null) {
 							binaryClient.connect();
@@ -646,7 +600,8 @@ public class ConsumerX implements BinaryClientEventListener {
 	}
 
 	private class DirectFetchProviderServicesResultHandler
-			implements IHandler<DirectFetchProviderServicesResultMessage> {
+			implements
+				IHandler<DirectFetchProviderServicesResultMessage> {
 
 		@Override
 		public void handle(DirectFetchProviderServicesResultMessage msg) {
@@ -657,7 +612,8 @@ public class ConsumerX implements BinaryClientEventListener {
 	}
 
 	private class SubscribeServiceResultServiceCenterHandler
-			implements IHandler<SubscribeServiceResultServiceCenterMessage> {
+			implements
+				IHandler<SubscribeServiceResultServiceCenterMessage> {
 
 		@Override
 		public void handle(SubscribeServiceResultServiceCenterMessage msg) {
@@ -668,7 +624,8 @@ public class ConsumerX implements BinaryClientEventListener {
 	}
 
 	private class NoticeProviderDisconnectedServiceCenterHandler
-			implements IHandler<NoticeProviderDisconnectedServiceCenterMessage> {
+			implements
+				IHandler<NoticeProviderDisconnectedServiceCenterMessage> {
 
 		@Override
 		public void handle(NoticeProviderDisconnectedServiceCenterMessage msg) {
