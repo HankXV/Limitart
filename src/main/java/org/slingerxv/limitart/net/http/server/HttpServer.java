@@ -153,11 +153,11 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 				return;
 			}
 		}
-		this.serverEventListener.onChannelActive(ctx.channel());
+		this.serverEventListener.onChannelStateChanged(ctx.channel(), true);
 	}
 
 	private void channelInactive0(ChannelHandlerContext ctx) throws Exception {
-		this.serverEventListener.onChannelInactive(ctx.channel());
+		this.serverEventListener.onChannelStateChanged(ctx.channel(), false);
 	}
 
 	private void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {

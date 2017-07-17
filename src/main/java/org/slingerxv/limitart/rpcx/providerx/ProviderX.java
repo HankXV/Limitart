@@ -144,11 +144,8 @@ public class ProviderX implements BinaryServerEventListener {
 	}
 
 	@Override
-	public void onChannelInactive(Channel channel) {
-	}
+	public void onChannelStateChanged(Channel channel, boolean active) {
 
-	@Override
-	public void onChannelActive(Channel channel) {
 	}
 
 	@Override

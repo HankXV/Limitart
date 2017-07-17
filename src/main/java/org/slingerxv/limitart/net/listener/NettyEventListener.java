@@ -3,9 +3,7 @@ package org.slingerxv.limitart.net.listener;
 import io.netty.channel.Channel;
 
 public interface NettyEventListener {
-	void onChannelActive(Channel channel);
-
-	void onChannelInactive(Channel channel);
+	void onChannelStateChanged(Channel channel, boolean active);
 
 	void onExceptionCaught(Channel channel, Throwable cause);
 }

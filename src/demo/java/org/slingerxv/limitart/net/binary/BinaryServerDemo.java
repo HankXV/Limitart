@@ -24,14 +24,8 @@ public class BinaryServerDemo {
 				cause.printStackTrace();
 			}
 
-			// 当一个Channel断开时
 			@Override
-			public void onChannelInactive(Channel channel) {
-			}
-
-			// 当一个Channel连接时
-			@Override
-			public void onChannelActive(Channel channel) {
+			public void onChannelStateChanged(Channel channel, boolean active) {
 
 			}
 

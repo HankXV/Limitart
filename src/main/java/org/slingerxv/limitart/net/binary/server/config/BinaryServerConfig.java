@@ -28,8 +28,7 @@ public final class BinaryServerConfig {
 	private MessageFactory factory;
 
 	// ---listener
-	private Proc1<Channel> onChannelActive;;
-	private Proc1<Channel> onChannelInactive;
+	private Proc2<Channel, Boolean> onChannelStateChanged;
 	private Proc2<Channel, Throwable> onExceptionCaught;
 	private Proc1<Channel> onServerBind;
 	private Proc1<Channel> onConnectionEffective;

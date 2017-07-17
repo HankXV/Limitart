@@ -75,13 +75,10 @@ public class ServiceCenterX {
 			}
 
 			@Override
-			public void onChannelInactive(Channel channel) {
-				onDisconnect(channel);
-			}
-
-			@Override
-			public void onChannelActive(Channel channel) {
-
+			public void onChannelStateChanged(Channel channel, boolean active) {
+				if (!active) {
+					onDisconnect(channel);
+				}
 			}
 
 			@Override

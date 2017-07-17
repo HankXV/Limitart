@@ -9,6 +9,8 @@ import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
 
+import io.netty.channel.Channel;
+
 /**
  * 二进制通信客户端配置
  * 
@@ -23,8 +25,7 @@ public final class BinaryClientConfig {
 	private AbstractBinaryEncoder encoder;
 	private MessageFactory factory;
 	// ----listener
-	private Proc1<BinaryClient> onChannelActive;
-	private Proc1<BinaryClient> onChannelInactive;
+	private Proc2<Channel, Boolean> onChannelStateChanged;
 	private Proc2<BinaryClient, Throwable> onExceptionCaught;
 	private Proc1<BinaryClient> onConnectionEffective;
 	private Proc1<Message> dispatchMessage;

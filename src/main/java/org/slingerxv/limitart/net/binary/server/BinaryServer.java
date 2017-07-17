@@ -332,12 +332,12 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			}
 		}
 		this.startConnectionValidate(ctx.channel());
-		this.serverEventListener.onChannelActive(ctx.channel());
+		this.serverEventListener.onChannelStateChanged(ctx.channel(), true);
 	}
 
 	private void channelInactive0(ChannelHandlerContext ctx) throws Exception {
 		log.info(ctx.channel().remoteAddress() + " disconnected！");
-		this.serverEventListener.onChannelInactive(ctx.channel());
+		this.serverEventListener.onChannelStateChanged(ctx.channel(), false);
 	}
 
 	private void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
