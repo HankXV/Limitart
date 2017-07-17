@@ -3,15 +3,15 @@ package org.slingerxv.limitart.db.struct;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class TableInfo {
-	private HashMap<String, ColumnInfo> columnInfos = new HashMap<>();
+public class Table {
+	private HashMap<String, Column> columnInfos = new HashMap<>();
 	private HashSet<String> primaryKeys = new HashSet<>();
 
-	public HashMap<String, ColumnInfo> getColumnInfos() {
+	public HashMap<String, Column> getColumnInfos() {
 		return columnInfos;
 	}
 
-	public void setColumnInfos(HashMap<String, ColumnInfo> columnInfos) {
+	public void setColumnInfos(HashMap<String, Column> columnInfos) {
 		this.columnInfos = columnInfos;
 	}
 

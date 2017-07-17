@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.db.struct.ColumnInfo;
-import org.slingerxv.limitart.db.struct.TableInfo;
+import org.slingerxv.limitart.db.struct.Column;
+import org.slingerxv.limitart.db.struct.Table;
 import org.slingerxv.limitart.db.tablechecker.anotation.FieldCheck;
 import org.slingerxv.limitart.db.tablechecker.anotation.TableCheck;
 import org.slingerxv.limitart.dblog.tablecheck.LogStructChecker;
@@ -59,7 +59,7 @@ public class TableChecker {
 				result.error = true;
 				continue;
 			}
-			TableInfo columnDefine = LogDBUtil.getColumnDefine(con, tableName);
+			Table columnDefine = LogDBUtil.getColumnDefine(con, tableName);
 			List<Field> fields = ReflectionUtil.getFields(bean, checkBeanSuperClass);
 			for (Field field : fields) {
 				FieldCheck annotation = field.getAnnotation(FieldCheck.class);
@@ -74,7 +74,7 @@ public class TableChecker {
 				if (StringUtil.isEmptyOrNull(col)) {
 					col = field.getName();
 				}
-				ColumnInfo now = new ColumnInfo();
+				Column now = new Column();
 				now.setTableFieldName(col);
 				now.setType(annotation.type().getValue());
 				now.setSize(annotation.size());
@@ -85,7 +85,7 @@ public class TableChecker {
 							"表：" + tableName + "[" + bean.getSimpleName() + "]" + "，字段：" + field.getName() + ",字段缺失");
 					continue;
 				}
-				ColumnInfo columnInfo = columnDefine.getColumnInfos().get(col);
+				Column columnInfo = columnDefine.getColumnInfos().get(col);
 				if (!LogStructChecker.isSame(now, columnInfo)) {
 					// 字段类型错误
 					appendError(result, sb, "表：" + tableName + "[" + bean.getSimpleName() + "]" + "，字段："

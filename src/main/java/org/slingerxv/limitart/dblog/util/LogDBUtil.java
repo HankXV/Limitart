@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.db.struct.ColumnInfo;
-import org.slingerxv.limitart.db.struct.TableInfo;
+import org.slingerxv.limitart.db.struct.Column;
+import org.slingerxv.limitart.db.struct.Table;
 import org.slingerxv.limitart.dblog.anotation.LogColumn;
 import org.slingerxv.limitart.dblog.define.ILog;
 import org.slingerxv.limitart.dblog.define.LogRollType;
@@ -107,8 +107,8 @@ public class LogDBUtil {
 	 * @return 表信息
 	 * @throws SQLException
 	 */
-	public static TableInfo getColumnDefine(Connection conn, String tableName) throws SQLException {
-		TableInfo tableInfo = new TableInfo();
+	public static Table getColumnDefine(Connection conn, String tableName) throws SQLException {
+		Table tableInfo = new Table();
 		DatabaseMetaData metaData = conn.getMetaData();
 		ResultSet columns = metaData.getColumns(null, "%", tableName, "%");
 		ResultSet primaryKey = metaData.getPrimaryKeys(null, "%", tableName);
@@ -116,7 +116,7 @@ public class LogDBUtil {
 			tableInfo.getPrimaryKeys().add(primaryKey.getString(4));
 		}
 		while (columns.next()) {
-			ColumnInfo info = new ColumnInfo();
+			Column info = new Column();
 			info.setTableFieldName(columns.getString("COLUMN_NAME"));
 			info.setType(columns.getString("TYPE_NAME").toLowerCase());
 			info.setSize(columns.getInt("COLUMN_SIZE"));

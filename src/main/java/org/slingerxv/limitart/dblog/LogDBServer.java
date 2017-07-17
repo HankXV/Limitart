@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.LongAdder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.db.define.IDataSourceFactory;
 import org.slingerxv.limitart.dblog.anotation.LogColumn;
 import org.slingerxv.limitart.dblog.config.LogDBServerConfig;
 import org.slingerxv.limitart.dblog.define.ILog;
@@ -41,15 +40,13 @@ public class LogDBServer implements IServer {
 	private LogDBServerConfig config;
 	private ThreadPoolExecutor threadPool;
 	private BlockingQueue<Runnable> logTaskQueue;
-	private IDataSourceFactory dataSourceFactory;
 	private LogStructChecker checker = new LogStructChecker();
 	private boolean isStop = true;
 	private LongAdder doneLogNum = new LongAdder();
 	private LongAdder lostLogNum = new LongAdder();
 
-	public LogDBServer(LogDBServerConfig config, IDataSourceFactory dataSourceFactory) {
+	public LogDBServer(LogDBServerConfig config) {
 		this.config = config;
-		this.dataSourceFactory = dataSourceFactory;
 	}
 
 	/**
@@ -109,7 +106,7 @@ public class LogDBServer implements IServer {
 			throw new Exception("server is stopped!");
 		}
 		String buildSelectTableSql = LogDBUtil.buildSelectCountTableSql_MYSQL(builder);
-		try (Connection connection = this.dataSourceFactory.getDataSource().getConnection();
+		try (Connection connection = this.config.getDataSourceFactory().run().getConnection();
 				PreparedStatement prepareStatement = connection.prepareStatement(buildSelectTableSql);
 				ResultSet executeQuery = prepareStatement.executeQuery();) {
 			executeQuery.next();
@@ -124,7 +121,7 @@ public class LogDBServer implements IServer {
 		Set<String> relativeTableNames = LogDBUtil.getRelativeTableNames(clss, startTime, endTime);
 		// 筛选不存在的表
 		Iterator<String> iterator2 = relativeTableNames.iterator();
-		try (Connection connection = this.dataSourceFactory.getDataSource().getConnection();) {
+		try (Connection connection = this.config.getDataSourceFactory().run().getConnection();) {
 			List<String> tableNames = LogDBUtil.getTableNames(connection);
 			for (; iterator2.hasNext();) {
 				if (!tableNames.contains(iterator2.next())) {
@@ -171,7 +168,7 @@ public class LogDBServer implements IServer {
 		}
 		List<T> result = new ArrayList<>();
 		String buildSelectTableSql = LogDBUtil.buildSelectTableSql_MYSQL(builder);
-		try (Connection connection = this.dataSourceFactory.getDataSource().getConnection();
+		try (Connection connection = this.config.getDataSourceFactory().run().getConnection();
 				PreparedStatement prepareStatement = connection.prepareStatement(buildSelectTableSql);
 				ResultSet executeQuery = prepareStatement.executeQuery();) {
 			while (executeQuery.next()) {
@@ -218,10 +215,6 @@ public class LogDBServer implements IServer {
 		return config;
 	}
 
-	public IDataSourceFactory getDataSourceFactory() {
-		return this.dataSourceFactory;
-	}
-
 	public long getDoneLogNum() {
 		return doneLogNum.longValue();
 	}
@@ -252,7 +245,7 @@ public class LogDBServer implements IServer {
 		}
 
 		public void run() {
-			try (Connection con = LogDBServer.this.getDataSourceFactory().getDataSource().getConnection();) {
+			try (Connection con = LogDBServer.this.config.getDataSourceFactory().run().getConnection();) {
 				long now = System.currentTimeMillis();
 				if (this.alog == null) {
 					return;
@@ -294,9 +287,6 @@ public class LogDBServer implements IServer {
 		if (this.config == null) {
 			throw new NullPointerException("please init server first!");
 		}
-		if (this.dataSourceFactory == null) {
-			throw new NullPointerException("please set a DBConnection!");
-		}
 		if (!isStop) {
 			throw new NullPointerException("server has already start!");
 		}
@@ -325,7 +315,7 @@ public class LogDBServer implements IServer {
 				}
 			}
 			// 启动时，执行表格结构检查
-			try (Connection connection = this.dataSourceFactory.getDataSource().getConnection();) {
+			try (Connection connection = this.config.getDataSourceFactory().run().getConnection();) {
 				checker.executeCheck(connection);
 			}
 		}

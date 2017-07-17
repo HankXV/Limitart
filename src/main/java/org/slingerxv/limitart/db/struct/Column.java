@@ -6,7 +6,7 @@ package org.slingerxv.limitart.db.struct;
  * @author hank
  *
  */
-public class ColumnInfo {
+public class Column {
 	private String tableFieldName;
 	private String type;
 	private int size;
