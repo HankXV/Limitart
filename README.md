@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/HankXV/Limitart.svg?branch=master)](https://travis-ci.org/HankXV/Limitart)
-[![Coverage Status](https://coveralls.io/repos/github/HankXV/Limitart/badge.svg?branch=master)](https://coveralls.io/github/HankXV/Limitart?branch=master)
 # 简介(Brief Introduction)
 一个旨在帮助快速搭建**Java中小型游戏服务器**的框架，通信底层采用Netty4.X，数据库采用MySql相关(框架其实并未与Mysql产生太多耦合，但建议使用Mysql)，生产消费者采用Disruptor等。**有想共同参与的或者向我吐槽的，留言**。
 

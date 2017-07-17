@@ -47,14 +47,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.eluder.coveralls</groupId>
-				<artifactId>coveralls-maven-plugin</artifactId>
-				<version>4.3.0</version>
-				<configuration>
-					<repoToken>STrM46q9m5VVTwC2Y0E6JWgoRy74BARtt</repoToken>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
