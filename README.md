@@ -63,11 +63,11 @@ Finally, initialize a server instance and bind it.
 ```java
 
 		BinaryServerConfig config = new BinaryServerConfigBuilder()
-				//指定端口
+				//指定端口 port
 				.addressPair(new AddressPair(8888))
-				//注册消息
+				//注册消息 register factory
 				.factory(facotry)
-				//派发消息
+				//派发消息 handle message
 				.dispatchMessage(message -> {
 					message.getHandler().handle(message);
 				}).build();
