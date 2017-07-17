@@ -112,7 +112,7 @@ public final class BinaryServerConfig {
 	public MessageFactory getFactory() {
 		return factory;
 	}
-	
+
 	public static class BinaryServerConfigBuilder {
 		private String serverName;
 		private AddressPair addressPair;
@@ -135,6 +135,13 @@ public final class BinaryServerConfig {
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
 			this.whiteList = new HashSet<>();
+			this.dispatchMessage = new Proc1<Message>() {
+
+				@Override
+				public void run(Message t) {
+					t.getHandler().handle(t);
+				}
+			};
 		}
 
 		/**
@@ -202,7 +209,7 @@ public final class BinaryServerConfig {
 			}
 			return this;
 		}
-		
+
 		public BinaryServerConfigBuilder onChannelStateChanged(Proc2<Channel, Boolean> onChannelStateChanged) {
 			this.onChannelStateChanged = onChannelStateChanged;
 			return this;
@@ -212,17 +219,17 @@ public final class BinaryServerConfig {
 			this.onExceptionCaught = onExceptionCaught;
 			return this;
 		}
-		
+
 		public BinaryServerConfigBuilder onServerBind(Proc1<Channel> onServerBind) {
 			this.onServerBind = onServerBind;
 			return this;
 		}
-		
+
 		public BinaryServerConfigBuilder onConnectionEffective(Proc1<Channel> onConnectionEffective) {
 			this.onConnectionEffective = onConnectionEffective;
 			return this;
 		}
-		
+
 		public BinaryServerConfigBuilder dispatchMessage(Proc1<Message> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
 			return this;

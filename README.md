@@ -68,9 +68,7 @@ Finally, initialize a server instance and bind it.
 				//注册消息 register factory
 				.factory(facotry)
 				//派发消息 handle message
-				.dispatchMessage(message -> {
-					message.getHandler().handle(message);
-				}).build();
+				.build();
 		BinaryServer server = new BinaryServer(config);
 		server.startServer();
 		
@@ -91,8 +89,6 @@ Look at the client below. Because we do not allow client processing messages onl
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}).dispatchMessage(message -> {
-					message.getHandler().handle(message);
 				}).build();
 				
 ```
