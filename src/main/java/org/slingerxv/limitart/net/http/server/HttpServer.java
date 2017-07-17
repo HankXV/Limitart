@@ -166,11 +166,11 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 
 	private void channelRead00(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
 		if (!msg.decoderResult().isSuccess()) {
-			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_DECODE_FAIL);
+			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_DECODE_FAIL);
 			return;
 		}
 		if (StringUtil.isEmptyOrNull(msg.uri())) {
-			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_URL_EMPTY);
+			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_URL_EMPTY);
 			return;
 		}
 		String url;
@@ -182,7 +182,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		} else if (msg.method() == POST) {
 			url = msg.uri();
 		} else {
-			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_METHOD_FORBBIDEN);
+			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_METHOD_FORBBIDEN);
 			return;
 		}
 		if (url.equals("/2016info")) {
@@ -192,22 +192,22 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		UrlMessage message = this.config.getFacotry().getMessage(url);
 		if (message == null) {
 			log.error("消息不存在:" + url);
-			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_URL_FORBBIDEN);
+			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_URL_FORBBIDEN);
 			return;
 		}
 		if (message.getMethod() == null) {
-			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_METHOD_FORBBIDEN);
+			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_METHOD_FORBBIDEN);
 			return;
 		}
 		// 如果为POST，那么只能POST,如果是Get，那么都可以
 		if (message.getMethod() == QueryMethod.POST && msg.method() != POST) {
-			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_METHOD_ERROR);
+			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_METHOD_ERROR);
 			return;
 		}
 		@SuppressWarnings("unchecked")
 		HttpHandler<UrlMessage> handler = (HttpHandler<UrlMessage>) this.config.getFacotry().getHandler(url);
 		if (handler == null) {
-			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_URL_FORBBIDEN);
+			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_URL_FORBBIDEN);
 			return;
 		}
 		message.setChannel(ctx.channel());
@@ -236,7 +236,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 				}
 			} catch (Exception e) {
 				log.error(e, e);
-				HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_POST_ERROR);
+				HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_POST_ERROR);
 				return;
 			}
 		}
@@ -253,7 +253,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 				}
 			}
 		} catch (Exception e) {
-			HttpUtil.sendResponseError(ctx.channel(), msg, RequestErrorCode.ERROR_MESSAGE_PARSE, e.getMessage());
+			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_MESSAGE_PARSE, e.getMessage());
 			return;
 		}
 		this.serverEventListener.dispatchMessage(message, params);
