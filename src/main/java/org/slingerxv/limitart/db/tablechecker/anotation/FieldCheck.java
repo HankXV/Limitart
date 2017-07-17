@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.slingerxv.limitart.db.log.define.SqlColumnType;
+import org.slingerxv.limitart.dblog.define.SqlColumnType;
 
 
 /**

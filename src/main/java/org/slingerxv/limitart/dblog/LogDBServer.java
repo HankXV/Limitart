@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log;
+package org.slingerxv.limitart.dblog;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -18,14 +18,14 @@ import java.util.concurrent.atomic.LongAdder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.db.log.anotation.LogColumn;
-import org.slingerxv.limitart.db.log.config.LogDBServerConfig;
-import org.slingerxv.limitart.db.log.define.IDataSourceFactory;
-import org.slingerxv.limitart.db.log.define.ILog;
-import org.slingerxv.limitart.db.log.exception.LogDBServerAlreadyStopException;
-import org.slingerxv.limitart.db.log.tablecheck.LogStructChecker;
-import org.slingerxv.limitart.db.log.util.LogDBUtil;
-import org.slingerxv.limitart.db.log.util.LogDBUtil.QueryConditionBuilder;
+import org.slingerxv.limitart.db.define.IDataSourceFactory;
+import org.slingerxv.limitart.dblog.anotation.LogColumn;
+import org.slingerxv.limitart.dblog.config.LogDBServerConfig;
+import org.slingerxv.limitart.dblog.define.ILog;
+import org.slingerxv.limitart.dblog.exception.LogDBServerAlreadyStopException;
+import org.slingerxv.limitart.dblog.tablecheck.LogStructChecker;
+import org.slingerxv.limitart.dblog.util.LogDBUtil;
+import org.slingerxv.limitart.dblog.util.LogDBUtil.QueryConditionBuilder;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.reflectasm.FieldAccess;
 import org.slingerxv.limitart.thread.NamedThreadFactory;

@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log.struct;
+package org.slingerxv.limitart.db.struct;
 
 import java.util.HashMap;
 import java.util.HashSet;

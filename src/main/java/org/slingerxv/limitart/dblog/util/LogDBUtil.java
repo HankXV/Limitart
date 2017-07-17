@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log.util;
+package org.slingerxv.limitart.dblog.util;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -20,12 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.db.log.anotation.LogColumn;
-import org.slingerxv.limitart.db.log.define.ILog;
-import org.slingerxv.limitart.db.log.define.LogRollType;
-import org.slingerxv.limitart.db.log.define.SqlColumnType;
-import org.slingerxv.limitart.db.log.struct.ColumnInfo;
-import org.slingerxv.limitart.db.log.struct.TableInfo;
+import org.slingerxv.limitart.db.struct.ColumnInfo;
+import org.slingerxv.limitart.db.struct.TableInfo;
+import org.slingerxv.limitart.dblog.anotation.LogColumn;
+import org.slingerxv.limitart.dblog.define.ILog;
+import org.slingerxv.limitart.dblog.define.LogRollType;
+import org.slingerxv.limitart.dblog.define.SqlColumnType;
 import org.slingerxv.limitart.reflectasm.FieldAccess;
 import org.slingerxv.limitart.util.StringUtil;
 import org.slingerxv.limitart.util.filter.FieldFilter;

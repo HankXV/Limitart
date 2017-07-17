@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log.tablecheck;
+package org.slingerxv.limitart.dblog.tablecheck;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -14,13 +14,13 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.db.log.anotation.LogColumn;
-import org.slingerxv.limitart.db.log.define.AbstractLog;
-import org.slingerxv.limitart.db.log.define.ILog;
-import org.slingerxv.limitart.db.log.define.SqlColumnType;
-import org.slingerxv.limitart.db.log.struct.ColumnInfo;
-import org.slingerxv.limitart.db.log.struct.TableInfo;
-import org.slingerxv.limitart.db.log.util.LogDBUtil;
+import org.slingerxv.limitart.db.struct.ColumnInfo;
+import org.slingerxv.limitart.db.struct.TableInfo;
+import org.slingerxv.limitart.dblog.anotation.LogColumn;
+import org.slingerxv.limitart.dblog.define.AbstractLog;
+import org.slingerxv.limitart.dblog.define.ILog;
+import org.slingerxv.limitart.dblog.define.SqlColumnType;
+import org.slingerxv.limitart.dblog.util.LogDBUtil;
 import org.slingerxv.limitart.reflectasm.FieldAccess;
 import org.slingerxv.limitart.util.ReflectionUtil;
 import org.slingerxv.limitart.util.filter.FieldFilter;

@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log.define;
+package org.slingerxv.limitart.dblog.define;
 
 /**
  * 日志滚动类型

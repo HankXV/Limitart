@@ -10,12 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.db.log.struct.ColumnInfo;
-import org.slingerxv.limitart.db.log.struct.TableInfo;
-import org.slingerxv.limitart.db.log.tablecheck.LogStructChecker;
-import org.slingerxv.limitart.db.log.util.LogDBUtil;
+import org.slingerxv.limitart.db.struct.ColumnInfo;
+import org.slingerxv.limitart.db.struct.TableInfo;
 import org.slingerxv.limitart.db.tablechecker.anotation.FieldCheck;
 import org.slingerxv.limitart.db.tablechecker.anotation.TableCheck;
+import org.slingerxv.limitart.dblog.tablecheck.LogStructChecker;
+import org.slingerxv.limitart.dblog.util.LogDBUtil;
 import org.slingerxv.limitart.util.ReflectionUtil;
 import org.slingerxv.limitart.util.StringUtil;
 

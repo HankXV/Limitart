@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log.config;
+package org.slingerxv.limitart.dblog.config;
 
 import java.util.HashSet;
 import java.util.Set;

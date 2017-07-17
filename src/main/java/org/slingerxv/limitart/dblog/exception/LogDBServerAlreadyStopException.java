@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log.exception;
+package org.slingerxv.limitart.dblog.exception;
 
 public class LogDBServerAlreadyStopException extends Exception {
 
