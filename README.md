@@ -3,7 +3,7 @@
 一个旨在帮助快速搭建**Java中小型游戏服务器**的框架，通信底层采用Netty4.X，数据库采用MySql相关(框架其实并未与Mysql产生太多耦合，但建议使用Mysql)，生产消费者采用Disruptor等。**有想共同参与的或者向我吐槽的，留言**。
 
 This is a framework that designed to help to build a **Java Midrange Game Server** quickly. Its communicating interface based on Netty4.X, the database is using MySql (This framework is actually not much coupling with MySql, but it still recommonded to use MySql.), and the TaskQueue(MessageQueue) based on Disruptor. **If one have some advice or want be one of us, please leave any messages to us, and we are always welcome**
-# 环境要求(Environment)
+## 环境要求(Environment)
 Jdk8或以上
 
 Jdk8 or above.
