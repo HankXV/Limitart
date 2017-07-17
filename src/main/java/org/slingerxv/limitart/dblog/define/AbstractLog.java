@@ -1,6 +1,6 @@
-package org.slingerxv.limitart.db.log.define;
+package org.slingerxv.limitart.dblog.define;
 
-import org.slingerxv.limitart.db.log.anotation.LogColumn;
+import org.slingerxv.limitart.dblog.anotation.LogColumn;
 
 /**
  * 基础日志

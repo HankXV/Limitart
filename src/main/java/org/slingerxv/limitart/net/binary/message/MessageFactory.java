@@ -44,7 +44,7 @@ public class MessageFactory {
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, IHandler.class);
 		for (Class<?> clzz : classesByPackage) {
 			if (clzz.getName().contains("$")) {
-				log.warn("inner class or anonymous class will not be register:" + clzz.getName());
+				log.warn("inner class or anonymous class will not be registerd:" + clzz.getName());
 				continue;
 			}
 			messageFactory.registerMsg((IHandler) clzz.newInstance());

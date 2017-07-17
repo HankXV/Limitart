@@ -20,10 +20,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
@@ -122,22 +120,17 @@ public final class HttpUtil {
 		}
 	}
 
-	public static void sendResponse(Channel channel, FullHttpRequest fullHttpRequest, HttpResponseStatus resultCode,
-			String result) {
-		boolean close = fullHttpRequest.headers().contains(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE, true)
-				|| fullHttpRequest.protocolVersion().equals(HttpVersion.HTTP_1_0) && !fullHttpRequest.headers()
-						.contains(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE, true);
-		sendResponse(channel, resultCode, result, close);
+	public static void sendResponse(Channel channel, HttpResponseStatus resultCode, String result) {
+		sendResponse(channel, resultCode, result, true);
 	}
 
-	public static void sendResponseError(Channel channel, FullHttpRequest fullHttpRequest, RequestErrorCode errorCode,
-			String others) {
+	public static void sendResponseError(Channel channel, RequestErrorCode errorCode, String others) {
 		sendResponse(channel, HttpResponseStatus.BAD_GATEWAY, "ErrorCode:" + errorCode.getValue() + " Info:" + others,
 				true);
 	}
 
-	public static void sendResponseError(Channel channel, FullHttpRequest fullHttpRequest, RequestErrorCode errorCode) {
-		sendResponseError(channel, fullHttpRequest, errorCode, errorCode.toString());
+	public static void sendResponseError(Channel channel, RequestErrorCode errorCode) {
+		sendResponseError(channel, errorCode, errorCode.toString());
 	}
 
 	public static String map2QueryParam(ConstraintMap<String> map) {

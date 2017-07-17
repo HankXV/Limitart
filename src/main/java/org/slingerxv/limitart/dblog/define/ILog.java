@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log.define;
+package org.slingerxv.limitart.dblog.define;
 
 public interface ILog {
 	/**

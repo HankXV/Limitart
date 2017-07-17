@@ -1,11 +1,13 @@
-package org.slingerxv.limitart.db.log.config;
+package org.slingerxv.limitart.dblog.config;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import org.slingerxv.limitart.util.StringUtil;
+import javax.sql.DataSource;
 
+import org.slingerxv.limitart.funcs.Func;
+import org.slingerxv.limitart.util.StringUtil;
 
 /**
  * 日志服务器配置
@@ -28,6 +30,7 @@ public final class LogDBServerConfig {
 	private String charset;
 	// 自定义线程池
 	private ThreadPoolExecutor customInsertThreadPool;
+	private Func<DataSource> dataSourceFactory;
 
 	private LogDBServerConfig(LogDBServerConfigBuilder builder) {
 		this.scanPackages = builder.scanPackages.toArray(new String[0]);
@@ -37,6 +40,10 @@ public final class LogDBServerConfig {
 		this.dbEngine = builder.dbEngine;
 		this.charset = builder.charset;
 		this.customInsertThreadPool = builder.customInsertThreadPool;
+		if (builder.dataSourceFactory == null) {
+			throw new NullPointerException("dataSourceFactory");
+		}
+		this.dataSourceFactory = builder.dataSourceFactory;
 	}
 
 	public int getThreadCorePoolSize() {
@@ -67,6 +74,10 @@ public final class LogDBServerConfig {
 		return taskMaxSize;
 	}
 
+	public Func<DataSource> getDataSourceFactory() {
+		return dataSourceFactory;
+	}
+
 	public static class LogDBServerConfigBuilder {
 		// 扫描项目包名(日志结构检查)
 		private Set<String> scanPackages = new HashSet<>();
@@ -82,6 +93,7 @@ public final class LogDBServerConfig {
 		private String charset;
 		// 自定义线程池
 		private ThreadPoolExecutor customInsertThreadPool;
+		private Func<DataSource> dataSourceFactory;
 
 		public LogDBServerConfigBuilder() {
 			this.taskMaxSize = 8000;
@@ -196,6 +208,11 @@ public final class LogDBServerConfig {
 				throw new NullPointerException("customInsertThreadPool");
 			}
 			this.customInsertThreadPool = threadPool;
+			return this;
+		}
+
+		public LogDBServerConfigBuilder dataSource(Func<DataSource> dataSourceFactory) {
+			this.dataSourceFactory = dataSourceFactory;
 			return this;
 		}
 	}

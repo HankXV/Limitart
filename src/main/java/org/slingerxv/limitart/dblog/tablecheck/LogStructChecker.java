@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log.tablecheck;
+package org.slingerxv.limitart.dblog.tablecheck;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -14,13 +14,13 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.db.log.anotation.LogColumn;
-import org.slingerxv.limitart.db.log.define.AbstractLog;
-import org.slingerxv.limitart.db.log.define.ILog;
-import org.slingerxv.limitart.db.log.define.SqlColumnType;
-import org.slingerxv.limitart.db.log.struct.ColumnInfo;
-import org.slingerxv.limitart.db.log.struct.TableInfo;
-import org.slingerxv.limitart.db.log.util.LogDBUtil;
+import org.slingerxv.limitart.db.struct.Column;
+import org.slingerxv.limitart.db.struct.Table;
+import org.slingerxv.limitart.dblog.anotation.LogColumn;
+import org.slingerxv.limitart.dblog.define.AbstractLog;
+import org.slingerxv.limitart.dblog.define.ILog;
+import org.slingerxv.limitart.dblog.define.SqlColumnType;
+import org.slingerxv.limitart.dblog.util.LogDBUtil;
 import org.slingerxv.limitart.reflectasm.FieldAccess;
 import org.slingerxv.limitart.util.ReflectionUtil;
 import org.slingerxv.limitart.util.filter.FieldFilter;
@@ -166,10 +166,10 @@ public class LogStructChecker {
 				continue;
 			}
 			log.info("开始检查表结构：" + logTableName);
-			TableInfo columnDefine = LogDBUtil.getColumnDefine(con, logTableName);
-			List<ColumnInfo> increaseList = new ArrayList<>();
+			Table columnDefine = LogDBUtil.getColumnDefine(con, logTableName);
+			List<Column> increaseList = new ArrayList<>();
 			List<String> decreaseList = new ArrayList<>();
-			List<ColumnInfo> modifyList = new ArrayList<>();
+			List<Column> modifyList = new ArrayList<>();
 			// 检查增加字段
 			FieldAccess logFields = LogDBUtil.getLogFields(clss);
 			for (int index = 0; index < logFields.getFieldCount(); ++index) {
@@ -183,7 +183,7 @@ public class LogStructChecker {
 					throw new Exception("日志字段：" + field.getName() + "必须为公共字段!");
 				}
 				String tableFieldName = LogDBUtil.getTableFieldName(logFields.getFieldNames()[index]);
-				ColumnInfo info = new ColumnInfo();
+				Column info = new Column();
 				info.setTableFieldName(tableFieldName);
 				info.setType(annotation.type().getValue());
 				info.setSize(annotation.size());
@@ -192,7 +192,7 @@ public class LogStructChecker {
 					increaseList.add(info);
 				} else {
 					// 检查变更字段
-					ColumnInfo source = columnDefine.getColumnInfos().get(tableFieldName);
+					Column source = columnDefine.getColumnInfos().get(tableFieldName);
 					if (!isSame(info, source)) {
 						if (ableChange(info, source)) {
 							modifyList.add(info);
@@ -203,7 +203,7 @@ public class LogStructChecker {
 				}
 			}
 			// 检查删除字段
-			for (ColumnInfo info : columnDefine.getColumnInfos().values()) {
+			for (Column info : columnDefine.getColumnInfos().values()) {
 				if (columnDefine.getPrimaryKeys().contains(info.getTableFieldName())) {
 					continue;
 				}
@@ -221,7 +221,7 @@ public class LogStructChecker {
 				}
 			}
 
-			for (ColumnInfo col : increaseList) {
+			for (Column col : increaseList) {
 				try (PreparedStatement prepareStatement = con.prepareStatement(LogDBUtil.buildColumnIncreaseSql_MYSQL(
 						logTableName, col.getTableFieldName(), col.getType(), col.getSize(), col.getComment()));) {
 					if (prepareStatement.executeUpdate() == 0) {
@@ -251,7 +251,7 @@ public class LogStructChecker {
 				}
 
 			}
-			for (ColumnInfo col : modifyList) {
+			for (Column col : modifyList) {
 				try (PreparedStatement prepareStatement = con.prepareStatement(LogDBUtil.buildColumnModifySql_MYSQL(
 						logTableName, col.getTableFieldName(), col.getType(), col.getSize(), col.getComment()));) {
 					if (prepareStatement.executeUpdate() == 0) {
@@ -270,7 +270,7 @@ public class LogStructChecker {
 		}
 	}
 
-	public static boolean isSame(ColumnInfo now, ColumnInfo old) {
+	public static boolean isSame(Column now, Column old) {
 		if ((((now.getType().equals(SqlColumnType.MYSQL_int.getValue()))
 				|| (now.getType().equals(SqlColumnType.MYSQL_integer.getValue()))
 				|| (now.getType().startsWith(SqlColumnType.MYSQL_int.getValue()))))
@@ -298,7 +298,7 @@ public class LogStructChecker {
 		return (now.getType().equals(old.getType())) && (now.getSize() <= old.getSize());
 	}
 
-	private boolean ableChange(ColumnInfo info, ColumnInfo info2) {
+	private boolean ableChange(Column info, Column info2) {
 		SqlColumnType typeByValue = SqlColumnType.getTypeByValue(info.getType());
 		if (typeByValue == null) {
 			return false;

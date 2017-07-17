@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.db.log.struct;
+package org.slingerxv.limitart.db.struct;
 
 /**
  * 数据库列信息
@@ -6,7 +6,7 @@ package org.slingerxv.limitart.db.log.struct;
  * @author hank
  *
  */
-public class ColumnInfo {
+public class Column {
 	private String tableFieldName;
 	private String type;
 	private int size;
