@@ -67,7 +67,6 @@ Finally, initialize a server instance and bind it.
 				.addressPair(new AddressPair(8888))
 				//注册消息 register factory
 				.factory(facotry)
-				//派发消息 handle message
 				.build();
 		BinaryServer server = new BinaryServer(config);
 		server.startServer();
