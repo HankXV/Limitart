@@ -120,6 +120,18 @@ public class TXCardsCalculator {
 				}
 			}
 		}
+		// 如果顺子是A2345，将A放至末位
+		if (maxNumberOfStraight == 5) {
+			byte[] newCards = new byte[cards.length];
+			for (int k = 0; k < newCards.length; k++) {
+				if (k == newCards.length - 1) {
+					newCards[k] = cards[0];
+				}else{
+					newCards[k] = cards[k + 1];
+				}
+			}
+			cards = newCards;
+		}
 		// 评估数值
 		evaluator = rank;
 		for (int i = 0; i < numbers.length; ++i) {
@@ -191,16 +203,14 @@ public class TXCardsCalculator {
 			}
 			// 顺子
 			for (int j = i;; --j) {
-				if (i < 4) {
+				if (i < 3) {
 					break;
 				}
 				if (cardNumbers[j] <= 0) {
 					break;
 				}
-				if (j == i - 4) {
-					if (maxNumberOfStraight < i + 2) {
-						maxNumberOfStraight = (byte) (i + 2);
-					}
+				if (j == i - 4 || (i == 3 && j == 0 && cardNumbers[cardNumbers.length - 1] > 0)) {
+					maxNumberOfStraight = (byte) (i + 2);
 					break;
 				}
 			}
