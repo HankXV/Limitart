@@ -129,9 +129,7 @@ public class ConsumerX {
 		rpcMessageFacotry.registerMsg(new DirectFetchProviderServicesResultHandler());
 		BinaryClient client = new BinaryClient(new BinaryClientConfigBuilder()
 				.remoteAddress(new AddressPair(providerIp, providerPort)).autoReconnect(config.getAutoConnectInterval())
-				.factory(rpcMessageFacotry).onExceptionCaught((binaryClient, cause) -> {
-					log.error(cause, cause);
-				}).onChannelStateChanged((binaryClient, active) -> {
+				.factory(rpcMessageFacotry).onChannelStateChanged((binaryClient, active) -> {
 					if (!active) {
 						clearOnDisconnected(binaryClient);
 					}

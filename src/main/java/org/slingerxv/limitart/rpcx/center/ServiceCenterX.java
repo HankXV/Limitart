@@ -62,9 +62,7 @@ public class ServiceCenterX {
 				.factory(new MessageFactory().registerMsg(new SubscribeServiceFromServiceCenterConsumerHandler())
 						.registerMsg(new PushServiceToServiceCenterProviderHandler())
 						.registerMsg(new AddScheduleToServiceCenterProviderHandler()))
-				.onExceptionCaught((channel, cause) -> {
-					log.error(cause, cause);
-				}).onChannelStateChanged((channel, active) -> {
+				.onChannelStateChanged((channel, active) -> {
 					if (!active) {
 						onDisconnect(channel);
 					}
