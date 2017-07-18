@@ -105,22 +105,20 @@ public class ConsumerX {
 			MessageFactory centryFactory = new MessageFactory();
 			centryFactory.registerMsg(new SubscribeServiceResultServiceCenterHandler());
 			centryFactory.registerMsg(new NoticeProviderDisconnectedServiceCenterHandler());
-			BinaryClientConfigBuilder serviceCenterBuilder = new BinaryClientConfigBuilder();
-			serviceCenterBuilder.autoReconnect(config.getAutoConnectInterval())
+			BinaryClientConfigBuilder serviceCenterBuilder = new BinaryClientConfigBuilder()
+					.autoReconnect(config.getAutoConnectInterval())
 					.remoteAddress(new AddressPair(config.getServiceCenterIp(), config.getServiceCenterPort(), null))
-					.clientName("RPC-Consumer").factory(centryFactory);
-			serviceCenterClient = new BinaryClient(serviceCenterBuilder.onExceptionCaught((client, cause) -> {
-				log.error(cause, cause);
-			}).onConnectionEffective(client -> {
-				if (listener != null) {
-					listener.onServiceCenterConnected(ConsumerX.this);
-				}
-				// 订阅服务
-				subscribeServicesFromServiceCenter();
-			}).dispatchMessage(message -> {
-				message.setExtra(ConsumerX.this);
-				message.getHandler().handle(message);
-			}).build());
+					.clientName("RPC-Consumer").factory(centryFactory).onConnectionEffective(client -> {
+						if (listener != null) {
+							listener.onServiceCenterConnected(ConsumerX.this);
+						}
+						// 订阅服务
+						subscribeServicesFromServiceCenter();
+					}).dispatchMessage(message -> {
+						message.setExtra(ConsumerX.this);
+						message.getHandler().handle(message);
+					});
+			serviceCenterClient = new BinaryClient(serviceCenterBuilder.build());
 			serviceCenterClient.connect();
 		}
 	}
@@ -600,8 +598,7 @@ public class ConsumerX {
 	}
 
 	private class DirectFetchProviderServicesResultHandler
-			implements
-				IHandler<DirectFetchProviderServicesResultMessage> {
+			implements IHandler<DirectFetchProviderServicesResultMessage> {
 
 		@Override
 		public void handle(DirectFetchProviderServicesResultMessage msg) {
@@ -612,8 +609,7 @@ public class ConsumerX {
 	}
 
 	private class SubscribeServiceResultServiceCenterHandler
-			implements
-				IHandler<SubscribeServiceResultServiceCenterMessage> {
+			implements IHandler<SubscribeServiceResultServiceCenterMessage> {
 
 		@Override
 		public void handle(SubscribeServiceResultServiceCenterMessage msg) {
@@ -624,8 +620,7 @@ public class ConsumerX {
 	}
 
 	private class NoticeProviderDisconnectedServiceCenterHandler
-			implements
-				IHandler<NoticeProviderDisconnectedServiceCenterMessage> {
+			implements IHandler<NoticeProviderDisconnectedServiceCenterMessage> {
 
 		@Override
 		public void handle(NoticeProviderDisconnectedServiceCenterMessage msg) {

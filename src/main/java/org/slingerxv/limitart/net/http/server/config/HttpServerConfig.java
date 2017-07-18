@@ -19,7 +19,7 @@ public final class HttpServerConfig {
 	private int httpObjectAggregatorMax;
 	private UrlMessageFactory facotry;
 	private HashSet<String> whiteList;
-	//listener
+	// listener
 	private Proc1<Channel> onServerBind;
 	private Proc2<Channel, Boolean> onChannelStateChanged;
 	private Proc2<UrlMessage, ConstraintMap<String>> dispatchMessage;
@@ -61,23 +61,23 @@ public final class HttpServerConfig {
 	public UrlMessageFactory getFacotry() {
 		return facotry;
 	}
-	
+
 	public Proc1<Channel> getOnServerBind() {
 		return onServerBind;
 	}
-	
+
 	public Proc2<Channel, Boolean> getOnChannelStateChanged() {
 		return onChannelStateChanged;
 	}
-	
+
 	public Proc2<UrlMessage, ConstraintMap<String>> getDispatchMessage() {
 		return dispatchMessage;
 	}
-	
+
 	public Proc2<Channel, HttpMessage> getOnMessageOverSize() {
 		return onMessageOverSize;
 	}
-	
+
 	public Proc2<Channel, Throwable> getOnExceptionCaught() {
 		return onExceptionCaught;
 	}
@@ -88,13 +88,13 @@ public final class HttpServerConfig {
 		private int httpObjectAggregatorMax;
 		private UrlMessageFactory facotry;
 		private HashSet<String> whiteList;
-		//listener
+		// listener
 		private Proc1<Channel> onServerBind;
 		private Proc2<Channel, Boolean> onChannelStateChanged;
 		private Proc2<UrlMessage, ConstraintMap<String>> dispatchMessage;
 		private Proc2<Channel, HttpMessage> onMessageOverSize;
 		private Proc2<Channel, Throwable> onExceptionCaught;
-		
+
 		public HttpServerConfigBuilder() {
 			this.serverName = "Http-Server";
 			this.port = 8888;
@@ -136,28 +136,28 @@ public final class HttpServerConfig {
 			this.facotry = factory;
 			return this;
 		}
-		
-		public HttpServerConfigBuilder onServerBind(Proc1<Channel> onServerBind){
+
+		public HttpServerConfigBuilder onServerBind(Proc1<Channel> onServerBind) {
 			this.onServerBind = onServerBind;
 			return this;
 		}
-		
-		public HttpServerConfigBuilder onChannelStateChanged(Proc2<Channel,Boolean> onChannelStateChanged){
+
+		public HttpServerConfigBuilder onChannelStateChanged(Proc2<Channel, Boolean> onChannelStateChanged) {
 			this.onChannelStateChanged = onChannelStateChanged;
 			return this;
 		}
-		
-		public HttpServerConfigBuilder dispatchMessage(Proc2<UrlMessage,ConstraintMap<String>> dispatchMessage){
+
+		public HttpServerConfigBuilder dispatchMessage(Proc2<UrlMessage, ConstraintMap<String>> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
 			return this;
 		}
-		
-		public HttpServerConfigBuilder onMessageOverSize(Proc2<Channel, HttpMessage> onMessageOverSize){
+
+		public HttpServerConfigBuilder onMessageOverSize(Proc2<Channel, HttpMessage> onMessageOverSize) {
 			this.onMessageOverSize = onMessageOverSize;
 			return this;
 		}
-		
-		public HttpServerConfigBuilder onExceptionCaught(Proc2<Channel, Throwable> onExceptionCaught){
+
+		public HttpServerConfigBuilder onExceptionCaught(Proc2<Channel, Throwable> onExceptionCaught) {
 			this.onExceptionCaught = onExceptionCaught;
 			return this;
 		}

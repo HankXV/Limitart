@@ -260,6 +260,8 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		}
 		if (this.config.getDispatchMessage() != null) {
 			this.config.getDispatchMessage().run(message, params);
+		} else {
+			log.warn(config.getServerName() + " no dispatch message listener!");
 		}
 	}
 }

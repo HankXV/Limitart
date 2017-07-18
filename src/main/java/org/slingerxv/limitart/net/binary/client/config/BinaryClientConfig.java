@@ -76,7 +76,7 @@ public final class BinaryClientConfig {
 	public MessageFactory getFactory() {
 		return factory;
 	}
-	
+
 	public Proc2<BinaryClient, Boolean> getOnChannelStateChanged() {
 		return onChannelStateChanged;
 	}
@@ -112,6 +112,13 @@ public final class BinaryClientConfig {
 			this.autoReconnect = 0;
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
+			this.dispatchMessage = new Proc1<Message>() {
+
+				@Override
+				public void run(Message t) {
+					t.getHandler().handle(t);
+				}
+			};
 		}
 
 		/**
@@ -164,7 +171,7 @@ public final class BinaryClientConfig {
 			this.factory = factory;
 			return this;
 		}
-		
+
 		public BinaryClientConfigBuilder onChannelStateChanged(Proc2<BinaryClient, Boolean> onChannelStateChanged) {
 			this.onChannelStateChanged = onChannelStateChanged;
 			return this;
@@ -179,7 +186,7 @@ public final class BinaryClientConfig {
 			this.onConnectionEffective = onConnectionEffective;
 			return this;
 		}
-		
+
 		public BinaryClientConfigBuilder dispatchMessage(Proc1<Message> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
 			return this;

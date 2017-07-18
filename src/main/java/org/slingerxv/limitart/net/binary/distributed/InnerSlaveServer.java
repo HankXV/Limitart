@@ -51,8 +51,6 @@ public abstract class InnerSlaveServer implements IServer {
 						log.error(toMaster.getConfig().getClientName() + " server disconnected,"
 								+ binaryClient.channel());
 					}
-				}).onExceptionCaught((client, cause) -> {
-					log.error("session:" + client.channel(), cause);
 				}).onConnectionEffective(client -> {
 					// 链接成功,上报本服务器的服务端口等信息
 					ReqConnectionReportSlave2MasterMessage msg = new ReqConnectionReportSlave2MasterMessage();
