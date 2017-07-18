@@ -117,7 +117,7 @@ public class BinaryClient {
 
 				@Override
 				public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-					log.error(ctx.channel() + " cause:" + cause);
+					log.error(ctx.channel() + " cause:", cause);
 					if (config.getOnExceptionCaught() != null) {
 						config.getOnExceptionCaught().run(BinaryClient.this, cause);
 					}
@@ -242,6 +242,8 @@ public class BinaryClient {
 			} else {
 				if (this.config.getDispatchMessage() != null) {
 					this.config.getDispatchMessage().run(msg);
+				} else {
+					log.warn(config.getClientName() + " no dispatch message listener!");
 				}
 			}
 		} finally {

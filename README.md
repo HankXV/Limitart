@@ -3,85 +3,36 @@
 一个旨在帮助快速搭建**Java中小型游戏服务器**的框架，通信底层采用Netty4.X，数据库采用MySql相关(框架其实并未与Mysql产生太多耦合，但建议使用Mysql)，生产消费者采用Disruptor等。**有想共同参与的或者向我吐槽的，留言**。
 
 This is a framework that designed to help to build a **Java Midrange Game Server** quickly. Its communicating interface based on Netty4.X, the database is using MySql (This framework is actually not much coupling with MySql, but it still recommonded to use MySql.), and the TaskQueue(MessageQueue) based on Disruptor. **If one have some advice or want be one of us, please leave any messages to us, and we are always welcome**
-# 环境要求(Environment)
+## 环境要求(Environment)
 Jdk8或以上
 
 Jdk8 or above.
 # 快速开始(Quick start)
-使用服务器框架我们首先就是要关心如何快速的搭建出服务器的原始模型。我们需要构造一些必要的参数：端口和服务器名称。
-For using the server's framework, how to build the original model of the server as quick as possible is the first thing we must care about. First, we need to construct some necessary parameters such as port and server's name.
-```java
-
-	BinaryServerConfig build = new BinaryServerConfigBuilder().port(8888).serverName("BinaryServerDemo").build();
-
-```
-然后我们需要构造一个监听器。
-Second, we need to construct a listener.
-```java
-
-	BinaryServerEventListener binaryServerEventListener = new BinaryServerEventListener() {
-		// 当网络模块发生错误时
-		@Override
-		public void onExceptionCaught(Channel channel, Throwable cause) {
-			cause.printStackTrace();
-		}
-	
-		// 当一个Channel断开时
-		@Override
-		public void onChannelInactive(Channel channel) {
-		}
-	
-		// 当一个Channel连接时
-		@Override
-		public void onChannelActive(Channel channel) {
-	
-		}
-	
-		// 当服务器完成绑定时
-		@Override
-		public void onServerBind(Channel channel) {
-	
-		}
-	
-		// 当链接有效时(通常在这里我们认为一个链接是有效的，因为它经过了验证)
-		@Override
-		public void onConnectionEffective(Channel channel) {
-	
-		}
-	
-		// 当接收到消息时
-		@Override
-		public void dispatchMessage(Message message) {
-			message.getHandler().handle(message);
-		}
-	};
-
-```
-倒数第二步我们需要确定服务器可以处理哪些消息。让我们来创建第一个消息。
-Next, we neet to determine which messages the server can handle. Let's create a message.
+第一步我们需要确定服务器可以处理哪些消息。让我们来创建第一个消息。
+First, we neet to determine which messages the server can handle. Let's create a message.
 ```java
 
 	public class BinaryMessageDemo extends Message {
+		// 传递的信息 transfer of information
 		public String info;
 	
-		// 消息编号
+		// 消息编号 message id
 		@Override
 		public short getMessageId() {
 			return 1;
 		}
 	
-		// 编码
+		// 编码encode
 		@Override
 		public void encode() throws Exception {
 			putString(this.info);
 		}
 	
-		// 解码
+		// 解码decode
 		@Override
 		public void decode() throws Exception {
 			this.info = getString();
 		}
-	
 	}
 
 ```
@@ -99,8 +50,8 @@ Create a Handler for the message. Here, we just simply print the contents of tra
 	}
 	
 ```
-构造一个消息工厂，把消息和对应的处理器注册进去。
-Construct a `MessageFactory` that registers messages and corresponding Handlers.
+构造一个消息工厂，把消息的处理器注册进去。
+Construct a `MessageFactory` that registers message's handler.
 ```java
 
 	MessageFactory factory = new MessageFactory();
@@ -108,87 +59,48 @@ Construct a `MessageFactory` that registers messages and corresponding Handlers.
 		
 ```
 最后初始化一个服务器实例并绑定。收工！
-Finally, initialize a server instance and bind it. Call it a day!
+Finally, initialize a server instance and bind it. 
 ```java
 
-	BinaryServer server = new BinaryServer(build, binaryServerEventListener, factory);
-	server.bind();
+		BinaryServerConfig config = new BinaryServerConfigBuilder()
+				//指定端口 port
+				.addressPair(new AddressPair(8888))
+				//注册消息 register factory
+				.factory(facotry)
+				.build();
+		BinaryServer server = new BinaryServer(config);
+		server.startServer();
 		
 ```
-下面看看客户端。因为我们现在不让客户端处理消息只发送消息，所以我们创建一个消息处理器传进消息工厂就行。现在开始构造客户端，填写好服务器地址和端口，当然还有客户端名称。你可以选择是否重连，我们这里就不展示了。
-Look at the client below. Because we do not allow client processing messages only send messages, so we create a message into the message processor factory on the line. Now build the client, fill in the server address and port, and, of course, the client name. You can choose whether or not to reconnect, and we don't show it here.
+下面看看客户端。因为我们现在不让客户端处理消息只发送消息，所以我们创建一个消息处理器传进消息工厂就行。现在开始构造客户端，填写好服务器地址和端口，当然还有客户端名称。你可以选择是否重连，我们这里就不展示了。添加监听器`onConnectionEffective`并在里面写发送消息给服务器的代码。
+Look at the client below. Because we do not allow client processing messages only send messages, so we create a message into the message processor factory on the line. Now build the client, fill in the server address and port, and, of course, the client name. You can choose whether or not to reconnect, and we don't show it here.Write the code that sends the message to the server in the listener `onConnectionEffective`.
 ```java
 
-	BinaryClientConfig build = new BinaryClientConfigBuilder().remoteIp("127.0.0.1").remotePort(8888)
-			.clientName("BinaryClientDemo").build();
+		MessageFactory factory = new MessageFactory();
+		BinaryClientConfig config = new BinaryClientConfigBuilder()
+				.remoteAddress(new AddressPair("127.0.0.1", 8888))
+				.factory(factory)
+				.onConnectionEffective(client -> {
+					BinaryMessageDemo message = new BinaryMessageDemo();
+					message.info = "Hello Limitart!";
+					try {
+						client.sendMessage(message, null);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}).build();
 				
-```
-接下来，在监听器里的回调函数`onConnectionEffective`里写发送消息给服务器的代码，因为一定要保证连接服务器是成功的我们才发送消息。
-Next, write the code that sends the message to the server in the callback function `onConnectionEffective` in the listener, because we have to make sure the connection server is successful before we send the message.
-```java
-
-	BinaryClientEventListener binaryClientEventListener = new BinaryClientEventListener() {
-
-			@Override
-			public void onExceptionCaught(BinaryClient client, Throwable cause) {
-				cause.printStackTrace();
-			}
-
-			@Override
-			public void onConnectionEffective(BinaryClient client) {
-				BinaryMessageDemo message = new BinaryMessageDemo();
-				message.info = "Hello Limitart!";
-				try {
-					client.sendMessage(message, null);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-
-			@Override
-			public void onChannelInactive(BinaryClient client) {
-
-			}
-
-			@Override
-			public void onChannelActive(BinaryClient client) {
-
-			}
-
-			@Override
-			public void dispatchMessage(Message message) {
-				message.getHandler().handle(message);
-			}
-		};
-		
 ```
 收工！
 To be finished！
 ```java
 
-	BinaryClient client = new BinaryClient(build, binaryClientEventListener, factory);
-	client.connect();
+		BinaryClient client = new BinaryClient(config);
+		client.connect();
 		
 ```
-让我们来看看效果吧,启动服务器，服务器绑定成功
-Let's take a look at the effect, start the server, and make the server binding successful
-```
-
-	[INFO][BinaryServer]BinaryServerDemo nio init
-	[INFO][BinaryServer]BinaryServerDemo bind at port:8888
-	
-```
-启动客户端，客户端链接成功，并发送了消息
-Start the client, the client link is successful, and the message is sent
-```
-
-	[INFO][BinaryClient]BinaryClientDemo nio init
-	[INFO][BinaryClient]BinaryClientDemo start connect server：127.0.0.1:8888...
-	[INFO][BinaryClient]BinaryClientDemo connect server：127.0.0.1:8888 success！
-
-```
-服务器验证链接成功并且收到了消息！是不是很棒！！！
-The server verified that the link was successful and received the message! cool!!!!
+让我们来看看效果吧,启动服务器，服务器绑定成功,启动客户端，客户端链接成功，并发送了消息,服务器验证链接成功并且收到了消息！是不是很棒！！！
+Start the client, the client link is successful, and the message is sent.The server verified that the link was successful and received the message! cool!!!!
 ```
 
 	server received message:Hello Limitart!
