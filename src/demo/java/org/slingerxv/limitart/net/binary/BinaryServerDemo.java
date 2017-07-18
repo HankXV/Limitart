@@ -15,10 +15,7 @@ public class BinaryServerDemo {
 				.addressPair(new AddressPair(8888))
 				//注册消息
 				.factory(facotry)
-				//派发消息
-				.dispatchMessage(message -> {
-					message.getHandler().handle(message);
-				}).build();
+				.build();
 		BinaryServer server = new BinaryServer(config);
 		server.startServer();
 	}

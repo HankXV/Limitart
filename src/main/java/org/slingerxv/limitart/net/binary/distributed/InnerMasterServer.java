@@ -43,9 +43,9 @@ public abstract class InnerMasterServer implements IServer {
 		config.getFactory().registerMsg(new ReqServerLoadSlave2MasterHandler());
 		server = new BinaryServer(new BinaryServerConfig.BinaryServerConfigBuilder()
 				.addressPair(new AddressPair(config.getMasterPort(), InnerServerUtil.getInnerPass()))
-				.serverName(config.getServerName()).factory(config.getFactory()).dispatchMessage((message) -> {
+				.serverName(config.getServerName()).factory(config.getFactory()).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
-					message.getHandler().handle(message);
+					handler.handle(message);
 				}).onChannelStateChanged((channel, active) -> {
 					if (!active) {
 						Integer serverType = InnerServerUtil.getServerType(channel);

@@ -21,8 +21,6 @@ public class BinaryClientDemo {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}).dispatchMessage(message -> {
-					message.getHandler().handle(message);
 				}).build();
 		BinaryClient client = new BinaryClient(config);
 		client.connect();

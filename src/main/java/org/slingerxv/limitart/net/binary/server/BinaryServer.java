@@ -314,7 +314,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			if (handler == null) {
 				throw new Exception(config.getServerName() + " can not find handler for message,id:" + messageId);
 			}
-			msg.setHandler(handler);
 			msg.setChannel(ctx.channel());
 			msg.setServer(this);
 			// 如果是内部消息，则自己消化
@@ -327,7 +326,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					return;
 				}
 				if (config.getDispatchMessage() != null) {
-					config.getDispatchMessage().run(msg);
+					config.getDispatchMessage().run(msg, handler);
 				} else {
 					log.warn(config.getServerName() + " no dispatch message listener!");
 				}

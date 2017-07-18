@@ -70,9 +70,9 @@ public abstract class InnerSlaveServer implements IServer {
 					}
 					TimerUtil.scheduleGlobal(5000, 5000, reportTask);
 					onConnectMasterSuccess(InnerSlaveServer.this);
-				}).dispatchMessage(message -> {
+				}).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
-					message.getHandler().handle(message);
+					handler.handle(message);
 				}).build());
 		reportTask = new TimerTask() {
 

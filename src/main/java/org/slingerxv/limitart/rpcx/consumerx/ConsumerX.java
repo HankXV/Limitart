@@ -114,9 +114,9 @@ public class ConsumerX {
 						}
 						// 订阅服务
 						subscribeServicesFromServiceCenter();
-					}).dispatchMessage(message -> {
+					}).dispatchMessage((message, handler) -> {
 						message.setExtra(ConsumerX.this);
-						message.getHandler().handle(message);
+						handler.handle(message);
 					});
 			serviceCenterClient = new BinaryClient(serviceCenterBuilder.build());
 			serviceCenterClient.connect();
@@ -143,9 +143,9 @@ public class ConsumerX {
 					if (this.listener != null) {
 						this.listener.onConsumerConnected(binaryClient);
 					}
-				}).dispatchMessage(message -> {
+				}).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
-					message.getHandler().handle(message);
+					handler.handle(message);
 				}).build());
 		return client;
 	}

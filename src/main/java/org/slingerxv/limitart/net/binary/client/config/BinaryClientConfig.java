@@ -5,6 +5,7 @@ import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
+import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
@@ -26,7 +27,7 @@ public final class BinaryClientConfig {
 	private Proc2<BinaryClient, Boolean> onChannelStateChanged;
 	private Proc2<BinaryClient, Throwable> onExceptionCaught;
 	private Proc1<BinaryClient> onConnectionEffective;
-	private Proc1<Message> dispatchMessage;
+	private Proc2<Message, IHandler<Message>> dispatchMessage;
 
 	private BinaryClientConfig(BinaryClientConfigBuilder builder) {
 		this.clientName = builder.clientName;
@@ -89,7 +90,7 @@ public final class BinaryClientConfig {
 		return onConnectionEffective;
 	}
 
-	public Proc1<Message> getDispatchMessage() {
+	public Proc2<Message, IHandler<Message>> getDispatchMessage() {
 		return dispatchMessage;
 	}
 
@@ -104,7 +105,7 @@ public final class BinaryClientConfig {
 		private Proc2<BinaryClient, Boolean> onChannelStateChanged;
 		private Proc2<BinaryClient, Throwable> onExceptionCaught;
 		private Proc1<BinaryClient> onConnectionEffective;
-		private Proc1<Message> dispatchMessage;
+		private Proc2<Message, IHandler<Message>> dispatchMessage;
 
 		public BinaryClientConfigBuilder() {
 			this.clientName = "Binary-Client";
@@ -112,11 +113,11 @@ public final class BinaryClientConfig {
 			this.autoReconnect = 0;
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
-			this.dispatchMessage = new Proc1<Message>() {
+			this.dispatchMessage = new Proc2<Message, IHandler<Message>>() {
 
 				@Override
-				public void run(Message t) {
-					t.getHandler().handle(t);
+				public void run(Message t1, IHandler<Message> t2) {
+					t2.handle(t1);
 				}
 			};
 		}
@@ -187,7 +188,7 @@ public final class BinaryClientConfig {
 			return this;
 		}
 
-		public BinaryClientConfigBuilder dispatchMessage(Proc1<Message> dispatchMessage) {
+		public BinaryClientConfigBuilder dispatchMessage(Proc2<Message, IHandler<Message>> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
 			return this;
 		}

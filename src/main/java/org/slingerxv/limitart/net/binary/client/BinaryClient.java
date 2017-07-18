@@ -226,7 +226,6 @@ public class BinaryClient {
 			if (handler == null) {
 				throw new Exception(config.getClientName() + " can not find handler for message,id:" + messageId);
 			}
-			msg.setHandler(handler);
 			msg.setChannel(ctx.channel());
 			msg.setClient(this);
 			// 如果是内部消息，则自己消化
@@ -234,7 +233,7 @@ public class BinaryClient {
 				handler.handle(msg);
 			} else {
 				if (this.config.getDispatchMessage() != null) {
-					this.config.getDispatchMessage().run(msg);
+					this.config.getDispatchMessage().run(msg,handler);
 				} else {
 					log.warn(config.getClientName() + " no dispatch message listener!");
 				}

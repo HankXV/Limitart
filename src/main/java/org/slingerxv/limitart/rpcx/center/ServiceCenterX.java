@@ -68,9 +68,9 @@ public class ServiceCenterX {
 					if (!active) {
 						onDisconnect(channel);
 					}
-				}).dispatchMessage(message -> {
+				}).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
-					message.getHandler().handle(message);
+					handler.handle(message);
 				}).build();
 		binaryServer = new BinaryServer(serverConfig);
 	}

@@ -6,6 +6,7 @@ import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
+import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
@@ -33,7 +34,7 @@ public final class BinaryServerConfig {
 	private Proc2<Channel, Throwable> onExceptionCaught;
 	private Proc1<Channel> onServerBind;
 	private Proc1<Channel> onConnectionEffective;
-	private Proc1<Message> dispatchMessage;
+	private Proc2<Message, IHandler<Message>> dispatchMessage;
 
 	private BinaryServerConfig(BinaryServerConfigBuilder builder) {
 		this.serverName = builder.serverName;
@@ -89,7 +90,7 @@ public final class BinaryServerConfig {
 		return onConnectionEffective;
 	}
 
-	public Proc1<Message> getDispatchMessage() {
+	public Proc2<Message, IHandler<Message>> getDispatchMessage() {
 		return dispatchMessage;
 	}
 
@@ -126,7 +127,7 @@ public final class BinaryServerConfig {
 		private Proc2<Channel, Throwable> onExceptionCaught;
 		private Proc1<Channel> onServerBind;
 		private Proc1<Channel> onConnectionEffective;
-		private Proc1<Message> dispatchMessage;
+		private Proc2<Message, IHandler<Message>> dispatchMessage;
 
 		public BinaryServerConfigBuilder() {
 			this.serverName = "Binary-Server";
@@ -135,11 +136,11 @@ public final class BinaryServerConfig {
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
 			this.whiteList = new HashSet<>();
-			this.dispatchMessage = new Proc1<Message>() {
+			this.dispatchMessage = new Proc2<Message, IHandler<Message>>() {
 
 				@Override
-				public void run(Message t) {
-					t.getHandler().handle(t);
+				public void run(Message t1, IHandler<Message> t2) {
+					t2.handle(t1);
 				}
 			};
 		}
@@ -230,7 +231,7 @@ public final class BinaryServerConfig {
 			return this;
 		}
 
-		public BinaryServerConfigBuilder dispatchMessage(Proc1<Message> dispatchMessage) {
+		public BinaryServerConfigBuilder dispatchMessage(Proc2<Message, IHandler<Message>> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
 			return this;
 		}

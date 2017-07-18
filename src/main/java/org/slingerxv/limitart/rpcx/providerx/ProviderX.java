@@ -68,9 +68,9 @@ public class ProviderX {
 		factory.registerMsg(new RpcExecuteClientHandler());
 		factory.registerMsg(new DirectFetchProverServicesHandler());
 		server = new BinaryServer(new BinaryServerConfigBuilder().addressPair(new AddressPair(config.getMyPort()))
-				.serverName("RPC-Provider").factory(factory).dispatchMessage(message -> {
+				.serverName("RPC-Provider").factory(factory).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
-					message.getHandler().handle(message);
+					handler.handle(message);
 				}).onServerBind(channel -> {
 					if (this.providerListener != null) {
 						this.providerListener.onProviderBind(this);
@@ -89,9 +89,9 @@ public class ProviderX {
 						if (this.providerListener != null) {
 							this.providerListener.onServiceCenterConnected(ProviderX.this);
 						}
-					}).dispatchMessage(message -> {
+					}).dispatchMessage((message, handler) -> {
 						message.setExtra(this);
-						message.getHandler().handle(message);
+						handler.handle(message);
 					}).build());
 		}
 	}

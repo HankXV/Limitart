@@ -1,7 +1,6 @@
 package org.slingerxv.limitart.net.binary.message;
 
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
-import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 
 import io.netty.channel.Channel;
@@ -22,7 +21,6 @@ public abstract class Message extends MessageMeta {
 	// 预留参数
 	private transient Object extra;
 	private transient Object extra1;
-	private transient IHandler<Message> handler;
 
 	public abstract short getMessageId();
 
@@ -56,14 +54,6 @@ public abstract class Message extends MessageMeta {
 
 	public void setExtra(Object extra) {
 		this.extra = extra;
-	}
-
-	public IHandler<Message> getHandler() {
-		return handler;
-	}
-
-	public void setHandler(IHandler<Message> handler) {
-		this.handler = handler;
 	}
 
 	public Object getExtra1() {
