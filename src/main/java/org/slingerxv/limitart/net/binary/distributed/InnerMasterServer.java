@@ -18,7 +18,6 @@ import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
-import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.net.struct.AddressPair;
 
@@ -41,7 +40,7 @@ public abstract class InnerMasterServer implements IServer {
 		this.config = config;
 		config.getFactory().registerMsg(new ReqConnectionReportSlave2MasterHandler());
 		config.getFactory().registerMsg(new ReqServerLoadSlave2MasterHandler());
-		server = new BinaryServer(new BinaryServerConfig.BinaryServerConfigBuilder()
+		server = new BinaryServer.BinaryServerBuilder()
 				.addressPair(new AddressPair(config.getMasterPort(), InnerServerUtil.getInnerPass()))
 				.serverName(config.getServerName()).factory(config.getFactory()).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
@@ -75,7 +74,7 @@ public abstract class InnerMasterServer implements IServer {
 							}
 						}
 					}
-				}).build());
+				}).build();
 	}
 
 	/**
@@ -161,11 +160,11 @@ public abstract class InnerMasterServer implements IServer {
 			try {
 				server.sendMessage(channelList, sjm0, (isSuccess, cause, channel) -> {
 					if (isSuccess) {
-						log.info(server.getConfig().getServerName() + " tell new slave server info " + msg.getChannel()
+						log.info(server.getServerName() + " tell new slave server info " + msg.getChannel()
 								+ " to other slave servers success,slave server Id:" + data.getServerId());
 					} else {
 						log.error(
-								server.getConfig().getServerName() + " tell new slave server info " + msg.getChannel()
+								server.getServerName() + " tell new slave server info " + msg.getChannel()
 										+ " to other slave servers fail,new slave server Id:" + data.getServerId(),
 								cause);
 					}
@@ -186,13 +185,11 @@ public abstract class InnerMasterServer implements IServer {
 			try {
 				server.sendMessage(msg.getChannel(), sjm, (isSuccess, cause, channel) -> {
 					if (isSuccess) {
-						log.info(server.getConfig().getServerName()
-								+ " tell other slave servers info to new slave server " + msg.getChannel()
-								+ " success,slave server Id:" + data.getServerId());
+						log.info(server.getServerName() + " tell other slave servers info to new slave server "
+								+ msg.getChannel() + " success,slave server Id:" + data.getServerId());
 					} else {
-						log.error(server.getConfig().getServerName()
-								+ " tell other slave servers info to new slave server " + msg.getChannel()
-								+ " fail,new slave server Id:" + data.getServerId(), cause);
+						log.error(server.getServerName() + " tell other slave servers info to new slave server "
+								+ msg.getChannel() + " fail,new slave server Id:" + data.getServerId(), cause);
 					}
 				});
 			} catch (Exception e) {

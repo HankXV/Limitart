@@ -14,19 +14,24 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Proc1;
+import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
+import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
-import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
 import org.slingerxv.limitart.net.define.AbstractNettyServer;
 import org.slingerxv.limitart.net.define.IServer;
+import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.RandomUtil;
+import org.slingerxv.limitart.util.StringUtil;
 import org.slingerxv.limitart.util.SymmetricEncryptionUtil;
 import org.slingerxv.limitart.util.TimerUtil;
 
@@ -55,24 +60,59 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	private ServerBootstrap boot;
 	private Channel channel;
-	private BinaryServerConfig config;
 	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
 	private SymmetricEncryptionUtil encrypUtil;
 	private TimerTask clearTask;
 
-	public BinaryServer(BinaryServerConfig config) throws Exception {
-		if (config == null) {
-			throw new NullPointerException("BinaryServerConfig");
+	// --config
+	private String serverName;
+	private AddressPair addressPair;
+	private int connectionValidateTimeInSec;
+	private AbstractBinaryDecoder decoder;
+	private AbstractBinaryEncoder encoder;
+	private HashSet<String> whiteList;
+	private MessageFactory factory;
+
+	// ---listener
+	private Proc2<Channel, Boolean> onChannelStateChanged;
+	private Proc2<Channel, Throwable> onExceptionCaught;
+	private Proc1<Channel> onServerBind;
+	private Proc1<Channel> onConnectionEffective;
+	private Proc2<Message, IHandler<Message>> dispatchMessage;
+
+	private BinaryServer(BinaryServerBuilder builder) throws Exception {
+		this.serverName = builder.serverName;
+		if (builder.addressPair == null) {
+			throw new NullPointerException("addressPair");
 		}
-		if (config.getFactory() == null) {
-			throw new NullPointerException("MessageFactory");
+		this.addressPair = builder.addressPair;
+		this.connectionValidateTimeInSec = builder.connectionValidateTimeInSec;
+		if (builder.decoder == null) {
+			throw new NullPointerException("decoder");
 		}
-		this.config = config;
+		this.decoder = builder.decoder;
+		if (builder.encoder == null) {
+			throw new NullPointerException("encoder");
+		}
+		this.encoder = builder.encoder;
+		if (builder.whiteList == null) {
+			throw new NullPointerException("whiteList");
+		}
+		this.whiteList = builder.whiteList;
+		if (builder.factory == null) {
+			throw new NullPointerException("factory");
+		}
+		this.factory = builder.factory;
+		this.onChannelStateChanged = builder.onChannelStateChanged;
+		this.onExceptionCaught = builder.onExceptionCaught;
+		this.onServerBind = builder.onServerBind;
+		this.onConnectionEffective = builder.onConnectionEffective;
+		this.dispatchMessage = builder.dispatchMessage;
 		// 初始化内部消息
-		config.getFactory().registerMsg(new ConnectionValidateClientHandler());
+		this.factory.registerMsg(new ConnectionValidateClientHandler());
 		// 初始化加密工具
 		try {
-			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(config.getAddressPair().getPass(), "20170106");
+			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(addressPair.getPass(), "20170106");
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 				| InvalidAlgorithmParameterException e) {
 			log.error(e, e);
@@ -82,14 +122,14 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			boot.option(ChannelOption.SO_BACKLOG, 1024).channel(EpollServerSocketChannel.class)
 					.childOption(ChannelOption.SO_LINGER, 0).childOption(ChannelOption.SO_REUSEADDR, true)
 					.childOption(ChannelOption.SO_KEEPALIVE, true);
-			log.info(config.getServerName() + " epoll init");
+			log.info(serverName + " epoll init");
 		} else {
 			boot.channel(NioServerSocketChannel.class);
-			log.info(config.getServerName() + " nio init");
+			log.info(serverName + " nio init");
 		}
 		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-				.childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializerImpl(this));
+				.childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializerImpl());
 		clearTask = new TimerTask() {
 
 			@Override
@@ -104,19 +144,19 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	public void startServer() {
 		new Thread(() -> {
 			try {
-				boot.bind(config.getAddressPair().getPort()).addListener((ChannelFuture arg0) -> {
+				boot.bind(addressPair.getPort()).addListener((ChannelFuture arg0) -> {
 					if (arg0.isSuccess()) {
 						channel = arg0.channel();
-						log.info(config.getServerName() + " bind at port:" + config.getAddressPair().getPort());
-						if (config.getOnServerBind() != null) {
-							config.getOnServerBind().run(arg0.channel());
+						log.info(serverName + " bind at port:" + addressPair.getPort());
+						if (onServerBind != null) {
+							onServerBind.run(arg0.channel());
 						}
 					}
 				}).sync().channel().closeFuture().sync();
 			} catch (InterruptedException e) {
 				log.error(e, e);
 			}
-		}, config.getServerName() + "-Binder").start();
+		}, serverName + "-Binder").start();
 	}
 
 	@Override
@@ -129,24 +169,18 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 	public void sendMessage(Channel channel, Message msg, Proc3<Boolean, Throwable, Channel> listener)
 			throws Exception {
-		SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, listener);
+		SendMessageUtil.sendMessage(encoder, channel, msg, listener);
 	}
 
 	public void sendMessage(List<Channel> channels, Message msg, Proc3<Boolean, Throwable, Channel> listener)
 			throws Exception {
-		SendMessageUtil.sendMessage(this.config.getEncoder(), channels, msg, listener);
+		SendMessageUtil.sendMessage(encoder, channels, msg, listener);
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
-		private BinaryServer server;
-
-		private ChannelInitializerImpl(BinaryServer server) {
-			this.server = server;
-		}
 
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
-			AbstractBinaryDecoder decoder = server.config.getDecoder();
 			ch.pipeline()
 					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
 							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
@@ -160,16 +194,15 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 						@Override
 						public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 							log.error(ctx.channel() + " cause:", cause);
-							if (config.getOnExceptionCaught() != null) {
-								config.getOnExceptionCaught().run(ctx.channel(), cause);
+							if (onExceptionCaught != null) {
+								onExceptionCaught.run(ctx.channel(), cause);
 							}
 						}
 
 						@Override
 						public void channelActive(ChannelHandlerContext ctx) throws Exception {
 							log.info(ctx.channel().remoteAddress() + " connected！");
-							HashSet<String> whiteList = config.getWhiteList();
-							if (whiteList != null && !config.getWhiteList().isEmpty()) {
+							if (whiteList != null && !whiteList.isEmpty()) {
 								InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 								String remoteAddress = insocket.getAddress().getHostAddress();
 								if (!whiteList.contains(remoteAddress)) {
@@ -179,16 +212,16 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 								}
 							}
 							startConnectionValidate(ctx.channel());
-							if (config.getOnChannelStateChanged() != null) {
-								config.getOnChannelStateChanged().run(ctx.channel(), true);
+							if (onChannelStateChanged != null) {
+								onChannelStateChanged.run(ctx.channel(), true);
 							}
 						}
 
 						@Override
 						public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 							log.info(ctx.channel().remoteAddress() + " disconnected！");
-							if (config.getOnChannelStateChanged() != null) {
-								config.getOnChannelStateChanged().run(ctx.channel(), false);
+							if (onChannelStateChanged != null) {
+								onChannelStateChanged.run(ctx.channel(), false);
 							}
 						}
 
@@ -218,7 +251,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		} catch (Exception e) {
 			log.error(e, e);
 			channel.close();
-			log.info(config.getServerName() + " remote connection " + data.channel.remoteAddress()
+			log.info(serverName + " remote connection " + data.channel.remoteAddress()
 					+ " discarded，server encryp util error！");
 			return;
 		}
@@ -226,11 +259,11 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		try {
 			sendMessage(channel, msg, (isSuccess, cause, channel1) -> {
 				if (isSuccess) {
-					log.info(config.getServerName() + " send client " + channel1.remoteAddress() + " validate token:"
-							+ encode + "success！");
+					log.info(serverName + " send client " + channel1.remoteAddress() + " validate token:" + encode
+							+ "success！");
 				} else {
-					log.error(config.getServerName() + " send client " + channel1.remoteAddress() + " validate token:"
-							+ encode + "fail！", cause);
+					log.error(serverName + " send client " + channel1.remoteAddress() + " validate token:" + encode
+							+ "fail！", cause);
 				}
 			});
 		} catch (Exception e) {
@@ -250,11 +283,11 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		for (; iterator.hasNext();) {
 			SessionValidateData data = iterator.next();
 			long startValidateTime = data.startValidateTime;
-			if (now - startValidateTime > this.config.getConnectionValidateTimeInSec() * 1000) {
+			if (now - startValidateTime > connectionValidateTimeInSec * 1000) {
 				iterator.remove();
 				data.channel.close();
 				// 移除链接
-				log.error(config.getServerName() + " connection " + data.channel.remoteAddress()
+				log.error(serverName + " connection " + data.channel.remoteAddress()
 						+ " discarded，validate time out,wait validate size:" + tempChannels.size());
 			}
 		}
@@ -273,27 +306,25 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		if (sessionValidateData == null) {
 			channel.close();
 			// 移除链接
-			log.info(config.getServerName() + " remote connection " + channel.remoteAddress()
-					+ " discarded，validate time out！");
+			log.info(serverName + " remote connection " + channel.remoteAddress() + " discarded，validate time out！");
 			return;
 		}
 		// 对比结果
 		if (sessionValidateData.validateRandom != validateRandom) {
 			// 移除链接
-			log.info(config.getServerName() + " remote connection " + channel.remoteAddress()
-					+ " discarded，validate wrong！");
+			log.info(serverName + " remote connection " + channel.remoteAddress() + " discarded，validate wrong！");
 			return;
 		}
 		tempChannels.remove(asLongText);
-		log.info(config.getServerName() + " remote connection " + channel.remoteAddress() + " validate success!");
+		log.info(serverName + " remote connection " + channel.remoteAddress() + " validate success!");
 		// 通知客户端成功
 		try {
 			sendMessage(channel, new ConnectionValidateSuccessServerMessage(), null);
 		} catch (Exception e) {
 			log.error(e, e);
 		}
-		if (config.getOnConnectionEffective() != null) {
-			config.getOnConnectionEffective().run(channel);
+		if (onConnectionEffective != null) {
+			onConnectionEffective.run(channel);
 		}
 	}
 
@@ -301,18 +332,18 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
-			short messageId = this.config.getDecoder().readMessageId(ctx.channel(), buffer);
-			Message msg = config.getFactory().getMessage(messageId);
+			short messageId = decoder.readMessageId(ctx.channel(), buffer);
+			Message msg = factory.getMessage(messageId);
 			if (msg == null) {
-				throw new Exception(config.getServerName() + " message empty,id:" + messageId);
+				throw new Exception(serverName + " message empty,id:" + messageId);
 			}
 			msg.buffer(buffer);
 			msg.decode();
 			msg.buffer(null);
 			@SuppressWarnings("unchecked")
-			IHandler<Message> handler = (IHandler<Message>) config.getFactory().getHandler(messageId);
+			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
 			if (handler == null) {
-				throw new Exception(config.getServerName() + " can not find handler for message,id:" + messageId);
+				throw new Exception(serverName + " can not find handler for message,id:" + messageId);
 			}
 			msg.setChannel(ctx.channel());
 			msg.setServer(this);
@@ -325,10 +356,10 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					log.error("channel " + ctx.channel() + " has not validate yet!");
 					return;
 				}
-				if (config.getDispatchMessage() != null) {
-					config.getDispatchMessage().run(msg, handler);
+				if (dispatchMessage != null) {
+					dispatchMessage.run(msg, handler);
 				} else {
-					log.warn(config.getServerName() + " no dispatch message listener!");
+					log.warn(serverName + " no dispatch message listener!");
 				}
 			}
 		} catch (Exception e) {
@@ -339,11 +370,35 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		}
 	}
 
-	public BinaryServerConfig getConfig() {
-		return this.config;
+	public String getServerName() {
+		return serverName;
 	}
 
-	public class SessionValidateData {
+	public AddressPair getAddressPair() {
+		return addressPair;
+	}
+
+	public int getConnectionValidateTimeInSec() {
+		return connectionValidateTimeInSec;
+	}
+
+	public AbstractBinaryDecoder getDecoder() {
+		return decoder;
+	}
+
+	public AbstractBinaryEncoder getEncoder() {
+		return encoder;
+	}
+
+	public HashSet<String> getWhiteList() {
+		return whiteList;
+	}
+
+	public MessageFactory getFactory() {
+		return factory;
+	}
+
+	private class SessionValidateData {
 		private Channel channel;
 		private long startValidateTime;
 		private int validateRandom;
@@ -355,11 +410,135 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		}
 	}
 
-	public class ConnectionValidateClientHandler implements IHandler<ConnectionValidateClientMessage> {
+	private class ConnectionValidateClientHandler implements IHandler<ConnectionValidateClientMessage> {
 
 		@Override
 		public void handle(ConnectionValidateClientMessage msg) {
 			msg.getServer().onClientConnectionValidate(msg.getChannel(), msg.validateRandom);
+		}
+	}
+
+	public static class BinaryServerBuilder {
+		private String serverName;
+		private AddressPair addressPair;
+		private int connectionValidateTimeInSec;
+		private AbstractBinaryDecoder decoder;
+		private AbstractBinaryEncoder encoder;
+		private HashSet<String> whiteList;
+		private MessageFactory factory;
+		// ---listener
+		private Proc2<Channel, Boolean> onChannelStateChanged;
+		private Proc2<Channel, Throwable> onExceptionCaught;
+		private Proc1<Channel> onServerBind;
+		private Proc1<Channel> onConnectionEffective;
+		private Proc2<Message, IHandler<Message>> dispatchMessage;
+
+		public BinaryServerBuilder() {
+			this.serverName = "Binary-Server";
+			this.addressPair = new AddressPair(8888, "limitart-core");
+			this.connectionValidateTimeInSec = 20;
+			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
+			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
+			this.whiteList = new HashSet<>();
+			this.dispatchMessage = new Proc2<Message, IHandler<Message>>() {
+
+				@Override
+				public void run(Message t1, IHandler<Message> t2) {
+					t2.handle(t1);
+				}
+			};
+		}
+
+		/**
+		 * 构建服务器
+		 * 
+		 * @return
+		 * @throws Exception
+		 */
+		public BinaryServer build() throws Exception {
+			return new BinaryServer(this);
+		}
+
+		/**
+		 * 自定义解码器
+		 * 
+		 * @param decoder
+		 * @return
+		 */
+		public BinaryServerBuilder decoder(AbstractBinaryDecoder decoder) {
+			this.decoder = decoder;
+			return this;
+		}
+
+		public BinaryServerBuilder encoder(AbstractBinaryEncoder encoder) {
+			this.encoder = encoder;
+			return this;
+		}
+
+		public BinaryServerBuilder serverName(String serverName) {
+			this.serverName = serverName;
+			return this;
+		}
+
+		/**
+		 * 绑定端口
+		 * 
+		 * @param port
+		 * @return
+		 */
+		public BinaryServerBuilder addressPair(AddressPair addressPair) {
+			this.addressPair = addressPair;
+			return this;
+		}
+
+		public BinaryServerBuilder factory(MessageFactory factory) {
+			this.factory = factory;
+			return this;
+		}
+
+		/**
+		 * 链接验证超时(秒)
+		 * 
+		 * @param connectionValidateTimeInSec
+		 * @return
+		 */
+		public BinaryServerBuilder connectionValidateTimeInSec(int connectionValidateTimeInSec) {
+			this.connectionValidateTimeInSec = connectionValidateTimeInSec;
+			return this;
+		}
+
+		public BinaryServerBuilder whiteList(String... remoteAddress) {
+			for (String ip : remoteAddress) {
+				if (StringUtil.isIp(ip)) {
+					this.whiteList.add(ip);
+				}
+			}
+			return this;
+		}
+
+		public BinaryServerBuilder onChannelStateChanged(Proc2<Channel, Boolean> onChannelStateChanged) {
+			this.onChannelStateChanged = onChannelStateChanged;
+			return this;
+		}
+
+		public BinaryServerBuilder onExceptionCaught(Proc2<Channel, Throwable> onExceptionCaught) {
+			this.onExceptionCaught = onExceptionCaught;
+			return this;
+		}
+
+		public BinaryServerBuilder onServerBind(Proc1<Channel> onServerBind) {
+			this.onServerBind = onServerBind;
+			return this;
+		}
+
+		public BinaryServerBuilder onConnectionEffective(Proc1<Channel> onConnectionEffective) {
+			this.onConnectionEffective = onConnectionEffective;
+			return this;
+		}
+
+		public BinaryServerBuilder dispatchMessage(Proc2<Message, IHandler<Message>> dispatchMessage) {
+			this.dispatchMessage = dispatchMessage;
+			return this;
 		}
 	}
 }

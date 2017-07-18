@@ -14,7 +14,6 @@ import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig.Binary
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
-import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig.BinaryServerConfigBuilder;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.define.ServiceX;
 import org.slingerxv.limitart.rpcx.exception.ServiceError;
@@ -67,7 +66,7 @@ public class ProviderX {
 		// 初始化内部消息
 		factory.registerMsg(new RpcExecuteClientHandler());
 		factory.registerMsg(new DirectFetchProverServicesHandler());
-		server = new BinaryServer(new BinaryServerConfigBuilder().addressPair(new AddressPair(config.getMyPort()))
+		server = new BinaryServer.BinaryServerBuilder().addressPair(new AddressPair(config.getMyPort()))
 				.serverName("RPC-Provider").factory(factory).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
 					handler.handle(message);
@@ -75,7 +74,7 @@ public class ProviderX {
 					if (this.providerListener != null) {
 						this.providerListener.onProviderBind(this);
 					}
-				}).build());
+				}).build();
 		// 处理服务中心模式
 		if (this.config.getServiceCenterIp() != null) {
 			MessageFactory centerFacotry = new MessageFactory();

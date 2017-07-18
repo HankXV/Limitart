@@ -14,7 +14,6 @@ import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
-import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.center.config.ServiceCenterXConfig;
 import org.slingerxv.limitart.rpcx.center.schedule.ScheduleTask;
@@ -57,8 +56,7 @@ public class ServiceCenterX {
 			throw new NullPointerException("ServiceCenterXConfig");
 		}
 		this.config = config;
-		BinaryServerConfig serverConfig = new BinaryServerConfig.BinaryServerConfigBuilder()
-				.addressPair(new AddressPair(config.getPort()))
+		binaryServer = new BinaryServer.BinaryServerBuilder().addressPair(new AddressPair(config.getPort()))
 				.factory(new MessageFactory().registerMsg(new SubscribeServiceFromServiceCenterConsumerHandler())
 						.registerMsg(new PushServiceToServiceCenterProviderHandler())
 						.registerMsg(new AddScheduleToServiceCenterProviderHandler()))
@@ -70,7 +68,6 @@ public class ServiceCenterX {
 					message.setExtra(this);
 					handler.handle(message);
 				}).build();
-		binaryServer = new BinaryServer(serverConfig);
 	}
 
 	public ServiceCenterX bind() throws Exception {

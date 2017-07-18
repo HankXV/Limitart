@@ -50,13 +50,11 @@ Construct a `MessageFactory` that registers message's handler.
 Finally, initialize a server instance and bind it. 
 ```java
 
-		BinaryServerConfig config = new BinaryServerConfigBuilder()
-				//指定端口 port
+		BinaryServer server = new BinaryServer.BinaryServerBuilder()
+				// 指定端口 port
 				.addressPair(new AddressPair(8888))
-				//注册消息 register factory
-				.factory(facotry)
-				.build();
-		BinaryServer server = new BinaryServer(config);
+				// 注册消息  register factory
+				.factory(messageFactory).build();
 		server.startServer();
 		
 ```
