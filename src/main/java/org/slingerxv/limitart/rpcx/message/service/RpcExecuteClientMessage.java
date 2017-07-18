@@ -1,60 +1,19 @@
 package org.slingerxv.limitart.rpcx.message.service;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.slingerxv.limitart.rpcx.message.constant.RpcMessageEnum;
 
 public class RpcExecuteClientMessage extends RPCMeta {
-	private int requestId;
-	private String moduleName;
-	private String methodName;
-	private List<String> paramTypes = new ArrayList<>();
-	private List<Object> params = new ArrayList<>();
+	public int requestId;
+	public String moduleName;
+	public String methodName;
+	public ArrayList<String> paramTypes = new ArrayList<>();
+	public ArrayList<Object> params = new ArrayList<>();
 
 	@Override
 	public String toString() {
 		return moduleName + "@" + methodName;
-	}
-
-	public int getRequestId() {
-		return requestId;
-	}
-
-	public void setRequestId(int requestId) {
-		this.requestId = requestId;
-	}
-
-	public String getModuleName() {
-		return moduleName;
-	}
-
-	public void setModuleName(String moduleName) {
-		this.moduleName = moduleName;
-	}
-
-	public String getMethodName() {
-		return methodName;
-	}
-
-	public void setMethodName(String methodName) {
-		this.methodName = methodName;
-	}
-
-	public List<Object> getParams() {
-		return params;
-	}
-
-	public void setParams(List<Object> params) {
-		this.params = params;
-	}
-
-	public List<String> getParamTypes() {
-		return paramTypes;
-	}
-
-	public void setParamTypes(List<String> paramTypes) {
-		this.paramTypes = paramTypes;
 	}
 
 	@Override

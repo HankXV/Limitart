@@ -10,15 +10,4 @@ public class ReqServerLoadSlave2MasterMessage extends Message {
 	public short getMessageId() {
 		return DistributedMessageEnum.ReqServerLoadSlave2MasterMessage.getValue();
 	}
-
-	@Override
-	public void encode() throws Exception {
-		putInt(this.load);
-	}
-
-	@Override
-	public void decode() throws Exception {
-		this.load = getInt();
-	}
-
 }

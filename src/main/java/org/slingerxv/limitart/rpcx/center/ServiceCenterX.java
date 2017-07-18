@@ -52,8 +52,7 @@ public class ServiceCenterX {
 	// 定时任务集合
 	private ConcurrentHashMap<String, ConcurrentHashSet<Integer>> schedules = new ConcurrentHashMap<>();
 
-	public ServiceCenterX(ServiceCenterXConfig config)
-			throws Exception {
+	public ServiceCenterX(ServiceCenterXConfig config) throws Exception {
 		if (config == null) {
 			throw new NullPointerException("ServiceCenterXConfig");
 		}
@@ -135,7 +134,7 @@ public class ServiceCenterX {
 				continue;
 			}
 			ProviderServiceMeta serviceMeta = new ProviderServiceMeta();
-			serviceMeta.setServiceName(entry.getKey());
+			serviceMeta.serviceName = entry.getKey();
 			for (int tpid : data) {
 				ServiceXServerSession serviceXServerSession = rpcServers.get(tpid);
 				if (serviceXServerSession != null) {
@@ -143,10 +142,10 @@ public class ServiceCenterX {
 					hostMeta.setIp(serviceXServerSession.getServerIp());
 					hostMeta.setPort(serviceXServerSession.getServerPort());
 					hostMeta.setProviderId(serviceXServerSession.getProviderId());
-					serviceMeta.getHostInfos().add(hostMeta);
+					serviceMeta.hostInfos.add(hostMeta);
 				}
 			}
-			msg.getServices().add(serviceMeta);
+			msg.services.add(serviceMeta);
 		}
 		// 查找所有客户端
 		for (ServiceXClientSession session : rpcClients.values()) {
@@ -169,8 +168,8 @@ public class ServiceCenterX {
 			String serviceName = entry.getKey();
 			ConcurrentHashSet<Integer> data = entry.getValue();
 			ProviderServiceMeta info = new ProviderServiceMeta();
-			msg.getServices().add(info);
-			info.setServiceName(serviceName);
+			msg.services.add(info);
+			info.serviceName = serviceName;
 			for (int providerId : data) {
 				ServiceXServerSession serviceXServerSession = rpcServers.get(providerId);
 				if (serviceXServerSession != null) {
@@ -178,7 +177,7 @@ public class ServiceCenterX {
 					hostMeta.setIp(serviceXServerSession.getServerIp());
 					hostMeta.setPort(serviceXServerSession.getServerPort());
 					hostMeta.setProviderId(serviceXServerSession.getProviderId());
-					info.getHostInfos().add(hostMeta);
+					info.hostInfos.add(hostMeta);
 				}
 			}
 		}
@@ -348,9 +347,8 @@ public class ServiceCenterX {
 		}
 	}
 
-	private class SubscribeServiceFromServiceCenterConsumerHandler
-			implements
-				IHandler<SubscribeServiceFromServiceCenterConsumerMessage> {
+	public class SubscribeServiceFromServiceCenterConsumerHandler
+			implements IHandler<SubscribeServiceFromServiceCenterConsumerMessage> {
 
 		@Override
 		public void handle(SubscribeServiceFromServiceCenterConsumerMessage msg) {
@@ -360,27 +358,25 @@ public class ServiceCenterX {
 
 	}
 
-	private class PushServiceToServiceCenterProviderHandler
-			implements
-				IHandler<PushServiceToServiceCenterProviderMessage> {
+	public class PushServiceToServiceCenterProviderHandler
+			implements IHandler<PushServiceToServiceCenterProviderMessage> {
 
 		@Override
 		public void handle(PushServiceToServiceCenterProviderMessage msg) {
-			((ServiceCenterX) msg.getExtra()).onProviderPublicServices(msg.getChannel(), msg.getProviderUID(),
-					msg.getMyIp(), msg.getMyPort(), msg.getServices());
+			((ServiceCenterX) msg.getExtra()).onProviderPublicServices(msg.getChannel(), msg.providerUID, msg.myIp,
+					msg.myPort, msg.services);
 		}
 
 	}
 
-	private class AddScheduleToServiceCenterProviderHandler
-			implements
-				IHandler<AddScheduleToServiceCenterProviderMessage> {
+	public class AddScheduleToServiceCenterProviderHandler
+			implements IHandler<AddScheduleToServiceCenterProviderMessage> {
 
 		@Override
 		public void handle(AddScheduleToServiceCenterProviderMessage msg) {
-			((ServiceCenterX) msg.getExtra()).onAddSchedule(msg.getJobName(), msg.getProviderId(),
-					msg.getCronExpression(), msg.getIntervalInHours(), msg.getIntervalInMinutes(),
-					msg.getIntervalInSeconds(), msg.getIntervalInMillis(), msg.getRepeatCount());
+			((ServiceCenterX) msg.getExtra()).onAddSchedule(msg.jobName, msg.providerId, msg.cronExpression,
+					msg.intervalInHours, msg.intervalInMinutes, msg.intervalInSeconds, msg.intervalInMillis,
+					msg.repeatCount);
 		}
 
 	}

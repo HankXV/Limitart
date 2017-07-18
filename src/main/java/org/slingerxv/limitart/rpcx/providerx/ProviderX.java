@@ -288,8 +288,8 @@ public class ProviderX {
 	 */
 	private void directPushServices(Channel channel) {
 		DirectFetchProviderServicesResultMessage msg = new DirectFetchProviderServicesResultMessage();
-		msg.setProviderId(this.config.getProviderUID());
-		msg.getServices().addAll(services.keySet());
+		msg.providerId = this.config.getProviderUID();
+		msg.services.addAll(services.keySet());
 		try {
 			server.sendMessage(channel, msg, null);
 		} catch (Exception e) {
@@ -303,11 +303,11 @@ public class ProviderX {
 	private void pushServicesToCenter() {
 		log.info("开始发布自己的服务到服务中心...");
 		PushServiceToServiceCenterProviderMessage msg = new PushServiceToServiceCenterProviderMessage();
-		msg.setMyIp(this.config.getMyIp());
-		msg.setMyPort(this.config.getMyPort());
-		msg.setProviderUID(this.config.getProviderUID());
+		msg.myIp = this.config.getMyIp();
+		msg.myPort = this.config.getMyPort();
+		msg.providerUID = this.config.getProviderUID();
 		for (String serviceName : services.keySet()) {
-			msg.getServices().add(serviceName);
+			msg.services.add(serviceName);
 			log.info("发布服务到服务中心：" + serviceName);
 		}
 		try {
@@ -353,14 +353,14 @@ public class ProviderX {
 			throw new Exception("重复的JobName:" + jobName);
 		}
 		AddScheduleToServiceCenterProviderMessage msg = new AddScheduleToServiceCenterProviderMessage();
-		msg.setJobName(job.getJobName());
-		msg.setProviderId(this.config.getProviderUID());
-		msg.setCronExpression(job.getCronExpression());
-		msg.setIntervalInHours(job.getIntervalInHours());
-		msg.setIntervalInMinutes(job.getIntervalInMinutes());
-		msg.setIntervalInSeconds(job.getIntervalInSeconds());
-		msg.setIntervalInMillis(job.getIntervalInMillis());
-		msg.setRepeatCount(job.getRepeatCount());
+		msg.jobName = job.getJobName();
+		msg.providerId = this.config.getProviderUID();
+		msg.cronExpression = job.getCronExpression();
+		msg.intervalInHours = job.getIntervalInHours();
+		msg.intervalInMinutes = job.getIntervalInMinutes();
+		msg.intervalInSeconds = job.getIntervalInSeconds();
+		msg.intervalInMillis = job.getIntervalInMillis();
+		msg.repeatCount = job.getRepeatCount();
 		serviceCenterClient.sendMessage(msg, (isSuccess, cause, channel) -> {
 			if (isSuccess) {
 				scheduleJobs.put(jobName, job);
@@ -384,23 +384,20 @@ public class ProviderX {
 		providerJob.getListener().action();
 	}
 
-	private class RpcExecuteClientHandler implements IHandler<RpcExecuteClientMessage> {
+	public class RpcExecuteClientHandler implements IHandler<RpcExecuteClientMessage> {
 
 		@Override
 		public void handle(RpcExecuteClientMessage msg) {
-			int requestId = msg.getRequestId();
-			String moduleName = msg.getModuleName();
-			String methodName = msg.getMethodName();
-			List<Object> params = msg.getParams();
 			try {
-				((ProviderX) msg.getExtra()).executeRPC(msg.getChannel(), requestId, moduleName, methodName, params);
+				((ProviderX) msg.getExtra()).executeRPC(msg.getChannel(), msg.requestId, msg.moduleName, msg.methodName,
+						msg.params);
 			} catch (Exception e) {
 				log.error(e, e);
 			}
 		}
 	}
 
-	private class DirectFetchProverServicesHandler implements IHandler<DirectFetchProviderServicesMessage> {
+	public class DirectFetchProverServicesHandler implements IHandler<DirectFetchProviderServicesMessage> {
 
 		@Override
 		public void handle(DirectFetchProviderServicesMessage msg) {
@@ -409,7 +406,7 @@ public class ProviderX {
 
 	}
 
-	private class TriggerScheduleServiceCenterToProviderServiceCenterHandler
+	public class TriggerScheduleServiceCenterToProviderServiceCenterHandler
 			implements IHandler<TriggerScheduleServiceCenterToProviderServiceCenterMessage> {
 
 		@Override

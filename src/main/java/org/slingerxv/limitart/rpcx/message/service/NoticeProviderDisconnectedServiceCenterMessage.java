@@ -18,15 +18,4 @@ public class NoticeProviderDisconnectedServiceCenterMessage extends Message {
 	public short getMessageId() {
 		return RpcMessageEnum.NoticeProviderDisconnectedServiceCenterMessage.getValue();
 	}
-
-	@Override
-	public void encode() throws Exception {
-		putInt(this.providerUID);
-	}
-
-	@Override
-	public void decode() throws Exception {
-		this.providerUID = getInt();
-	}
-
 }

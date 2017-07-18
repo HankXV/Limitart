@@ -14,18 +14,16 @@ public class Poker {
 	private final static byte CARD_SUIT_COUNT = 4;
 	private final static byte[] STANDARD_POKER = new byte[CARD_COUNT];
 	// 花色
-	public final static byte CARD_SUIT_HEART = 1;
-	public final static byte CARD_SUIT_CLUB = 2;
+	public final static byte CARD_SUIT_SPADE = 1;
+	public final static byte CARD_SUIT_HEART = 2;
 	public final static byte CARD_SUIT_DIAMOND = 3;
-	public final static byte CARD_SUIT_SPADE = 4;
-	public final static byte CARD_SUIT_JOKER = 5;
+	public final static byte CARD_SUIT_CLUB = 4;
 	// 编号
 	public final static byte CARD_NUM_JACK = 11;
 	public final static byte CARD_NUM_QUEEN = 12;
 	public final static byte CARD_NUM_KING = 13;
 	public final static byte CARD_NUM_ACE = 14;
-	public final static byte CARD_NUM_JOKER_SMALL = 1;
-	public final static byte CARD_NUM_JOKER_BIG = 2;
+	public final static byte CARD_NUM_JOKER = 15;
 
 	static {
 		for (byte i = 0; i < CARD_SUIT_COUNT; ++i) {
@@ -36,7 +34,7 @@ public class Poker {
 	}
 
 	public static byte createCard(byte number, byte color) {
-		return (byte) ((number << 3) | (color));
+		return (byte) ((number) | (color << 4));
 	}
 
 	/**
@@ -58,8 +56,8 @@ public class Poker {
 	public static byte[] createPokerWithJoker() {
 		byte[] template = new byte[CARD_COUNT + 2];
 		System.arraycopy(STANDARD_POKER, 0, template, 0, STANDARD_POKER.length);
-		template[52] = createCard(CARD_NUM_JOKER_SMALL, CARD_SUIT_JOKER);
-		template[53] = createCard(CARD_NUM_JOKER_BIG, CARD_SUIT_JOKER);
+		template[52] = createCard(CARD_NUM_JOKER, CARD_SUIT_SPADE);
+		template[53] = createCard(CARD_NUM_JOKER, CARD_SUIT_HEART);
 		return template;
 	}
 
@@ -87,7 +85,7 @@ public class Poker {
 	 * @return
 	 */
 	public static byte getCardNumber(byte value) {
-		return (byte) (value >> 3);
+		return (byte) (value & 15);
 	}
 
 	/**
@@ -98,7 +96,7 @@ public class Poker {
 	 * @return
 	 */
 	public static byte getCardColor(byte value) {
-		return (byte) (value & 7);
+		return (byte) (value >> 4);
 	}
 
 	/*
@@ -115,7 +113,7 @@ public class Poker {
 	 * @return
 	 */
 	public static boolean isJoker(byte card) {
-		return getCardColor(card) == CARD_SUIT_JOKER;
+		return isBigJoker(card) || isSmallJoker(card);
 	}
 
 	/**
@@ -125,7 +123,7 @@ public class Poker {
 	 * @return
 	 */
 	public static boolean isBigJoker(byte card) {
-		return isJoker(card) && getCardNumber(card) == CARD_NUM_JOKER_BIG;
+		return isJoker(card) && (getCardColor(card) == CARD_SUIT_HEART);
 	}
 
 	/**
@@ -135,7 +133,7 @@ public class Poker {
 	 * @return
 	 */
 	public static boolean isSmallJoker(byte card) {
-		return isJoker(card) && getCardNumber(card) == CARD_NUM_JOKER_SMALL;
+		return isJoker(card) && (getCardColor(card) == CARD_SUIT_SPADE);
 	}
 
 	/**
@@ -146,7 +144,7 @@ public class Poker {
 	 * @return
 	 */
 	public static boolean isSameSuit(byte card, byte anotherCard) {
-		return (card & anotherCard & 7) != 0;
+		return (card & anotherCard) >> 4 != 0;
 	}
 
 	/**
@@ -157,7 +155,7 @@ public class Poker {
 	 * @return
 	 */
 	public static boolean isSameNumber(byte card, byte anotherCard) {
-		return (card & anotherCard) >> 3 != 0;
+		return (card & anotherCard & 15) != 0;
 	}
 
 	/**

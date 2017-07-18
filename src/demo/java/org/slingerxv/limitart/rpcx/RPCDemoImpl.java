@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.slingerxv.limitart.rpcx.bean.PersonInfo;
 
-
 public class RPCDemoImpl implements IRPCDemo {
 
 	@Override
@@ -24,8 +23,8 @@ public class RPCDemoImpl implements IRPCDemo {
 	@Override
 	public PersonInfo helloPerson() throws Exception {
 		PersonInfo a = new PersonInfo();
-		a.setAge(1);
-		a.setName("a");
+		a.age = 1;
+		a.name = "a";
 		return a;
 	}
 
@@ -38,11 +37,11 @@ public class RPCDemoImpl implements IRPCDemo {
 	public PersonInfo[] helloPersons() throws Exception {
 		PersonInfo[] result = new PersonInfo[2];
 		PersonInfo a = new PersonInfo();
-		a.setAge(1);
-		a.setName("a");
+		a.age = 1;
+		a.name = "a";
 		PersonInfo b = new PersonInfo();
-		b.setAge(2);
-		b.setName("b");
+		b.age = 2;
+		b.name = "b";
 		result[0] = a;
 		result[1] = b;
 		return result;

@@ -15,15 +15,4 @@ public class DirectFetchProviderServicesMessage extends Message {
 	public short getMessageId() {
 		return RpcMessageEnum.DirectFetchProviderServicesMessage.getValue();
 	}
-
-	@Override
-	public void encode() throws Exception {
-
-	}
-
-	@Override
-	public void decode() throws Exception {
-
-	}
-
 }

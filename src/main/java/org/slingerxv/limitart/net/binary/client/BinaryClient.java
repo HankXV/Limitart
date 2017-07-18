@@ -248,7 +248,7 @@ public class BinaryClient {
 		return this.config;
 	}
 
-	private class ConnectionValidateServerHandler implements IHandler<ConnectionValidateServerMessage> {
+	public class ConnectionValidateServerHandler implements IHandler<ConnectionValidateServerMessage> {
 
 		@Override
 		public void handle(ConnectionValidateServerMessage msg) {
@@ -257,7 +257,7 @@ public class BinaryClient {
 
 	}
 
-	private class ConnectionValidateSuccessServerHandler implements IHandler<ConnectionValidateSuccessServerMessage> {
+	public class ConnectionValidateSuccessServerHandler implements IHandler<ConnectionValidateSuccessServerMessage> {
 
 		@Override
 		public void handle(ConnectionValidateSuccessServerMessage msg) {

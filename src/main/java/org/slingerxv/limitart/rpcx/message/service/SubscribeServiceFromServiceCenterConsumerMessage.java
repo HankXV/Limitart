@@ -15,14 +15,4 @@ public class SubscribeServiceFromServiceCenterConsumerMessage extends Message {
 	public short getMessageId() {
 		return RpcMessageEnum.SubscribeServiceFromServiceCenterConsumerMessage.getValue();
 	}
-
-	@Override
-	public void encode() throws Exception {
-
-	}
-
-	@Override
-	public void decode() throws Exception {
-
-	}
 }

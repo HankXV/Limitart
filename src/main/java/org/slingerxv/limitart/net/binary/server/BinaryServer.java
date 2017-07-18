@@ -344,7 +344,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		return this.config;
 	}
 
-	private class SessionValidateData {
+	public class SessionValidateData {
 		private Channel channel;
 		private long startValidateTime;
 		private int validateRandom;
@@ -356,7 +356,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		}
 	}
 
-	private class ConnectionValidateClientHandler implements IHandler<ConnectionValidateClientMessage> {
+	public class ConnectionValidateClientHandler implements IHandler<ConnectionValidateClientMessage> {
 
 		@Override
 		public void handle(ConnectionValidateClientMessage msg) {

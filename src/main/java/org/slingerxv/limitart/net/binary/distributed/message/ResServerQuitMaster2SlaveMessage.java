@@ -11,17 +11,4 @@ public class ResServerQuitMaster2SlaveMessage extends Message {
 	public short getMessageId() {
 		return DistributedMessageEnum.ResServerQuitMaster2SlaveMessage.getValue();
 	}
-
-	@Override
-	public void encode() throws Exception {
-		putInt(this.serverType);
-		putInt(this.serverId);
-	}
-
-	@Override
-	public void decode() throws Exception {
-		this.serverType = getInt();
-		this.serverId = getInt();
-	}
-
 }

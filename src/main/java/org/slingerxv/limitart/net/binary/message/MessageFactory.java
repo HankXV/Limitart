@@ -1,5 +1,6 @@
 package org.slingerxv.limitart.net.binary.message;
 
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -36,18 +37,37 @@ public class MessageFactory {
 	 * @throws Exception
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static MessageFactory createByPackage(String packageName)
-			throws MessageIDDuplicatedException, Exception {
+	public static MessageFactory createByPackage(String packageName) throws Exception {
+		checkMessageMetas(packageName);
 		MessageFactory messageFactory = new MessageFactory();
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, IHandler.class);
 		for (Class<?> clzz : classesByPackage) {
-			if (clzz.getName().contains("$")) {
+			if (clzz.isAnonymousClass()) {
 				log.warn("inner class or anonymous class will not be registerd:" + clzz.getName());
 				continue;
 			}
 			messageFactory.registerMsg((IHandler) clzz.newInstance());
 		}
 		return messageFactory;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void checkMessageMetas(String packageName) throws Exception {
+		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, MessageMeta.class);
+		for (Class<?> temp : classesByPackage) {
+			if (temp.isAnonymousClass() || Modifier.isAbstract(temp.getModifiers())) {
+				continue;
+			}
+			log.info("check message:" + temp.getName());
+			Class<? extends MessageMeta> clazz = (Class<? extends MessageMeta>) temp;
+			MessageMeta newInstance = clazz.newInstance();
+			ByteBuf buffer = Unpooled.directBuffer(256);
+			newInstance.buffer(buffer);
+			newInstance.encode();
+			newInstance.decode();
+			newInstance.buffer(null);
+			buffer.release();
+		}
 	}
 
 	public synchronized MessageFactory registerMsg(IHandler<? extends Message> handler)
@@ -70,13 +90,6 @@ public class MessageFactory {
 		Class<? extends Message> msgClass = (Class<? extends Message>) handlerInterface.getActualTypeArguments()[0];
 		// 这里先实例化一个出来获取其ID
 		Message newInstance = msgClass.newInstance();
-		// 检查消息字段
-		ByteBuf buffer = Unpooled.directBuffer(256);
-		newInstance.buffer(buffer);
-		newInstance.encode();
-		newInstance.decode();
-		newInstance.buffer(null);
-		buffer.release();
 		short id = newInstance.getMessageId();
 		if (msgs.containsKey(id)) {
 			Class<? extends Message> class1 = msgs.get(id).newInstance().getClass();

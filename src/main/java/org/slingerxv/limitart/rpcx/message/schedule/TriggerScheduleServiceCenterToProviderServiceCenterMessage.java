@@ -33,17 +33,4 @@ public class TriggerScheduleServiceCenterToProviderServiceCenterMessage extends 
 	public short getMessageId() {
 		return RpcMessageEnum.TriggerScheduleServiceCenterToProviderServiceCenterMessage.getValue();
 	}
-
-	@Override
-	public void encode() throws Exception {
-		putString(this.jobName);
-		putBoolean(this.end);
-	}
-
-	@Override
-	public void decode() throws Exception {
-		this.jobName = getString();
-		this.end = getBoolean();
-	}
-
 }

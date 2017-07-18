@@ -10,15 +10,4 @@ public class ReqConnectionReportSlave2MasterMessage extends Message {
 	public short getMessageId() {
 		return DistributedMessageEnum.ReqConnectionReportSlave2MasterMessage.getValue();
 	}
-
-	@Override
-	public void encode() throws Exception {
-		putMessageMeta(this.serverInfo);
-	}
-
-	@Override
-	public void decode() throws Exception {
-		this.serverInfo = getMessageMeta(InnerServerInfo.class);
-	}
-
 }

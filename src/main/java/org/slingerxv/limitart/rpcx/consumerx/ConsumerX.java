@@ -225,8 +225,8 @@ public class ConsumerX {
 		log.info("接收到服务中心推送过来的服务，开始筛选和处理...");
 		for (ProviderServiceMeta info : services) {
 			// 筛选自己有用的服务
-			String serviceName = info.getServiceName();
-			List<ProviderHostMeta> hostInfos = info.getHostInfos();
+			String serviceName = info.serviceName;
+			List<ProviderHostMeta> hostInfos = info.hostInfos;
 			if (!serviceProxyClasses.containsKey(serviceName)) {
 				// 不需要的服务
 				continue;
@@ -517,36 +517,36 @@ public class ConsumerX {
 		}
 		// 开始构造消息
 		RpcExecuteClientMessage msg = new RpcExecuteClientMessage();
-		msg.setRequestId(requestIdCreater.incrementAndGet());
-		msg.setModuleName(serviceName);
-		msg.setMethodName(methodOverloadName);
+		msg.requestId = requestIdCreater.incrementAndGet();
+		msg.moduleName = serviceName;
+		msg.methodName = methodOverloadName;
 		if (args != null && args.length > 0) {
 			for (Object obj : args) {
 				if (obj == null) {
-					msg.getParamTypes().add(null);
-					msg.getParams().add(null);
+					msg.paramTypes.add(null);
+					msg.params.add(null);
 				} else {
-					msg.getParamTypes().add(obj.getClass().getName());
-					msg.getParams().add(obj);
+					msg.paramTypes.add(obj.getClass().getName());
+					msg.params.add(obj);
 				}
 			}
 		}
 		RemoteFuture future = new RemoteFuture();
 		future.setProviderId(selectServer);
-		future.setRequestId(msg.getRequestId());
-		futures.put(msg.getRequestId(), future);
+		future.setRequestId(msg.requestId);
+		futures.put(msg.requestId, future);
 		if (futures.size() > 100) {
 			log.error("警告！开始动态代理方法：" + methodOverloadName + "，服务器：" + selectServer + "，回调列表长度：" + futures.size()
-					+ "(并发量)，id：" + msg.getRequestId());
+					+ "(并发量)，id：" + msg.requestId);
 		}
 		// 发送消息
 		try {
 			binaryClient.sendMessage(msg, (isSuccess, cause, channel) -> {
 				if (!isSuccess) {
-					futures.remove(msg.getRequestId());
+					futures.remove(msg.requestId);
 					try {
 						throw new ServiceXIOException("动态代理方法：" + methodOverloadName + "，服务器：" + selectServer
-								+ "失败！网络未连接！" + "，id：" + msg.getRequestId());
+								+ "失败！网络未连接！" + "，id：" + msg.requestId);
 					} catch (ServiceXIOException e) {
 						log.error(e, e);
 						log.error(cause, cause);
@@ -588,7 +588,7 @@ public class ConsumerX {
 		}
 	}
 
-	private class RpcResultServerHandler implements IHandler<RpcResultServerMessage> {
+	public class RpcResultServerHandler implements IHandler<RpcResultServerMessage> {
 
 		@Override
 		public void handle(RpcResultServerMessage msg) {
@@ -597,29 +597,29 @@ public class ConsumerX {
 
 	}
 
-	private class DirectFetchProviderServicesResultHandler
+	public class DirectFetchProviderServicesResultHandler
 			implements IHandler<DirectFetchProviderServicesResultMessage> {
 
 		@Override
 		public void handle(DirectFetchProviderServicesResultMessage msg) {
-			int providerId = msg.getProviderId();
-			List<String> services = msg.getServices();
+			int providerId = msg.providerId;
+			List<String> services = msg.services;
 			((ConsumerX) msg.getExtra()).onDirectFetchProviderServices(msg.getClient(), providerId, services);
 		}
 	}
 
-	private class SubscribeServiceResultServiceCenterHandler
+	public class SubscribeServiceResultServiceCenterHandler
 			implements IHandler<SubscribeServiceResultServiceCenterMessage> {
 
 		@Override
 		public void handle(SubscribeServiceResultServiceCenterMessage msg) {
-			List<ProviderServiceMeta> services = msg.getServices();
+			List<ProviderServiceMeta> services = msg.services;
 			((ConsumerX) msg.getExtra()).onSubsribeServicesCome(services);
 		}
 
 	}
 
-	private class NoticeProviderDisconnectedServiceCenterHandler
+	public class NoticeProviderDisconnectedServiceCenterHandler
 			implements IHandler<NoticeProviderDisconnectedServiceCenterMessage> {
 
 		@Override

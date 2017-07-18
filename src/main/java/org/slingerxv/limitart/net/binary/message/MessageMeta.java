@@ -132,34 +132,34 @@ public abstract class MessageMeta {
 					temp1[i] = temp[i];
 				}
 				putBooleanArray(temp1);
-			} else if (component.isAssignableFrom(MessageMeta.class)) {
+			} else if (component.getSuperclass() == MessageMeta.class) {
 				putMessageMetaArray((MessageMeta[]) object);
 			} else if (component == String.class) {
 				putStringArray((String[]) object);
 			}
-		} else if (type.isAssignableFrom(List.class)) {
-			ParameterizedType pt = (ParameterizedType) type.getGenericSuperclass();
-			Class component = (Class) pt.getActualTypeArguments()[0];
+		} else if (List.class.isAssignableFrom(type)) {
+			ParameterizedType t = (ParameterizedType) field.getGenericType();
+			Class<?> component = (Class<?>) t.getActualTypeArguments()[0];
 			if (component == Byte.class) {
-				putByteList((List<Byte>) object);
+				putByteList((ArrayList<Byte>) object);
 			} else if (component == Short.class) {
 				putShort((short) object);
 			} else if (component == Integer.class) {
-				putIntList((List<Integer>) object);
+				putIntList((ArrayList<Integer>) object);
 			} else if (component == Long.class) {
-				putLongList((List<Long>) object);
+				putLongList((ArrayList<Long>) object);
 			} else if (component == Float.class) {
-				putFloatList((List<Float>) object);
+				putFloatList((ArrayList<Float>) object);
 			} else if (component == Double.class) {
-				putDoubleList((List<Double>) object);
+				putDoubleList((ArrayList<Double>) object);
 			} else if (component == Character.class) {
-				putCharList((List<Character>) object);
+				putCharList((ArrayList<Character>) object);
 			} else if (component == Boolean.class) {
-				putBooleanList((List<Boolean>) object);
-			} else if (component.isAssignableFrom(MessageMeta.class)) {
-				putMessageMetaList((List<MessageMeta>) object);
+				putBooleanList((ArrayList<Boolean>) object);
+			} else if (component.getSuperclass() == MessageMeta.class) {
+				putMessageMetaList((ArrayList<MessageMeta>) object);
 			} else if (component == String.class) {
-				putStringList((List<String>) object);
+				putStringList((ArrayList<String>) object);
 			}
 		} else {
 			if (type == Byte.class) {
@@ -211,13 +211,15 @@ public abstract class MessageMeta {
 				} else {
 					putBoolean((boolean) object);
 				}
-			} else if (type.isAssignableFrom(MessageMeta.class)) {
+			} else if (type.getSuperclass() == MessageMeta.class) {
 				MessageMeta next = (MessageMeta) object;
 				putMessageMeta(next);
 			} else if (type == String.class) {
 				putString((String) object);
 			} else {
-				throw new MessageIOException("type error:" + type.getName());
+				throw new MessageIOException(getClass()
+						+ " type error(non MessageMeta field must be pritive(or it's box object),array or List. array's component  and List's generic param as the same as non MessageMeta rule ):"
+						+ type.getName());
 			}
 		}
 	}
@@ -325,14 +327,14 @@ public abstract class MessageMeta {
 					temp1[i] = temp[i];
 				}
 				field.set(this, temp1);
-			} else if (component.isAssignableFrom(MessageMeta.class)) {
+			} else if (component.getSuperclass() == MessageMeta.class) {
 				field.set(this, getMessageMetaArray((Class<? extends MessageMeta>) component));
 			} else if (component == String.class) {
 				field.set(this, getStringArray());
 			}
-		} else if (type.isAssignableFrom(List.class)) {
-			ParameterizedType pt = (ParameterizedType) type.getGenericSuperclass();
-			Class component = (Class) pt.getActualTypeArguments()[0];
+		} else if (List.class.isAssignableFrom(type)) {
+			ParameterizedType t = (ParameterizedType) field.getGenericType();
+			Class<?> component = (Class<?>) t.getActualTypeArguments()[0];
 			if (component == Byte.class) {
 				field.set(this, getByteList());
 			} else if (component == Short.class) {
@@ -349,8 +351,8 @@ public abstract class MessageMeta {
 				field.set(this, getCharList());
 			} else if (component == Boolean.class) {
 				field.set(this, getBooleanList());
-			} else if (component.isAssignableFrom(MessageMeta.class)) {
-				field.set(this, getMessageMetaList((Class<? extends MessageMeta>) type));
+			} else if (component.getSuperclass() == MessageMeta.class) {
+				field.set(this, getMessageMetaList((Class<? extends MessageMeta>) component));
 			} else if (component == String.class) {
 				field.set(this, getStringList());
 			}
@@ -371,12 +373,14 @@ public abstract class MessageMeta {
 				field.set(this, getChar());
 			} else if (type == Boolean.class) {
 				field.set(this, getBoolean());
-			} else if (type.isAssignableFrom(MessageMeta.class)) {
+			} else if (type.getSuperclass() == MessageMeta.class) {
 				field.set(this, getMessageMeta((Class<? extends MessageMeta>) type));
 			} else if (type == String.class) {
 				field.set(this, getString());
 			} else {
-				throw new MessageIOException("type error:" + type.getName());
+				throw new MessageIOException(getClass()
+						+ " type error(non MessageMeta field must be pritive(or it's box object),array or List. array's component  and List's generic param as the same as non MessageMeta rule ):"
+						+ type.getName());
 			}
 		}
 	}
@@ -446,7 +450,7 @@ public abstract class MessageMeta {
 	 * @param value
 	 * @throws Exception
 	 */
-	protected final <T extends MessageMeta> void putMessageMetaList(List<T> value) throws Exception {
+	protected final <T extends MessageMeta> void putMessageMetaList(ArrayList<T> value) throws Exception {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -467,14 +471,14 @@ public abstract class MessageMeta {
 	 * @return
 	 * @throws Exception
 	 */
-	protected final <T extends MessageMeta> List<T> getMessageMetaList(Class<T> clazz) throws Exception {
+	protected final <T extends MessageMeta> ArrayList<T> getMessageMetaList(Class<T> clazz) throws Exception {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<>();
 		} else {
-			List<T> list = new ArrayList<>();
+			ArrayList<T> list = new ArrayList<>();
 			for (int i = 0; i < len; ++i) {
 				T messageMeta = getMessageMeta(clazz);
 				list.add(messageMeta);
@@ -565,7 +569,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putStringList(List<String> value) {
+	protected final void putStringList(ArrayList<String> value) {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -584,14 +588,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<String> getStringList() {
+	protected final ArrayList<String> getStringList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<String>();
 		} else {
-			List<String> list = new ArrayList<String>();
+			ArrayList<String> list = new ArrayList<String>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getString());
 			}
@@ -665,7 +669,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putLongList(List<Long> value) {
+	protected final void putLongList(ArrayList<Long> value) {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -684,14 +688,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<Long> getLongList() {
+	protected final ArrayList<Long> getLongList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<Long>();
 		} else {
-			List<Long> list = new ArrayList<Long>();
+			ArrayList<Long> list = new ArrayList<Long>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getLong());
 			}
@@ -773,7 +777,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putIntList(List<Integer> value) {
+	protected final void putIntList(ArrayList<Integer> value) {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -792,14 +796,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<Integer> getIntList() {
+	protected final ArrayList<Integer> getIntList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<Integer>();
 		} else {
-			List<Integer> list = new ArrayList<Integer>();
+			ArrayList<Integer> list = new ArrayList<Integer>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getInt());
 			}
@@ -813,14 +817,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<Byte> getByteList() {
+	protected final ArrayList<Byte> getByteList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<Byte>();
 		} else {
-			List<Byte> list = new ArrayList<Byte>();
+			ArrayList<Byte> list = new ArrayList<Byte>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getByte());
 			}
@@ -884,7 +888,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putByteList(List<Byte> value) {
+	protected final void putByteList(ArrayList<Byte> value) {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -913,7 +917,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param list
 	 */
-	protected final void putByteArrayList(List<byte[]> list) {
+	protected final void putByteArrayList(ArrayList<byte[]> list) {
 		if (list == null) {
 			putShort((short) -1);
 		} else if (list.isEmpty()) {
@@ -932,14 +936,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<byte[]> getByteArrayList() {
+	protected final ArrayList<byte[]> getByteArrayList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<>();
 		} else {
-			List<byte[]> list = new ArrayList<>();
+			ArrayList<byte[]> list = new ArrayList<>();
 			list.add(getByteArray());
 			return list;
 		}
@@ -1007,7 +1011,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putBooleanList(List<Boolean> value) {
+	protected final void putBooleanList(ArrayList<Boolean> value) {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -1026,14 +1030,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<Boolean> getBooleanList() {
+	protected final ArrayList<Boolean> getBooleanList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<Boolean>();
 		} else {
-			List<Boolean> list = new ArrayList<Boolean>();
+			ArrayList<Boolean> list = new ArrayList<Boolean>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getBoolean());
 			}
@@ -1107,7 +1111,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putFloatList(List<Float> value) {
+	protected final void putFloatList(ArrayList<Float> value) {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -1126,14 +1130,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<Float> getFloatList() {
+	protected final ArrayList<Float> getFloatList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<>();
 		} else {
-			List<Float> list = new ArrayList<>();
+			ArrayList<Float> list = new ArrayList<>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getFloat());
 			}
@@ -1207,7 +1211,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putDoubleList(List<Double> value) {
+	protected final void putDoubleList(ArrayList<Double> value) {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -1226,14 +1230,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<Double> getDoubleList() {
+	protected final ArrayList<Double> getDoubleList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<Double>();
 		} else {
-			List<Double> list = new ArrayList<Double>();
+			ArrayList<Double> list = new ArrayList<Double>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getDouble());
 			}
@@ -1307,7 +1311,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putShortList(List<Short> value) {
+	protected final void putShortList(ArrayList<Short> value) {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -1326,14 +1330,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<Short> getShortList() {
+	protected final ArrayList<Short> getShortList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<Short>();
 		} else {
-			List<Short> list = new ArrayList<Short>();
+			ArrayList<Short> list = new ArrayList<Short>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getShort());
 			}
@@ -1407,7 +1411,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putCharList(List<Character> value) {
+	protected final void putCharList(ArrayList<Character> value) {
 		if (value == null) {
 			putShort((short) -1);
 		} else if (value.isEmpty()) {
@@ -1426,14 +1430,14 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final List<Character> getCharList() {
+	protected final ArrayList<Character> getCharList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
 		} else if (len == 0) {
 			return new ArrayList<Character>();
 		} else {
-			List<Character> list = new ArrayList<Character>();
+			ArrayList<Character> list = new ArrayList<Character>();
 			for (int i = 0; i < len; ++i) {
 				list.add(getChar());
 			}
