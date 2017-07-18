@@ -8,14 +8,4 @@ public class EmptyMessage extends Message {
 	public short getMessageId() {
 		return 0;
 	}
-
-	@Override
-	public void encode() throws Exception {
-
-	}
-
-	@Override
-	public void decode() throws Exception {
-
-	}
 }

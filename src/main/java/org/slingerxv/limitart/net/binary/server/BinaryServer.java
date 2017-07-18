@@ -19,7 +19,6 @@ import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
-import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
@@ -61,7 +60,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private SymmetricEncryptionUtil encrypUtil;
 	private TimerTask clearTask;
 
-	public BinaryServer(BinaryServerConfig config) throws MessageIDDuplicatedException {
+	public BinaryServer(BinaryServerConfig config) throws Exception {
 		if (config == null) {
 			throw new NullPointerException("BinaryServerConfig");
 		}
@@ -223,7 +222,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					+ " discarded，server encryp util error！");
 			return;
 		}
-		msg.setValidateStr(encode);
+		msg.validateStr = encode;
 		try {
 			sendMessage(channel, msg, (isSuccess, cause, channel1) -> {
 				if (isSuccess) {
@@ -361,8 +360,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 		@Override
 		public void handle(ConnectionValidateClientMessage msg) {
-			int validateRandom = msg.getValidateRandom();
-			msg.getServer().onClientConnectionValidate(msg.getChannel(), validateRandom);
+			msg.getServer().onClientConnectionValidate(msg.getChannel(), msg.validateRandom);
 		}
 	}
 }

@@ -1,18 +1,16 @@
 package org.slingerxv.limitart.net.binary.message;
 
-import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slingerxv.limitart.net.binary.message.exception.MessageIOException;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
-import org.slingerxv.limitart.util.StringUtil;
+import org.slingerxv.limitart.reflectasm.FieldAccess;
+import org.slingerxv.limitart.util.filter.FieldFilter;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.CorruptedFrameException;
@@ -28,11 +26,374 @@ import io.netty.util.CharsetUtil;
 public abstract class MessageMeta {
 	private static final boolean COMPRESS_INT = false;
 	private static ConcurrentHashMap<Class<? extends MessageMeta>, ConstructorAccess> messageMetaCache = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<Class<? extends MessageMeta>, FieldAccess> messageMetaFieldCache = new ConcurrentHashMap<>();
 	private ByteBuf buffer;
 
-	public abstract void encode() throws Exception;
+	public void encode() throws Exception {
+		FieldAccess fieldAccess = getFieldAccess();
+		Field[] fields = fieldAccess.getFields();
+		for (Field temp : fields) {
+			writeField(temp);
+		}
+	}
 
-	public abstract void decode() throws Exception;
+	private void writeField(Field field) throws Exception {
+		Class<?> type = field.getType();
+		Object object = field.get(this);
+		if (type.isPrimitive()) {
+			if (type == byte.class) {
+				putByte(field.getByte(this));
+			} else if (type == short.class) {
+				putShort(field.getShort(this));
+			} else if (type == int.class) {
+				putInt(field.getInt(this));
+			} else if (type == long.class) {
+				putLong(field.getLong(this));
+			} else if (type == float.class) {
+				putFloat(field.getFloat(this));
+			} else if (type == double.class) {
+				putDouble(field.getDouble(this));
+			} else if (type == char.class) {
+				putChar(field.getChar(this));
+			} else if (type == boolean.class) {
+				putBoolean(field.getBoolean(this));
+			}
+		} else if (type.isArray()) {
+			Class<?> component = type.getComponentType();
+			if (component == byte.class) {
+				putByteArray((byte[]) object);
+			} else if (component == short.class) {
+				putShortArray((short[]) object);
+			} else if (component == int.class) {
+				putIntArray((int[]) object);
+			} else if (component == long.class) {
+				putLongArray((long[]) object);
+			} else if (component == float.class) {
+				putFloatArray((float[]) object);
+			} else if (component == double.class) {
+				putDoubleArray((double[]) object);
+			} else if (component == char.class) {
+				putCharArray((char[]) object);
+			} else if (component == boolean.class) {
+				putBooleanArray((boolean[]) object);
+			} else if (component == Byte.class) {
+				Byte[] temp = (Byte[]) object;
+				byte[] temp1 = new byte[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				putByteArray(temp1);
+			} else if (component == Short.class) {
+				Short[] temp = (Short[]) object;
+				short[] temp1 = new short[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				putShortArray(temp1);
+			} else if (component == Integer.class) {
+				Integer[] temp = (Integer[]) object;
+				int[] temp1 = new int[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				putIntArray(temp1);
+			} else if (component == Long.class) {
+				Long[] temp = (Long[]) object;
+				long[] temp1 = new long[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				putLongArray(temp1);
+			} else if (component == Float.class) {
+				Float[] temp = (Float[]) object;
+				float[] temp1 = new float[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				putFloatArray(temp1);
+			} else if (component == Double.class) {
+				Double[] temp = (Double[]) object;
+				double[] temp1 = new double[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				putDoubleArray(temp1);
+			} else if (component == Character.class) {
+				Character[] temp = (Character[]) object;
+				char[] temp1 = new char[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				putCharArray(temp1);
+			} else if (component == Boolean.class) {
+				Boolean[] temp = (Boolean[]) object;
+				boolean[] temp1 = new boolean[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				putBooleanArray(temp1);
+			} else if (component.isAssignableFrom(MessageMeta.class)) {
+				putMessageMetaArray((MessageMeta[]) object);
+			} else if (component == String.class) {
+				putStringArray((String[]) object);
+			}
+		} else if (type.isAssignableFrom(List.class)) {
+			ParameterizedType pt = (ParameterizedType) type.getGenericSuperclass();
+			Class component = (Class) pt.getActualTypeArguments()[0];
+			if (component == Byte.class) {
+				putByteList((List<Byte>) object);
+			} else if (component == Short.class) {
+				putShort((short) object);
+			} else if (component == Integer.class) {
+				putIntList((List<Integer>) object);
+			} else if (component == Long.class) {
+				putLongList((List<Long>) object);
+			} else if (component == Float.class) {
+				putFloatList((List<Float>) object);
+			} else if (component == Double.class) {
+				putDoubleList((List<Double>) object);
+			} else if (component == Character.class) {
+				putCharList((List<Character>) object);
+			} else if (component == Boolean.class) {
+				putBooleanList((List<Boolean>) object);
+			} else if (component.isAssignableFrom(MessageMeta.class)) {
+				putMessageMetaList((List<MessageMeta>) object);
+			} else if (component == String.class) {
+				putStringList((List<String>) object);
+			}
+		} else {
+			if (type == Byte.class) {
+				if (object == null) {
+					putByte((byte) 0);
+				} else {
+					putByte((byte) object);
+				}
+			} else if (type == Short.class) {
+				if (object == null) {
+					putShort((short) 0);
+				} else {
+					putShort((short) object);
+				}
+			} else if (type == Integer.class) {
+				if (object == null) {
+					putInt(0);
+				} else {
+					putInt((int) object);
+				}
+			} else if (type == Long.class) {
+				if (object == null) {
+					putLong(0L);
+				} else {
+					putLong((long) object);
+				}
+			} else if (type == Float.class) {
+				if (object == null) {
+					putFloat(0F);
+				} else {
+					putFloat((float) object);
+				}
+			} else if (type == Double.class) {
+				if (object == null) {
+					putDouble(0D);
+				} else {
+					putDouble((double) object);
+				}
+			} else if (type == Character.class) {
+				if (object == null) {
+					putChar((char) 0);
+				} else {
+					putChar((char) object);
+				}
+			} else if (type == Boolean.class) {
+				putBoolean(field.getBoolean(this));
+				if (object == null) {
+					putBoolean(false);
+				} else {
+					putBoolean((boolean) object);
+				}
+			} else if (type.isAssignableFrom(MessageMeta.class)) {
+				MessageMeta next = (MessageMeta) object;
+				putMessageMeta(next);
+			} else if (type == String.class) {
+				putString((String) object);
+			} else {
+				throw new MessageIOException("type error:" + type.getName());
+			}
+		}
+	}
+
+	public void decode() throws Exception {
+		FieldAccess fieldAccess = getFieldAccess();
+		Field[] fields = fieldAccess.getFields();
+		for (Field temp : fields) {
+			readField(temp);
+		}
+	}
+
+	private void readField(Field field) throws IllegalArgumentException, IllegalAccessException, Exception {
+		Class<?> type = field.getType();
+		if (type.isPrimitive()) {
+			if (type == byte.class) {
+				field.setByte(this, getByte());
+			} else if (type == short.class) {
+				field.setShort(this, getShort());
+			} else if (type == int.class) {
+				field.setInt(this, getInt());
+			} else if (type == long.class) {
+				field.setLong(this, getLong());
+			} else if (type == float.class) {
+				putFloat(field.getFloat(this));
+				field.setFloat(this, getFloat());
+			} else if (type == double.class) {
+				field.setDouble(this, getDouble());
+			} else if (type == char.class) {
+				field.setChar(this, getChar());
+			} else if (type == boolean.class) {
+				field.setBoolean(this, getBoolean());
+			}
+		} else if (type.isArray()) {
+			Class<?> component = type.getComponentType();
+			if (component == byte.class) {
+				field.set(this, getByteArray());
+			} else if (component == short.class) {
+				field.set(this, getShortArray());
+			} else if (component == int.class) {
+				field.set(this, getIntArray());
+			} else if (component == long.class) {
+				field.set(this, getLongArray());
+			} else if (component == float.class) {
+				field.set(this, getFloatArray());
+			} else if (component == double.class) {
+				field.set(this, getDoubleArray());
+			} else if (component == char.class) {
+				field.set(this, getCharArray());
+			} else if (component == boolean.class) {
+				field.set(this, getBooleanArray());
+			} else if (component == Byte.class) {
+				byte[] temp = getByteArray();
+				Byte[] temp1 = new Byte[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				field.set(this, temp1);
+			} else if (component == Short.class) {
+				short[] temp = getShortArray();
+				Short[] temp1 = new Short[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				field.set(this, temp1);
+			} else if (component == Integer.class) {
+				int[] temp = getIntArray();
+				Integer[] temp1 = new Integer[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				field.set(this, temp1);
+			} else if (component == Long.class) {
+				long[] temp = getLongArray();
+				Long[] temp1 = new Long[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				field.set(this, temp1);
+			} else if (component == Float.class) {
+				float[] temp = getFloatArray();
+				Float[] temp1 = new Float[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				field.set(this, temp1);
+			} else if (component == Double.class) {
+				double[] temp = getDoubleArray();
+				Double[] temp1 = new Double[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				field.set(this, temp1);
+			} else if (component == Character.class) {
+				char[] temp = getCharArray();
+				Character[] temp1 = new Character[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				field.set(this, temp1);
+			} else if (component == Boolean.class) {
+				boolean[] temp = getBooleanArray();
+				Boolean[] temp1 = new Boolean[temp.length];
+				for (int i = 0; i < temp.length; ++i) {
+					temp1[i] = temp[i];
+				}
+				field.set(this, temp1);
+			} else if (component.isAssignableFrom(MessageMeta.class)) {
+				field.set(this, getMessageMetaArray((Class<? extends MessageMeta>) component));
+			} else if (component == String.class) {
+				field.set(this, getStringArray());
+			}
+		} else if (type.isAssignableFrom(List.class)) {
+			ParameterizedType pt = (ParameterizedType) type.getGenericSuperclass();
+			Class component = (Class) pt.getActualTypeArguments()[0];
+			if (component == Byte.class) {
+				field.set(this, getByteList());
+			} else if (component == Short.class) {
+				field.set(this, getShortList());
+			} else if (component == Integer.class) {
+				field.set(this, getIntList());
+			} else if (component == Long.class) {
+				field.set(this, getLongList());
+			} else if (component == Float.class) {
+				field.set(this, getFloatList());
+			} else if (component == Double.class) {
+				field.set(this, getDoubleList());
+			} else if (component == Character.class) {
+				field.set(this, getCharList());
+			} else if (component == Boolean.class) {
+				field.set(this, getBooleanList());
+			} else if (component.isAssignableFrom(MessageMeta.class)) {
+				field.set(this, getMessageMetaList((Class<? extends MessageMeta>) type));
+			} else if (component == String.class) {
+				field.set(this, getStringList());
+			}
+		} else {
+			if (type == Byte.class) {
+				field.set(this, getByte());
+			} else if (type == Short.class) {
+				field.set(this, getShort());
+			} else if (type == Integer.class) {
+				field.set(this, getInt());
+			} else if (type == Long.class) {
+				field.set(this, getLong());
+			} else if (type == Float.class) {
+				field.set(this, getFloat());
+			} else if (type == Double.class) {
+				field.set(this, getDouble());
+			} else if (type == Character.class) {
+				field.set(this, getChar());
+			} else if (type == Boolean.class) {
+				field.set(this, getBoolean());
+			} else if (type.isAssignableFrom(MessageMeta.class)) {
+				field.set(this, getMessageMeta((Class<? extends MessageMeta>) type));
+			} else if (type == String.class) {
+				field.set(this, getString());
+			} else {
+				throw new MessageIOException("type error:" + type.getName());
+			}
+		}
+	}
+
+	private FieldAccess getFieldAccess() {
+		FieldAccess fieldAccess = messageMetaFieldCache.get(getClass());
+		if (fieldAccess == null) {
+			fieldAccess = FieldAccess.get(getClass(), false, field -> {
+				return !(FieldFilter.isStatic(field) || FieldFilter.isTransient(field));
+			});
+			FieldAccess put = messageMetaFieldCache.putIfAbsent(getClass(), fieldAccess);
+			if (put != null) {
+				fieldAccess = put;
+			}
+		}
+		return fieldAccess;
+	}
 
 	public void buffer(ByteBuf buffer) {
 		this.buffer = buffer;
@@ -447,6 +808,27 @@ public abstract class MessageMeta {
 	}
 
 	/**
+	 * 读取byte列表
+	 * 
+	 * @param buffer
+	 * @return
+	 */
+	protected final List<Byte> getByteList() {
+		short len = getShort();
+		if (len == -1) {
+			return null;
+		} else if (len == 0) {
+			return new ArrayList<Byte>();
+		} else {
+			List<Byte> list = new ArrayList<Byte>();
+			for (int i = 0; i < len; ++i) {
+				list.add(getByte());
+			}
+			return list;
+		}
+	}
+
+	/**
 	 * 写入int数组
 	 * 
 	 * @param buffer
@@ -494,6 +876,25 @@ public abstract class MessageMeta {
 	 */
 	protected final void putByte(byte value) {
 		buffer.writeByte(value);
+	}
+
+	/**
+	 * 写入byte列表
+	 * 
+	 * @param buffer
+	 * @param value
+	 */
+	protected final void putByteList(List<Byte> value) {
+		if (value == null) {
+			putShort((short) -1);
+		} else if (value.isEmpty()) {
+			putShort((short) 0);
+		} else {
+			putShort((short) value.size());
+			for (Byte temp : value) {
+				putByte(temp);
+			}
+		}
 	}
 
 	/**
@@ -1077,192 +1478,6 @@ public abstract class MessageMeta {
 				result[i] = getChar();
 			}
 			return result;
-		}
-	}
-
-	protected final Object decodeObj(Class<?> type) throws Exception {
-		return decodeObj(type.getName());
-	}
-
-	protected final Object decodeObj(String type) throws Exception {
-		if (type == null || type.equals("null")) {
-			return null;
-		} else if (type.equals("java.lang.Integer") || type.equals("int")) {
-			return getInt();
-		} else if (type.equals("[I")) {
-			return getIntArray();
-		} else if (type.equals("java.lang.Byte") || type.equals("byte")) {
-			return getByte();
-		} else if (type.equals("[B")) {
-			return getByteArray();
-		} else if (type.equals("java.lang.Short") || type.equals("short")) {
-			return getShort();
-		} else if (type.equals("[S")) {
-			return getShortArray();
-		} else if (type.equals("java.lang.Long") || type.equals("long")) {
-			return getLong();
-		} else if (type.equals("[J")) {
-			return getLongArray();
-		} else if (type.equals("java.lang.Boolean") || type.equals("boolean")) {
-			return getBoolean();
-		} else if (type.equals("[Z")) {
-			return getBooleanArray();
-		} else if (type.equals("java.lang.String")) {
-			return getString();
-		} else if (type.equals("[Ljava.lang.String;")) {
-			return getStringArray();
-		} else if (type.equals("java.lang.Float") || type.equals("float")) {
-			return getFloat();
-		} else if (type.equals("F")) {
-			return getFloatArray();
-		} else if (type.equals("java.lang.Double") || type.equals("double")) {
-			return getDouble();
-		} else if (type.equals("[D")) {
-			return getDoubleArray();
-		} else if (type.equals("java.lang.Character") || type.equals("char")) {
-			return getChar();
-		} else if (type.equals("[C")) {
-			return getCharArray();
-		} else if (type.equals("java.util.ArrayList") || type.equals("java.util.List")) {
-			List<Object> objList = new ArrayList<>();
-			short length = getShort();
-			if (length > 0) {
-				String listType = getString();
-				for (int i = 0; i < length; ++i) {
-					objList.add(decodeObj(listType));
-				}
-			}
-			return objList;
-		} else if (type.equals("java.util.HashMap") || type.equals("java.util.Map")) {
-			short length = getShort();
-			if (length == 0) {
-				return null;
-			}
-			String keyType = getString();
-			String valueType = getString();
-			HashMap<Object, Object> map = new HashMap<>();
-			for (int i = 0; i < length; ++i) {
-				map.put(decodeObj(keyType), decodeObj(valueType));
-			}
-			return map;
-		} else if (type.equals("java.util.HashSet") || type.equals("java.util.Set")) {
-			short length = getShort();
-			if (length == 0) {
-				return null;
-			}
-			String setType = getString();
-			HashSet<Object> set = new HashSet<>();
-			for (int i = 0; i < length; ++i) {
-				set.add(decodeObj(setType));
-			}
-			return set;
-		} else if (type.startsWith("[L")) {
-			Class forName = Class.forName(type);
-			return getMessageMetaArray(forName.getComponentType());
-		} else {
-			Class forName = Class.forName(type);
-			return getMessageMeta(forName);
-		}
-	}
-
-	protected final void encodeObj(Object object) throws Exception {
-		encodeObj(object, null);
-	}
-
-	protected final void encodeObj(Object object, String type) throws Exception {
-		if (object == null) {
-			return;
-		}
-		if (StringUtil.isEmptyOrNull(type)) {
-			type = object.getClass().getName();
-		}
-		if (type.equals("java.lang.Integer") || type.equals("int")) {
-			putInt((int) object);
-		} else if (type.equals("[I")) {
-			putIntArray((int[]) object);
-		} else if (type.equals("java.lang.Byte") || type.equals("byte")) {
-			putByte((byte) object);
-		} else if (type.equals("[B")) {
-			putByteArray((byte[]) object);
-		} else if (type.equals("java.lang.Short") || type.equals("short")) {
-			putShort((short) object);
-		} else if (type.equals("[S")) {
-			putShortArray((short[]) object);
-		} else if (type.equals("java.lang.Long") || type.equals("long")) {
-			putLong((long) object);
-		} else if (type.equals("[J")) {
-			putLongArray((long[]) object);
-		} else if (type.equals("java.lang.Boolean") || type.equals("boolean")) {
-			putBoolean((boolean) object);
-		} else if (type.equals("[Z")) {
-			putBooleanArray((boolean[]) object);
-		} else if (type.equals("java.lang.String")) {
-			putString((String) object);
-		} else if (type.equals("[Ljava.lang.String;")) {
-			putStringArray((String[]) object);
-		} else if (type.equals("java.lang.Float") || type.equals("float")) {
-			putFloat((float) object);
-		} else if (type.equals("F")) {
-			putFloatArray((float[]) object);
-		} else if (type.equals("java.lang.Double") || type.equals("double")) {
-			putDouble((double) object);
-		} else if (type.equals("[D")) {
-			putDoubleArray((double[]) object);
-		} else if (type.equals("java.lang.Character") || type.equals("char")) {
-			putChar((char) object);
-		} else if (type.equals("[C")) {
-			putCharArray((char[]) object);
-		} else if (type.equals("java.util.ArrayList") || type.equals("java.util.List")) {
-			List<Object> objs = (List<Object>) object;
-			if (objs.isEmpty()) {
-				putShort((short) 0);
-			} else {
-				putShort((short) objs.size());
-				String name = objs.get(0).getClass().getName();
-				putString(name);
-				for (Object obj : objs) {
-					encodeObj(obj);
-				}
-			}
-		} else if (type.equals("java.util.HashMap") || type.equals("java.util.Map")) {
-			Map<Object, Object> map = (Map<Object, Object>) object;
-			if (map.isEmpty()) {
-				putShort((short) 0);
-			} else {
-				putShort((short) map.size());
-				boolean f = false;
-				for (Entry<Object, Object> next : map.entrySet()) {
-					if (!f) {
-						f = true;
-						putString(next.getKey().getClass().getName());
-						putString(next.getValue().getClass().getName());
-					}
-					encodeObj(next.getKey());
-					encodeObj(next.getValue());
-				}
-			}
-		} else if (type.equals("java.util.HashSet") || type.equals("java.util.Set")) {
-			Set<Object> set = (Set<Object>) object;
-			if (set.isEmpty()) {
-				putShort((short) 0);
-			} else {
-				putShort((short) set.size());
-				boolean f = false;
-				for (Object value : set) {
-					if (!f) {
-						f = true;
-						putString(value.getClass().getName());
-					}
-					encodeObj(value);
-				}
-			}
-		} else if (object instanceof MessageMeta) {
-			putMessageMeta((MessageMeta) object);
-		} else if (object.getClass().isArray()
-				&& object.getClass().getComponentType().getSuperclass() == MessageMeta.class) {
-			putMessageMetaArray((MessageMeta[]) object);
-		} else {
-			throw new IOException(object.getClass().getName() + " does not supported yet!");
 		}
 	}
 

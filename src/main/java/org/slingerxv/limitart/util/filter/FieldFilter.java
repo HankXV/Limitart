@@ -9,21 +9,22 @@ import java.lang.reflect.Modifier;
  * @author hank
  *
  */
-public abstract class FieldFilter {
-	public abstract boolean filter(Field field);
+public interface FieldFilter {
+	boolean filter(Field field);
 
 	public static boolean isStatic(Field field) {
-		int modifiers = field.getModifiers();
-		return Modifier.isStatic(modifiers);
+		return Modifier.isStatic(field.getModifiers());
 	}
 
 	public static boolean isPrivate(Field field) {
-		int modifiers = field.getModifiers();
-		return Modifier.isPrivate(modifiers);
+		return Modifier.isPrivate(field.getModifiers());
 	}
 
 	public static boolean isPublic(Field field) {
-		int modifiers = field.getModifiers();
-		return Modifier.isPublic(modifiers);
+		return Modifier.isPublic(field.getModifiers());
+	}
+
+	public static boolean isTransient(Field field) {
+		return Modifier.isTransient(field.getModifiers());
 	}
 }

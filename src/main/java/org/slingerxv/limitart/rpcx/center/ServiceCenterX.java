@@ -13,7 +13,6 @@ import org.quartz.Trigger;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.struct.AddressPair;
@@ -54,7 +53,7 @@ public class ServiceCenterX {
 	private ConcurrentHashMap<String, ConcurrentHashSet<Integer>> schedules = new ConcurrentHashMap<>();
 
 	public ServiceCenterX(ServiceCenterXConfig config)
-			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
+			throws Exception {
 		if (config == null) {
 			throw new NullPointerException("ServiceCenterXConfig");
 		}

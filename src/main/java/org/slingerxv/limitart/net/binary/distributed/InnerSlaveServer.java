@@ -1,11 +1,6 @@
 package org.slingerxv.limitart.net.binary.distributed;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.TimerTask;
-
-import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +14,6 @@ import org.slingerxv.limitart.net.binary.distributed.message.ReqConnectionReport
 import org.slingerxv.limitart.net.binary.distributed.message.ReqServerLoadSlave2MasterMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerJoinMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster2SlaveMessage;
-import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.TimerUtil;
@@ -36,8 +30,7 @@ public abstract class InnerSlaveServer implements IServer {
 	private BinaryClient toMaster;
 	private TimerTask reportTask;
 
-	public InnerSlaveServer(InnerSlaveServerConfig config) throws MessageIDDuplicatedException, InvalidKeyException,
-			NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+	public InnerSlaveServer(InnerSlaveServerConfig config) throws Exception {
 		this.config = config;
 		config.getFactory().registerMsg(new ResServerJoinMaster2SlaveHandler())
 				.registerMsg(new ResServerQuitMaster2SlaveHandler());

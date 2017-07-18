@@ -25,12 +25,8 @@ public final class ReflectionUtil {
 	}
 
 	public static List<Field> getFields(Class<?> clazz, boolean isSuper) {
-		return getFields(clazz, isSuper, new FieldFilter() {
-
-			@Override
-			public boolean filter(Field field) {
-				return !isStatic(field);
-			}
+		return getFields(clazz, isSuper, field -> {
+			return !FieldFilter.isStatic(field);
 		});
 	}
 

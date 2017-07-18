@@ -17,7 +17,6 @@ import org.slingerxv.limitart.net.binary.distributed.message.ResServerJoinMaster
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
-import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.define.IServer;
@@ -38,7 +37,7 @@ public abstract class InnerMasterServer implements IServer {
 	private BinaryServer server;
 	private InnerMasterServerConfig config;
 
-	public InnerMasterServer(InnerMasterServerConfig config) throws MessageIDDuplicatedException {
+	public InnerMasterServer(InnerMasterServerConfig config) throws Exception {
 		this.config = config;
 		config.getFactory().registerMsg(new ReqConnectionReportSlave2MasterHandler());
 		config.getFactory().registerMsg(new ReqServerLoadSlave2MasterHandler());

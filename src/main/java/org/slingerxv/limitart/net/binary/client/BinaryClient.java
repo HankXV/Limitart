@@ -1,12 +1,7 @@
 package org.slingerxv.limitart.net.binary.client;
 
 import java.net.SocketAddress;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.TimerTask;
-
-import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,7 +11,6 @@ import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
-import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
@@ -54,8 +48,7 @@ public class BinaryClient {
 	private SymmetricEncryptionUtil decodeUtil;
 	private TimerTask reconnectTask;
 
-	public BinaryClient(BinaryClientConfig config) throws InvalidKeyException, NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidAlgorithmParameterException, MessageIDDuplicatedException {
+	public BinaryClient(BinaryClientConfig config) throws Exception {
 		if (config == null) {
 			throw new NullPointerException("BinaryClientConfig");
 		}
@@ -189,7 +182,7 @@ public class BinaryClient {
 			String decode = decodeUtil.decode(validateStr);
 			int validateRandom = Integer.parseInt(decode);
 			ConnectionValidateClientMessage msg = new ConnectionValidateClientMessage();
-			msg.setValidateRandom(validateRandom);
+			msg.validateRandom = validateRandom;
 			sendMessage(msg, null);
 			log.info(config.getClientName() + " parse validate code success，return result：" + validateRandom);
 		} catch (Exception e) {
@@ -259,8 +252,7 @@ public class BinaryClient {
 
 		@Override
 		public void handle(ConnectionValidateServerMessage msg) {
-			String validateStr = msg.getValidateStr();
-			msg.getClient().decodeConnectionValidateData(validateStr);
+			msg.getClient().decodeConnectionValidateData(msg.validateStr);
 		}
 
 	}

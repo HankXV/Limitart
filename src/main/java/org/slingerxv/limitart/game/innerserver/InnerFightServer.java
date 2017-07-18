@@ -1,11 +1,6 @@
 package org.slingerxv.limitart.game.innerserver;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
-
-import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +13,6 @@ import org.slingerxv.limitart.net.binary.distributed.config.InnerSlaveServerConf
 import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
-import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
 
 /**
@@ -32,8 +26,7 @@ public abstract class InnerFightServer implements IServer {
 	private InnerMasterServer server;
 	private InnerSlaveServer toMaster;
 
-	public InnerFightServer(InnerFightServerConfig config) throws InvalidKeyException, NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidAlgorithmParameterException, MessageIDDuplicatedException {
+	public InnerFightServer(InnerFightServerConfig config) throws Exception {
 		server = new InnerMasterServer(new InnerMasterServerConfigBuilder().serverName("Fight")
 				.masterPort(config.getFightServerInnerPort()).factory(config.getFactory()).build()) {
 

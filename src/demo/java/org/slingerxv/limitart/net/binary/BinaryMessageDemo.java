@@ -11,16 +11,4 @@ public class BinaryMessageDemo extends Message {
 	public short getMessageId() {
 		return 1;
 	}
-
-	// 编码encode
-	@Override
-	public void encode() throws Exception {
-		putString(this.info);
-	}
-
-	// 解码decode
-	@Override
-	public void decode() throws Exception {
-		this.info = getString();
-	}
 }

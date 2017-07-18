@@ -21,18 +21,6 @@ First, we neet to determine which messages the server can handle. Let's create a
 		public short getMessageId() {
 			return 1;
 		}
-	
-		// 编码encode
-		@Override
-		public void encode() throws Exception {
-			putString(this.info);
-		}
-	
-		// 解码decode
-		@Override
-		public void decode() throws Exception {
-			this.info = getString();
-		}
 	}
 
 ```

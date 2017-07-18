@@ -1,7 +1,6 @@
 package org.slingerxv.limitart.net.binary;
 
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig;
 import org.slingerxv.limitart.net.binary.server.config.BinaryServerConfig.BinaryServerConfigBuilder;
@@ -9,7 +8,7 @@ import org.slingerxv.limitart.net.struct.AddressPair;
 
 public class BinaryServerDemo {
 	public static void main(String[] args)
-			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
+			throws Exception {
 		MessageFactory facotry = new MessageFactory().registerMsg(BinaryHandlerDemo.class);
 		BinaryServerConfig config = new BinaryServerConfigBuilder()
 				//指定端口

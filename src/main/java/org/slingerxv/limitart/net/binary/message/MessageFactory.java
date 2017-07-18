@@ -1,6 +1,5 @@
 package org.slingerxv.limitart.net.binary.message;
 
-import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -13,6 +12,8 @@ import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedEx
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.util.ReflectionUtil;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 /**
  * 消息工厂 注意：这里的handler是单例，一定不能往里存成员变量
@@ -30,16 +31,13 @@ public class MessageFactory {
 	 * 通过反射包来加载所有handler
 	 * 
 	 * @param packageName
-	 * @return
-	 * @throws ClassNotFoundException
-	 * @throws IOException
 	 * @throws MessageIDDuplicatedException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
+	 * @returns
+	 * @throws Exception
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static MessageFactory createByPackage(String packageName) throws ClassNotFoundException, IOException,
-			MessageIDDuplicatedException, InstantiationException, IllegalAccessException {
+	public static MessageFactory createByPackage(String packageName)
+			throws MessageIDDuplicatedException, Exception {
 		MessageFactory messageFactory = new MessageFactory();
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, IHandler.class);
 		for (Class<?> clzz : classesByPackage) {
@@ -53,7 +51,7 @@ public class MessageFactory {
 	}
 
 	public synchronized MessageFactory registerMsg(IHandler<? extends Message> handler)
-			throws MessageIDDuplicatedException {
+			throws MessageIDDuplicatedException, Exception {
 		Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
 		ParameterizedType handlerInterface = null;
 		for (Type temp : genericInterfaces) {
@@ -71,13 +69,14 @@ public class MessageFactory {
 		@SuppressWarnings("unchecked")
 		Class<? extends Message> msgClass = (Class<? extends Message>) handlerInterface.getActualTypeArguments()[0];
 		// 这里先实例化一个出来获取其ID
-		Message newInstance = null;
-		try {
-			newInstance = msgClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			log.error(e, e);
-			return this;
-		}
+		Message newInstance = msgClass.newInstance();
+		// 检查消息字段
+		ByteBuf buffer = Unpooled.directBuffer(256);
+		newInstance.buffer(buffer);
+		newInstance.encode();
+		newInstance.decode();
+		newInstance.buffer(null);
+		buffer.release();
 		short id = newInstance.getMessageId();
 		if (msgs.containsKey(id)) {
 			Class<? extends Message> class1 = msgs.get(id).newInstance().getClass();
@@ -99,7 +98,7 @@ public class MessageFactory {
 	}
 
 	public synchronized MessageFactory registerMsg(Class<? extends IHandler<? extends Message>> handlerClass)
-			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
+			throws Exception {
 		return registerMsg(handlerClass.newInstance());
 	}
 

@@ -1,13 +1,8 @@
 package org.slingerxv.limitart.game.innerserver;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +12,6 @@ import org.slingerxv.limitart.net.binary.distributed.InnerSlaveServer;
 import org.slingerxv.limitart.net.binary.distributed.config.InnerSlaveServerConfig.InnerSlaveServerConfigBuilder;
 import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
-import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.define.IServer;
 
 /**
@@ -31,8 +25,7 @@ public abstract class InnerGameServer implements IServer {
 	private ConcurrentHashMap<Integer, InnerSlaveServer> toFights = new ConcurrentHashMap<>();
 	private InnerSlaveServer toPublic;
 
-	public InnerGameServer(InnerGameServerConfig config) throws InvalidKeyException, NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidAlgorithmParameterException, MessageIDDuplicatedException {
+	public InnerGameServer(InnerGameServerConfig config) throws Exception {
 		toPublic = new InnerSlaveServer(new InnerSlaveServerConfigBuilder().slaveName("Game-To-Public")
 				.myServerId(config.getServerId()).myServerIp(config.getGameServerIp())
 				.myServerPort(config.getGameServerPort()).myServerPass(config.getGameServerPass())
@@ -104,8 +97,7 @@ public abstract class InnerGameServer implements IServer {
 						};
 						toFights.put(info.serverId, client);
 						client.startServer();
-					} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-							| InvalidAlgorithmParameterException | MessageIDDuplicatedException e) {
+					} catch (Exception e) {
 						log.error(e, e);
 					}
 				}
