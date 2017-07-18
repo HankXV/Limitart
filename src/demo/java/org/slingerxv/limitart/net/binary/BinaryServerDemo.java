@@ -1,7 +1,6 @@
 package org.slingerxv.limitart.net.binary;
 
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.struct.AddressPair;
 
 public class BinaryServerDemo {

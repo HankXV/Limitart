@@ -1,7 +1,8 @@
 package org.slingerxv.limitart.net.binary.message;
 
-import org.slingerxv.limitart.net.binary.client.BinaryClient;
-import org.slingerxv.limitart.net.binary.server.BinaryServer;
+
+import org.slingerxv.limitart.net.binary.BinaryClient;
+import org.slingerxv.limitart.net.binary.BinaryServer;
 
 import io.netty.channel.Channel;
 

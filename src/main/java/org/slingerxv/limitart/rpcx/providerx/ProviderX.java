@@ -9,10 +9,10 @@ import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.net.binary.client.BinaryClient;
+import org.slingerxv.limitart.net.binary.BinaryClient;
+import org.slingerxv.limitart.net.binary.BinaryServer;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.binary.server.BinaryServer;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.define.ServiceX;
 import org.slingerxv.limitart.rpcx.exception.ServiceError;

@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.net.binary.distributed.struct;
 
-import org.slingerxv.limitart.net.binary.client.BinaryClient;
+
+import org.slingerxv.limitart.net.binary.BinaryClient;
 
 import io.netty.channel.Channel;
 

@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.LongAdder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
-import org.slingerxv.limitart.net.binary.client.BinaryClient;
+import org.slingerxv.limitart.net.binary.BinaryClient;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;

@@ -4,7 +4,7 @@ import java.util.TimerTask;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.net.binary.client.BinaryClient;
+import org.slingerxv.limitart.net.binary.BinaryClient;
 import org.slingerxv.limitart.net.binary.distributed.config.InnerSlaveServerConfig;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerJoinMaster2SlaveHandler;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerQuitMaster2SlaveHandler;
