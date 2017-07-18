@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
-import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig.BinaryClientConfigBuilder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.server.BinaryServer;
@@ -79,7 +78,7 @@ public class ProviderX {
 		if (this.config.getServiceCenterIp() != null) {
 			MessageFactory centerFacotry = new MessageFactory();
 			centerFacotry.registerMsg(new TriggerScheduleServiceCenterToProviderServiceCenterHandler());
-			serviceCenterClient = new BinaryClient(new BinaryClientConfigBuilder().autoReconnect(5)
+			serviceCenterClient = new BinaryClient.BinaryClientBuilder().autoReconnect(5)
 					.remoteAddress(
 							new AddressPair(this.config.getServiceCenterIp(), this.config.getServiceCenterPort()))
 					.factory(centerFacotry).onConnectionEffective(client -> {
@@ -91,7 +90,7 @@ public class ProviderX {
 					}).dispatchMessage((message, handler) -> {
 						message.setExtra(this);
 						handler.handle(message);
-					}).build());
+					}).build();
 		}
 	}
 

@@ -18,7 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
-import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig.BinaryClientConfigBuilder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
@@ -105,8 +104,7 @@ public class ConsumerX {
 			MessageFactory centryFactory = new MessageFactory();
 			centryFactory.registerMsg(new SubscribeServiceResultServiceCenterHandler());
 			centryFactory.registerMsg(new NoticeProviderDisconnectedServiceCenterHandler());
-			BinaryClientConfigBuilder serviceCenterBuilder = new BinaryClientConfigBuilder()
-					.autoReconnect(config.getAutoConnectInterval())
+			serviceCenterClient = new BinaryClient.BinaryClientBuilder().autoReconnect(config.getAutoConnectInterval())
 					.remoteAddress(new AddressPair(config.getServiceCenterIp(), config.getServiceCenterPort(), null))
 					.clientName("RPC-Consumer").factory(centryFactory).onConnectionEffective(client -> {
 						if (listener != null) {
@@ -117,8 +115,7 @@ public class ConsumerX {
 					}).dispatchMessage((message, handler) -> {
 						message.setExtra(ConsumerX.this);
 						handler.handle(message);
-					});
-			serviceCenterClient = new BinaryClient(serviceCenterBuilder.build());
+					}).build();
 			serviceCenterClient.connect();
 		}
 	}
@@ -127,7 +124,7 @@ public class ConsumerX {
 		MessageFactory rpcMessageFacotry = new MessageFactory();
 		rpcMessageFacotry.registerMsg(new RpcResultServerHandler());
 		rpcMessageFacotry.registerMsg(new DirectFetchProviderServicesResultHandler());
-		BinaryClient client = new BinaryClient(new BinaryClientConfigBuilder()
+		BinaryClient client = new BinaryClient.BinaryClientBuilder()
 				.remoteAddress(new AddressPair(providerIp, providerPort)).autoReconnect(config.getAutoConnectInterval())
 				.factory(rpcMessageFacotry).onChannelStateChanged((binaryClient, active) -> {
 					if (!active) {
@@ -144,7 +141,7 @@ public class ConsumerX {
 				}).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
 					handler.handle(message);
-				}).build());
+				}).build();
 		return client;
 	}
 

@@ -5,7 +5,6 @@ import java.util.TimerTask;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.client.BinaryClient;
-import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig;
 import org.slingerxv.limitart.net.binary.distributed.config.InnerSlaveServerConfig;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerJoinMaster2SlaveHandler;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerQuitMaster2SlaveHandler;
@@ -34,15 +33,13 @@ public abstract class InnerSlaveServer implements IServer {
 		this.config = config;
 		config.getFactory().registerMsg(new ResServerJoinMaster2SlaveHandler())
 				.registerMsg(new ResServerQuitMaster2SlaveHandler());
-		toMaster = new BinaryClient(new BinaryClientConfig.BinaryClientConfigBuilder().autoReconnect(5)
-				.clientName(config.getSlaveName())
+		toMaster = new BinaryClient.BinaryClientBuilder().autoReconnect(5).clientName(config.getSlaveName())
 				.remoteAddress(
 						new AddressPair(config.getMasterIp(), config.getMasterInnerPort(), config.getMasterInnerPass()))
 				.factory(config.getFactory()).onChannelStateChanged((binaryClient, active) -> {
 					if (!active) {
 						TimerUtil.unScheduleGlobal(reportTask);
-						log.error(toMaster.getConfig().getClientName() + " server disconnected,"
-								+ binaryClient.channel());
+						log.error(toMaster.getClientName() + " server disconnected," + binaryClient.channel());
 					}
 				}).onConnectionEffective(client -> {
 					// 链接成功,上报本服务器的服务端口等信息
@@ -58,11 +55,10 @@ public abstract class InnerSlaveServer implements IServer {
 					try {
 						client.sendMessage(msg, (isSuccess, cause, channel) -> {
 							if (isSuccess) {
-								log.info("report my server info to " + client.getConfig().getClientName() + " success:"
-										+ info);
+								log.info("report my server info to " + client.getClientName() + " success:" + info);
 							} else {
-								log.error("report my server info to master " + client.getConfig().getClientName()
-										+ " fail:" + info, cause);
+								log.error("report my server info to master " + client.getClientName() + " fail:" + info,
+										cause);
 							}
 						});
 					} catch (Exception e) {
@@ -73,7 +69,7 @@ public abstract class InnerSlaveServer implements IServer {
 				}).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
 					handler.handle(message);
-				}).build());
+				}).build();
 		reportTask = new TimerTask() {
 
 			@Override

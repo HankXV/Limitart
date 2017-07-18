@@ -5,16 +5,20 @@ import java.util.TimerTask;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Proc1;
+import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
-import org.slingerxv.limitart.net.binary.client.config.BinaryClientConfig;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
+import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
 import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
+import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.SymmetricEncryptionUtil;
 import org.slingerxv.limitart.util.TimerUtil;
 
@@ -41,28 +45,54 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  */
 public class BinaryClient {
 	private static Logger log = LogManager.getLogger();
-	private BinaryClientConfig config;
 	private static EventLoopGroup group = new NioEventLoopGroup();
 	private Bootstrap bootstrap;
 	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
 	private TimerTask reconnectTask;
+	// ----config
+	private String clientName;
+	private AddressPair remoteAddress;
+	private int autoReconnect;
+	private AbstractBinaryDecoder decoder;
+	private AbstractBinaryEncoder encoder;
+	private MessageFactory factory;
+	// ----listener
+	private Proc2<BinaryClient, Boolean> onChannelStateChanged;
+	private Proc2<BinaryClient, Throwable> onExceptionCaught;
+	private Proc1<BinaryClient> onConnectionEffective;
+	private Proc2<Message, IHandler<Message>> dispatchMessage;
 
-	public BinaryClient(BinaryClientConfig config) throws Exception {
-		if (config == null) {
-			throw new NullPointerException("BinaryClientConfig");
+	private BinaryClient(BinaryClientBuilder builder) throws Exception {
+		this.clientName = builder.clientName;
+		if (builder.remoteAddress == null) {
+			throw new NullPointerException("remoteAddress");
 		}
-		if (config.getFactory() == null) {
-			throw new NullPointerException("MessageFactory");
+		this.remoteAddress = builder.remoteAddress;
+		this.autoReconnect = builder.autoReconnect;
+		if (builder.decoder == null) {
+			throw new NullPointerException("decoder");
 		}
-		this.config = config;
+		this.decoder = builder.decoder;
+		if (builder.encoder == null) {
+			throw new NullPointerException("encoder");
+		}
+		this.encoder = builder.encoder;
+		if (builder.factory == null) {
+			throw new NullPointerException("factory");
+		}
+		this.factory = builder.factory;
+		this.onChannelStateChanged = builder.onChannelStateChanged;
+		this.onExceptionCaught = builder.onExceptionCaught;
+		this.onConnectionEffective = builder.onConnectionEffective;
+		this.dispatchMessage = builder.dispatchMessage;
 		// 内部消息注册
-		config.getFactory().registerMsg(new ConnectionValidateServerHandler())
+		factory.registerMsg(new ConnectionValidateServerHandler())
 				.registerMsg(new ConnectionValidateSuccessServerHandler());
-		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(config.getRemoteAddress().getPass());
+		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(remoteAddress.getPass());
 		bootstrap = new Bootstrap();
 		bootstrap.channel(NioSocketChannel.class);
-		log.info(config.getClientName() + " nio init");
+		log.info(clientName + " nio init");
 		bootstrap.group(group).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.handler(new ChannelInitializerImpl());
 		reconnectTask = new TimerTask() {
@@ -78,7 +108,6 @@ public class BinaryClient {
 
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
-			AbstractBinaryDecoder decoder = config.getDecoder();
 			ch.pipeline()
 					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
 							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
@@ -96,23 +125,23 @@ public class BinaryClient {
 
 				@Override
 				public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-					if (config.getOnChannelStateChanged() != null) {
-						config.getOnChannelStateChanged().run(BinaryClient.this, false);
+					if (onChannelStateChanged != null) {
+						onChannelStateChanged.run(BinaryClient.this, false);
 					}
 				}
 
 				@Override
 				public void channelActive(ChannelHandlerContext ctx) throws Exception {
-					if (config.getOnChannelStateChanged() != null) {
-						config.getOnChannelStateChanged().run(BinaryClient.this, true);
+					if (onChannelStateChanged != null) {
+						onChannelStateChanged.run(BinaryClient.this, true);
 					}
 				}
 
 				@Override
 				public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 					log.error(ctx.channel() + " cause:", cause);
-					if (config.getOnExceptionCaught() != null) {
-						config.getOnExceptionCaught().run(BinaryClient.this, cause);
+					if (onExceptionCaught != null) {
+						onExceptionCaught.run(BinaryClient.this, cause);
 					}
 				}
 			});
@@ -121,7 +150,7 @@ public class BinaryClient {
 	}
 
 	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) throws Exception {
-		SendMessageUtil.sendMessage(this.config.getEncoder(), channel, msg, listener);
+		SendMessageUtil.sendMessage(encoder, channel, msg, listener);
 	}
 
 	public BinaryClient disConnect() {
@@ -141,22 +170,19 @@ public class BinaryClient {
 		if (channel != null && channel.isWritable()) {
 			return;
 		}
-		log.info(config.getClientName() + " start connect server：" + config.getRemoteAddress().getIp() + ":"
-				+ config.getRemoteAddress().getPort() + "...");
+		log.info(clientName + " start connect server：" + remoteAddress.getIp() + ":" + remoteAddress.getPort() + "...");
 		try {
-			bootstrap.connect(config.getRemoteAddress().getIp(), config.getRemoteAddress().getPort())
+			bootstrap.connect(remoteAddress.getIp(), remoteAddress.getPort())
 					.addListener((ChannelFutureListener) channelFuture -> {
 						channel = channelFuture.channel();
 						if (channelFuture.isSuccess()) {
-							log.info(config.getClientName() + " connect server：" + config.getRemoteAddress().getIp()
-									+ ":" + config.getRemoteAddress().getPort() + " success！");
+							log.info(clientName + " connect server：" + remoteAddress.getIp() + ":"
+									+ remoteAddress.getPort() + " success！");
 						} else {
-							log.error(
-									config.getClientName() + " try connect server：" + config.getRemoteAddress().getIp()
-											+ ":" + config.getRemoteAddress().getPort() + " fail",
-									channelFuture.cause().getMessage());
-							if (config.getAutoReconnect() > 0) {
-								tryReconnect(config.getAutoReconnect());
+							log.error(clientName + " try connect server：" + remoteAddress.getIp() + ":"
+									+ remoteAddress.getPort() + " fail", channelFuture.cause().getMessage());
+							if (autoReconnect > 0) {
+								tryReconnect(autoReconnect);
 							}
 						}
 					}).sync();
@@ -184,7 +210,7 @@ public class BinaryClient {
 			ConnectionValidateClientMessage msg = new ConnectionValidateClientMessage();
 			msg.validateRandom = validateRandom;
 			sendMessage(msg, null);
-			log.info(config.getClientName() + " parse validate code success，return result：" + validateRandom);
+			log.info(clientName + " parse validate code success，return result：" + validateRandom);
 		} catch (Exception e) {
 			log.error(e, e);
 		}
@@ -192,8 +218,8 @@ public class BinaryClient {
 
 	private void onConnectionValidateSeccuss(String remote) {
 		log.info("server validate success,remote:" + remote);
-		if (this.config.getOnConnectionEffective() != null) {
-			this.config.getOnConnectionEffective().run(this);
+		if (onConnectionEffective != null) {
+			onConnectionEffective.run(this);
 		}
 	}
 
@@ -209,22 +235,46 @@ public class BinaryClient {
 		return this.channel.remoteAddress();
 	}
 
+	public String getClientName() {
+		return this.clientName;
+	}
+
+	public AddressPair getRemoteAddress() {
+		return remoteAddress;
+	}
+
+	public int getAutoReconnect() {
+		return autoReconnect;
+	}
+
+	public AbstractBinaryDecoder getDecoder() {
+		return decoder;
+	}
+
+	public AbstractBinaryEncoder getEncoder() {
+		return encoder;
+	}
+
+	public MessageFactory getFactory() {
+		return factory;
+	}
+
 	private void channelRead0(ChannelHandlerContext ctx, Object arg) throws Exception {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
-			short messageId = this.config.getDecoder().readMessageId(ctx.channel(), buffer);
-			Message msg = config.getFactory().getMessage(messageId);
+			short messageId = decoder.readMessageId(ctx.channel(), buffer);
+			Message msg = factory.getMessage(messageId);
 			if (msg == null) {
-				throw new Exception(config.getClientName() + " message empty,id:" + messageId);
+				throw new Exception(clientName + " message empty,id:" + messageId);
 			}
 			msg.buffer(buffer);
 			msg.decode();
 			msg.buffer(null);
 			@SuppressWarnings("unchecked")
-			IHandler<Message> handler = (IHandler<Message>) config.getFactory().getHandler(messageId);
+			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
 			if (handler == null) {
-				throw new Exception(config.getClientName() + " can not find handler for message,id:" + messageId);
+				throw new Exception(clientName + " can not find handler for message,id:" + messageId);
 			}
 			msg.setChannel(ctx.channel());
 			msg.setClient(this);
@@ -232,10 +282,10 @@ public class BinaryClient {
 			if (InnerMessageEnum.getTypeByValue(messageId) != null) {
 				handler.handle(msg);
 			} else {
-				if (this.config.getDispatchMessage() != null) {
-					this.config.getDispatchMessage().run(msg,handler);
+				if (dispatchMessage != null) {
+					dispatchMessage.run(msg, handler);
 				} else {
-					log.warn(config.getClientName() + " no dispatch message listener!");
+					log.warn(clientName + " no dispatch message listener!");
 				}
 			}
 		} finally {
@@ -243,11 +293,7 @@ public class BinaryClient {
 		}
 	}
 
-	public BinaryClientConfig getConfig() {
-		return this.config;
-	}
-
-	public class ConnectionValidateServerHandler implements IHandler<ConnectionValidateServerMessage> {
+	private class ConnectionValidateServerHandler implements IHandler<ConnectionValidateServerMessage> {
 
 		@Override
 		public void handle(ConnectionValidateServerMessage msg) {
@@ -256,11 +302,112 @@ public class BinaryClient {
 
 	}
 
-	public class ConnectionValidateSuccessServerHandler implements IHandler<ConnectionValidateSuccessServerMessage> {
+	private class ConnectionValidateSuccessServerHandler implements IHandler<ConnectionValidateSuccessServerMessage> {
 
 		@Override
 		public void handle(ConnectionValidateSuccessServerMessage msg) {
 			msg.getClient().onConnectionValidateSeccuss(msg.getChannel().remoteAddress().toString());
+		}
+	}
+
+	public static class BinaryClientBuilder {
+		private String clientName;
+		private AddressPair remoteAddress;
+		private int autoReconnect;
+		private AbstractBinaryDecoder decoder;
+		private AbstractBinaryEncoder encoder;
+		private MessageFactory factory;
+		// ----listener
+		private Proc2<BinaryClient, Boolean> onChannelStateChanged;
+		private Proc2<BinaryClient, Throwable> onExceptionCaught;
+		private Proc1<BinaryClient> onConnectionEffective;
+		private Proc2<Message, IHandler<Message>> dispatchMessage;
+
+		public BinaryClientBuilder() {
+			this.clientName = "Binary-Client";
+			this.remoteAddress = new AddressPair("127.0.0.1", 8888);
+			this.autoReconnect = 0;
+			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
+			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
+			this.dispatchMessage = new Proc2<Message, IHandler<Message>>() {
+
+				@Override
+				public void run(Message t1, IHandler<Message> t2) {
+					t2.handle(t1);
+				}
+			};
+		}
+
+		/**
+		 * 构建配置
+		 * 
+		 * @return
+		 * @throws Exception
+		 */
+		public BinaryClient build() throws Exception {
+			return new BinaryClient(this);
+		}
+
+		public BinaryClientBuilder decoder(AbstractBinaryDecoder decoder) {
+			this.decoder = decoder;
+			return this;
+		}
+
+		public BinaryClientBuilder encoder(AbstractBinaryEncoder encoder) {
+			this.encoder = encoder;
+			return this;
+		}
+
+		public BinaryClientBuilder clientName(String clientName) {
+			this.clientName = clientName;
+			return this;
+		}
+
+		/**
+		 * 服务器IP
+		 * 
+		 * @param remoteIp
+		 * @return
+		 */
+		public BinaryClientBuilder remoteAddress(AddressPair remoteAddress) {
+			this.remoteAddress = remoteAddress;
+			return this;
+		}
+
+		/**
+		 * 自动重连尝试间隔(秒)
+		 * 
+		 * @param autoReconnect
+		 * @return
+		 */
+		public BinaryClientBuilder autoReconnect(int autoReconnect) {
+			this.autoReconnect = autoReconnect;
+			return this;
+		}
+
+		public BinaryClientBuilder factory(MessageFactory factory) {
+			this.factory = factory;
+			return this;
+		}
+
+		public BinaryClientBuilder onChannelStateChanged(Proc2<BinaryClient, Boolean> onChannelStateChanged) {
+			this.onChannelStateChanged = onChannelStateChanged;
+			return this;
+		}
+
+		public BinaryClientBuilder onExceptionCaught(Proc2<BinaryClient, Throwable> onExceptionCaught) {
+			this.onExceptionCaught = onExceptionCaught;
+			return this;
+		}
+
+		public BinaryClientBuilder onConnectionEffective(Proc1<BinaryClient> onConnectionEffective) {
+			this.onConnectionEffective = onConnectionEffective;
+			return this;
+		}
+
+		public BinaryClientBuilder dispatchMessage(Proc2<Message, IHandler<Message>> dispatchMessage) {
+			this.dispatchMessage = dispatchMessage;
+			return this;
 		}
 	}
 }

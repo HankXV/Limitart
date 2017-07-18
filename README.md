@@ -63,18 +63,17 @@ Look at the client below. Because we do not allow client processing messages onl
 ```java
 
 		MessageFactory factory = new MessageFactory();
-		BinaryClientConfig config = new BinaryClientConfigBuilder()
-				.remoteAddress(new AddressPair("127.0.0.1", 8888))
-				.factory(factory)
-				.onConnectionEffective(client -> {
+		BinaryClient client = new BinaryClient.BinaryClientBuilder().remoteAddress(new AddressPair("127.0.0.1", 8888))
+				.factory(factory).onConnectionEffective(c -> {
 					BinaryMessageDemo message = new BinaryMessageDemo();
 					message.info = "Hello Limitart!";
 					try {
-						client.sendMessage(message, null);
+						c.sendMessage(message, null);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}).build();
+		client.connect();
 				
 ```
 收工！
