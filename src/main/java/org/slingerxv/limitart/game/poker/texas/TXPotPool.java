@@ -24,11 +24,15 @@ public class TXPotPool {
 	 */
 	/**
 	 * 每轮触发的计算
-	 * @param bets 座位索引对应玩家当轮的注数
-	 * @param smallBlind 小盲注数值
-	 * @param times	递归次数，调用时为1
+	 * 
+	 * @param bets
+	 *            座位索引对应玩家当轮的注数
+	 * @param smallBlind
+	 *            小盲注数值
+	 * @param times
+	 *            递归次数，调用时为1
 	 */
-	public void calTrigger(long[] bets,long smallBlind,int times) {
+	public void calTrigger(long[] bets, long smallBlind, int times) {
 		long min = Long.MAX_VALUE;
 		for (long bet : bets) {
 			if (bet == 0) {
@@ -39,7 +43,7 @@ public class TXPotPool {
 			}
 		}
 		long needReduce = 0;
-		if(min == smallBlind && times == 1){
+		if (min == smallBlind && times == 1) {
 			min = smallBlind * 2;
 			needReduce = smallBlind;
 		}
@@ -65,7 +69,7 @@ public class TXPotPool {
 			pots.put(key, sidePot);
 		}
 		sidePot.chips += min * list.size() - needReduce;
-		calTrigger(bets,smallBlind,times++);
+		calTrigger(bets, smallBlind, times++);
 	}
 
 	/**
