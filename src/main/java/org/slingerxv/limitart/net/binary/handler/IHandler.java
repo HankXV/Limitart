@@ -10,6 +10,6 @@ import org.slingerxv.limitart.net.binary.message.Message;
  */
 public interface IHandler<T extends Message> {
 
-	void handle(T msg) throws Exception;
+	void handle(T msg);
 
 }

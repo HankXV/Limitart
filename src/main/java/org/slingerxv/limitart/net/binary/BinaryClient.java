@@ -283,7 +283,14 @@ public class BinaryClient {
 				handler.handle(msg);
 			} else {
 				if (dispatchMessage != null) {
-					dispatchMessage.run(msg, handler);
+					try {
+						dispatchMessage.run(msg, handler);
+					} catch (Exception e) {
+						log.error(ctx.channel() + " cause:", e);
+						if (onExceptionCaught != null) {
+							onExceptionCaught.run(this, e);
+						}
+					}
 				} else {
 					log.warn(clientName + " no dispatch message listener!");
 				}
@@ -329,16 +336,8 @@ public class BinaryClient {
 			this.autoReconnect = 0;
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
-			this.dispatchMessage = new Proc2<Message, IHandler<Message>>() {
-
-				@Override
-				public void run(Message t1, IHandler<Message> t2) {
-					try {
-						t2.handle(t1);
-					} catch (Exception e) {
-						log.error(e, e);
-					}
-				}
+			this.dispatchMessage = (t1, t2) -> {
+				t2.handle(t1);
 			};
 		}
 

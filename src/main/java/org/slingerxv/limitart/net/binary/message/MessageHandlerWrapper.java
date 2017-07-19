@@ -11,7 +11,7 @@ public class MessageHandlerWrapper {
 		this.handler = handler;
 	}
 
-	public void handle() throws Exception {
+	public void handle() {
 		handler.handle(message);
 	}
 

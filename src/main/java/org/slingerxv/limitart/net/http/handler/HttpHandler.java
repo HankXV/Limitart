@@ -11,5 +11,5 @@ import org.slingerxv.limitart.net.http.message.UrlMessage;
  */
 public interface HttpHandler<T extends UrlMessage> {
 
-	ConstraintMap<String> doServer(T msg) throws Exception;
+	ConstraintMap<String> doServer(T msg);
 }

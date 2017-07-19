@@ -71,7 +71,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 	// listener
 	private Proc1<Channel> onServerBind;
 	private Proc2<Channel, Boolean> onChannelStateChanged;
-	private Proc2<UrlMessage, ConstraintMap<String>> dispatchMessage;
+	private Proc2<UrlMessage, HttpHandler<UrlMessage>> dispatchMessage;
 	private Proc2<Channel, HttpMessage> onMessageOverSize;
 	private Proc2<Channel, Throwable> onExceptionCaught;
 
@@ -296,7 +296,14 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			return;
 		}
 		if (dispatchMessage != null) {
-			dispatchMessage.run(message, params);
+			try {
+				dispatchMessage.run(message, handler);
+			} catch (Exception e) {
+				log.error(ctx.channel() + " cause:", e);
+				if (onExceptionCaught != null) {
+					onExceptionCaught.run(channel, e);
+				}
+			}
 		} else {
 			log.warn(serverName + " no dispatch message listener!");
 		}
@@ -311,7 +318,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		// listener
 		private Proc1<Channel> onServerBind;
 		private Proc2<Channel, Boolean> onChannelStateChanged;
-		private Proc2<UrlMessage, ConstraintMap<String>> dispatchMessage;
+		private Proc2<UrlMessage, HttpHandler<UrlMessage>> dispatchMessage;
 		private Proc2<Channel, HttpMessage> onMessageOverSize;
 		private Proc2<Channel, Throwable> onExceptionCaught;
 
@@ -320,6 +327,9 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			this.port = 8080;
 			this.httpObjectAggregatorMax = 1024 * 1024;
 			this.whiteList = new HashSet<>();
+			this.dispatchMessage = (message, handler) -> {
+				handler.doServer(message);
+			};
 		}
 
 		public HttpServer build() {
@@ -367,7 +377,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 
-		public HttpServerBuilder dispatchMessage(Proc2<UrlMessage, ConstraintMap<String>> dispatchMessage) {
+		public HttpServerBuilder dispatchMessage(Proc2<UrlMessage, HttpHandler<UrlMessage>> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
 			return this;
 		}

@@ -357,7 +357,14 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					return;
 				}
 				if (dispatchMessage != null) {
-					dispatchMessage.run(msg, handler);
+					try {
+						dispatchMessage.run(msg, handler);
+					} catch (Exception e) {
+						log.error(ctx.channel() + " cause:", e);
+						if (onExceptionCaught != null) {
+							onExceptionCaught.run(channel, e);
+						}
+					}
 				} else {
 					log.warn(serverName + " no dispatch message listener!");
 				}
@@ -440,16 +447,8 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
 			this.whiteList = new HashSet<>();
-			this.dispatchMessage = new Proc2<Message, IHandler<Message>>() {
-
-				@Override
-				public void run(Message t1, IHandler<Message> t2) {
-					try {
-						t2.handle(t1);
-					} catch (Exception e) {
-						log.error(e, e);
-					}
-				}
+			this.dispatchMessage = (t1, t2) -> {
+				t2.handle(t1);
 			};
 		}
 
