@@ -143,7 +143,7 @@ public abstract class MessageMeta {
 			if (component == Byte.class) {
 				putByteList((ArrayList<Byte>) object);
 			} else if (component == Short.class) {
-				putShort((short) object);
+				putShortList((ArrayList<Short>) object);
 			} else if (component == Integer.class) {
 				putIntList((ArrayList<Integer>) object);
 			} else if (component == Long.class) {
@@ -205,7 +205,6 @@ public abstract class MessageMeta {
 					putChar((char) object);
 				}
 			} else if (type == Boolean.class) {
-				putBoolean(field.getBoolean(this));
 				if (object == null) {
 					putBoolean(false);
 				} else {
@@ -217,8 +216,9 @@ public abstract class MessageMeta {
 			} else if (type == String.class) {
 				putString((String) object);
 			} else {
+				System.err.println();
 				throw new MessageIOException(getClass()
-						+ " type error(non MessageMeta field must be pritive(or it's box object),array or List. array's component  and List's generic param as the same as non MessageMeta rule ):"
+						+ " type error(non MessageMeta field must be primitive(or it's box object),array or List. array's component  and List's generic param as the same as non MessageMeta rule ):"
 						+ type.getName());
 			}
 		}
@@ -379,7 +379,7 @@ public abstract class MessageMeta {
 				field.set(this, getString());
 			} else {
 				throw new MessageIOException(getClass()
-						+ " type error(non MessageMeta field must be pritive(or it's box object),array or List. array's component  and List's generic param as the same as non MessageMeta rule ):"
+						+ " type error(non MessageMeta field must be primitive(or it's box object),array or List. array's component  and List's generic param as the same as non MessageMeta rule ):"
 						+ type.getName());
 			}
 		}
@@ -389,7 +389,7 @@ public abstract class MessageMeta {
 		FieldAccess fieldAccess = messageMetaFieldCache.get(getClass());
 		if (fieldAccess == null) {
 			fieldAccess = FieldAccess.get(getClass(), false, field -> {
-				return !(FieldFilter.isStatic(field) || FieldFilter.isTransient(field));
+				return !(FieldFilter.isStatic(field) || FieldFilter.isTransient(field) || FieldFilter.isFinal(field));
 			});
 			FieldAccess put = messageMetaFieldCache.putIfAbsent(getClass(), fieldAccess);
 			if (put != null) {

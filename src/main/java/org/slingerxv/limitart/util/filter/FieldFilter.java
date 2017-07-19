@@ -27,4 +27,16 @@ public interface FieldFilter {
 	public static boolean isTransient(Field field) {
 		return Modifier.isTransient(field.getModifiers());
 	}
+
+	public static boolean isProtected(Field field) {
+		return Modifier.isProtected(field.getModifiers());
+	}
+
+	public static boolean isFinal(Field field) {
+		return Modifier.isFinal(field.getModifiers());
+	}
+
+	public static boolean isVolatile(Field field) {
+		return Modifier.isVolatile(field.getModifiers());
+	}
 }
