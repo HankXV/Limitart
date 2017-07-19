@@ -333,7 +333,11 @@ public class BinaryClient {
 
 				@Override
 				public void run(Message t1, IHandler<Message> t2) {
-					t2.handle(t1);
+					try {
+						t2.handle(t1);
+					} catch (Exception e) {
+						log.error(e, e);
+					}
 				}
 			};
 		}

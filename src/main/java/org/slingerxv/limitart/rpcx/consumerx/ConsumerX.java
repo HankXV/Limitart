@@ -114,7 +114,11 @@ public class ConsumerX {
 						subscribeServicesFromServiceCenter();
 					}).dispatchMessage((message, handler) -> {
 						message.setExtra(ConsumerX.this);
-						handler.handle(message);
+						try {
+							handler.handle(message);
+						} catch (Exception e) {
+							log.error(e, e);
+						}
 					}).build();
 			serviceCenterClient.connect();
 		}
@@ -140,7 +144,11 @@ public class ConsumerX {
 					}
 				}).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
-					handler.handle(message);
+					try {
+						handler.handle(message);
+					} catch (Exception e) {
+						log.error(e, e);
+					}
 				}).build();
 		return client;
 	}

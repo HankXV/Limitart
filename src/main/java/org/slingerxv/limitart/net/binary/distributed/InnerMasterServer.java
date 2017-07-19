@@ -44,7 +44,11 @@ public abstract class InnerMasterServer implements IServer {
 				.addressPair(new AddressPair(config.getMasterPort(), InnerServerUtil.getInnerPass()))
 				.serverName(config.getServerName()).factory(config.getFactory()).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
-					handler.handle(message);
+					try {
+						handler.handle(message);
+					} catch (Exception e) {
+						log.error(e, e);
+					}
 				}).onChannelStateChanged((channel, active) -> {
 					if (!active) {
 						Integer serverType = InnerServerUtil.getServerType(channel);

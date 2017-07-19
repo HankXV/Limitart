@@ -3,8 +3,6 @@ package org.slingerxv.limitart.net.http;
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpMethod.POST;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
@@ -262,7 +260,6 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			return;
 		}
 		message.setChannel(ctx.channel());
-		message.setHandler(handler);
 		// 如果是POST，最后再来解析参数
 		if (msg.method() == POST) {
 			try {
@@ -291,18 +288,9 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 				return;
 			}
 		}
+		message.putAll(params);
 		try {
-			Field[] declaredFields = message.getClass().getDeclaredFields();
-			for (Field field : declaredFields) {
-				if (Modifier.isTransient(field.getModifiers())) {
-					continue;
-				}
-				field.setAccessible(true);
-				Object object = params.getObject(field.getName());
-				if (object != null) {
-					field.set(message, object);
-				}
-			}
+			message.decode();
 		} catch (Exception e) {
 			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_MESSAGE_PARSE, e.getMessage());
 			return;

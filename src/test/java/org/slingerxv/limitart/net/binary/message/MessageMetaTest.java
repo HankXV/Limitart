@@ -37,7 +37,7 @@ public class MessageMetaTest {
 	}
 
 	@Test
-	public void test() {
+	public void codec() {
 		try {
 			meta.encode();
 		} catch (Exception e) {

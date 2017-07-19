@@ -77,61 +77,93 @@ public abstract class MessageMeta {
 			} else if (component == boolean.class) {
 				putBooleanArray((boolean[]) object);
 			} else if (component == Byte.class) {
-				Byte[] temp = (Byte[]) object;
-				byte[] temp1 = new byte[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (object == null) {
+					putByteArray(null);
+				} else {
+					Byte[] temp = (Byte[]) object;
+					byte[] temp1 = new byte[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i] == null ? 0 : temp[i];
+					}
+					putByteArray(temp1);
 				}
-				putByteArray(temp1);
 			} else if (component == Short.class) {
-				Short[] temp = (Short[]) object;
-				short[] temp1 = new short[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (object == null) {
+					putShortArray(null);
+				} else {
+					Short[] temp = (Short[]) object;
+					short[] temp1 = new short[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i] == null ? 0 : temp[i];
+					}
+					putShortArray(temp1);
 				}
-				putShortArray(temp1);
 			} else if (component == Integer.class) {
-				Integer[] temp = (Integer[]) object;
-				int[] temp1 = new int[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (object == null) {
+					putIntArray(null);
+				} else {
+					Integer[] temp = (Integer[]) object;
+					int[] temp1 = new int[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i] == null ? 0 : temp[i];
+					}
+					putIntArray(temp1);
 				}
-				putIntArray(temp1);
 			} else if (component == Long.class) {
-				Long[] temp = (Long[]) object;
-				long[] temp1 = new long[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (object == null) {
+					putLongArray(null);
+				} else {
+					Long[] temp = (Long[]) object;
+					long[] temp1 = new long[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i] == null ? 0 : temp[i];
+					}
+					putLongArray(temp1);
 				}
-				putLongArray(temp1);
 			} else if (component == Float.class) {
-				Float[] temp = (Float[]) object;
-				float[] temp1 = new float[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (object == null) {
+					putFloatArray(null);
+				} else {
+					Float[] temp = (Float[]) object;
+					float[] temp1 = new float[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i] == null ? 0 : temp[i];
+					}
+					putFloatArray(temp1);
 				}
-				putFloatArray(temp1);
 			} else if (component == Double.class) {
-				Double[] temp = (Double[]) object;
-				double[] temp1 = new double[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (object == null) {
+					putDoubleArray(null);
+				} else {
+					Double[] temp = (Double[]) object;
+					double[] temp1 = new double[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i] == null ? 0 : temp[i];
+					}
+					putDoubleArray(temp1);
 				}
-				putDoubleArray(temp1);
 			} else if (component == Character.class) {
-				Character[] temp = (Character[]) object;
-				char[] temp1 = new char[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (object == null) {
+					putCharArray(null);
+				} else {
+					Character[] temp = (Character[]) object;
+					char[] temp1 = new char[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i] == null ? 0 : temp[i];
+					}
+					putCharArray(temp1);
 				}
-				putCharArray(temp1);
 			} else if (component == Boolean.class) {
-				Boolean[] temp = (Boolean[]) object;
-				boolean[] temp1 = new boolean[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (object == null) {
+					putBooleanArray(null);
+				} else {
+					Boolean[] temp = (Boolean[]) object;
+					boolean[] temp1 = new boolean[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i] == null ? false : temp[i];
+					}
+					putBooleanArray(temp1);
 				}
-				putBooleanArray(temp1);
 			} else if (component.getSuperclass() == MessageMeta.class) {
 				putMessageMetaArray((MessageMeta[]) object);
 			} else if (component == String.class) {
@@ -273,60 +305,76 @@ public abstract class MessageMeta {
 				field.set(this, getBooleanArray());
 			} else if (component == Byte.class) {
 				byte[] temp = getByteArray();
-				Byte[] temp1 = new Byte[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (temp != null) {
+					Byte[] temp1 = new Byte[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i];
+					}
+					field.set(this, temp1);
 				}
-				field.set(this, temp1);
 			} else if (component == Short.class) {
 				short[] temp = getShortArray();
-				Short[] temp1 = new Short[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (temp != null) {
+					Short[] temp1 = new Short[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i];
+					}
+					field.set(this, temp1);
 				}
-				field.set(this, temp1);
 			} else if (component == Integer.class) {
 				int[] temp = getIntArray();
-				Integer[] temp1 = new Integer[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (temp != null) {
+					Integer[] temp1 = new Integer[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i];
+					}
+					field.set(this, temp1);
 				}
-				field.set(this, temp1);
 			} else if (component == Long.class) {
 				long[] temp = getLongArray();
-				Long[] temp1 = new Long[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (temp != null) {
+					Long[] temp1 = new Long[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i];
+					}
+					field.set(this, temp1);
 				}
-				field.set(this, temp1);
 			} else if (component == Float.class) {
 				float[] temp = getFloatArray();
-				Float[] temp1 = new Float[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (temp != null) {
+					Float[] temp1 = new Float[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i];
+					}
+					field.set(this, temp1);
 				}
-				field.set(this, temp1);
 			} else if (component == Double.class) {
 				double[] temp = getDoubleArray();
-				Double[] temp1 = new Double[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (temp != null) {
+					Double[] temp1 = new Double[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i];
+					}
+					field.set(this, temp1);
 				}
-				field.set(this, temp1);
 			} else if (component == Character.class) {
 				char[] temp = getCharArray();
-				Character[] temp1 = new Character[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (temp != null) {
+					Character[] temp1 = new Character[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i];
+					}
+					field.set(this, temp1);
 				}
-				field.set(this, temp1);
 			} else if (component == Boolean.class) {
 				boolean[] temp = getBooleanArray();
-				Boolean[] temp1 = new Boolean[temp.length];
-				for (int i = 0; i < temp.length; ++i) {
-					temp1[i] = temp[i];
+				if (temp != null) {
+					Boolean[] temp1 = new Boolean[temp.length];
+					for (int i = 0; i < temp.length; ++i) {
+						temp1[i] = temp[i];
+					}
+					field.set(this, temp1);
 				}
-				field.set(this, temp1);
 			} else if (component.getSuperclass() == MessageMeta.class) {
 				field.set(this, getMessageMetaArray((Class<? extends MessageMeta>) component));
 			} else if (component == String.class) {

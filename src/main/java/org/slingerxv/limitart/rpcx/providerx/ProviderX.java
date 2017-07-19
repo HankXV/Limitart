@@ -68,7 +68,11 @@ public class ProviderX {
 		server = new BinaryServer.BinaryServerBuilder().addressPair(new AddressPair(config.getMyPort()))
 				.serverName("RPC-Provider").factory(factory).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
-					handler.handle(message);
+					try {
+						handler.handle(message);
+					} catch (Exception e) {
+						log.error(e, e);
+					}
 				}).onServerBind(channel -> {
 					if (this.providerListener != null) {
 						this.providerListener.onProviderBind(this);
@@ -89,7 +93,11 @@ public class ProviderX {
 						}
 					}).dispatchMessage((message, handler) -> {
 						message.setExtra(this);
-						handler.handle(message);
+						try {
+							handler.handle(message);
+						} catch (Exception e) {
+							log.error(e, e);
+						}
 					}).build();
 		}
 	}

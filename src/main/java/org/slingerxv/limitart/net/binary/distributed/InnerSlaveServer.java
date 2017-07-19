@@ -68,7 +68,11 @@ public abstract class InnerSlaveServer implements IServer {
 					onConnectMasterSuccess(InnerSlaveServer.this);
 				}).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
-					handler.handle(message);
+					try {
+						handler.handle(message);
+					} catch (Exception e) {
+						log.error(e, e);
+					}
 				}).build();
 		reportTask = new TimerTask() {
 

@@ -25,6 +25,14 @@ public class ConstraintMap<K> {
 		map = new HashMap<>();
 	}
 
+	public void putAll(Map<K, Object> map) {
+		this.map.putAll(map);
+	}
+
+	public void putAll(ConstraintMap<K> map) {
+		this.map.putAll(map.map);
+	}
+
 	public boolean hasKey(K key) {
 		return map.containsKey(key);
 	}

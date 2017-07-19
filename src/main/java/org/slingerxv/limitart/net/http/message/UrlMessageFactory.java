@@ -14,7 +14,6 @@ import org.slingerxv.limitart.net.http.handler.HttpHandler;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.util.ReflectionUtil;
 
-
 /**
  * 消息工厂 注意：这里的handler是单例，一定不能往里存成员变量
  * 
@@ -42,7 +41,7 @@ public class UrlMessageFactory {
 	}
 
 	public synchronized UrlMessageFactory registerMsg(HttpHandler<? extends UrlMessage> handler)
-			throws InstantiationException, IllegalAccessException {
+			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
 		Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
 		ParameterizedType handlerInterface = null;
 		for (Type temp : genericInterfaces) {
@@ -63,7 +62,13 @@ public class UrlMessageFactory {
 		UrlMessage newInstance = msgClass.newInstance();
 		String url = newInstance.getUrl();
 		if (messages.containsKey(url)) {
-			throw new IllegalArgumentException("message url duplicated:" + url);
+			Class<? extends UrlMessage> class1 = messages.get(url).newInstance().getClass();
+			if (!class1.getName().equals(msgClass.getName())) {
+				throw new MessageIDDuplicatedException("message id duplicated:" + url + ",class old:" + class1.getName()
+						+ ",class new:" + msgClass.getName());
+			} else {
+				return this;
+			}
 		}
 		if (handlers.containsKey(url)) {
 			throw new IllegalArgumentException("handler url duplicated:" + url);
@@ -71,12 +76,12 @@ public class UrlMessageFactory {
 		ConstructorAccess<? extends UrlMessage> constructorAccess = ConstructorAccess.get(msgClass);
 		messages.put(url, constructorAccess);
 		handlers.put(url, handler);
-		log.debug("regist msg: {}，handler:{}", msgClass.getSimpleName(), handler.getClass().getSimpleName());
+		log.info("regist msg: {}，handler:{}", msgClass.getSimpleName(), handler.getClass().getSimpleName());
 		return this;
 	}
 
 	public UrlMessageFactory registerMsg(Class<? extends HttpHandler<? extends UrlMessage>> handlerClass)
-			throws InstantiationException, IllegalAccessException {
+			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
 		return registerMsg(handlerClass.newInstance());
 	}
 

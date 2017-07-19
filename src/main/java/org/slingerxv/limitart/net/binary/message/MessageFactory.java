@@ -42,8 +42,9 @@ public class MessageFactory {
 		MessageFactory messageFactory = new MessageFactory();
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, IHandler.class);
 		for (Class<?> clzz : classesByPackage) {
-			if (clzz.isAnonymousClass()) {
-				log.warn("inner class or anonymous class will not be registerd:" + clzz.getName());
+			if (Modifier.isAbstract(clzz.getModifiers()) || clzz.isAnonymousClass() || clzz.isMemberClass()
+					|| clzz.isLocalClass()) {
+				log.warn("inner class or anonymous class or abstract class will not be registerd:" + clzz.getName());
 				continue;
 			}
 			messageFactory.registerMsg((IHandler) clzz.newInstance());
@@ -54,12 +55,13 @@ public class MessageFactory {
 	@SuppressWarnings("unchecked")
 	private static void checkMessageMetas(String packageName) throws Exception {
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, MessageMeta.class);
-		for (Class<?> temp : classesByPackage) {
-			if (temp.isAnonymousClass() || Modifier.isAbstract(temp.getModifiers())) {
+		for (Class<?> clzz : classesByPackage) {
+			if (Modifier.isAbstract(clzz.getModifiers()) || clzz.isAnonymousClass() || clzz.isMemberClass()
+					|| clzz.isLocalClass()) {
 				continue;
 			}
-			log.info("check message:" + temp.getName());
-			Class<? extends MessageMeta> clazz = (Class<? extends MessageMeta>) temp;
+			log.info("check message:" + clzz.getName());
+			Class<? extends MessageMeta> clazz = (Class<? extends MessageMeta>) clzz;
 			MessageMeta newInstance = clazz.newInstance();
 			ByteBuf buffer = Unpooled.directBuffer(256);
 			newInstance.buffer(buffer);
@@ -70,8 +72,7 @@ public class MessageFactory {
 		}
 	}
 
-	public synchronized MessageFactory registerMsg(IHandler<? extends Message> handler)
-			throws MessageIDDuplicatedException, Exception {
+	public synchronized MessageFactory registerMsg(IHandler<? extends Message> handler) throws Exception {
 		Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
 		ParameterizedType handlerInterface = null;
 		for (Type temp : genericInterfaces) {
