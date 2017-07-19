@@ -206,10 +206,19 @@ public class TXCardsCalculator {
 				if (i < 3) {
 					break;
 				}
+				// 满足A2345特殊情况
+				if(j == -1 && cardNumbers[cardNumbers.length - 1] > 0){
+					maxNumberOfStraight = (byte) (i + 2);
+					break;
+				}else if(j == -1 && cardNumbers[cardNumbers.length - 1] <= 0){
+					break;
+				}
+				// 不连续
 				if (cardNumbers[j] <= 0) {
 					break;
 				}
-				if (j == i - 4 || (i == 3 && j == 0 && cardNumbers[cardNumbers.length - 1] > 0)) {
+				// 普通顺子
+				if (j == i - 4) {
 					maxNumberOfStraight = (byte) (i + 2);
 					break;
 				}
