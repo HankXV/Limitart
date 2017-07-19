@@ -14,7 +14,7 @@ import org.slingerxv.limitart.util.StringUtil;
  * @author hank
  *
  */
-public class ConstraintMap<K> implements IConstraintMap<K> {
+public class ConstraintMap<K> implements IPrimitiveTypeMap<K> {
 	private Map<K, Object> map;
 
 	protected ConstraintMap(Map<K, Object> map) {
@@ -33,22 +33,18 @@ public class ConstraintMap<K> implements IConstraintMap<K> {
 		this.map.putAll(map.map);
 	}
 
-	@Override
 	public void clear() {
 		map.clear();
 	}
 
-	@Override
 	public boolean hasKey(K key) {
 		return map.containsKey(key);
 	}
 
-	@Override
 	public boolean removeKey(K key) {
 		return map.remove(key) != null;
 	}
 
-	@Override
 	public int size() {
 		return map.size();
 	}
@@ -132,6 +128,19 @@ public class ConstraintMap<K> implements IConstraintMap<K> {
 	}
 
 	@Override
+	public void putChar(K key, char value) {
+		map.put(key, value);
+	}
+
+	@Override
+	public char getChar(K key) {
+		if (!hasKey(key)) {
+			return 0;
+		}
+		return (char) map.get(key);
+	}
+
+	@Override
 	public void putBoolean(K key, boolean value) {
 		putInt(key, value ? 1 : 0);
 	}
@@ -199,4 +208,5 @@ public class ConstraintMap<K> implements IConstraintMap<K> {
 		map.fromJSON(jsonContent);
 		return map;
 	}
+
 }

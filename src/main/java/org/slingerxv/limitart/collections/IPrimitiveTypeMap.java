@@ -1,13 +1,13 @@
 package org.slingerxv.limitart.collections;
 
-public interface IConstraintMap<K> {
-	void clear();
-
-	boolean hasKey(K key);
-
-	boolean removeKey(K key);
-
-	int size();
+/**
+ * 基础类型操作Map
+ * 
+ * @author hank
+ *
+ * @param <K>
+ */
+public interface IPrimitiveTypeMap<K> {
 
 	void putByte(K key, byte value);
 
@@ -36,6 +36,10 @@ public interface IConstraintMap<K> {
 	void putBoolean(K key, boolean value);
 
 	boolean getBoolean(K key);
+
+	void putChar(K key, char value);
+
+	char getChar(K key);
 
 	void putString(K key, String value);
 
