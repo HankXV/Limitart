@@ -14,7 +14,7 @@ import org.slingerxv.limitart.util.StringUtil;
  * @author hank
  *
  */
-public class ConstraintMap<K> {
+public class ConstraintMap<K> implements IConstraintMap<K> {
 	private Map<K, Object> map;
 
 	protected ConstraintMap(Map<K, Object> map) {
@@ -33,138 +33,115 @@ public class ConstraintMap<K> {
 		this.map.putAll(map.map);
 	}
 
-	public boolean hasKey(K key) {
-		return map.containsKey(key);
-	}
-
+	@Override
 	public void clear() {
 		map.clear();
 	}
 
+	@Override
+	public boolean hasKey(K key) {
+		return map.containsKey(key);
+	}
+
+	@Override
 	public boolean removeKey(K key) {
 		return map.remove(key) != null;
 	}
 
+	@Override
 	public int size() {
 		return map.size();
 	}
 
+	@Override
 	public void putByte(K key, byte value) {
 		map.put(key, value);
 	}
 
-	public Byte getByte(K key) {
-		if (!hasKey(key)) {
-			return null;
-		}
-		return Byte.valueOf(map.get(key).toString());
-	}
-
-	public byte getByte2(K key) {
+	@Override
+	public byte getByte(K key) {
 		if (!hasKey(key)) {
 			return 0;
 		}
-		return getByte(key);
+		return (byte) map.get(key);
 	}
 
+	@Override
 	public void putShort(K key, short value) {
 		map.put(key, value);
 	}
 
-	public Short getShort(K key) {
-		if (!hasKey(key)) {
-			return null;
-		}
-		return Short.valueOf(map.get(key).toString());
-	}
-
-	public short getShort2(K key) {
+	@Override
+	public short getShort(K key) {
 		if (!hasKey(key)) {
 			return 0;
 		}
-		return getShort(key);
+		return (short) map.get(key);
 	}
 
+	@Override
 	public void putInt(K key, int value) {
 		map.put(key, value);
 	}
 
-	public Integer getInt(K key) {
-		if (!hasKey(key)) {
-			return null;
-		}
-		return Integer.valueOf(map.get(key).toString());
-	}
-
-	public int getInt2(K key) {
+	@Override
+	public int getInt(K key) {
 		if (!hasKey(key)) {
 			return 0;
 		}
-		return getInt(key);
+		return (int) map.get(key);
 	}
 
+	@Override
 	public void putLong(K key, long value) {
 		map.put(key, value);
 	}
 
-	public Long getLong(K key) {
-		if (!hasKey(key)) {
-			return null;
-		}
-		return Long.valueOf(map.get(key).toString());
-	}
-
-	public long getLong2(K key) {
+	@Override
+	public long getLong(K key) {
 		if (!hasKey(key)) {
 			return 0;
 		}
-		return getLong(key);
+		return (long) map.get(key);
 	}
 
+	@Override
 	public void putFloat(K key, float value) {
 		map.put(key, value);
 	}
 
-	public Float getFloat(K key) {
+	@Override
+	public float getFloat(K key) {
 		if (!hasKey(key)) {
-			return null;
+			return 0;
 		}
-		return Float.valueOf(map.get(key).toString());
+		return (float) map.get(key);
 	}
 
-	public float getFloat2(K key) {
-		if (!hasKey(key)) {
-			return 0F;
-		}
-		return getFloat(key);
-	}
-
+	@Override
 	public void putDouble(K key, double value) {
 		map.put(key, value);
 	}
 
-	public Double getDouble(K key) {
+	@Override
+	public double getDouble(K key) {
 		if (!hasKey(key)) {
-			return null;
+			return 0;
 		}
-		return Double.valueOf(map.get(key).toString());
+		return (double) map.get(key);
 	}
 
-	public double getDouble2(K key) {
-		if (!hasKey(key)) {
-			return 0D;
-		}
-		return getDouble(key);
-	}
-
+	@Override
 	public void putBoolean(K key, boolean value) {
 		putInt(key, value ? 1 : 0);
 	}
 
+	@Override
 	public boolean getBoolean(K key) {
-		return getInt2(key) == 1;
+		return getInt(key) == 1;
 	}
 
+	@Override
 	public void putString(K key, String value) {
 		if (value == null) {
 			map.put(key, "");
@@ -173,25 +150,15 @@ public class ConstraintMap<K> {
 		}
 	}
 
+	@Override
 	public String getString(K key) {
 		if (!hasKey(key)) {
-			return null;
+			return "";
 		}
 		return (String) map.get(key);
 	}
 
-	public String getString2(K key) {
-		if (!hasKey(key)) {
-			return "";
-		}
-		return getString(key);
-	}
-
 	public <T> void putObject(K key, T value) {
-		map.put(key, value);
-	}
-
-	public void putObject2(K key, Object value) {
 		map.put(key, value);
 	}
 
@@ -201,10 +168,6 @@ public class ConstraintMap<K> {
 			return null;
 		}
 		return (T) map.get(key);
-	}
-
-	public Object getObject2(K key) {
-		return map.get(key);
 	}
 
 	public Set<K> keySet() {
