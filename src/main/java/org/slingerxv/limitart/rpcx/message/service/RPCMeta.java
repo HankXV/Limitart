@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageMeta;
-import org.slingerxv.limitart.util.StringUtil;
 
 public abstract class RPCMeta extends Message {
 
@@ -23,43 +22,43 @@ public abstract class RPCMeta extends Message {
 	protected final Object decodeObj(String type) throws Exception {
 		if (type == null || type.equals("null")) {
 			return null;
-		} else if (type.equals("java.lang.Integer") || type.equals("int")) {
+		} else if (type.equals(Integer.class.getName()) || type.equals(int.class.getName())) {
 			return getInt();
-		} else if (type.equals("[I")) {
+		} else if (type.equals(int[].class.getName())) {
 			return getIntArray();
-		} else if (type.equals("java.lang.Byte") || type.equals("byte")) {
+		} else if (type.equals(Byte.class.getName()) || type.equals(byte.class.getName())) {
 			return getByte();
-		} else if (type.equals("[B")) {
+		} else if (type.equals(byte[].class.getName())) {
 			return getByteArray();
-		} else if (type.equals("java.lang.Short") || type.equals("short")) {
+		} else if (type.equals(Short.class.getName()) || type.equals(short.class.getName())) {
 			return getShort();
-		} else if (type.equals("[S")) {
+		} else if (type.equals(short[].class.getName())) {
 			return getShortArray();
-		} else if (type.equals("java.lang.Long") || type.equals("long")) {
+		} else if (type.equals(Long.class.getName()) || type.equals(long.class.getName())) {
 			return getLong();
-		} else if (type.equals("[J")) {
+		} else if (type.equals(long[].class.getName())) {
 			return getLongArray();
-		} else if (type.equals("java.lang.Boolean") || type.equals("boolean")) {
+		} else if (type.equals(Boolean.class.getName()) || type.equals(boolean.class.getName())) {
 			return getBoolean();
-		} else if (type.equals("[Z")) {
+		} else if (type.equals(boolean[].class.getName())) {
 			return getBooleanArray();
-		} else if (type.equals("java.lang.String")) {
+		} else if (type.equals(String.class.getName())) {
 			return getString();
-		} else if (type.equals("[Ljava.lang.String;")) {
+		} else if (type.equals(String[].class.getName())) {
 			return getStringArray();
-		} else if (type.equals("java.lang.Float") || type.equals("float")) {
+		} else if (type.equals(Float.class.getName()) || type.equals(float.class.getName())) {
 			return getFloat();
-		} else if (type.equals("F")) {
+		} else if (type.equals(float[].class.getName())) {
 			return getFloatArray();
-		} else if (type.equals("java.lang.Double") || type.equals("double")) {
+		} else if (type.equals(Double.class.getName()) || type.equals(double.class.getName())) {
 			return getDouble();
-		} else if (type.equals("[D")) {
+		} else if (type.equals(double[].class.getName())) {
 			return getDoubleArray();
-		} else if (type.equals("java.lang.Character") || type.equals("char")) {
+		} else if (type.equals(Character.class.getName()) || type.equals(char.class.getName())) {
 			return getChar();
-		} else if (type.equals("[C")) {
+		} else if (type.equals(char[].class.getName())) {
 			return getCharArray();
-		} else if (type.equals("java.util.ArrayList") || type.equals("java.util.List")) {
+		} else if (type.equals(ArrayList.class.getName()) || type.equals(List.class.getName())) {
 			List<Object> objList = new ArrayList<>();
 			short length = getShort();
 			if (length > 0) {
@@ -69,7 +68,7 @@ public abstract class RPCMeta extends Message {
 				}
 			}
 			return objList;
-		} else if (type.equals("java.util.HashMap") || type.equals("java.util.Map")) {
+		} else if (type.equals(HashMap.class.getName()) || type.equals(Map.class.getName())) {
 			short length = getShort();
 			if (length == 0) {
 				return null;
@@ -81,7 +80,7 @@ public abstract class RPCMeta extends Message {
 				map.put(decodeObj(keyType), decodeObj(valueType));
 			}
 			return map;
-		} else if (type.equals("java.util.HashSet") || type.equals("java.util.Set")) {
+		} else if (type.equals(HashSet.class.getName()) || type.equals(Set.class.getName())) {
 			short length = getShort();
 			if (length == 0) {
 				return null;
@@ -103,55 +102,49 @@ public abstract class RPCMeta extends Message {
 		}
 	}
 
-	protected final void encodeObj(Object object) throws Exception {
-		encodeObj(object, null);
-	}
-
 	@SuppressWarnings("unchecked")
-	protected final void encodeObj(Object object, String type) throws Exception {
+	protected final void encodeObj(Object object) throws Exception {
 		if (object == null) {
 			return;
 		}
-		if (StringUtil.isEmptyOrNull(type)) {
-			type = object.getClass().getName();
-		}
-		if (type.equals("java.lang.Integer") || type.equals("int")) {
+		Class<?> type = object.getClass();
+		if (type.equals(Integer.class) || type.equals(int.class)) {
 			putInt((int) object);
-		} else if (type.equals("[I")) {
+		} else if (type.equals(int[].class)) {
 			putIntArray((int[]) object);
-		} else if (type.equals("java.lang.Byte") || type.equals("byte")) {
+		} else if (type.equals(Byte.class) || type.equals(byte.class)) {
 			putByte((byte) object);
-		} else if (type.equals("[B")) {
+		} else if (type.equals(byte[].class)) {
 			putByteArray((byte[]) object);
-		} else if (type.equals("java.lang.Short") || type.equals("short")) {
+		} else if (type.equals(Short.class) || type.equals(short.class)) {
 			putShort((short) object);
-		} else if (type.equals("[S")) {
+		} else if (type.equals(short[].class)) {
 			putShortArray((short[]) object);
-		} else if (type.equals("java.lang.Long") || type.equals("long")) {
+		} else if (type.equals(Long.class) || type.equals(long.class)) {
 			putLong((long) object);
-		} else if (type.equals("[J")) {
+		} else if (type.equals(long[].class)) {
 			putLongArray((long[]) object);
-		} else if (type.equals("java.lang.Boolean") || type.equals("boolean")) {
+		} else if (type.equals(Boolean.class) || type.equals(boolean.class)) {
 			putBoolean((boolean) object);
-		} else if (type.equals("[Z")) {
+		} else if (type.equals(boolean[].class)) {
 			putBooleanArray((boolean[]) object);
-		} else if (type.equals("java.lang.String")) {
+		} else if (type.equals(String.class)) {
 			putString((String) object);
-		} else if (type.equals("[Ljava.lang.String;")) {
+		} else if (type.equals(String[].class)) {
 			putStringArray((String[]) object);
-		} else if (type.equals("java.lang.Float") || type.equals("float")) {
+		} else if (type.equals(Float.class) || type.equals(float.class)) {
 			putFloat((float) object);
-		} else if (type.equals("F")) {
+		} else if (type.equals(float[].class)) {
 			putFloatArray((float[]) object);
-		} else if (type.equals("java.lang.Double") || type.equals("double")) {
+		} else if (type.equals(Double.class) || type.equals(double.class)) {
 			putDouble((double) object);
-		} else if (type.equals("[D")) {
+		} else if (type.equals(double[].class)) {
 			putDoubleArray((double[]) object);
-		} else if (type.equals("java.lang.Character") || type.equals("char")) {
+		} else if (type.equals(Character.class) || type.equals(char.class)) {
 			putChar((char) object);
-		} else if (type.equals("[C")) {
+		} else if (type.equals(char[].class)) {
 			putCharArray((char[]) object);
-		} else if (type.equals("java.util.ArrayList") || type.equals("java.util.List")) {
+		} else if (type.equals(ArrayList.class) || type.equals(List.class)) {
 			List<Object> objs = (List<Object>) object;
 			if (objs.isEmpty()) {
 				putShort((short) 0);
@@ -163,7 +156,7 @@ public abstract class RPCMeta extends Message {
 					encodeObj(obj);
 				}
 			}
-		} else if (type.equals("java.util.HashMap") || type.equals("java.util.Map")) {
+		} else if (type.equals(HashMap.class) || type.equals(Map.class)) {
 			Map<Object, Object> map = (Map<Object, Object>) object;
 			if (map.isEmpty()) {
 				putShort((short) 0);
@@ -180,7 +173,7 @@ public abstract class RPCMeta extends Message {
 					encodeObj(next.getValue());
 				}
 			}
-		} else if (type.equals("java.util.HashSet") || type.equals("java.util.Set")) {
+		} else if (type.equals(HashSet.class) || type.equals(Set.class)) {
 			Set<Object> set = (Set<Object>) object;
 			if (set.isEmpty()) {
 				putShort((short) 0);

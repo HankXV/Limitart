@@ -1,24 +1,19 @@
 package org.slingerxv.limitart.util;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class SymmetricEncryptionUtilTest {
-	SymmetricEncryptionUtil utilEncode;
-	SymmetricEncryptionUtil utilDecode;
-	SymmetricEncryptionUtil utilDecodeError;
+	private SymmetricEncryptionUtil utilEncode;
+	private SymmetricEncryptionUtil utilDecode;
+	private SymmetricEncryptionUtil utilDecodeError;
 
 	@Before
 	public void setUp() throws Exception {
 		utilEncode = SymmetricEncryptionUtil.getEncodeInstance("SymmetricEncryptionUtilTest", "okwjeofijop2i3jr");
 		utilDecode = SymmetricEncryptionUtil.getDecodeInstance("SymmetricEncryptionUtilTest");
 		utilDecodeError = SymmetricEncryptionUtil.getDecodeInstance("2324ds");
-	}
-
-	@After
-	public void tearDown() throws Exception {
 	}
 
 	@Test
