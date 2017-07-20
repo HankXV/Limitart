@@ -8,10 +8,10 @@ First, we neet to determine which messages the server can handle. Let's create a
 ```java
 
 	public class BinaryMessageDemo extends Message {
-		// 传递的信息 transfer of information
+		// transfer of information
 		public String info;
 	
-		// 消息编号 message id
+		//  message id
 		@Override
 		public short getMessageId() {
 			return 1;
@@ -43,9 +43,9 @@ Finally, initialize a server instance and bind it.
 ```java
 
 		BinaryServer server = new BinaryServer.BinaryServerBuilder()
-				// 指定端口 port
+				// port
 				.addressPair(new AddressPair(8888))
-				// 注册消息  register factory
+				// register factory
 				.factory(messageFactory).build();
 		server.startServer();
 		
