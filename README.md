@@ -1,14 +1,9 @@
 [![Build Status](https://travis-ci.org/HankXV/Limitart.svg?branch=master)](https://travis-ci.org/HankXV/Limitart)
-# 简介(Brief Introduction)
-一个旨在帮助快速搭建**Java中小型游戏服务器**的框架，通信底层采用Netty4.X，数据库采用MySql相关(框架其实并未与Mysql产生太多耦合，但建议使用Mysql)，生产消费者采用Disruptor等。**有想共同参与的或者向我吐槽的，留言**。
-
+# Brief Introduction
 This is a framework that designed to help to build a **Java Midrange Game Server** quickly. Its communicating interface based on Netty4.X, the database is using MySql (This framework is actually not much coupling with MySql, but it still recommonded to use MySql.), and the TaskQueue(MessageQueue) based on Disruptor. **If one have some advice or want be one of us, please leave any messages to us, and we are always welcome**
-## 环境要求(Environment)
-Jdk8或以上
-
+## Environment
 Jdk8 or above.
-# 快速开始(Quick start)
-第一步我们需要确定服务器可以处理哪些消息。让我们来创建第一个消息。
+# Quick start
 First, we neet to determine which messages the server can handle. Let's create a message.
 ```java
 
@@ -24,7 +19,6 @@ First, we neet to determine which messages the server can handle. Let's create a
 	}
 
 ```
-为上面的消息创建一个处理器，这里我们就简单的打印传输过来的内容即可。
 Create a Handler for the message. Here, we just simply print the contents of transmission.
 ```java
 
@@ -38,7 +32,6 @@ Create a Handler for the message. Here, we just simply print the contents of tra
 	}
 	
 ```
-构造一个消息工厂，把消息的处理器注册进去。
 Construct a `MessageFactory` that registers message's handler.
 ```java
 
@@ -46,7 +39,6 @@ Construct a `MessageFactory` that registers message's handler.
 	factory.registerMsg(BinaryHandlerDemo.class);
 		
 ```
-最后初始化一个服务器实例并绑定。收工！
 Finally, initialize a server instance and bind it. 
 ```java
 
@@ -58,7 +50,6 @@ Finally, initialize a server instance and bind it.
 		server.startServer();
 		
 ```
-下面看看客户端。因为我们现在不让客户端处理消息只发送消息，所以我们创建一个消息处理器传进消息工厂就行。现在开始构造客户端，填写好服务器地址和端口，当然还有客户端名称。你可以选择是否重连，我们这里就不展示了。添加监听器`onConnectionEffective`并在里面写发送消息给服务器的代码。
 Look at the client below. Because we do not allow client processing messages only send messages, so we create a message into the message processor factory on the line. Now build the client, fill in the server address and port, and, of course, the client name. You can choose whether or not to reconnect, and we don't show it here.Write the code that sends the message to the server in the listener `onConnectionEffective`.
 ```java
 
@@ -76,15 +67,13 @@ Look at the client below. Because we do not allow client processing messages onl
 		client.connect();
 				
 ```
-收工！
-To be finished！
+finished！
 ```java
 
 		BinaryClient client = new BinaryClient(config);
 		client.connect();
 		
 ```
-让我们来看看效果吧,启动服务器，服务器绑定成功,启动客户端，客户端链接成功，并发送了消息,服务器验证链接成功并且收到了消息！是不是很棒！！！
 Start the client, the client link is successful, and the message is sent.The server verified that the link was successful and received the message! cool!!!!
 ```
 
