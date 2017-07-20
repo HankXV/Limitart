@@ -195,6 +195,10 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K> {
 		return StringUtil.toJSON(this.map);
 	}
 
+	public String toJSONWithClassInfo() {
+		return StringUtil.toJSONWithClassInfo(this.map);
+	}
+
 	private void fromJSON(String jsonContent) {
 		if (!StringUtil.isEmptyOrNull(jsonContent)) {
 			@SuppressWarnings("unchecked")
