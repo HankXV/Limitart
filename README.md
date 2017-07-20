@@ -131,11 +131,6 @@ In practical development, it is always troublesome to care about registration me
 很多异步任务都需要由消息队列做中间层来完成线程的跳转，游戏中应用到的场景可能是消息的分发和异步IO任务(如异步数据库保存)的处理，这里提供两种实现，`DisruptorTaskQueue`和`LinkedBlockingTaskQueue`，前者底层为Disruptor快速无锁的环形队列，吞吐量很高，后者为Java原生的并发阻塞队列，推荐使用前者。
 ## 消息队列组(Task Queue Group)
 由于任务处理线程可能有动态增长的需要，这里加入一个简单的消息队列组来完成任务，其功能类似于Java自身的ThreadPoolExecutor,但是不同之处在于，消息队列组可以确定某个到来的任务只能由特定的线程执行，比如同一战场的玩家任务一定要在同一个线程执行，同一个地图的玩家任务也一定要在同一个线程执行，有交互行为的任务要在同一线程执行等。线程租中每个执行的单位需要继承`AutoGrowthEntity`以帮助他们找到自己所在的线程。
-## 数据库相关(Database)
-### 数据库表检查器(Database Table Checker)
-数据库表检查器的作用在于当服务器检测到数据库表结构和自身的对象结构不吻合时，应当立即关闭服务器，以免更糟糕的错误发生。要使用表结构检查器，需要用到表检查注解(`@TableCheck`)放在类上，字段检查注解(`@FieldCheck`)放在字段上，最后调用数据库表检查器(`TableChecker`)来注册需要检查的类返回检查结果。在项目中应当养成写检查的良好习惯。
-### 数据库日志系统(Database Logger)
-数据库日志系统主要用作统计，方便后台查看营收等游戏数据。每个日志都对应了一个日志结构(继承自`AbstractLog`)，他会指定滚动时间，与数据库对应的字段类型检查用注解`@LogColumn`放在字段上，日志的名字为类名的小写加滚动后缀。滚动的类型有日表、月表、年表、不滚动4种，按需配置。日志系统每次启动前都会检查所有表结构是否正确，如果不正确在可修正的范围内给与修正，如果无法修正则抛出异常。使用`LogDBServerConfig`来构造日志系统，需要指定扫描的日志包名、线程以及数据库编码之类的配置，建议线程数量不要太多，1-3个足够。
 ## 游戏常用集合类(Game Collections)
 ### 排行榜(IRankMap)
 `IRankMap`目前有两个实现(`FrequencyReadRankMap`、`FrequencyWriteRankMap`)前者是需要随时更新排名信息的，后者是一次性结算排名的，不同场景使用不同实现。排行元数据需要实现`IRankObj`接口。
