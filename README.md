@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/HankXV/Limitart.svg?branch=master)](https://travis-ci.org/HankXV/Limitart)
 # Brief Introduction
-This is a framework that designed to help to build a **Java Midrange Game Server** quickly. Its communicating interface based on Netty4.X, the database is using MySql (This framework is actually not much coupling with MySql, but it still recommonded to use MySql.), and the TaskQueue(MessageQueue) based on Disruptor. **If one have some advice or want be one of us, please leave any messages to us, and we are always welcome**
+This is a framework that designed to help to build a **Java Midrange Game Server** quickly. Its communicating interface based on Netty4.X and the TaskQueue(MessageQueue) based on Disruptor. **If one have some advice or want be one of us, please leave any messages to us, and we are always welcome**
 ## Environment
 Jdk8 or above.
 # Quick start
@@ -67,14 +67,7 @@ Look at the client below. Because we do not allow client processing messages onl
 		client.connect();
 				
 ```
-finished！
-```java
-
-		BinaryClient client = new BinaryClient(config);
-		client.connect();
-		
-```
-Start the client, the client link is successful, and the message is sent.The server verified that the link was successful and received the message! cool!!!!
+finished！The client link is successful, and the message is sent.The server verified that the link was successful and received the message! cool!!!!
 ```
 
 	server received message:Hello Limitart!
