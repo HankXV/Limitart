@@ -31,7 +31,7 @@ class AccessClassLoader extends ClassLoader {
 	}
 
 	@SuppressWarnings("rawtypes")
-	static AccessClassLoader get(Class type) {
+	public static AccessClassLoader get(Class type) {
 		ClassLoader parent = getParentClassLoader(type);
 		// 1. fast-path:
 		if (selfContextParentClassLoader.equals(parent)) {

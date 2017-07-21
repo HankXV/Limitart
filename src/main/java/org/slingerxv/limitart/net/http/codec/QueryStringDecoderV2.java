@@ -3,6 +3,7 @@ package org.slingerxv.limitart.net.http.codec;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.Objects;
 
 import org.slingerxv.limitart.collections.ConstraintMap;
 
@@ -38,16 +39,11 @@ public class QueryStringDecoderV2 {
 	}
 
 	public QueryStringDecoderV2(String uri, Charset charset, boolean hasPath, int maxParams) {
-		if (uri == null) {
-			throw new NullPointerException("getUri");
-		}
-		if (charset == null) {
-			throw new NullPointerException("charset");
-		}
+		Objects.requireNonNull(uri, "getUri");
+		Objects.requireNonNull(charset, "charset");
 		if (maxParams <= 0) {
 			throw new IllegalArgumentException("maxParams: " + maxParams + " (expected: a positive integer)");
 		}
-
 		this.uri = uri;
 		this.charset = charset;
 		this.maxParams = maxParams;

@@ -233,7 +233,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_METHOD_FORBBIDEN);
 			return;
 		}
-		if (url.equals("/2016info")) {
+		if ("/2016info".equals(url)) {
 			HttpUtil.sendResponse(ctx.channel(), HttpResponseStatus.OK, "hello~stupid!", true);
 			return;
 		}

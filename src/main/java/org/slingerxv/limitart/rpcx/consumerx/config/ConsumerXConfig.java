@@ -3,11 +3,11 @@ package org.slingerxv.limitart.rpcx.consumerx.config;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.slingerxv.limitart.rpcx.consumerx.selector.define.IProviderSelector;
 import org.slingerxv.limitart.rpcx.consumerx.struct.ProviderRemote;
-import org.slingerxv.limitart.util.StringUtil;
 
 /**
  * RPC服务消费者配置
@@ -92,14 +92,10 @@ public final class ConsumerXConfig {
 		}
 
 		public ConsumerXConfigBuilder appendProviderRemote(ProviderRemote remote) {
-			if (remote == null) {
-				throw new NullPointerException("ProviderRemote");
-			}
-			if (StringUtil.isEmptyOrNull(remote.getProviderIp())) {
-				throw new NullPointerException("providerIp");
-			}
+			Objects.requireNonNull(remote, "ProviderRemote");
+			Objects.requireNonNull(remote.getProviderIp(), "providerIp");
 			if (remote.getProviderPort() < 1024) {
-				throw new NullPointerException("providerPort must >=1024");
+				throw new IllegalArgumentException("providerPort must >=1024");
 			}
 			if (providerRemotes == null) {
 				providerRemotes = new ArrayList<>();
@@ -109,33 +105,30 @@ public final class ConsumerXConfig {
 		}
 
 		public ConsumerXConfigBuilder serviceCenterIp(String serviceCenterIp) {
-			if (StringUtil.isEmptyOrNull(serviceCenterIp)) {
-				throw new NullPointerException("serviceCenterIp");
-			}
+			Objects.requireNonNull(serviceCenterIp, "serviceCenterIp");
 			this.serviceCenterIp = serviceCenterIp;
 			return this;
 		}
 
 		public ConsumerXConfigBuilder serviceCenterPort(int serviceCenterPort) {
 			if (serviceCenterPort < 1024) {
-				throw new NullPointerException("serviceCenterPort must >=1024");
+				throw new IllegalArgumentException("serviceCenterPort must >=1024");
 			}
 			this.serviceCenterPort = serviceCenterPort;
 			return this;
 		}
 
-		public ConsumerXConfigBuilder addServicePackage(String servicePackage) {
-			if (StringUtil.isEmptyOrNull(servicePackage)) {
-				throw new NullPointerException("servicePackage");
+		public ConsumerXConfigBuilder addServicePackage(String... servicePackages) {
+			Objects.requireNonNull(servicePackages, "servicePackages");
+			for (String temp : servicePackages) {
+				Objects.requireNonNull(temp, "servicePackage");
+				this.servicePackages.add(temp);
 			}
-			this.servicePackages.add(servicePackage);
 			return this;
 		}
 
 		public ConsumerXConfigBuilder selector(IProviderSelector selector) {
-			if (selector == null) {
-				throw new NullPointerException("IProviderSelector");
-			}
+			Objects.requireNonNull(selector, "selector");
 			this.selector = selector;
 			return this;
 		}

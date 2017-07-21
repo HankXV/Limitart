@@ -9,6 +9,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -354,12 +355,8 @@ public final class SecurityUtil {
 	}
 
 	private static int decode4to3(byte[] source, int srcOffset, byte[] destination, int destOffset, int options) {
-		if (source == null) {
-			throw new NullPointerException("Source array was null.");
-		}
-		if (destination == null) {
-			throw new NullPointerException("Destination array was null.");
-		}
+		Objects.requireNonNull(source, "Source array was null.");
+		Objects.requireNonNull(destination, "Destination array was null.");
 		if ((srcOffset < 0) || (srcOffset + 3 >= source.length)) {
 			throw new IllegalArgumentException(
 					String.format("Source array with length %d cannot have offset of %d and still process four bytes.",
@@ -402,9 +399,7 @@ public final class SecurityUtil {
 	}
 
 	private static byte[] decode(byte[] source, int off, int len, int options) throws InvalidBase64CharacterException {
-		if (source == null) {
-			throw new NullPointerException("Cannot decode null source array.");
-		}
+		Objects.requireNonNull(source, "Cannot decode null source array.");
 		if ((off < 0) || (off + len > source.length)) {
 			throw new IllegalArgumentException(
 					String.format("Source array with length %d cannot have offset of %d and process %d bytes.",

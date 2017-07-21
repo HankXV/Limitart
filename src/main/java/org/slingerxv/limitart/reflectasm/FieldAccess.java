@@ -40,14 +40,14 @@ public abstract class FieldAccess {
 	private Field[] fields;
 
 	public int getIndex(String fieldName) {
-		for (int i = 0, n = fieldNames.length; i < n; ++i)
+		for (int i = 0; i < fieldNames.length; ++i)
 			if (fieldNames[i].equals(fieldName))
 				return i;
 		throw new IllegalArgumentException("Unable to find non-private field: " + fieldName);
 	}
 
 	public int getIndex(Field field) {
-		for (int i = 0, n = fields.length; i < n; ++i)
+		for (int i = 0; i < fields.length; ++i)
 			if (fields[i].equals(field))
 				return i;
 		throw new IllegalArgumentException("Unable to find non-private field: " + field);
@@ -126,10 +126,7 @@ public abstract class FieldAccess {
 
 			@Override
 			public boolean filter(Field field) {
-				if (!(FieldFilter.isStatic(field)))
-					if (!(FieldFilter.isPrivate(field)))
-						return true;
-				return false;
+				return !(FieldFilter.isStatic(field)) && !(FieldFilter.isPrivate(field));
 			}
 		});
 	}
@@ -139,8 +136,7 @@ public abstract class FieldAccess {
 		ArrayList<Field> fields = (ArrayList<Field>) ReflectionUtil.getFields(type, isSuper, filter);
 		String[] fieldNames = new String[fields.size()];
 		Class[] fieldTypes = new Class[fields.size()];
-		int i = 0;
-		for (int n = fieldNames.length; i < n; ++i) {
+		for (int i = 0; i < fieldNames.length; ++i) {
 			fieldNames[i] = ((Field) fields.get(i)).getName();
 			fieldTypes[i] = ((Field) fields.get(i)).getType();
 		}

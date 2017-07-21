@@ -21,7 +21,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 
 public abstract class ConstructorAccess<T> {
-	boolean isNonStaticMemberClass;
+	private boolean isNonStaticMemberClass;
 
 	public boolean isNonStaticMemberClass() {
 		return isNonStaticMemberClass;

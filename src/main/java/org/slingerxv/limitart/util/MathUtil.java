@@ -14,8 +14,9 @@ public final class MathUtil {
 	 * @param pickNum
 	 * @return
 	 */
-	public static <E> List<List<E>> CNM(List<E> source, int pickNum) {
+	public static <E> List<List<E>> CNM(List<E> source, int getNum) {
 		List<List<E>> result = new ArrayList<>();
+		int pickNum = getNum;
 		if (pickNum < 0) {
 			pickNum = 1;
 		}

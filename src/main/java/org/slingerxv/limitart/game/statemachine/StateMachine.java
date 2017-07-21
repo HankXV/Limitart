@@ -2,6 +2,7 @@ package org.slingerxv.limitart.game.statemachine;
 
 import java.text.MessageFormat;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,9 +47,7 @@ public class StateMachine {
 	}
 
 	public StateMachine addState(State... states) throws StateException {
-		if (states == null) {
-			throw new NullPointerException("states");
-		}
+		Objects.requireNonNull(states, "states");
 		for (State temp : states) {
 			addState(temp);
 		}
@@ -62,12 +61,8 @@ public class StateMachine {
 	 * @throws Exception
 	 */
 	public StateMachine addState(State state) throws StateException {
-		if (state == null) {
-			throw new NullPointerException("state");
-		}
-		if (state.getStateId() == null) {
-			throw new NullPointerException("stateId");
-		}
+		Objects.requireNonNull(state, "state");
+		Objects.requireNonNull(state.getStateId(), "stateId");
 		if (this.stateMap.containsKey(state.getStateId())) {
 			throw new StateException("NodeId:" + state.getStateId() + " duplicated in this FSM !");
 		}
@@ -84,9 +79,7 @@ public class StateMachine {
 	 * @throws StateException
 	 */
 	private StateMachine changeState(Integer stateId) throws StateException {
-		if (stateId == null) {
-			throw new NullPointerException("stateId");
-		}
+		Objects.requireNonNull(stateId, "stateId");
 		if (this.curState != null && stateId.intValue() == this.curState.getStateId().intValue()) {
 			return this;
 		}

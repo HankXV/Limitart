@@ -71,9 +71,11 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements IRankMap<K, 
 	}
 
 	@Override
-	public List<V> getRange(int start, int end) {
+	public List<V> getRange(int startIndex, int endIndex) {
 		List<V> temp = new ArrayList<>();
 		int size = size();
+		int start = startIndex;
+		int end = endIndex;
 		if (size == 0) {
 			return temp;
 		}
@@ -98,8 +100,9 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements IRankMap<K, 
 	}
 
 	@Override
-	public V getAt(int index) {
+	public V getAt(int at) {
 		int size = size();
+		int index = at;
 		if (size == 0) {
 			return null;
 		}

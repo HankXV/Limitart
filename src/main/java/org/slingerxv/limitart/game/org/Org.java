@@ -162,10 +162,8 @@ public abstract class Org {
 			throw new CreatorCanNotQuitException();
 		}
 		OrgMember remove = members.remove(member.getMemberId());
-		if (remove != null) {
-			if (onQuit != null) {
-				onQuit.run(this, remove);
-			}
+		if (remove != null && onQuit != null) {
+			onQuit.run(this, remove);
 		}
 		return this;
 	}

@@ -1533,7 +1533,8 @@ public abstract class MessageMeta {
 		}
 	}
 
-	private void writeRawVarint32(int value) {
+	private void writeRawVarint32(int val) {
+		int value = val;
 		while (true) {
 			if ((value & 0xFFFFFF80) == 0) {
 				this.buffer.writeByte(value);

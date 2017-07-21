@@ -69,7 +69,7 @@ public abstract class MethodAccess {
 	 */
 	@SuppressWarnings("rawtypes")
 	public int getIndex(String methodName, Class... paramTypes) {
-		for (int i = 0, n = methodNames.length; i < n; i++)
+		for (int i = 0; i < methodNames.length; i++)
 			if (methodNames[i].equals(methodName) && Arrays.equals(paramTypes, parameterTypes[i]))
 				return i;
 		throw new IllegalArgumentException(
@@ -81,7 +81,7 @@ public abstract class MethodAccess {
 	 * specified number of arguments.
 	 */
 	public int getIndex(String methodName, int paramsCount) {
-		for (int i = 0, n = methodNames.length; i < n; i++)
+		for (int i = 0; i < methodNames.length; i++)
 			if (methodNames[i].equals(methodName) && parameterTypes[i].length == paramsCount)
 				return i;
 		throw new IllegalArgumentException(

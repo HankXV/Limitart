@@ -14,7 +14,7 @@ import org.slingerxv.limitart.funcs.Proc3;
  *
  */
 public class TXPotPool {
-	Map<String, TXPot> pots = new HashMap<>();
+	private Map<String, TXPot> pots = new HashMap<>();
 
 	/**
 	 * 每轮触发的计算

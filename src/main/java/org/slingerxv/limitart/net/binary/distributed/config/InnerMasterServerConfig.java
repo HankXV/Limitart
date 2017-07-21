@@ -1,5 +1,7 @@
 package org.slingerxv.limitart.net.binary.distributed.config;
 
+import java.util.Objects;
+
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 
 /**
@@ -16,9 +18,7 @@ public final class InnerMasterServerConfig {
 	private InnerMasterServerConfig(InnerMasterServerConfigBuilder builder) {
 		this.serverName = builder.serverName;
 		this.masterPort = builder.masterPort;
-		if (builder.factory == null) {
-			throw new NullPointerException("factory");
-		}
+		Objects.requireNonNull(factory, "factory");
 		this.factory = builder.factory;
 	}
 

@@ -1,9 +1,8 @@
 package org.slingerxv.limitart.rpcx.providerx.config;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-
-import org.slingerxv.limitart.util.StringUtil;
 
 /**
  * RPC服务提供者配置
@@ -70,40 +69,33 @@ public final class ProviderXConfig {
 		private Set<String> servicePackage = new HashSet<>();
 		private String serviceImplPackages;
 
-		public ProviderXConfigBuilder() {
-		}
-
 		public ProviderXConfig build() {
 			return new ProviderXConfig(this);
 		}
 
 		public ProviderXConfigBuilder myIp(String myIp) {
-			if (StringUtil.isEmptyOrNull(myIp)) {
-				throw new NullPointerException("myIp");
-			}
+			Objects.requireNonNull(myIp, "myIp");
 			this.myIp = myIp;
 			return this;
 		}
 
 		public ProviderXConfigBuilder myPort(int myPort) {
 			if (myPort < 1024) {
-				throw new NullPointerException("port must >=1024");
+				throw new IllegalArgumentException("port must >=1024");
 			}
 			this.myPort = myPort;
 			return this;
 		}
 
 		public ProviderXConfigBuilder serviceCenterIp(String serviceCenterIp) {
-			if (StringUtil.isEmptyOrNull(serviceCenterIp)) {
-				throw new NullPointerException("serviceCenterIp");
-			}
+			Objects.requireNonNull(serviceCenterIp, "serviceCenterIp");
 			this.serviceCenterIp = serviceCenterIp;
 			return this;
 		}
 
 		public ProviderXConfigBuilder serviceCenterPort(int serviceCenterPort) {
 			if (serviceCenterPort < 1024) {
-				throw new NullPointerException("serviceCenterPort must >=1024");
+				throw new IllegalArgumentException("serviceCenterPort must >=1024");
 			}
 			this.serviceCenterPort = serviceCenterPort;
 			return this;
@@ -117,15 +109,16 @@ public final class ProviderXConfig {
 			return this;
 		}
 
-		public ProviderXConfigBuilder addServicePackage(String servicePackage) {
-			if (StringUtil.isEmptyOrNull(servicePackage)) {
-				throw new NullPointerException("servicePackage");
+		public ProviderXConfigBuilder addServicePackage(String... servicePackages) {
+			Objects.requireNonNull(servicePackages, "servicePackages");
+			for (String temp : servicePackages) {
+				this.servicePackage.add(temp);
 			}
-			this.servicePackage.add(servicePackage);
 			return this;
 		}
 
 		public ProviderXConfigBuilder serviceImplPackages(String serviceImplPackages) {
+			Objects.requireNonNull(serviceImplPackages, "serviceImplPackages");
 			this.serviceImplPackages = serviceImplPackages;
 			return this;
 		}
