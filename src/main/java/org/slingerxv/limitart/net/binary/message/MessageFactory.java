@@ -49,6 +49,13 @@ public class MessageFactory {
 			}
 			messageFactory.registerMsg((IHandler) clzz.newInstance());
 		}
+
+//		List<Class<?>> classesOfAnnotation = ReflectionUtil.getClassesByPackage(packageName, (clazz) -> {
+//			return clazz.getAnnotation(Controller.class) != null;
+//		});
+//		for (Class<?> clzz : classesOfAnnotation) {
+			// TODO
+//		}
 		return messageFactory;
 	}
 

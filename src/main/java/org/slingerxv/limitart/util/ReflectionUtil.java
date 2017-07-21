@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.slingerxv.limitart.funcs.Func1;
 import org.slingerxv.limitart.util.filter.FieldFilter;
 
 /**
@@ -65,6 +66,13 @@ public final class ReflectionUtil {
 	 */
 	public static List<Class<?>> getClassesByPackage(String packageName, Class<?> superClass)
 			throws IOException, ClassNotFoundException {
+		return getClassesByPackage(packageName, (clazz) -> {
+			return superClass.isAssignableFrom(clazz) && !(superClass.equals(clazz));
+		});
+	}
+
+	public static List<Class<?>> getClassesByPackage(String packageName, Func1<Class<?>, Boolean> filter)
+			throws IOException, ClassNotFoundException {
 		// 第一个class类的集合
 		List<Class<?>> classes = new ArrayList<Class<?>>();
 		// 获取包的名字 并进行替换
@@ -82,7 +90,7 @@ public final class ReflectionUtil {
 				// 获取包的物理路径
 				String filePath = URLDecoder.decode(url.getFile(), "UTF-8");
 				// 以文件的方式扫描整个包下的文件 并添加到集合中
-				findAndAddClassesInPackageByFile(packageName, filePath, true, classes, superClass);
+				findAndAddClassesInPackageByFile(packageName, filePath, true, classes, filter);
 			} else if ("jar".equals(protocol)) {
 				// 如果是jar包文件
 				// 定义一个JarFile
@@ -117,7 +125,7 @@ public final class ReflectionUtil {
 					String className = name.substring(packageName.length() + 1, name.length() - 6);
 					Class<?> loadClass = Thread.currentThread().getContextClassLoader()
 							.loadClass(packageName + '.' + className);
-					if ((superClass.isAssignableFrom(loadClass)) && (!(superClass.equals(loadClass)))) {
+					if (filter.run(loadClass)) {
 						classes.add(loadClass);
 					}
 				}
@@ -135,8 +143,8 @@ public final class ReflectionUtil {
 	 * @param classes
 	 * @throws ClassNotFoundException
 	 */
-	public static void findAndAddClassesInPackageByFile(String packageName, String packagePath, final boolean recursive,
-			List<Class<?>> classes, Class<?> superClass) {
+	private static void findAndAddClassesInPackageByFile(String packageName, String packagePath,
+			final boolean recursive, List<Class<?>> classes, Func1<Class<?>, Boolean> filter) {
 		// 获取此包的目录 建立一个File
 		File dir = new File(packagePath);
 		// 如果不存在或者 也不是目录就直接返回
@@ -155,7 +163,7 @@ public final class ReflectionUtil {
 			// 如果是目录 则继续扫描
 			if (file.isDirectory()) {
 				findAndAddClassesInPackageByFile(packageName + "." + file.getName(), file.getAbsolutePath(), recursive,
-						classes, superClass);
+						classes, filter);
 			} else {
 				// 如果是java类文件 去掉后面的.class 只留下类名
 				String className = file.getName().substring(0, file.getName().length() - 6);
@@ -165,7 +173,7 @@ public final class ReflectionUtil {
 				} catch (ClassNotFoundException e) {
 					continue;
 				}
-				if ((superClass.isAssignableFrom(loadClass)) && (!(superClass.equals(loadClass)))) {
+				if (filter.run(loadClass)) {
 					classes.add(loadClass);
 				}
 			}
