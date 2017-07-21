@@ -123,7 +123,7 @@ public class Poker {
 	 * @return
 	 */
 	public static boolean isBigJoker(byte card) {
-		return isJoker(card) && (getCardColor(card) == CARD_SUIT_HEART);
+		return (getCardNumber(card) == CARD_NUM_JOKER) && (getCardColor(card) == CARD_SUIT_HEART);
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class Poker {
 	 * @return
 	 */
 	public static boolean isSmallJoker(byte card) {
-		return isJoker(card) && (getCardColor(card) == CARD_SUIT_SPADE);
+		return (getCardNumber(card) == CARD_NUM_JOKER) && (getCardColor(card) == CARD_SUIT_SPADE);
 	}
 
 	/**
