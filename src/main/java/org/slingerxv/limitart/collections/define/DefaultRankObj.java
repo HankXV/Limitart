@@ -2,7 +2,9 @@ package org.slingerxv.limitart.collections.define;
 
 import java.util.Comparator;
 
-public class DefaultRankObj implements IRankObj<Long> {
+import org.slingerxv.limitart.funcs.Func;
+
+public class DefaultRankObj implements Func<Long> {
 	public static final DefaultRankComparator COMPARATOR = new DefaultRankComparator();
 	private long uniqueId;
 	private long param1;
@@ -17,7 +19,7 @@ public class DefaultRankObj implements IRankObj<Long> {
 	}
 
 	@Override
-	public Long key() {
+	public Long run() {
 		return uniqueId;
 	}
 

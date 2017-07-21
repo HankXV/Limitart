@@ -171,7 +171,7 @@ public class QueryStringDecoderV2 {
 		if (nParams >= maxParams) {
 			return false;
 		}
-		if (!params.hasKey(name)) {
+		if (!params.containsKey(name)) {
 			nParams++;
 		}
 		params.putString(name, value);

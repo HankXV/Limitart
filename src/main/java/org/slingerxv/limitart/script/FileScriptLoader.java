@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -15,7 +16,6 @@ import org.slingerxv.limitart.script.exception.ScriptException;
 import org.slingerxv.limitart.util.FileUtil;
 
 import groovy.lang.GroovyClassLoader;
-
 
 public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 
@@ -32,9 +32,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 	public AbstractScriptLoader<KEY> reloadScript(KEY scriptId) throws CompilationFailedException, IOException,
 			InstantiationException, IllegalAccessException, ScriptException {
 		File file = scriptPath.get(scriptId);
-		if (file == null) {
-			throw new NullPointerException("script id:" + scriptId + " does not exist!");
-		}
+		Objects.requireNonNull(file, "script id:" + scriptId + " does not exist!");
 		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader())) {
 			Class<?> parseClass = loader.parseClass(file);
 			Object newInstance = parseClass.newInstance();

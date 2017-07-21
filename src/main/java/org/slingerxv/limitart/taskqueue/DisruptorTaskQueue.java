@@ -1,11 +1,13 @@
 package org.slingerxv.limitart.taskqueue;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.funcs.Func1;
 import org.slingerxv.limitart.funcs.Proc1;
+import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
 import org.slingerxv.limitart.thread.NamedThreadFactory;
@@ -31,6 +33,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	private TaskQueueEventProducerWithTraslator traslator;
 	private Func1<T, Boolean> intercept;
 	private Proc1<T> handle;
+	private Proc2<T, Throwable> exception;
 
 	public DisruptorTaskQueue(String threadName) {
 		this(threadName, 2048);
@@ -61,7 +64,11 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 
 			@Override
 			public void onEvent(DisruptorTaskQueueEvent arg0, long arg1, boolean arg3) throws Exception {
-				log.error(new Exception("exception cathed:" + arg0.getMsg().getClass()));
+				Exception e = new Exception("exception catched:" + arg0.getMsg().getClass());
+				log.error(e, e);
+				if (exception != null) {
+					exception.run(arg0.msg, e);
+				}
 			}
 		});
 		traslator = new TaskQueueEventProducerWithTraslator(disruptor.getRingBuffer());
@@ -74,6 +81,11 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 
 	public ITaskQueue<T> handle(Proc1<T> handle) {
 		this.handle = handle;
+		return this;
+	}
+
+	public ITaskQueue<T> exception(Proc2<T, Throwable> exception) {
+		this.exception = exception;
 		return this;
 	}
 
@@ -95,14 +107,12 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	}
 
 	@Override
-	public void addCommand(T t) throws TaskQueueException {
-		if (t == null) {
-			throw new NullPointerException("t");
-		}
+	public void addCommand(T command) throws TaskQueueException {
+		Objects.requireNonNull(command, "command");
 		if (this.disruptor == null) {
 			throw new TaskQueueException(getThreadName() + " has not start yet!");
 		}
-		this.traslator.onData(t);
+		this.traslator.onData(command);
 	}
 
 	@Override

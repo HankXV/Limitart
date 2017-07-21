@@ -1,15 +1,18 @@
 package org.slingerxv.limitart.collections;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.slingerxv.limitart.collections.define.IRankMap;
-import org.slingerxv.limitart.collections.define.IRankObj;
+import org.slingerxv.limitart.funcs.Func;
 
 /**
  * 高频率写入排行结构 主要用于写入频率远远大于读取频率
@@ -19,7 +22,7 @@ import org.slingerxv.limitart.collections.define.IRankObj;
  * @param <K>
  * @param <V>
  */
-public class FrequencyWriteRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V> {
+public class FrequencyWriteRankMap<K, V extends Func<K>> implements IRankMap<K, V> {
 	private final TreeSet<V> treeSet;
 	private final Map<K, V> map;
 	private final Comparator<V> comparator;
@@ -28,6 +31,10 @@ public class FrequencyWriteRankMap<K, V extends IRankObj<K>> implements IRankMap
 	private boolean modified = false;
 
 	public FrequencyWriteRankMap(Comparator<V> comparator, int capacity) {
+		Objects.requireNonNull(comparator, "comparator");
+		if (capacity <= 0) {
+			throw new IllegalArgumentException("capacity > 0");
+		}
 		this.treeSet = new TreeSet<>(comparator);
 		this.map = new HashMap<>(capacity);
 		this.comparator = comparator;
@@ -40,32 +47,6 @@ public class FrequencyWriteRankMap<K, V extends IRankObj<K>> implements IRankMap
 		map.clear();
 		indexList = null;
 		modified = true;
-	}
-
-	@Override
-	public synchronized void put(K key, V value) {
-		if (map.containsKey(key)) {
-			V obj = map.get(key);
-			// 比较新数据与老数据大小
-			if (comparator.compare(value, obj) == 0) {
-				return;
-			}
-			// 因为防止老对象被更改值，所以要删除一次
-			treeSet.remove(obj);
-		}
-		map.put(key, value);
-		treeSet.add(value);
-		modified = true;
-		// 清理排行最后的数据
-		while (map.size() > capacity) {
-			V pollLast = treeSet.pollLast();
-			map.remove(pollLast.key());
-		}
-	}
-
-	@Override
-	public boolean containsKey(K key) {
-		return map.containsKey(key);
 	}
 
 	@Override
@@ -148,5 +129,77 @@ public class FrequencyWriteRankMap<K, V extends IRankObj<K>> implements IRankMap
 			modified = false;
 			indexList = new ArrayList<>(treeSet);
 		}
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
+
+	@Override
+	public boolean containsKey(Object key) {
+		return map.containsKey(key);
+	}
+
+	@Override
+	public boolean containsValue(Object value) {
+		return map.containsValue(value);
+	}
+
+	@Override
+	public V get(Object key) {
+		return map.get(key);
+	}
+
+	@Override
+	public synchronized V put(K key, V value) {
+		Objects.requireNonNull(key, "key");
+		Objects.requireNonNull(value, "value");
+		if (map.containsKey(key)) {
+			V obj = map.get(key);
+			// 比较新数据与老数据大小
+			if (comparator.compare(value, obj) == 0) {
+				return null;
+			}
+			// 因为防止老对象被更改值，所以要删除一次
+			treeSet.remove(obj);
+		}
+		map.put(key, value);
+		treeSet.add(value);
+		modified = true;
+		// 清理排行最后的数据
+		while (map.size() > capacity) {
+			V pollLast = treeSet.pollLast();
+			map.remove(pollLast.run());
+		}
+		return value;
+	}
+
+	@Override
+	public V remove(Object key) {
+		return null;
+	}
+
+	@Override
+	public void putAll(Map<? extends K, ? extends V> map) {
+		Objects.requireNonNull(map, "map");
+		for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
+			put(entry.getKey(), entry.getValue());
+		}
+	}
+
+	@Override
+	public Set<K> keySet() {
+		return null;
+	}
+
+	@Override
+	public Collection<V> values() {
+		return null;
+	}
+
+	@Override
+	public Set<Entry<K, V>> entrySet() {
+		return null;
 	}
 }

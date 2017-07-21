@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.net.binary;
 
 import java.net.SocketAddress;
+import java.util.Objects;
 import java.util.TimerTask;
 
 import org.apache.logging.log4j.LogManager;
@@ -65,22 +66,14 @@ public class BinaryClient {
 
 	private BinaryClient(BinaryClientBuilder builder) throws Exception {
 		this.clientName = builder.clientName;
-		if (builder.remoteAddress == null) {
-			throw new NullPointerException("remoteAddress");
-		}
+		Objects.requireNonNull(builder.remoteAddress, "remoteAddress");
 		this.remoteAddress = builder.remoteAddress;
 		this.autoReconnect = builder.autoReconnect;
-		if (builder.decoder == null) {
-			throw new NullPointerException("decoder");
-		}
+		Objects.requireNonNull(builder.decoder, "decoder");
 		this.decoder = builder.decoder;
-		if (builder.encoder == null) {
-			throw new NullPointerException("encoder");
-		}
+		Objects.requireNonNull(builder.encoder, "encoder");
 		this.encoder = builder.encoder;
-		if (builder.factory == null) {
-			throw new NullPointerException("factory");
-		}
+		Objects.requireNonNull(builder.factory, "factory");
 		this.factory = builder.factory;
 		this.onChannelStateChanged = builder.onChannelStateChanged;
 		this.onExceptionCaught = builder.onExceptionCaught;

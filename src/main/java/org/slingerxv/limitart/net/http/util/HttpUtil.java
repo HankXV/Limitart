@@ -151,7 +151,7 @@ public final class HttpUtil {
 			for (String temp : split2) {
 				String[] split3 = temp.split("[=]");
 				if (split3.length == 2) {
-					map.putObject(split3[0], split3[1]);
+					map.putString(split3[0], split3[1]);
 				}
 			}
 		}

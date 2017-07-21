@@ -6,6 +6,7 @@ import static io.netty.handler.codec.http.HttpMethod.POST;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,9 +81,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		this.httpObjectAggregatorMax = builder.httpObjectAggregatorMax;
 		this.serverName = builder.serverName;
 		this.whiteList = builder.whiteList;
-		if (builder.facotry == null) {
-			throw new NullPointerException("factory");
-		}
+		Objects.requireNonNull(builder.facotry, "factory");
 		this.facotry = builder.facotry;
 		this.onServerBind = builder.onServerBind;
 		this.onChannelStateChanged = builder.onChannelStateChanged;
@@ -270,7 +269,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 						Attribute at = (Attribute) data;
 						String name = at.getName();
 						String value = at.getValue();
-						params.putObject(name, value);
+						params.put(name, value);
 					} else if (data instanceof FileUpload) {
 						FileUpload fileUpload = (FileUpload) data;
 						int readableBytes = fileUpload.content().readableBytes();

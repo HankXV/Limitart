@@ -1,11 +1,13 @@
 package org.slingerxv.limitart.taskqueue;
 
+import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.funcs.Func1;
 import org.slingerxv.limitart.funcs.Proc1;
+import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 
 /**
@@ -21,6 +23,7 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 	private boolean start = false;
 	private Func1<T, Boolean> intercept;
 	private Proc1<T> handle;
+	private Proc2<T, Throwable> exception;
 
 	public LinkedBlockingTaskQueue(String threadName) {
 		setName(threadName);
@@ -33,6 +36,11 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 
 	public ITaskQueue<T> handle(Proc1<T> handle) {
 		this.handle = handle;
+		return this;
+	}
+
+	public ITaskQueue<T> exception(Proc2<T, Throwable> exception) {
+		this.exception = exception;
 		return this;
 	}
 
@@ -55,16 +63,17 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 				}
 			} catch (Exception e) {
 				log.error(e, e);
+				if (exception != null) {
+					exception.run(take, e);
+				}
 			}
 		}
 	}
 
 	@Override
-	public void addCommand(T t) {
-		if (t == null) {
-			throw new NullPointerException("t");
-		}
-		queue.offer(t);
+	public void addCommand(T command) {
+		Objects.requireNonNull(command, "command");
+		queue.offer(command);
 	}
 
 	@Override

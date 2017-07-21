@@ -1,24 +1,11 @@
 package org.slingerxv.limitart.collections.define;
 
 import java.util.List;
+import java.util.Map;
 
-public interface IRankMap<K, V extends IRankObj<K>> {
+import org.slingerxv.limitart.funcs.Func;
 
-	/**
-	 * 放入一个元素
-	 * 
-	 * @param key
-	 * @param value
-	 */
-	void put(K key, V value);
-
-	/**
-	 * 是否包含一个Key
-	 * 
-	 * @param key
-	 * @return
-	 */
-	boolean containsKey(K key);
+public interface IRankMap<K, V extends Func<K>> extends Map<K, V> {
 
 	/**
 	 * 集合大小

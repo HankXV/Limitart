@@ -1,5 +1,6 @@
 package org.slingerxv.limitart.taskqueuegroup;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,9 +29,7 @@ public class AutoGrowthTaskQueueGroup<T> {
 
 	public AutoGrowthTaskQueueGroup(int entityCountPerThread, int coreThreadCount, int initThreadCount,
 			int maxThreadCount, Func1<Integer, ITaskQueue<T>> newTaskQueue) throws Exception {
-		if (newTaskQueue == null) {
-			throw new NullPointerException("taskQueueFactory");
-		}
+		Objects.requireNonNull(newTaskQueue, "taskQueueFactory");
 		this.newTaskQueue = newTaskQueue;
 		this.maxThreadCount = maxThreadCount;
 		this.entityCountPerThread = entityCountPerThread;

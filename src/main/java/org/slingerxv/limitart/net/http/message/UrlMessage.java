@@ -24,7 +24,7 @@ public abstract class UrlMessage extends ConstraintMap<String> {
 		FieldAccess fieldAccess = getFieldAccess();
 		Field[] declaredFields = fieldAccess.getFields();
 		for (Field field : declaredFields) {
-			Object object = getObject(field.getName());
+			Object object = get(field.getName());
 			if (object != null) {
 				field.set(this, object);
 			}
@@ -37,7 +37,7 @@ public abstract class UrlMessage extends ConstraintMap<String> {
 		for (Field field : declaredFields) {
 			Object object = field.get(this);
 			if (object != null) {
-				putObject(field.getName(), object);
+				put(field.getName(), object);
 			}
 		}
 	}

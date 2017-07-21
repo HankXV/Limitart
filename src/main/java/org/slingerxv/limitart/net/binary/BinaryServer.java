@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -82,26 +83,16 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 	private BinaryServer(BinaryServerBuilder builder) throws Exception {
 		this.serverName = builder.serverName;
-		if (builder.addressPair == null) {
-			throw new NullPointerException("addressPair");
-		}
+		Objects.requireNonNull(builder.addressPair, "addressPair");
 		this.addressPair = builder.addressPair;
 		this.connectionValidateTimeInSec = builder.connectionValidateTimeInSec;
-		if (builder.decoder == null) {
-			throw new NullPointerException("decoder");
-		}
+		Objects.requireNonNull(builder.decoder, "decoder");
 		this.decoder = builder.decoder;
-		if (builder.encoder == null) {
-			throw new NullPointerException("encoder");
-		}
+		Objects.requireNonNull(builder.encoder, "encoder");
 		this.encoder = builder.encoder;
-		if (builder.whiteList == null) {
-			throw new NullPointerException("whiteList");
-		}
+		Objects.requireNonNull(builder.whiteList, "whiteList");
 		this.whiteList = builder.whiteList;
-		if (builder.factory == null) {
-			throw new NullPointerException("factory");
-		}
+		Objects.requireNonNull(builder.factory, "factory");
 		this.factory = builder.factory;
 		this.onChannelStateChanged = builder.onChannelStateChanged;
 		this.onExceptionCaught = builder.onExceptionCaught;

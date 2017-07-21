@@ -1,13 +1,16 @@
 package org.slingerxv.limitart.collections;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import org.slingerxv.limitart.collections.define.IRankMap;
-import org.slingerxv.limitart.collections.define.IRankObj;
+import org.slingerxv.limitart.funcs.Func;
 
 /**
  * 高频率读取排行结构 主要用于读取频率远远大于写入频率
@@ -17,7 +20,7 @@ import org.slingerxv.limitart.collections.define.IRankObj;
  * @param <K>
  * @param <V>
  */
-public class FrequencyReadRankMap<K, V extends IRankObj<K>> implements IRankMap<K, V> {
+public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V> {
 	private List<V> list;
 	private Map<K, V> map;
 	private final Comparator<V> comparator;
@@ -30,46 +33,14 @@ public class FrequencyReadRankMap<K, V extends IRankObj<K>> implements IRankMap<
 	}
 
 	public FrequencyReadRankMap(Comparator<V> comparator, int capacity) {
+		Objects.requireNonNull(comparator, "comparator");
+		if (capacity <= 0) {
+			throw new IllegalArgumentException("capacity > 0");
+		}
 		this.map = new HashMap<>(capacity);
 		this.comparator = comparator;
 		list = new ArrayList<>(capacity);
 		this.capacity = capacity;
-	}
-
-	@Override
-	public synchronized void put(K key, V value) {
-		if (map.containsKey(key)) {
-			V obj = map.get(key);
-			// 比较新数据与老数据大小
-			int compare = comparator.compare(value, obj);
-			if (compare == 0) {
-				return;
-			}
-			// 因为防止老对象被更改值，所以要删除一次
-			int binarySearch = binarySearch(obj, false);
-			list.remove(binarySearch);
-		} else {
-			if (!list.isEmpty()) {
-				if (comparator.compare(list.get(list.size() - 1), value) < 0) {
-					return;
-				}
-			}
-		}
-		int binarySearch = 0;
-		if (size() > 0) {
-			binarySearch = binarySearch(value, true);
-		}
-		map.put(key, value);
-		list.add(binarySearch, value);
-		while (map.size() > this.capacity) {
-			V pollLast = list.remove(map.size() - 1);
-			map.remove(pollLast.key());
-		}
-	}
-
-	@Override
-	public boolean containsKey(K key) {
-		return map.containsKey(key);
 	}
 
 	@Override
@@ -155,6 +126,88 @@ public class FrequencyReadRankMap<K, V extends IRankObj<K>> implements IRankMap<
 			return low;
 		}
 		return -1;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
+
+	@Override
+	public boolean containsKey(Object key) {
+		return map.containsKey(key);
+	}
+
+	@Override
+	public boolean containsValue(Object value) {
+		return map.containsValue(value);
+	}
+
+	@Override
+	public V get(Object key) {
+		return map.get(key);
+	}
+
+	@Override
+	public synchronized V put(K key, V value) {
+		Objects.requireNonNull(key, "key");
+		Objects.requireNonNull(value, "value");
+		if (map.containsKey(key)) {
+			V obj = map.get(key);
+			// 比较新数据与老数据大小
+			int compare = comparator.compare(value, obj);
+			if (compare == 0) {
+				return null;
+			}
+			// 因为防止老对象被更改值，所以要删除一次
+			int binarySearch = binarySearch(obj, false);
+			list.remove(binarySearch);
+		} else {
+			if (!list.isEmpty()) {
+				if (comparator.compare(list.get(list.size() - 1), value) < 0) {
+					return null;
+				}
+			}
+		}
+		int binarySearch = 0;
+		if (size() > 0) {
+			binarySearch = binarySearch(value, true);
+		}
+		map.put(key, value);
+		list.add(binarySearch, value);
+		while (map.size() > this.capacity) {
+			V pollLast = list.remove(map.size() - 1);
+			map.remove(pollLast.run());
+		}
+		return value;
+	}
+
+	@Override
+	public V remove(Object key) {
+		return null;
+	}
+
+	@Override
+	public void putAll(Map<? extends K, ? extends V> map) {
+		Objects.requireNonNull(map, "map");
+		for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
+			put(entry.getKey(), entry.getValue());
+		}
+	}
+
+	@Override
+	public Set<K> keySet() {
+		return null;
+	}
+
+	@Override
+	public Collection<V> values() {
+		return null;
+	}
+
+	@Override
+	public Set<Entry<K, V>> entrySet() {
+		return null;
 	}
 
 }

@@ -3,7 +3,7 @@ package org.slingerxv.limitart.collections;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import org.slingerxv.limitart.util.StringUtil;
@@ -14,10 +14,11 @@ import org.slingerxv.limitart.util.StringUtil;
  * @author hank
  *
  */
-public class ConstraintMap<K> implements IPrimitiveTypeMap<K> {
+public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	private Map<K, Object> map;
 
 	protected ConstraintMap(Map<K, Object> map) {
+		Objects.requireNonNull(map, "map");
 		this.map = map;
 	}
 
@@ -25,24 +26,8 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K> {
 		map = new HashMap<>();
 	}
 
-	public void putAll(Map<K, Object> map) {
-		this.map.putAll(map);
-	}
-
-	public void putAll(ConstraintMap<K> map) {
-		this.map.putAll(map.map);
-	}
-
 	public void clear() {
 		map.clear();
-	}
-
-	public boolean hasKey(K key) {
-		return map.containsKey(key);
-	}
-
-	public boolean removeKey(K key) {
-		return map.remove(key) != null;
 	}
 
 	public int size() {
@@ -51,93 +36,93 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K> {
 
 	@Override
 	public void putByte(K key, byte value) {
-		map.put(key, value);
+		put(key, value);
 	}
 
 	@Override
 	public byte getByte(K key) {
-		if (!hasKey(key)) {
+		if (!containsKey(key)) {
 			return 0;
 		}
-		return (byte) map.get(key);
+		return (byte) get(key);
 	}
 
 	@Override
 	public void putShort(K key, short value) {
-		map.put(key, value);
+		put(key, value);
 	}
 
 	@Override
 	public short getShort(K key) {
-		if (!hasKey(key)) {
+		if (!containsKey(key)) {
 			return 0;
 		}
-		return (short) map.get(key);
+		return (short) get(key);
 	}
 
 	@Override
 	public void putInt(K key, int value) {
-		map.put(key, value);
+		put(key, value);
 	}
 
 	@Override
 	public int getInt(K key) {
-		if (!hasKey(key)) {
+		if (!containsKey(key)) {
 			return 0;
 		}
-		return (int) map.get(key);
+		return (int) get(key);
 	}
 
 	@Override
 	public void putLong(K key, long value) {
-		map.put(key, value);
+		put(key, value);
 	}
 
 	@Override
 	public long getLong(K key) {
-		if (!hasKey(key)) {
+		if (!containsKey(key)) {
 			return 0;
 		}
-		return (long) map.get(key);
+		return (long) get(key);
 	}
 
 	@Override
 	public void putFloat(K key, float value) {
-		map.put(key, value);
+		put(key, value);
 	}
 
 	@Override
 	public float getFloat(K key) {
-		if (!hasKey(key)) {
+		if (!containsKey(key)) {
 			return 0;
 		}
-		return (float) map.get(key);
+		return (float) get(key);
 	}
 
 	@Override
 	public void putDouble(K key, double value) {
-		map.put(key, value);
+		put(key, value);
 	}
 
 	@Override
 	public double getDouble(K key) {
-		if (!hasKey(key)) {
+		if (!containsKey(key)) {
 			return 0;
 		}
-		return (double) map.get(key);
+		return (double) get(key);
 	}
 
 	@Override
 	public void putChar(K key, char value) {
-		map.put(key, value);
+		put(key, value);
 	}
 
 	@Override
 	public char getChar(K key) {
-		if (!hasKey(key)) {
+		if (!containsKey(key)) {
 			return 0;
 		}
-		return (char) map.get(key);
+		return (char) get(key);
 	}
 
 	@Override
@@ -153,30 +138,18 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K> {
 	@Override
 	public void putString(K key, String value) {
 		if (value == null) {
-			map.put(key, "");
+			put(key, "");
 		} else {
-			map.put(key, value);
+			put(key, value);
 		}
 	}
 
 	@Override
 	public String getString(K key) {
-		if (!hasKey(key)) {
+		if (!containsKey(key)) {
 			return "";
 		}
 		return (String) map.get(key);
-	}
-
-	public <T> void putObject(K key, T value) {
-		map.put(key, value);
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> T getObject(K key) {
-		if (!hasKey(key)) {
-			return null;
-		}
-		return (T) map.get(key);
 	}
 
 	public Set<K> keySet() {
@@ -211,6 +184,48 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K> {
 		ConstraintMap<T> map = new ConstraintMap<>();
 		map.fromJSON(jsonContent);
 		return map;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
+
+	@Override
+	public boolean containsKey(Object key) {
+		Objects.requireNonNull(key, "key");
+		return map.containsKey(key);
+	}
+
+	@Override
+	public boolean containsValue(Object value) {
+		Objects.requireNonNull(value, "value");
+		return map.containsValue(value);
+	}
+
+	@Override
+	public Object get(Object key) {
+		Objects.requireNonNull(key, "key");
+		return map.get(key);
+	}
+
+	@Override
+	public Object put(K key, Object value) {
+		Objects.requireNonNull(key, "key");
+		Objects.requireNonNull(value, "value");
+		return map.put(key, value);
+	}
+
+	@Override
+	public Object remove(Object key) {
+		Objects.requireNonNull(key, "key");
+		return map.remove(key) != null;
+	}
+
+	@Override
+	public void putAll(Map<? extends K, ? extends Object> map) {
+		Objects.requireNonNull(map, "map");
+		this.map.putAll(map);
 	}
 
 }
