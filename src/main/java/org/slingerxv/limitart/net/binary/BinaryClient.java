@@ -336,6 +336,7 @@ public class BinaryClient {
 			this.autoReconnect = 0;
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
+			this.factory = new MessageFactory();
 			this.dispatchMessage = (t1, t2) -> {
 				t2.handle(t1);
 			};
