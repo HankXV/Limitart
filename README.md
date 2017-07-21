@@ -1,6 +1,5 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/98c8a0ea3b43404aa8a820078e2c6e12)](https://www.codacy.com/app/104381832/Limitart?utm_source=github.com&utm_medium=referral&utm_content=HankXV/Limitart&utm_campaign=badger)
 [![Build Status](https://travis-ci.org/HankXV/Limitart.svg?branch=master)](https://travis-ci.org/HankXV/Limitart)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/98c8a0ea3b43404aa8a820078e2c6e12)](https://www.codacy.com/app/104381832/Limitart?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=HankXV/Limitart&amp;utm_campaign=Badge_Grade)
 # Brief Introduction
 This is a framework that designed to help you build a **Java Game Server** quickly.
 ## Environment
