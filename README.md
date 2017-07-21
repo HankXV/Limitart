@@ -35,36 +35,32 @@ Create a Handler for the message. Here, we just simply print the contents of tra
 Construct a `MessageFactory` that registers message's handler.
 ```java
 
-	MessageFactory factory = new MessageFactory();
-	factory.registerMsg(BinaryHandlerDemo.class);
+	MessageFactory factory = new MessageFactory().registerMsg(BinaryHandlerDemo.class);
 		
 ```
 Finally, initialize a server instance and bind it. 
 ```java
 
-		BinaryServer server = new BinaryServer.BinaryServerBuilder()
+			new BinaryServer.BinaryServerBuilder()
 				// port
 				.addressPair(new AddressPair(8888))
 				// register factory
 				.factory(messageFactory).build();
-		server.startServer();
+				.startServer();
 		
 ```
 Look at the client below. Because we do not allow client processing messages only send messages, so we create a message into the message processor factory on the line. Now build the client, fill in the server address and port, and, of course, the client name. You can choose whether or not to reconnect, and we don't show it here.Write the code that sends the message to the server in the listener `onConnectionEffective`.
 ```java
 
-		MessageFactory factory = new MessageFactory();
-		BinaryClient client = new BinaryClient.BinaryClientBuilder().remoteAddress(new AddressPair("127.0.0.1", 8888))
-				.factory(factory).onConnectionEffective(c -> {
+			new BinaryClient.BinaryClientBuilder()
+				.remoteAddress(new AddressPair("127.0.0.1", 8888))
+				.factory(new MessageFactory())
+				.onConnectionEffective(c -> {
 					BinaryMessageDemo message = new BinaryMessageDemo();
 					message.info = "Hello Limitart!";
-					try {
-						c.sendMessage(message, null);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}).build();
-		client.connect();
+					c.sendMessage(message, null);
+				}).build()
+				.connect();
 				
 ```
 finished！The client link is successful, and the message is sent.The server verified that the link was successful and received the message! cool!!!!
