@@ -38,8 +38,7 @@ public final class InnerSlaveServerConfig {
 		this.masterServerPass = builder.masterServerPass;
 		this.masterInnerPort = builder.masterInnerPort;
 		this.masterInnerPass = builder.masterInnerPass;
-		Objects.requireNonNull(factory, "factory");
-		this.factory = builder.factory;
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 	}
 
 	public String getSlaveName() {
