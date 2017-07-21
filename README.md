@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/HankXV/Limitart.svg?branch=master)](https://travis-ci.org/HankXV/Limitart)
 # Brief Introduction
-This is a framework that designed to help to build a **Java Midrange Game Server** quickly. Its communicating interface based on Netty4.X and the TaskQueue(MessageQueue) based on Disruptor. **If one have some advice or want to be one of us, please leave any messages to us, and we are always welcome**
+This is a framework that designed to help you build a **Java Game Server** quickly.
 ## Environment
 Jdk8 or above.
 # Quick Start
