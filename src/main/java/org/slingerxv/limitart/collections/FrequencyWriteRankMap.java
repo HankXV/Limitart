@@ -31,13 +31,12 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements IRankMap<K, 
 	private boolean modified = false;
 
 	public FrequencyWriteRankMap(Comparator<V> comparator, int capacity) {
-		Objects.requireNonNull(comparator, "comparator");
 		if (capacity <= 0) {
 			throw new IllegalArgumentException("capacity > 0");
 		}
 		this.treeSet = new TreeSet<>(comparator);
 		this.map = new HashMap<>(capacity);
-		this.comparator = comparator;
+		this.comparator = Objects.requireNonNull(comparator, "comparator");
 		this.capacity = capacity;
 	}
 
@@ -185,8 +184,7 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements IRankMap<K, 
 
 	@Override
 	public void putAll(Map<? extends K, ? extends V> map) {
-		Objects.requireNonNull(map, "map");
-		for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
+		for (Entry<? extends K, ? extends V> entry : Objects.requireNonNull(map, "map").entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}

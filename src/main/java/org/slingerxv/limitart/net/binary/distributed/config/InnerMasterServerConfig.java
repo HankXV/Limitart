@@ -18,8 +18,7 @@ public final class InnerMasterServerConfig {
 	private InnerMasterServerConfig(InnerMasterServerConfigBuilder builder) {
 		this.serverName = builder.serverName;
 		this.masterPort = builder.masterPort;
-		Objects.requireNonNull(factory, "factory");
-		this.factory = builder.factory;
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 	}
 
 	public String getServerName() {

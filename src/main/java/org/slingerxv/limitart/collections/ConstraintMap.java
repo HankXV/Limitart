@@ -18,8 +18,7 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	private Map<K, Object> map;
 
 	protected ConstraintMap(Map<K, Object> map) {
-		Objects.requireNonNull(map, "map");
-		this.map = map;
+		this.map = Objects.requireNonNull(map, "map");
 	}
 
 	public ConstraintMap() {
@@ -193,39 +192,32 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		Objects.requireNonNull(key, "key");
-		return map.containsKey(key);
+		return map.containsKey(Objects.requireNonNull(key, "key"));
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		Objects.requireNonNull(value, "value");
-		return map.containsValue(value);
+		return map.containsValue(Objects.requireNonNull(value, "value"));
 	}
 
 	@Override
 	public Object get(Object key) {
-		Objects.requireNonNull(key, "key");
-		return map.get(key);
+		return map.get(Objects.requireNonNull(key, "key"));
 	}
 
 	@Override
 	public Object put(K key, Object value) {
-		Objects.requireNonNull(key, "key");
-		Objects.requireNonNull(value, "value");
-		return map.put(key, value);
+		return map.put(Objects.requireNonNull(key, "key"), Objects.requireNonNull(value, "value"));
 	}
 
 	@Override
 	public Object remove(Object key) {
-		Objects.requireNonNull(key, "key");
-		return map.remove(key) != null;
+		return map.remove(Objects.requireNonNull(key, "key"));
 	}
 
 	@Override
 	public void putAll(Map<? extends K, ? extends Object> map) {
-		Objects.requireNonNull(map, "map");
-		this.map.putAll(map);
+		this.map.putAll(Objects.requireNonNull(map, "map"));
 	}
 
 }

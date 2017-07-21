@@ -108,11 +108,10 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 
 	@Override
 	public void addCommand(T command) throws TaskQueueException {
-		Objects.requireNonNull(command, "command");
 		if (this.disruptor == null) {
 			throw new TaskQueueException(getThreadName() + " has not start yet!");
 		}
-		this.traslator.onData(command);
+		this.traslator.onData(Objects.requireNonNull(command, "command"));
 	}
 
 	@Override

@@ -74,8 +74,7 @@ public final class ProviderXConfig {
 		}
 
 		public ProviderXConfigBuilder myIp(String myIp) {
-			Objects.requireNonNull(myIp, "myIp");
-			this.myIp = myIp;
+			this.myIp = Objects.requireNonNull(myIp, "myIp");
 			return this;
 		}
 
@@ -88,8 +87,7 @@ public final class ProviderXConfig {
 		}
 
 		public ProviderXConfigBuilder serviceCenterIp(String serviceCenterIp) {
-			Objects.requireNonNull(serviceCenterIp, "serviceCenterIp");
-			this.serviceCenterIp = serviceCenterIp;
+			this.serviceCenterIp = Objects.requireNonNull(serviceCenterIp, "serviceCenterIp");
 			return this;
 		}
 
@@ -110,16 +108,14 @@ public final class ProviderXConfig {
 		}
 
 		public ProviderXConfigBuilder addServicePackage(String... servicePackages) {
-			Objects.requireNonNull(servicePackages, "servicePackages");
-			for (String temp : servicePackages) {
-				this.servicePackage.add(temp);
+			for (String temp : Objects.requireNonNull(servicePackages, "servicePackages")) {
+				this.servicePackage.add(Objects.requireNonNull(temp, "temp"));
 			}
 			return this;
 		}
 
-		public ProviderXConfigBuilder serviceImplPackages(String serviceImplPackages) {
-			Objects.requireNonNull(serviceImplPackages, "serviceImplPackages");
-			this.serviceImplPackages = serviceImplPackages;
+		public ProviderXConfigBuilder serviceImplPackages(String serviceImplPackage) {
+			this.serviceImplPackages = Objects.requireNonNull(serviceImplPackage, "serviceImplPackage");
 			return this;
 		}
 	}

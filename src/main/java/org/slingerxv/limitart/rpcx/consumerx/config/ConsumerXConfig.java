@@ -105,8 +105,7 @@ public final class ConsumerXConfig {
 		}
 
 		public ConsumerXConfigBuilder serviceCenterIp(String serviceCenterIp) {
-			Objects.requireNonNull(serviceCenterIp, "serviceCenterIp");
-			this.serviceCenterIp = serviceCenterIp;
+			this.serviceCenterIp = Objects.requireNonNull(serviceCenterIp, "serviceCenterIp");
 			return this;
 		}
 
@@ -119,17 +118,14 @@ public final class ConsumerXConfig {
 		}
 
 		public ConsumerXConfigBuilder addServicePackage(String... servicePackages) {
-			Objects.requireNonNull(servicePackages, "servicePackages");
-			for (String temp : servicePackages) {
-				Objects.requireNonNull(temp, "servicePackage");
-				this.servicePackages.add(temp);
+			for (String temp : Objects.requireNonNull(servicePackages, "servicePackages")) {
+				this.servicePackages.add(Objects.requireNonNull(temp, "servicePackage"));
 			}
 			return this;
 		}
 
 		public ConsumerXConfigBuilder selector(IProviderSelector selector) {
-			Objects.requireNonNull(selector, "selector");
-			this.selector = selector;
+			this.selector = Objects.requireNonNull(selector, "selector");
 			return this;
 		}
 

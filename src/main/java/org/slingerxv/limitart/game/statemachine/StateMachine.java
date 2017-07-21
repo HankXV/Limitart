@@ -47,8 +47,7 @@ public class StateMachine {
 	}
 
 	public StateMachine addState(State... states) throws StateException {
-		Objects.requireNonNull(states, "states");
-		for (State temp : states) {
+		for (State temp : Objects.requireNonNull(states, "states")) {
 			addState(temp);
 		}
 		return this;

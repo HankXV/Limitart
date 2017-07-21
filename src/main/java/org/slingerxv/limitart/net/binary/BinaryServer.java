@@ -83,17 +83,12 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 	private BinaryServer(BinaryServerBuilder builder) throws Exception {
 		this.serverName = builder.serverName;
-		Objects.requireNonNull(builder.addressPair, "addressPair");
-		this.addressPair = builder.addressPair;
+		this.addressPair = Objects.requireNonNull(builder.addressPair, "addressPair");
 		this.connectionValidateTimeInSec = builder.connectionValidateTimeInSec;
-		Objects.requireNonNull(builder.decoder, "decoder");
-		this.decoder = builder.decoder;
-		Objects.requireNonNull(builder.encoder, "encoder");
-		this.encoder = builder.encoder;
-		Objects.requireNonNull(builder.whiteList, "whiteList");
-		this.whiteList = builder.whiteList;
-		Objects.requireNonNull(builder.factory, "factory");
-		this.factory = builder.factory;
+		this.decoder = Objects.requireNonNull(builder.decoder, "decoder");
+		this.encoder = Objects.requireNonNull(builder.encoder, "encoder");
+		this.whiteList = Objects.requireNonNull(builder.whiteList, "whiteList");
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 		this.onChannelStateChanged = builder.onChannelStateChanged;
 		this.onExceptionCaught = builder.onExceptionCaught;
 		this.onServerBind = builder.onServerBind;

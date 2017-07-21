@@ -66,15 +66,11 @@ public class BinaryClient {
 
 	private BinaryClient(BinaryClientBuilder builder) throws Exception {
 		this.clientName = builder.clientName;
-		Objects.requireNonNull(builder.remoteAddress, "remoteAddress");
-		this.remoteAddress = builder.remoteAddress;
+		this.remoteAddress = Objects.requireNonNull(builder.remoteAddress, "remoteAddress");
 		this.autoReconnect = builder.autoReconnect;
-		Objects.requireNonNull(builder.decoder, "decoder");
-		this.decoder = builder.decoder;
-		Objects.requireNonNull(builder.encoder, "encoder");
-		this.encoder = builder.encoder;
-		Objects.requireNonNull(builder.factory, "factory");
-		this.factory = builder.factory;
+		this.decoder = Objects.requireNonNull(builder.decoder, "decoder");
+		this.encoder = Objects.requireNonNull(builder.encoder, "encoder");
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 		this.onChannelStateChanged = builder.onChannelStateChanged;
 		this.onExceptionCaught = builder.onExceptionCaught;
 		this.onConnectionEffective = builder.onConnectionEffective;

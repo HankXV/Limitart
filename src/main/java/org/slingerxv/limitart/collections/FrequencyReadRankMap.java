@@ -33,12 +33,11 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 	}
 
 	public FrequencyReadRankMap(Comparator<V> comparator, int capacity) {
-		Objects.requireNonNull(comparator, "comparator");
 		if (capacity <= 0) {
 			throw new IllegalArgumentException("capacity > 0");
 		}
 		this.map = new HashMap<>(capacity);
-		this.comparator = comparator;
+		this.comparator = Objects.requireNonNull(comparator, "comparator");
 		this.list = new ArrayList<>(capacity);
 		this.capacity = capacity;
 	}
@@ -190,8 +189,7 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 
 	@Override
 	public void putAll(Map<? extends K, ? extends V> map) {
-		Objects.requireNonNull(map, "map");
-		for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
+		for (Entry<? extends K, ? extends V> entry : Objects.requireNonNull(map, "map").entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}

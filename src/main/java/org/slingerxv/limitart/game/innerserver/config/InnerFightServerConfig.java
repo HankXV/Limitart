@@ -22,8 +22,7 @@ public class InnerFightServerConfig {
 		this.fightServerPass = builder.fightServerPass;
 		this.publicIp = builder.publicIp;
 		this.publicPort = builder.publicPort;
-		Objects.requireNonNull(builder.factory, "factory");
-		this.factory = builder.factory;
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 	}
 
 	public int getServerId() {

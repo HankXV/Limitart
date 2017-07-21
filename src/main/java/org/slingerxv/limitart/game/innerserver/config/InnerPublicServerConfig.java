@@ -10,8 +10,7 @@ public class InnerPublicServerConfig {
 
 	private InnerPublicServerConfig(InnerPublicServerConfigBuilder builder) {
 		this.masterPort = builder.masterPort;
-		Objects.requireNonNull(builder.factory == null, "factory");
-		this.factory = builder.factory;
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 	}
 
 	public int getMasterPort() {
