@@ -54,7 +54,6 @@ Look at the client below. Because we do not allow client processing messages onl
 
 			new BinaryClient.BinaryClientBuilder()
 				.remoteAddress(new AddressPair("127.0.0.1", 8888))
-				.factory(new MessageFactory())
 				.onConnectionEffective(c -> {
 					BinaryMessageDemo message = new BinaryMessageDemo();
 					message.info = "Hello Limitart!";
