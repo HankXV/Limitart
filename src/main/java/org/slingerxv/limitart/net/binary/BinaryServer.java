@@ -123,7 +123,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 				clearUnvalidatedConnection();
 			}
 		};
-		TimerUtil.scheduleGlobal(1000, clearTask);
+		TimerUtil.scheduleGlobal(1000, 1000, clearTask);
 	}
 
 	@Override
