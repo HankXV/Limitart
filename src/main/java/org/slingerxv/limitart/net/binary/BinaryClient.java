@@ -138,8 +138,16 @@ public class BinaryClient {
 
 	}
 
-	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) throws Exception {
-		SendMessageUtil.sendMessage(encoder, channel, msg, listener);
+	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) {
+		channel.eventLoop().execute(() -> {
+			try {
+				SendMessageUtil.sendMessage(encoder, channel, msg, listener);
+			} catch (Exception e) {
+				if (onExceptionCaught != null) {
+					onExceptionCaught.run(BinaryClient.this, e);
+				}
+			}
+		});
 	}
 
 	public BinaryClient disConnect() {

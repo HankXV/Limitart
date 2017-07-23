@@ -155,12 +155,28 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 	public void sendMessage(Channel channel, Message msg, Proc3<Boolean, Throwable, Channel> listener)
 			throws Exception {
-		SendMessageUtil.sendMessage(encoder, channel, msg, listener);
+		channel.eventLoop().execute(() -> {
+			try {
+				SendMessageUtil.sendMessage(encoder, channel, msg, listener);
+			} catch (Exception e) {
+				if (onExceptionCaught != null) {
+					onExceptionCaught.run(channel, e);
+				}
+			}
+		});
 	}
 
 	public void sendMessage(List<Channel> channels, Message msg, Proc3<Boolean, Throwable, Channel> listener)
 			throws Exception {
-		SendMessageUtil.sendMessage(encoder, channels, msg, listener);
+		channel.eventLoop().execute(() -> {
+			try {
+				SendMessageUtil.sendMessage(encoder, channels, msg, listener);
+			} catch (Exception e) {
+				if (onExceptionCaught != null) {
+					onExceptionCaught.run(channel, e);
+				}
+			}
+		});
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
