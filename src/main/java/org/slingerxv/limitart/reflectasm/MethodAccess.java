@@ -38,6 +38,7 @@ public abstract class MethodAccess {
 	private Class[][] parameterTypes;
 	@SuppressWarnings("rawtypes")
 	private Class[] returnTypes;
+	private ArrayList<Method> methods;
 
 	abstract public Object invoke(Object object, int methodIndex, Object... args);
 
@@ -100,6 +101,10 @@ public abstract class MethodAccess {
 	@SuppressWarnings("rawtypes")
 	public Class[] getReturnTypes() {
 		return returnTypes;
+	}
+
+	public ArrayList<Method> getMethods() {
+		return methods;
 	}
 
 	@SuppressWarnings({ "rawtypes", "deprecation" })
@@ -320,6 +325,7 @@ public abstract class MethodAccess {
 			access.methodNames = methodNames;
 			access.parameterTypes = parameterTypes;
 			access.returnTypes = returnTypes;
+			access.methods = methods;
 			return access;
 		} catch (Throwable t) {
 			throw new RuntimeException("Error constructing method access class: " + accessClassName, t);

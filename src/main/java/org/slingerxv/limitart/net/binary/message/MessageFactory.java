@@ -1,16 +1,21 @@
 package org.slingerxv.limitart.net.binary.message;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
+import org.slingerxv.limitart.net.binary.message.anotation.Controller;
+import org.slingerxv.limitart.net.binary.message.anotation.Handler;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
+import org.slingerxv.limitart.reflectasm.MethodAccess;
 import org.slingerxv.limitart.util.ReflectionUtil;
 
 import io.netty.buffer.ByteBuf;
@@ -47,15 +52,15 @@ public class MessageFactory {
 				log.warn("inner class or anonymous class or abstract class will not be registerd:" + clzz.getName());
 				continue;
 			}
-			messageFactory.registerMsg((IHandler) clzz.newInstance());
+			messageFactory.registerMsg(null, (IHandler) clzz.newInstance());
 		}
-
-//		List<Class<?>> classesOfAnnotation = ReflectionUtil.getClassesByPackage(packageName, (clazz) -> {
-//			return clazz.getAnnotation(Controller.class) != null;
-//		});
-//		for (Class<?> clzz : classesOfAnnotation) {
-			// TODO
-//		}
+		// DEMO 版本
+		List<Class<?>> classesOfAnnotation = ReflectionUtil.getClassesByPackage(packageName, (clazz) -> {
+			return clazz.getAnnotation(Controller.class) != null;
+		});
+		for (Class<?> clzz : classesOfAnnotation) {
+			messageFactory.registerController(clzz);
+		}
 		return messageFactory;
 	}
 
@@ -79,23 +84,47 @@ public class MessageFactory {
 		}
 	}
 
-	public synchronized MessageFactory registerMsg(IHandler<? extends Message> handler) throws Exception {
-		Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
-		ParameterizedType handlerInterface = null;
-		for (Type temp : genericInterfaces) {
-			if (temp instanceof ParameterizedType) {
-				ParameterizedType ttemp = (ParameterizedType) temp;
-				if (ttemp.getRawType() == IHandler.class) {
-					handlerInterface = ttemp;
-					break;
+	public MessageFactory registerController(Class<?> controllerClazz) throws Exception {
+		Object newInstance = controllerClazz.newInstance();
+		MethodAccess methodAccess = MethodAccess.get(controllerClazz);
+		ArrayList<Method> methods = methodAccess.getMethods();
+		for (Method method : methods) {
+			Handler annotation = method.getAnnotation(Handler.class);
+			if (annotation == null) {
+				continue;
+			}
+			registerMsg(annotation.value(), new IHandler<Message>() {
+
+				@Override
+				public void handle(Message msg) {
+					methodAccess.invoke(newInstance, method.getName(), msg);
+				}
+			});
+		}
+		return this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public synchronized MessageFactory registerMsg(Class<? extends Message> msgClazz,
+			IHandler<? extends Message> handler) throws Exception {
+		Class<? extends Message> msgClass = msgClazz;
+		if (msgClass == null) {
+			Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
+			ParameterizedType handlerInterface = null;
+			for (Type temp : genericInterfaces) {
+				if (temp instanceof ParameterizedType) {
+					ParameterizedType ttemp = (ParameterizedType) temp;
+					if (ttemp.getRawType() == IHandler.class) {
+						handlerInterface = ttemp;
+						break;
+					}
 				}
 			}
+			if (handlerInterface == null) {
+				return this;
+			}
+			msgClass = (Class<? extends Message>) handlerInterface.getActualTypeArguments()[0];
 		}
-		if (handlerInterface == null) {
-			return this;
-		}
-		@SuppressWarnings("unchecked")
-		Class<? extends Message> msgClass = (Class<? extends Message>) handlerInterface.getActualTypeArguments()[0];
 		// 这里先实例化一个出来获取其ID
 		Message newInstance = msgClass.newInstance();
 		short id = newInstance.getMessageId();
@@ -118,9 +147,12 @@ public class MessageFactory {
 		return this;
 	}
 
-	public synchronized MessageFactory registerMsg(Class<? extends IHandler<? extends Message>> handlerClass)
-			throws Exception {
-		return registerMsg(handlerClass.newInstance());
+	public MessageFactory registerMsg(Class<? extends IHandler<? extends Message>> handlerClass) throws Exception {
+		return registerMsg(null, handlerClass.newInstance());
+	}
+
+	public MessageFactory registerMsg(IHandler<? extends Message> handler) throws Exception {
+		return registerMsg(null, handler);
 	}
 
 	public Message getMessage(short msgId) throws InstantiationException, IllegalAccessException {
