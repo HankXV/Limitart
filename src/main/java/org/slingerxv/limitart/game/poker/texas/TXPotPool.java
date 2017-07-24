@@ -98,8 +98,12 @@ public class TXPotPool {
 			Procs.invoke(listener, pot.key, pot.roles, pot.chips);
 		}
 	}
+	
+	public Map<String, TXPot> getPots() {
+		return pots;
+	}
 
-	private class TXPot {
+	public class TXPot {
 		private String key;
 		// 奖池数量
 		private long chips;
