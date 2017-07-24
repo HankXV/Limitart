@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
+import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
@@ -134,9 +135,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					if (arg0.isSuccess()) {
 						channel = arg0.channel();
 						log.info(serverName + " bind at port:" + addressPair.getPort());
-						if (onServerBind != null) {
-							onServerBind.run(arg0.channel());
-						}
+						Procs.invoke(onServerBind, arg0.channel());
 					}
 				}).sync().channel().closeFuture().sync();
 			} catch (InterruptedException e) {
@@ -159,9 +158,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			try {
 				SendMessageUtil.sendMessage(encoder, channel, msg, listener);
 			} catch (Exception e) {
-				if (onExceptionCaught != null) {
-					onExceptionCaught.run(channel, e);
-				}
+				Procs.invoke(onExceptionCaught, channel, e);
 			}
 		});
 	}
@@ -172,9 +169,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			try {
 				SendMessageUtil.sendMessage(encoder, channels, msg, listener);
 			} catch (Exception e) {
-				if (onExceptionCaught != null) {
-					onExceptionCaught.run(channel, e);
-				}
+				Procs.invoke(onExceptionCaught, channel, e);
 			}
 		});
 	}
@@ -196,9 +191,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 						@Override
 						public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 							log.error(ctx.channel() + " cause:", cause);
-							if (onExceptionCaught != null) {
-								onExceptionCaught.run(ctx.channel(), cause);
-							}
+							Procs.invoke(onExceptionCaught, ctx.channel(), cause);
 						}
 
 						@Override
@@ -214,17 +207,13 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 								}
 							}
 							startConnectionValidate(ctx.channel());
-							if (onChannelStateChanged != null) {
-								onChannelStateChanged.run(ctx.channel(), true);
-							}
+							Procs.invoke(onChannelStateChanged, ctx.channel(), true);
 						}
 
 						@Override
 						public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 							log.info(ctx.channel().remoteAddress() + " disconnected！");
-							if (onChannelStateChanged != null) {
-								onChannelStateChanged.run(ctx.channel(), false);
-							}
+							Procs.invoke(onChannelStateChanged, ctx.channel(), false);
 						}
 
 						@Override
@@ -325,9 +314,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		} catch (Exception e) {
 			log.error(e, e);
 		}
-		if (onConnectionEffective != null) {
-			onConnectionEffective.run(channel);
-		}
+		Procs.invoke(onConnectionEffective, channel);
 	}
 
 	private void channelRead0(ChannelHandlerContext ctx, Object arg) {
@@ -363,9 +350,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 						dispatchMessage.run(msg, handler);
 					} catch (Exception e) {
 						log.error(ctx.channel() + " cause:", e);
-						if (onExceptionCaught != null) {
-							onExceptionCaught.run(channel, e);
-						}
+						Procs.invoke(onExceptionCaught, channel, e);
 					}
 				} else {
 					log.warn(serverName + " no dispatch message listener!");

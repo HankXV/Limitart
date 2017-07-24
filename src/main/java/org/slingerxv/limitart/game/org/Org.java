@@ -6,6 +6,7 @@ import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Proc5;
+import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.game.org.authes.ChangeJobAuth;
 import org.slingerxv.limitart.game.org.exception.AlreadyJoinException;
 import org.slingerxv.limitart.game.org.exception.AuthIDErrorException;
@@ -77,9 +78,7 @@ public abstract class Org {
 			throw new JobIDDuplicatedException();
 		}
 		this.jobs.put(job.getJobId(), job);
-		if (onAddJob != null) {
-			onAddJob.run(this, job);
-		}
+		Procs.invoke(onAddJob, this, job);
 		return this;
 	}
 
@@ -99,9 +98,7 @@ public abstract class Org {
 		}
 		Job remove = this.jobs.remove(jobId);
 		if (remove != null) {
-			if (onRemoveJob != null) {
-				onRemoveJob.run(this, remove);
-			}
+			Procs.invoke(onRemoveJob, this, remove);
 			for (OrgMember member : this.members.values()) {
 				giveMemberJob(handler, member, Job.NONE_JOB_ID);
 			}
@@ -124,9 +121,7 @@ public abstract class Org {
 			throw new OrgMaxMemberException();
 		}
 		this.members.put(member.getMemberId(), member);
-		if (onJoin != null) {
-			onJoin.run(this, member);
-		}
+		Procs.invoke(onJoin, this, member);
 		return this;
 	}
 
@@ -162,8 +157,8 @@ public abstract class Org {
 			throw new CreatorCanNotQuitException();
 		}
 		OrgMember remove = members.remove(member.getMemberId());
-		if (remove != null && onQuit != null) {
-			onQuit.run(this, remove);
+		if (remove != null) {
+			Procs.invoke(onQuit, this, remove);
 		}
 		return this;
 	}
@@ -197,9 +192,7 @@ public abstract class Org {
 		}
 		OrgMember oldCreator = getOrgMember(this.creatorId);
 		this.creatorId = extenderId;
-		if (onChangeCreator != null) {
-			onChangeCreator.run(this, oldCreator, orgMember);
-		}
+		Procs.invoke(onChangeCreator, this, oldCreator, orgMember);
 		return this;
 	}
 
@@ -229,9 +222,7 @@ public abstract class Org {
 		}
 		int oldJobId = target.getJobId();
 		target.setJobId(jobId);
-		if (onChangeJob != null) {
-			onChangeJob.run(this, handler, target, getJob(oldJobId), job);
-		}
+		Procs.invoke(onChangeJob, this, handler, target, getJob(oldJobId), job);
 		return this;
 	}
 

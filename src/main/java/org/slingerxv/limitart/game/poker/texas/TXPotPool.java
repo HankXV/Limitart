@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.slingerxv.limitart.funcs.Proc3;
+import org.slingerxv.limitart.funcs.Procs;
 
 /**
  * 德州扑克奖池
@@ -94,7 +95,7 @@ public class TXPotPool {
 	 */
 	public void flushAward(Proc3<String, List<Integer>, Long> listener) {
 		for (TXPot pot : pots.values()) {
-			listener.run(pot.key, pot.roles, pot.chips);
+			Procs.invoke(listener, pot.key, pot.roles, pot.chips);
 		}
 	}
 

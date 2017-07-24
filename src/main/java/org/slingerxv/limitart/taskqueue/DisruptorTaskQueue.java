@@ -5,9 +5,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.funcs.Func1;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
+import org.slingerxv.limitart.funcs.Procs;
+import org.slingerxv.limitart.funcs.Test1;
+import org.slingerxv.limitart.funcs.Tests;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
 import org.slingerxv.limitart.thread.NamedThreadFactory;
@@ -31,7 +33,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	private Disruptor<DisruptorTaskQueueEvent> disruptor;
 	private NamedThreadFactory threadFactory;
 	private TaskQueueEventProducerWithTraslator traslator;
-	private Func1<T, Boolean> intercept;
+	private Test1<T> intercept;
 	private Proc1<T> handle;
 	private Proc2<T, Throwable> exception;
 
@@ -66,15 +68,13 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 			public void onEvent(DisruptorTaskQueueEvent arg0, long arg1, boolean arg3) throws Exception {
 				Exception e = new Exception("exception catched:" + arg0.getMsg().getClass());
 				log.error(e, e);
-				if (exception != null) {
-					exception.run(arg0.msg, e);
-				}
+				Procs.invoke(exception, arg0.msg, e);
 			}
 		});
 		traslator = new TaskQueueEventProducerWithTraslator(disruptor.getRingBuffer());
 	}
 
-	public ITaskQueue<T> intercept(Func1<T, Boolean> intercept) {
+	public ITaskQueue<T> intercept(Test1<T> intercept) {
 		this.intercept = intercept;
 		return this;
 	}
@@ -143,13 +143,11 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 
 		@Override
 		public void onEvent(DisruptorTaskQueueEvent event, long paramLong, boolean paramBoolean) throws Exception {
-			if (DisruptorTaskQueue.this.intercept != null && DisruptorTaskQueue.this.intercept.run(event.getMsg())) {
+			if (Tests.invoke(DisruptorTaskQueue.this.intercept, event.getMsg())) {
 				return;
 			}
 			try {
-				if (DisruptorTaskQueue.this.handle != null) {
-					DisruptorTaskQueue.this.handle.run(event.getMsg());
-				}
+				Procs.invoke(DisruptorTaskQueue.this.handle, event.getMsg());
 			} catch (Exception e) {
 				log.error(e, e);
 			}

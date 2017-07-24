@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
+import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.define.AbstractNettyServer;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.net.http.codec.QueryStringDecoderV2;
@@ -110,9 +111,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 										Exception e = new Exception(
 												ctx.channel() + " : " + oversized + " is over size");
 										log.error(e, e);
-										if (onMessageOverSize != null) {
-											onMessageOverSize.run(ctx.channel(), oversized);
-										}
+										Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
 									}
 								}).addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
 								.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
@@ -126,9 +125,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 
 									@Override
 									public void channelActive(ChannelHandlerContext ctx) throws Exception {
-										if (onChannelStateChanged != null) {
-											onChannelStateChanged.run(ctx.channel(), true);
-										}
+										Procs.invoke(onChannelStateChanged, ctx.channel(), true);
 									}
 
 									@Override
@@ -143,18 +140,14 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 												return;
 											}
 										}
-										if (onChannelStateChanged != null) {
-											onChannelStateChanged.run(ctx.channel(), false);
-										}
+										Procs.invoke(onChannelStateChanged, ctx.channel(), false);
 									}
 
 									@Override
 									public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 											throws Exception {
 										log.error(ctx.channel() + " cause:", cause);
-										if (onExceptionCaught != null) {
-											onExceptionCaught.run(ctx.channel(), cause);
-										}
+										Procs.invoke(onExceptionCaught, ctx.channel(), cause);
 									}
 								});
 					}
@@ -169,9 +162,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 					if (channelFuture.isSuccess()) {
 						channel = channelFuture.channel();
 						log.info(serverName + " bind at port:" + port);
-						if (onServerBind != null) {
-							onServerBind.run(channel);
-						}
+						Procs.invoke(onServerBind, channel);
 					}
 				}).sync().channel().closeFuture().sync();
 			} catch (InterruptedException e) {
@@ -299,9 +290,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 				dispatchMessage.run(message, handler);
 			} catch (Exception e) {
 				log.error(ctx.channel() + " cause:", e);
-				if (onExceptionCaught != null) {
-					onExceptionCaught.run(channel, e);
-				}
+				Procs.invoke(onExceptionCaught, channel, e);
 			}
 		} else {
 			log.warn(serverName + " no dispatch message listener!");
