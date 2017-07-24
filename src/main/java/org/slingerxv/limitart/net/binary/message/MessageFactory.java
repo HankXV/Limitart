@@ -16,6 +16,7 @@ import org.slingerxv.limitart.net.binary.message.anotation.Handler;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.reflectasm.MethodAccess;
+import org.slingerxv.limitart.util.Beta;
 import org.slingerxv.limitart.util.ReflectionUtil;
 
 import io.netty.buffer.ByteBuf;
@@ -84,6 +85,7 @@ public class MessageFactory {
 		}
 	}
 
+	@Beta
 	public MessageFactory registerController(Class<?> controllerClazz) throws Exception {
 		Object newInstance = controllerClazz.newInstance();
 		MethodAccess methodAccess = MethodAccess.get(controllerClazz);
