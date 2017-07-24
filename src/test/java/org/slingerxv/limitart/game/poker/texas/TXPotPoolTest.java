@@ -25,24 +25,18 @@ public class TXPotPoolTest {
 		data = new long[9];
 		roles = new ArrayList<>();
 		sum = 0;
-		for(int i=0;i<9;++i){
-			if(i == 0){
-				min = i+1;
+		for (int i = 0; i < 9; ++i) {
+			if (i == 0) {
+				min = i + 1;
 			}
-			if(i == 8){
-				key = ""+i;
+			if (i == 8) {
+				key = "" + i;
 			}
-			data[i] = i+1;
+			data[i] = i + 1;
 			roles.add(i);
 			sum += i;
 		}
 		chips = RandomUtil.randomLong(Long.MIN_VALUE, Long.MAX_VALUE);
-	}
-
-	@Test
-	public void testCalTrigger() {
-		pool.calTrigger(data, min, 1);
-		Assert.assertFalse(pool.pots.size() != data.length-1);
 	}
 
 	@Test
@@ -59,7 +53,7 @@ public class TXPotPoolTest {
 		pool.flushAward((key, roles, chips) -> {
 			++times;
 		});
-		Assert.assertFalse(times != data.length-1);
+		Assert.assertFalse(times != data.length - 1);
 	}
 
 }
