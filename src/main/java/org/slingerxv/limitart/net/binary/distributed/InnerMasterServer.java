@@ -3,12 +3,14 @@ package org.slingerxv.limitart.net.binary.distributed;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Proc2;
+import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.BinaryServer;
-import org.slingerxv.limitart.net.binary.distributed.config.InnerMasterServerConfig;
 import org.slingerxv.limitart.net.binary.distributed.handler.ReqConnectionReportSlave2MasterHandler;
 import org.slingerxv.limitart.net.binary.distributed.handler.ReqServerLoadSlave2MasterHandler;
 import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
@@ -18,6 +20,7 @@ import org.slingerxv.limitart.net.binary.distributed.message.ResServerJoinMaster
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.net.struct.AddressPair;
 
@@ -29,20 +32,28 @@ import io.netty.channel.Channel;
  * @author Hank
  *
  */
-public abstract class InnerMasterServer implements IServer {
+public class InnerMasterServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	// 从服务器集合
 	private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, InnerServerData>> slaves = new ConcurrentHashMap<>();
 	private BinaryServer server;
-	private InnerMasterServerConfig config;
+	// config---
+	private String serverName;
+	private int masterPort;
+	private MessageFactory factory;
+	// listener---
+	private Proc2<InnerServerData, Boolean> onConnectionChanged;
 
-	public InnerMasterServer(InnerMasterServerConfig config) throws Exception {
-		this.config = config;
-		config.getFactory().registerMsg(new ReqConnectionReportSlave2MasterHandler());
-		config.getFactory().registerMsg(new ReqServerLoadSlave2MasterHandler());
+	public InnerMasterServer(InnerMasterServerBuilder builder) throws Exception {
+		this.serverName = builder.serverName;
+		this.masterPort = builder.masterPort;
+		this.onConnectionChanged = builder.onConnectionChanged;
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
+		getFactory().registerMsg(new ReqConnectionReportSlave2MasterHandler());
+		getFactory().registerMsg(new ReqServerLoadSlave2MasterHandler());
 		server = new BinaryServer.BinaryServerBuilder()
-				.addressPair(new AddressPair(config.getMasterPort(), InnerServerUtil.getInnerPass()))
-				.serverName(config.getServerName()).factory(config.getFactory()).dispatchMessage((message, handler) -> {
+				.addressPair(new AddressPair(getMasterPort(), InnerServerUtil.getInnerPass()))
+				.serverName(getServerName()).factory(getFactory()).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
 					try {
 						handler.handle(message);
@@ -73,7 +84,7 @@ public abstract class InnerMasterServer implements IServer {
 									} catch (Exception e) {
 										log.error(e, e);
 									}
-									onSlaveDisconnected(remove);
+									Procs.invoke(onConnectionChanged, remove, false);
 								}
 							}
 						}
@@ -112,10 +123,6 @@ public abstract class InnerMasterServer implements IServer {
 	public void stopServer() {
 		server.stopServer();
 	}
-
-	protected abstract void onSlaveConnected(InnerServerData data);
-
-	protected abstract void onSlaveDisconnected(InnerServerData data);
 
 	/**
 	 * 收到SlaveServer的上报
@@ -201,7 +208,7 @@ public abstract class InnerMasterServer implements IServer {
 			}
 		}
 		concurrentHashMap.put(serverInfo.serverId, data);
-		onSlaveConnected(data);
+		Procs.invoke(onConnectionChanged, data, true);
 	}
 
 	/**
@@ -248,8 +255,16 @@ public abstract class InnerMasterServer implements IServer {
 		return concurrentHashMap.get(serverId);
 	}
 
-	public InnerMasterServerConfig getConfig() {
-		return config;
+	public String getServerName() {
+		return this.serverName;
+	}
+
+	public int getMasterPort() {
+		return masterPort;
+	}
+
+	public MessageFactory getFactory() {
+		return factory;
 	}
 
 	private InnerServerInfo serverData2ServerInfo(InnerServerData data) {
@@ -261,5 +276,55 @@ public abstract class InnerMasterServer implements IServer {
 		info.serverId = data.getServerId();
 		info.serverType = data.getServerType();
 		return info;
+	}
+
+	public static class InnerMasterServerBuilder {
+		private String serverName;
+		private int masterPort;
+		private MessageFactory factory;
+		private Proc2<InnerServerData, Boolean> onConnectionChanged;
+
+		public InnerMasterServerBuilder() {
+			this.serverName = "Inner-Master-Server";
+			this.masterPort = 8888;
+		}
+
+		/**
+		 * 构建配置
+		 * 
+		 * @return
+		 * @throws Exception
+		 */
+		public InnerMasterServer build() throws Exception {
+			return new InnerMasterServer(this);
+		}
+
+		public InnerMasterServerBuilder serverName(String serverName) {
+			this.serverName = serverName;
+			return this;
+		}
+
+		/**
+		 * 绑定端口
+		 * 
+		 * @param port
+		 * @return
+		 */
+		public InnerMasterServerBuilder masterPort(int masterPort) {
+			if (masterPort >= 1024) {
+				this.masterPort = masterPort;
+			}
+			return this;
+		}
+
+		public InnerMasterServerBuilder factory(MessageFactory factory) {
+			this.factory = factory;
+			return this;
+		}
+
+		public InnerMasterServerBuilder onConnectionChanged(Proc2<InnerServerData, Boolean> onConnectionChanged) {
+			this.onConnectionChanged = onConnectionChanged;
+			return this;
+		}
 	}
 }

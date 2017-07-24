@@ -1,11 +1,16 @@
 package org.slingerxv.limitart.net.binary.distributed;
 
+import java.util.Objects;
 import java.util.TimerTask;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Func;
+import org.slingerxv.limitart.funcs.Funcs;
+import org.slingerxv.limitart.funcs.Proc1;
+import org.slingerxv.limitart.funcs.Proc2;
+import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.BinaryClient;
-import org.slingerxv.limitart.net.binary.distributed.config.InnerSlaveServerConfig;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerJoinMaster2SlaveHandler;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerQuitMaster2SlaveHandler;
 import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
@@ -13,6 +18,7 @@ import org.slingerxv.limitart.net.binary.distributed.message.ReqConnectionReport
 import org.slingerxv.limitart.net.binary.distributed.message.ReqServerLoadSlave2MasterMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerJoinMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster2SlaveMessage;
+import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.TimerUtil;
@@ -23,20 +29,55 @@ import org.slingerxv.limitart.util.TimerUtil;
  * @author Hank
  *
  */
-public abstract class InnerSlaveServer implements IServer {
+public class InnerSlaveServer implements IServer {
 	private static Logger log = LogManager.getLogger();
-	private InnerSlaveServerConfig config;
 	private BinaryClient toMaster;
 	private TimerTask reportTask;
+	// config---
+	private String slaveName;
+	private int slaveType;
+	private int myServerId;
+	private String myIp;
+	private int myServerPort;
+	private String myServerPass;
+	private int myInnerServerPort;
+	private String myInnerServerPass;
+	private String masterIp;
+	private int masterServerPort;
+	private String masterServerPass;
+	private int masterInnerPort;
+	private String masterInnerPass;
+	private MessageFactory factory;
+	// listener--
+	private Func<Integer> serverLoad;
+	private Proc1<InnerServerInfo> onNewSlaveJoin;
+	private Proc2<Integer, Integer> onNewSlaveQuit;
+	private Proc1<InnerSlaveServer> onConnectMasterSuccess;
 
-	public InnerSlaveServer(InnerSlaveServerConfig config) throws Exception {
-		this.config = config;
-		config.getFactory().registerMsg(new ResServerJoinMaster2SlaveHandler())
+	public InnerSlaveServer(InnerSlaveServerBuilder builder) throws Exception {
+		this.slaveName = builder.slaveName;
+		this.slaveType = builder.slaveType;
+		this.myServerId = builder.myServerId;
+		this.myIp = builder.myServerIp;
+		this.myServerPort = builder.myServerPort;
+		this.myServerPass = builder.myServerPass;
+		this.myInnerServerPort = builder.myInnerServerPort;
+		this.myInnerServerPass = builder.myInnerServerPass;
+		this.masterIp = builder.masterIp;
+		this.masterServerPort = builder.masterServerPort;
+		this.masterServerPass = builder.masterServerPass;
+		this.masterInnerPort = builder.masterInnerPort;
+		this.masterInnerPass = builder.masterInnerPass;
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
+		this.serverLoad = builder.serverLoad;
+		this.onNewSlaveJoin = builder.onNewSlaveJoin;
+		this.onNewSlaveQuit = builder.onNewSlaveQuit;
+		this.onConnectMasterSuccess = builder.onConnectMasterSuccess;
+		getFactory().registerMsg(new ResServerJoinMaster2SlaveHandler())
 				.registerMsg(new ResServerQuitMaster2SlaveHandler());
-		toMaster = new BinaryClient.BinaryClientBuilder().autoReconnect(5).clientName(config.getSlaveName())
-				.remoteAddress(
-						new AddressPair(config.getMasterIp(), config.getMasterInnerPort(), config.getMasterInnerPass()))
-				.factory(config.getFactory()).onChannelStateChanged((binaryClient, active) -> {
+		toMaster = new BinaryClient.BinaryClientBuilder().autoReconnect(5).clientName(getSlaveName())
+				.remoteAddress(new AddressPair(getMasterIp(), getMasterInnerPort(), getMasterInnerPass()))
+				.factory(getFactory()).onChannelStateChanged((binaryClient, active) -> {
 					if (!active) {
 						TimerUtil.unScheduleGlobal(reportTask);
 						log.error(toMaster.getClientName() + " server disconnected," + binaryClient.channel());
@@ -45,12 +86,12 @@ public abstract class InnerSlaveServer implements IServer {
 					// 链接成功,上报本服务器的服务端口等信息
 					ReqConnectionReportSlave2MasterMessage msg = new ReqConnectionReportSlave2MasterMessage();
 					InnerServerInfo info = new InnerServerInfo();
-					info.innerPort = config.getMyInnerServerPort();
-					info.outIp = config.getMyIp();
-					info.outPass = config.getMyServerPass();
-					info.outPort = config.getMyServerPort();
-					info.serverId = config.getMyServerId();
-					info.serverType = serverType();
+					info.innerPort = getMyInnerServerPort();
+					info.outIp = getMyIp();
+					info.outPass = getMyServerPass();
+					info.outPort = getMyServerPort();
+					info.serverId = getMyServerId();
+					info.serverType = getSlaveType();
 					msg.serverInfo = info;
 					try {
 						client.sendMessage(msg, (isSuccess, cause, channel) -> {
@@ -65,7 +106,7 @@ public abstract class InnerSlaveServer implements IServer {
 						log.error(e, e);
 					}
 					TimerUtil.scheduleGlobal(5000, 5000, reportTask);
-					onConnectMasterSuccess(InnerSlaveServer.this);
+					Procs.invoke(onConnectMasterSuccess, InnerSlaveServer.this);
 				}).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
 					try {
@@ -94,8 +135,12 @@ public abstract class InnerSlaveServer implements IServer {
 	}
 
 	private void reportLoad() {
+		Integer invoke = Funcs.invoke(serverLoad);
+		if (invoke == null) {
+			return;
+		}
 		ReqServerLoadSlave2MasterMessage slm = new ReqServerLoadSlave2MasterMessage();
-		slm.load = serverLoad();
+		slm.load = invoke;
 		try {
 			toMaster.sendMessage(slm, (isSuccess, cause, channel) -> {
 				if (isSuccess) {
@@ -111,29 +156,205 @@ public abstract class InnerSlaveServer implements IServer {
 
 	public void ResServerJoinMaster2Slave(ResServerJoinMaster2SlaveMessage msg) {
 		for (InnerServerInfo info : msg.infos) {
-			onNewSlaveJoin(info);
+			Procs.invoke(onNewSlaveJoin, info);
 		}
 	}
 
 	public void ResServerQuitMaster2Slave(ResServerQuitMaster2SlaveMessage msg) {
-		onNewSlaveQuit(msg.serverType, msg.serverId);
+		Procs.invoke(onNewSlaveQuit, msg.serverType, msg.serverId);
 	}
 
 	public BinaryClient getMasterClient() {
 		return this.toMaster;
 	}
 
-	public InnerSlaveServerConfig getConfig() {
-		return config;
+	public String getSlaveName() {
+		return slaveName;
 	}
 
-	public abstract int serverType();
+	public int getSlaveType() {
+		return slaveType;
+	}
 
-	public abstract int serverLoad();
+	public int getMyServerId() {
+		return myServerId;
+	}
 
-	public abstract void onNewSlaveJoin(InnerServerInfo info);
+	public String getMyIp() {
+		return myIp;
+	}
 
-	public abstract void onNewSlaveQuit(int serverType, int serverId);
+	public int getMyServerPort() {
+		return myServerPort;
+	}
 
-	protected abstract void onConnectMasterSuccess(InnerSlaveServer slave);
+	public String getMyServerPass() {
+		return myServerPass;
+	}
+
+	public int getMyInnerServerPort() {
+		return myInnerServerPort;
+	}
+
+	public String getMyInnerServerPass() {
+		return myInnerServerPass;
+	}
+
+	public String getMasterIp() {
+		return masterIp;
+	}
+
+	public int getMasterServerPort() {
+		return masterServerPort;
+	}
+
+	public String getMasterServerPass() {
+		return masterServerPass;
+	}
+
+	public int getMasterInnerPort() {
+		return masterInnerPort;
+	}
+
+	public String getMasterInnerPass() {
+		return masterInnerPass;
+	}
+
+	public MessageFactory getFactory() {
+		return factory;
+	}
+
+	public static class InnerSlaveServerBuilder {
+		private String slaveName;
+		private int slaveType;
+		private int myServerId;
+		private String myServerIp;
+		private int myServerPort;
+		private String myServerPass;
+		private int myInnerServerPort;
+		private String myInnerServerPass;
+		private String masterIp;
+		private int masterServerPort;
+		private String masterServerPass;
+		private int masterInnerPort;
+		private String masterInnerPass;
+		private MessageFactory factory;
+		// listener--
+		private Func<Integer> serverLoad;
+		private Proc1<InnerServerInfo> onNewSlaveJoin;
+		private Proc2<Integer, Integer> onNewSlaveQuit;
+		private Proc1<InnerSlaveServer> onConnectMasterSuccess;
+
+		public InnerSlaveServerBuilder() {
+			this.slaveName = "Inner-Slave-Server";
+		}
+
+		/**
+		 * 构建配置
+		 * 
+		 * @return
+		 * @throws Exception
+		 */
+		public InnerSlaveServer build() throws Exception {
+			return new InnerSlaveServer(this);
+		}
+
+		public InnerSlaveServerBuilder slaveName(String slaveName) {
+			this.slaveName = slaveName;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder slaveType(int slaveType) {
+			this.slaveType = slaveType;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder myServerId(int myServerId) {
+			this.myServerId = myServerId;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder myServerIp(String myServerIp) {
+			this.myServerIp = myServerIp;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder myServerPort(int myServerPort) {
+			if (myServerPort >= 1024) {
+				this.myServerPort = myServerPort;
+			}
+			return this;
+		}
+
+		public InnerSlaveServerBuilder myServerPass(String myServerPass) {
+			this.myServerPass = myServerPass;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder myInnerServerPort(int myInnerServerPort) {
+			if (myInnerServerPort >= 1024) {
+				this.myInnerServerPort = myInnerServerPort;
+			}
+			return this;
+		}
+
+		public InnerSlaveServerBuilder myInnerServerPass(String myInnerServerPass) {
+			this.myInnerServerPass = myInnerServerPass;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder masterIp(String masterIp) {
+			this.masterIp = masterIp;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder masterServerPort(int masterServerPort) {
+			if (masterServerPort >= 1024) {
+				this.masterServerPort = masterServerPort;
+			}
+			return this;
+		}
+
+		public InnerSlaveServerBuilder masterServerPass(String masterServerPass) {
+			this.masterServerPass = masterServerPass;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder masterInnerPort(int masterInnerPort) {
+			if (masterInnerPort >= 1024) {
+				this.masterInnerPort = masterInnerPort;
+			}
+			return this;
+		}
+
+		public InnerSlaveServerBuilder masterInnerPass(String masterInnerPass) {
+			this.masterInnerPass = masterInnerPass;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder facotry(MessageFactory factory) {
+			this.factory = factory;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder serverLoad(Func<Integer> serverLoad) {
+			this.serverLoad = serverLoad;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder onNewSlaveJoin(Proc1<InnerServerInfo> onNewSlaveJoin) {
+			this.onNewSlaveJoin = onNewSlaveJoin;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder onNewSlaveQuit(Proc2<Integer, Integer> onNewSlaveQuit) {
+			this.onNewSlaveQuit = onNewSlaveQuit;
+			return this;
+		}
+
+		public InnerSlaveServerBuilder onConnectMasterSuccess(Proc1<InnerSlaveServer> onConnectMasterSuccess) {
+			this.onConnectMasterSuccess = onConnectMasterSuccess;
+			return this;
+		}
+	}
 }

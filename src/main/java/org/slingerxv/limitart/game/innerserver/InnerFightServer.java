@@ -8,9 +8,6 @@ import org.slingerxv.limitart.game.innerserver.config.InnerFightServerConfig;
 import org.slingerxv.limitart.game.innerserver.constant.InnerGameServerType;
 import org.slingerxv.limitart.net.binary.distributed.InnerMasterServer;
 import org.slingerxv.limitart.net.binary.distributed.InnerSlaveServer;
-import org.slingerxv.limitart.net.binary.distributed.config.InnerMasterServerConfig.InnerMasterServerConfigBuilder;
-import org.slingerxv.limitart.net.binary.distributed.config.InnerSlaveServerConfig.InnerSlaveServerConfigBuilder;
-import org.slingerxv.limitart.net.binary.distributed.message.InnerServerInfo;
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
 import org.slingerxv.limitart.net.define.IServer;
@@ -27,59 +24,32 @@ public abstract class InnerFightServer implements IServer {
 	private InnerSlaveServer toMaster;
 
 	public InnerFightServer(InnerFightServerConfig config) throws Exception {
-		server = new InnerMasterServer(new InnerMasterServerConfigBuilder().serverName("Fight")
-				.masterPort(config.getFightServerInnerPort()).factory(config.getFactory()).build()) {
+		server = new InnerMasterServer.InnerMasterServerBuilder().serverName("Fight")
+				.masterPort(config.getFightServerInnerPort()).factory(config.getFactory())
+				.onConnectionChanged((data, isConnected) -> {
+					if (isConnected) {
+						if (data.getServerType() == InnerGameServerType.SERVER_TYPE_GAME) {
+							log.info("game server connected:" + data.getServerId() + ",cur size:"
+									+ server.getSlaves(InnerGameServerType.SERVER_TYPE_GAME).size());
+						} else {
+							log.error("server type :" + data.getServerType() + " connected!!!!!!!check!!!!");
+						}
+					}
+				}).build();
 
-			@Override
-			protected void onSlaveConnected(InnerServerData data) {
-				if (data.getServerType() == InnerGameServerType.SERVER_TYPE_GAME) {
-					log.info("game server connected:" + data.getServerId() + ",cur size:"
-							+ getSlaves(InnerGameServerType.SERVER_TYPE_GAME).size());
-				} else {
-					log.error("server type :" + data.getServerType() + " connected!!!!!!!check!!!!");
-				}
-			}
+		toMaster = new InnerSlaveServer.InnerSlaveServerBuilder().slaveName("Fight-To-Public")
+				.slaveType(InnerGameServerType.SERVER_TYPE_FIGHT).myServerId(config.getServerId())
+				.myServerIp(config.getFightServerIp()).myServerPort(config.getFightServerPort())
+				.myServerPass(config.getFightServerPass()).masterServerPort(config.getFightServerPort())
+				.myInnerServerPort(config.getFightServerInnerPort()).myInnerServerPass(InnerServerUtil.getInnerPass())
+				.masterIp(config.getPublicIp()).masterInnerPort(config.getPublicPort())
+				.masterInnerPass(InnerServerUtil.getInnerPass()).facotry(config.getFactory()).serverLoad(() -> {
+					return getFightServerLoad();
+				}).onConnectMasterSuccess((slave) -> {
+					server.startServer();
+					onConnectPublic(slave);
+				}).build();
 
-			@Override
-			protected void onSlaveDisconnected(InnerServerData data) {
-
-			}
-		};
-
-		toMaster = new InnerSlaveServer(new InnerSlaveServerConfigBuilder().slaveName("Fight-To-Public")
-				.myServerId(config.getServerId()).myServerIp(config.getFightServerIp())
-				.myServerPort(config.getFightServerPort()).myServerPass(config.getFightServerPass())
-				.masterServerPort(config.getFightServerPort()).myInnerServerPort(config.getFightServerInnerPort())
-				.myInnerServerPass(InnerServerUtil.getInnerPass()).masterIp(config.getPublicIp())
-				.masterInnerPort(config.getPublicPort()).masterInnerPass(InnerServerUtil.getInnerPass())
-				.facotry(config.getFactory()).build()) {
-
-			@Override
-			public int serverType() {
-				return InnerGameServerType.SERVER_TYPE_FIGHT;
-			}
-
-			@Override
-			public int serverLoad() {
-				return getFightServerLoad();
-			}
-
-			@Override
-			public void onNewSlaveQuit(int serverType, int serverId) {
-
-			}
-
-			@Override
-			public void onNewSlaveJoin(InnerServerInfo info) {
-
-			}
-
-			@Override
-			protected void onConnectMasterSuccess(InnerSlaveServer slave) {
-				server.startServer();
-				onConnectPublic(slave);
-			}
-		};
 	}
 
 	@Override
