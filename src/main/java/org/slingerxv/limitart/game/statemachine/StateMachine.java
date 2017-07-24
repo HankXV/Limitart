@@ -130,9 +130,11 @@ public class StateMachine {
 			curState = next;
 		}
 		if (this.curState != null) {
-			this.curState.execute(deltaTimeInMills, this);
+			if (!curState.finished()) {
+				this.curState.execute0(deltaTimeInMills, this);
+			}
 			log.debug("EXE:{}", this.curState.getStateId());
-			IEvent con = this.curState.EventTrigger(this);
+			IEvent con = this.curState.EventTrigger(this, deltaTimeInMills);
 			if (con != null) {
 				int nextNodeId = con.getNextStateId();
 				if (!this.stateMap.containsKey(nextNodeId)) {

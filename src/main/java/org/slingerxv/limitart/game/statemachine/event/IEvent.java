@@ -15,7 +15,7 @@ public interface IEvent<T extends StateMachine> {
 	 * 
 	 * @return
 	 */
-    Integer getNextStateId();
+	Integer getNextStateId();
 
 	/**
 	 * 是否符合条件跳转
@@ -24,5 +24,5 @@ public interface IEvent<T extends StateMachine> {
 	 * @param param
 	 * @return
 	 */
-    boolean onCondition(State<T> state, T fsm);
+	boolean onCondition(T fsm, State<T> state, long delta);
 }
