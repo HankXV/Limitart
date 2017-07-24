@@ -107,7 +107,8 @@ public final class SymmetricEncryptionUtil {
 		return encode(source.getBytes(CharsetUtil.UTF_8));
 	}
 
-	public String decode(String tokenSource) throws Exception {
+	public String decode(String source) throws Exception {
+		String tokenSource = source;
 		int zeroFlag = 0;
 		if (tokenSource.startsWith("$")) {
 			zeroFlag = Integer.parseInt(tokenSource.substring(1, 3));

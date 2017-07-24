@@ -38,6 +38,7 @@ public abstract class MethodAccess {
 	private Class[][] parameterTypes;
 	@SuppressWarnings("rawtypes")
 	private Class[] returnTypes;
+	private ArrayList<Method> methods;
 
 	abstract public Object invoke(Object object, int methodIndex, Object... args);
 
@@ -69,7 +70,7 @@ public abstract class MethodAccess {
 	 */
 	@SuppressWarnings("rawtypes")
 	public int getIndex(String methodName, Class... paramTypes) {
-		for (int i = 0, n = methodNames.length; i < n; i++)
+		for (int i = 0; i < methodNames.length; i++)
 			if (methodNames[i].equals(methodName) && Arrays.equals(paramTypes, parameterTypes[i]))
 				return i;
 		throw new IllegalArgumentException(
@@ -81,7 +82,7 @@ public abstract class MethodAccess {
 	 * specified number of arguments.
 	 */
 	public int getIndex(String methodName, int paramsCount) {
-		for (int i = 0, n = methodNames.length; i < n; i++)
+		for (int i = 0; i < methodNames.length; i++)
 			if (methodNames[i].equals(methodName) && parameterTypes[i].length == paramsCount)
 				return i;
 		throw new IllegalArgumentException(
@@ -100,6 +101,10 @@ public abstract class MethodAccess {
 	@SuppressWarnings("rawtypes")
 	public Class[] getReturnTypes() {
 		return returnTypes;
+	}
+
+	public ArrayList<Method> getMethods() {
+		return methods;
 	}
 
 	@SuppressWarnings({ "rawtypes", "deprecation" })
@@ -320,6 +325,7 @@ public abstract class MethodAccess {
 			access.methodNames = methodNames;
 			access.parameterTypes = parameterTypes;
 			access.returnTypes = returnTypes;
+			access.methods = methods;
 			return access;
 		} catch (Throwable t) {
 			throw new RuntimeException("Error constructing method access class: " + accessClassName, t);

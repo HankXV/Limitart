@@ -104,12 +104,10 @@ public class AutoGrowthTaskQueueGroup<T> {
 		}
 		entity.setThreadIndex(0);
 		log.info(thread.getThread().getThreadName() + " unregistered entity:" + entity);
-		if (thread.getEntities().size() <= 0) {
-			if (threads.size() > this.coreThreadCount) {
-				AutoGrowthSegment<T> remove = threads.remove(threadIndex);
-				if (remove != null) {
-					remove.getThread().stopServer();
-				}
+		if (thread.getEntities().size() <= 0 && threads.size() > this.coreThreadCount) {
+			AutoGrowthSegment<T> remove = threads.remove(threadIndex);
+			if (remove != null) {
+				remove.getThread().stopServer();
 			}
 		}
 	}

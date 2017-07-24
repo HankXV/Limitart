@@ -33,13 +33,12 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 	}
 
 	public FrequencyReadRankMap(Comparator<V> comparator, int capacity) {
-		Objects.requireNonNull(comparator, "comparator");
 		if (capacity <= 0) {
 			throw new IllegalArgumentException("capacity > 0");
 		}
 		this.map = new HashMap<>(capacity);
-		this.comparator = comparator;
-		list = new ArrayList<>(capacity);
+		this.comparator = Objects.requireNonNull(comparator, "comparator");
+		this.list = new ArrayList<>(capacity);
 		this.capacity = capacity;
 	}
 
@@ -63,8 +62,10 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 	}
 
 	@Override
-	public List<V> getRange(int start, int end) {
+	public List<V> getRange(int startIndex, int endIndex) {
 		List<V> temp = new ArrayList<>();
+		int start = startIndex;
+		int end = endIndex;
 		int size = size();
 		if (size == 0) {
 			return temp;
@@ -89,8 +90,9 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 	}
 
 	@Override
-	public V getAt(int index) {
+	public V getAt(int at) {
 		int size = size();
+		int index = at;
 		if (size == 0) {
 			return null;
 		}
@@ -163,10 +165,8 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 			int binarySearch = binarySearch(obj, false);
 			list.remove(binarySearch);
 		} else {
-			if (!list.isEmpty()) {
-				if (comparator.compare(list.get(list.size() - 1), value) < 0) {
-					return null;
-				}
+			if (!list.isEmpty() && comparator.compare(list.get(list.size() - 1), value) < 0) {
+				return null;
 			}
 		}
 		int binarySearch = 0;
@@ -189,8 +189,7 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 
 	@Override
 	public void putAll(Map<? extends K, ? extends V> map) {
-		Objects.requireNonNull(map, "map");
-		for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
+		for (Entry<? extends K, ? extends V> entry : Objects.requireNonNull(map, "map").entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}

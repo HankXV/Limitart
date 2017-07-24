@@ -1,5 +1,7 @@
 package org.slingerxv.limitart.rpcx.providerx.schedule;
 
+import java.util.Objects;
+
 import org.slingerxv.limitart.util.StringUtil;
 
 /**
@@ -19,16 +21,12 @@ public final class ProviderJob {
 	private IProviderScheduleListener listener;
 
 	private ProviderJob(ProviderJobBuilder builder) {
-		if (StringUtil.isEmptyOrNull(builder.jobName)) {
-			throw new NullPointerException("jobName");
+		Objects.requireNonNull(builder.jobName, "jobName");
+		if (StringUtil.isEmptyOrNull(builder.cronExpression) && builder.intervalInHours <= 0
+				&& builder.intervalInMinutes <= 0 && builder.intervalInSeconds <= 0 && builder.intervalInMillis <= 0) {
+			throw new IllegalArgumentException("schedule time");
 		}
-		if (StringUtil.isEmptyOrNull(builder.cronExpression) && builder.intervalInHours <= 0 && builder.intervalInMinutes <= 0
-				&& builder.intervalInSeconds <= 0 && builder.intervalInMillis <= 0) {
-			throw new NullPointerException("schedule time");
-		}
-		if (builder.listener == null) {
-			throw new NullPointerException("listener");
-		}
+		Objects.requireNonNull(builder.listener, "listener");
 		this.jobName = builder.jobName;
 		this.cronExpression = builder.cronExpression;
 		this.intervalInHours = builder.intervalInHours;
@@ -197,7 +195,7 @@ public final class ProviderJob {
 				throw new NullPointerException("IProviderScheduleListener");
 			}
 			this.listener = listener;
-			if(StringUtil.isEmptyOrNull(this.jobName)){
+			if (StringUtil.isEmptyOrNull(this.jobName)) {
 				return jobName(listener.getClass().getName());
 			}
 			return this;

@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
+import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
@@ -66,15 +67,11 @@ public class BinaryClient {
 
 	private BinaryClient(BinaryClientBuilder builder) throws Exception {
 		this.clientName = builder.clientName;
-		Objects.requireNonNull(builder.remoteAddress, "remoteAddress");
-		this.remoteAddress = builder.remoteAddress;
+		this.remoteAddress = Objects.requireNonNull(builder.remoteAddress, "remoteAddress");
 		this.autoReconnect = builder.autoReconnect;
-		Objects.requireNonNull(builder.decoder, "decoder");
-		this.decoder = builder.decoder;
-		Objects.requireNonNull(builder.encoder, "encoder");
-		this.encoder = builder.encoder;
-		Objects.requireNonNull(builder.factory, "factory");
-		this.factory = builder.factory;
+		this.decoder = Objects.requireNonNull(builder.decoder, "decoder");
+		this.encoder = Objects.requireNonNull(builder.encoder, "encoder");
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 		this.onChannelStateChanged = builder.onChannelStateChanged;
 		this.onExceptionCaught = builder.onExceptionCaught;
 		this.onConnectionEffective = builder.onConnectionEffective;
@@ -118,32 +115,32 @@ public class BinaryClient {
 
 				@Override
 				public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-					if (onChannelStateChanged != null) {
-						onChannelStateChanged.run(BinaryClient.this, false);
-					}
+					Procs.invoke(onChannelStateChanged, BinaryClient.this, false);
 				}
 
 				@Override
 				public void channelActive(ChannelHandlerContext ctx) throws Exception {
-					if (onChannelStateChanged != null) {
-						onChannelStateChanged.run(BinaryClient.this, true);
-					}
+					Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
 				}
 
 				@Override
 				public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 					log.error(ctx.channel() + " cause:", cause);
-					if (onExceptionCaught != null) {
-						onExceptionCaught.run(BinaryClient.this, cause);
-					}
+					Procs.invoke(onExceptionCaught, BinaryClient.this, cause);
 				}
 			});
 		}
 
 	}
 
-	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) throws Exception {
-		SendMessageUtil.sendMessage(encoder, channel, msg, listener);
+	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) {
+		channel.eventLoop().execute(() -> {
+			try {
+				SendMessageUtil.sendMessage(encoder, channel, msg, listener);
+			} catch (Exception e) {
+				Procs.invoke(onExceptionCaught, BinaryClient.this, e);
+			}
+		});
 	}
 
 	public BinaryClient disConnect() {
@@ -211,9 +208,7 @@ public class BinaryClient {
 
 	private void onConnectionValidateSeccuss(String remote) {
 		log.info("server validate success,remote:" + remote);
-		if (onConnectionEffective != null) {
-			onConnectionEffective.run(this);
-		}
+		Procs.invoke(onConnectionEffective, this);
 	}
 
 	public String channelLongID() {

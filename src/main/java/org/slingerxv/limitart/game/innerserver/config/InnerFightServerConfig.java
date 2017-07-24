@@ -1,5 +1,7 @@
 package org.slingerxv.limitart.game.innerserver.config;
 
+import java.util.Objects;
+
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 
 public class InnerFightServerConfig {
@@ -20,10 +22,7 @@ public class InnerFightServerConfig {
 		this.fightServerPass = builder.fightServerPass;
 		this.publicIp = builder.publicIp;
 		this.publicPort = builder.publicPort;
-		if (builder.factory == null) {
-			throw new NullPointerException("factory");
-		}
-		this.factory = builder.factory;
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 	}
 
 	public int getServerId() {
@@ -67,9 +66,6 @@ public class InnerFightServerConfig {
 		private String publicIp;
 		private int publicPort;
 		private MessageFactory factory;
-
-		public InnerFightServerConfigBuilder() {
-		}
 
 		/**
 		 * 构建配置

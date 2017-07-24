@@ -5,9 +5,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slingerxv.limitart.funcs.Func1;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
+import org.slingerxv.limitart.funcs.Procs;
+import org.slingerxv.limitart.funcs.Test1;
+import org.slingerxv.limitart.funcs.Tests;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 
 /**
@@ -21,7 +23,7 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 	private static Logger log = LogManager.getLogger();
 	private LinkedBlockingQueue<T> queue = new LinkedBlockingQueue<>();
 	private boolean start = false;
-	private Func1<T, Boolean> intercept;
+	private Test1<T> intercept;
 	private Proc1<T> handle;
 	private Proc2<T, Throwable> exception;
 
@@ -29,7 +31,7 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 		setName(threadName);
 	}
 
-	public ITaskQueue<T> intercept(Func1<T, Boolean> intercept) {
+	public ITaskQueue<T> intercept(Test1<T> intercept) {
 		this.intercept = intercept;
 		return this;
 	}
@@ -54,18 +56,14 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 			} catch (InterruptedException e) {
 				log.error(e, e);
 			}
-			if (intercept != null && intercept.run(take)) {
+			if (Tests.invoke(intercept, take)) {
 				continue;
 			}
 			try {
-				if (handle != null) {
-					handle.run(take);
-				}
+				Procs.invoke(handle, take);
 			} catch (Exception e) {
 				log.error(e, e);
-				if (exception != null) {
-					exception.run(take, e);
-				}
+				Procs.invoke(exception, take, e);
 			}
 		}
 	}

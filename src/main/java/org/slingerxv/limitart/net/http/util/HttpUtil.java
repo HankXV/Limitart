@@ -109,15 +109,17 @@ public final class HttpUtil {
 
 	public static void sendResponse(Channel channel, HttpResponseStatus resultCode, ContentTypes contentType,
 			ByteBuf result, boolean isClose) {
-		FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, resultCode, result);
-		response.headers().add(HttpHeaderNames.CONTENT_TYPE, contentType.getValue());
-		response.headers().add(HttpHeaderNames.CONTENT_LENGTH, result.readableBytes() + "");
-		response.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-		response.headers().add(HttpHeaderNames.CONTENT_DISPOSITION, "inline;filename=\"stupid.jpg\"");
-		ChannelFuture future = channel.writeAndFlush(response);
-		if (isClose) {
-			future.addListener(ChannelFutureListener.CLOSE);
-		}
+		channel.eventLoop().execute(() -> {
+			FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, resultCode, result);
+			response.headers().add(HttpHeaderNames.CONTENT_TYPE, contentType.getValue());
+			response.headers().add(HttpHeaderNames.CONTENT_LENGTH, result.readableBytes() + "");
+			response.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+			response.headers().add(HttpHeaderNames.CONTENT_DISPOSITION, "inline;filename=\"stupid.jpg\"");
+			ChannelFuture future = channel.writeAndFlush(response);
+			if (isClose) {
+				future.addListener(ChannelFutureListener.CLOSE);
+			}
+		});
 	}
 
 	public static void sendResponse(Channel channel, HttpResponseStatus resultCode, String result) {

@@ -1,5 +1,7 @@
 package org.slingerxv.limitart.net.binary.distributed.config;
 
+import java.util.Objects;
+
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 
 /**
@@ -36,10 +38,7 @@ public final class InnerSlaveServerConfig {
 		this.masterServerPass = builder.masterServerPass;
 		this.masterInnerPort = builder.masterInnerPort;
 		this.masterInnerPass = builder.masterInnerPass;
-		if (builder.factory == null) {
-			throw new NullPointerException("factory");
-		}
-		this.factory = builder.factory;
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 	}
 
 	public String getSlaveName() {

@@ -3,6 +3,7 @@ package org.slingerxv.limitart.rpcx.center;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
@@ -52,9 +53,7 @@ public class ServiceCenterX {
 	private ConcurrentHashMap<String, ConcurrentHashSet<Integer>> schedules = new ConcurrentHashMap<>();
 
 	public ServiceCenterX(ServiceCenterXConfig config) throws Exception {
-		if (config == null) {
-			throw new NullPointerException("ServiceCenterXConfig");
-		}
+		Objects.requireNonNull(config, "config");
 		this.config = config;
 		binaryServer = new BinaryServer.BinaryServerBuilder().addressPair(new AddressPair(config.getPort()))
 				.factory(new MessageFactory().registerMsg(new SubscribeServiceFromServiceCenterConsumerHandler())

@@ -1,5 +1,7 @@
 package org.slingerxv.limitart.game.innerserver.config;
 
+import java.util.Objects;
+
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 
 public class InnerPublicServerConfig {
@@ -8,10 +10,7 @@ public class InnerPublicServerConfig {
 
 	private InnerPublicServerConfig(InnerPublicServerConfigBuilder builder) {
 		this.masterPort = builder.masterPort;
-		if (builder.factory == null) {
-			throw new NullPointerException("factory");
-		}
-		this.factory = builder.factory;
+		this.factory = Objects.requireNonNull(builder.factory, "factory");
 	}
 
 	public int getMasterPort() {
@@ -25,9 +24,6 @@ public class InnerPublicServerConfig {
 	public static class InnerPublicServerConfigBuilder {
 		private int masterPort;
 		private MessageFactory factory;
-
-		public InnerPublicServerConfigBuilder() {
-		}
 
 		/**
 		 * 构建配置
