@@ -87,9 +87,10 @@ public class TXCardsCalculator {
 		if (txCards.length != 5) {
 			throw new IllegalArgumentException("the length has to be five");
 		}
-		cards = txCards;
-		for (int i = 0; i < txCards.length; ++i) {
-			byte card = txCards[i];
+		byte[] tempCards = new byte[txCards.length];
+		System.arraycopy(txCards, 0, tempCards, 0, txCards.length);
+		for (int i = 0; i < tempCards.length; ++i) {
+			byte card = tempCards[i];
 			numbers[i] = Poker.getCardNumber(card);
 			colors[i] = Poker.getCardColor(card);
 		}
@@ -114,28 +115,30 @@ public class TXCardsCalculator {
 					temp = colors[i];
 					colors[i] = colors[j];
 					colors[j] = temp;
-					temp = cards[i];
-					cards[i] = cards[j];
-					cards[j] = temp;
+					temp = tempCards[i];
+					tempCards[i] = tempCards[j];
+					tempCards[j] = temp;
 				}
 			}
 		}
 		// 如果顺子是A2345，将A放至末位
 		if (maxNumberOfStraight == 5) {
-			byte[] newCards = new byte[cards.length];
+			byte[] newCards = new byte[tempCards.length];
 			for (int k = 0; k < newCards.length; k++) {
 				if (k == newCards.length - 1) {
-					newCards[k] = cards[0];
+					newCards[k] = tempCards[0];
 				}else{
-					newCards[k] = cards[k + 1];
+					newCards[k] = tempCards[k + 1];
 				}
 			}
 			cards = newCards;
+		}else{
+			cards = tempCards;
 		}
 		// 评估数值
 		evaluator = rank;
-		for (int i = 0; i < numbers.length; ++i) {
-			evaluator |= ((long) numbers[i]) << ((numbers.length - i - 1) << 3);
+		for (int i = 0; i < cards.length; ++i) {
+			evaluator |= ((long) Poker.getCardNumber(cards[i])) << ((cards.length - i - 1) << 3);
 		}
 	}
 

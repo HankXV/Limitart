@@ -3,6 +3,7 @@ package org.slingerxv.limitart.game.poker.texas;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slingerxv.limitart.util.RandomUtil;
@@ -10,62 +11,55 @@ import org.slingerxv.limitart.util.RandomUtil;
 @SuppressWarnings("unused")
 public class TXPotPoolTest {
 	private TXPotPool pool;
-	private long[][] datas;
+	private long[] data;
+	private long min;
+	private String key;
 	private List<Integer> roles;
 	private long chips;
+	private long sum;
+	private int times;
 
 	@Before
 	public void setUp() throws Exception {
 		pool = new TXPotPool();
-		datas = new long[100][];
-		for (int i = 0; i < 100; ++i) {
-			long[] data = new long[9];
-			for (int j = 0; j < data.length; ++j) {
-				data[j] = RandomUtil.randomLong(Long.MIN_VALUE, Long.MAX_VALUE);
-			}
-			datas[i] = data;
-		}
-		String key = "";
+		data = new long[9];
 		roles = new ArrayList<>();
-		for (int i = 0; i < 5; ++i) {
-			roles.add(RandomUtil.randomInt(0, 9));
-			key += roles.get(i).toString();
+		sum = 0;
+		for(int i=0;i<9;++i){
+			if(i == 0){
+				min = i+1;
+			}
+			if(i == 8){
+				key = ""+i;
+			}
+			data[i] = i+1;
+			roles.add(i);
+			sum += i;
 		}
 		chips = RandomUtil.randomLong(Long.MIN_VALUE, Long.MAX_VALUE);
 	}
 
 	@Test
 	public void testCalTrigger() {
-		for (int i = 0; i < datas.length; ++i) {
-			long min = Long.MAX_VALUE;
-			for (int j = 0; j < datas[i].length; ++j) {
-				if (min > datas[i][j]) {
-					min = datas[i][j];
-				}
-			}
-			pool.calTrigger(datas[i], min, 1);
-		}
+		pool.calTrigger(data, min, 1);
+		Assert.assertFalse(pool.pots.size() != data.length-1);
 	}
 
 	@Test
 	public void testGetSumChips() {
-		for (int i = 0; i < datas.length; ++i) {
-			long min = Long.MAX_VALUE;
-			for (int j = 0; j < datas[i].length; ++j) {
-				if (min > datas[i][j]) {
-					min = datas[i][j];
-				}
-			}
-			pool.calTrigger(datas[i], min, 1);
-			pool.getSumChips();
-		}
+		pool.calTrigger(data, min, 1);
+		long[] sumChips = pool.getSumChips();
+		Assert.assertFalse((sumChips[0] <= 0 || sumChips[1] <= 0) && sumChips[0] + sumChips[1] == sum);
 	}
 
 	@Test
 	public void testFlushAward() {
+		pool.calTrigger(data, min, 1);
+		times = 0;
 		pool.flushAward((key, roles, chips) -> {
-			System.out.println();
+			++times;
 		});
+		Assert.assertFalse(times != data.length-1);
 	}
 
 }

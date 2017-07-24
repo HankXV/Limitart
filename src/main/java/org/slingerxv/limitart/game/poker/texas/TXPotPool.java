@@ -70,7 +70,7 @@ public class TXPotPool {
 			pots.put(key, sidePot);
 		}
 		sidePot.chips += min * list.size() - needReduce;
-		calTrigger(bets, smallBlind, times++);
+		calTrigger(bets, smallBlind, ++times);
 	}
 
 	/**
