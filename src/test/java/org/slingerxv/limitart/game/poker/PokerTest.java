@@ -4,17 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slingerxv.limitart.util.MathUtil;
 import org.slingerxv.limitart.util.NumberUtil;
+import org.slingerxv.limitart.util.StringUtil;
 
 public class PokerTest {
+	private List<Byte> pokers;
 	private byte[] cards;
 	private List<List<Byte>> fiveCards;
 
 	@Before
 	public void setUp() throws Exception {
+		pokers = new ArrayList<>();
 		cards = Poker.createPokerWithJoker();
 		byte[] pokers = Poker.createPoker();
 		List<Byte> bytes = new ArrayList<>();
@@ -35,82 +39,101 @@ public class PokerTest {
 	public void testCreateCard() {
 		for(int i=2;i<15;++i){
 			for(int j=1;j<5;++j){
-				Poker.createCard((byte)i, (byte)j);
+				pokers.add(Poker.createCard((byte)i, (byte)j));
 			}
 		}
+		Assert.assertFalse(pokers.size() != 52);
 	}
 	
 	@Test
 	public void testCreatePoker() {
-		Poker.createPoker();
+		byte[] createPoker = Poker.createPoker();
+		Assert.assertFalse(createPoker.length != 52);
 	}
 	
 	@Test
 	public void testCreatePokerWithJoker() {
-		Poker.createPokerWithJoker();
+		byte[] createPokerWithJoker = Poker.createPokerWithJoker();
+		Assert.assertFalse(createPokerWithJoker.length != 54);
 	}
 
 	@Test
 	public void testShuffle() {
+		byte[] createPoker = Poker.createPoker();
 		Poker.shuffle(cards);
+		Assert.assertFalse(createPoker.length != 52);
 	}
 
 	@Test
 	public void testGetCardNumber() {
-		for(byte card : cards){
-			Poker.getCardNumber(card);
+		for(int i=2;i<15;++i){
+			byte number = (byte)i;
+			for(int j=1;j<5;++j){
+				byte suit = (byte)j;
+				byte createCard = Poker.createCard(number, suit);
+				Assert.assertFalse(Poker.getCardNumber(createCard) != number);
+			}
 		}
 	}
 
 	@Test
 	public void testGetCardColor() {
-		for(byte card : cards){
-			Poker.getCardColor(card);
+		for(int i=2;i<15;++i){
+			byte number = (byte)i;
+			for(int j=1;j<5;++j){
+				byte suit = (byte)j;
+				byte createCard = Poker.createCard(number, suit);
+				Assert.assertFalse(Poker.getCardColor(createCard) != suit);
+			}
 		}
 	}
 
 	@Test
 	public void testIsAce() {
-		for(byte card : cards){
-			Poker.isAce(card);
+		for(int i=1;i<5;++i){
+			byte createCard = Poker.createCard(Poker.CARD_NUM_ACE, (byte)i);
+			Assert.assertFalse(Poker.getCardNumber(createCard) != Poker.CARD_NUM_ACE);
 		}
 	}
 
 	@Test
 	public void testIsJoker() {
-		for(byte card : cards){
-			Poker.isJoker(card);
+		for(int i=1;i<3;++i){
+			byte createCard = Poker.createCard(Poker.CARD_NUM_ACE, (byte)i);
+			Assert.assertFalse(Poker.isJoker(createCard));
 		}
 	}
 
 	@Test
 	public void testIsBigJoker() {
-		for(byte card : cards){
-			Poker.isBigJoker(card);
-		}
+		byte createCard = Poker.createCard(Poker.CARD_NUM_ACE, Poker.CARD_SUIT_HEART);
+		Assert.assertFalse(Poker.isJoker(createCard));
 	}
 
 	@Test
 	public void testIsSmallJoker() {
-		for(byte card : cards){
-			Poker.isSmallJoker(card);
-		}
+		byte createCard = Poker.createCard(Poker.CARD_NUM_ACE, Poker.CARD_SUIT_SPADE);
+		Assert.assertFalse(Poker.isJoker(createCard));
 	}
 
 	@Test
 	public void testIsSameSuit() {
-		for(byte card : cards){
-			for(byte anotherCard : cards){
-				Poker.isSameSuit(card, anotherCard);
+		for(int i=2;i<15;++i){
+			byte number = (byte)i;
+			for(int j=1;j<5;++j){
+				byte suit = (byte)j;
+				Assert.assertFalse(!Poker.isSameSuit(Poker.createCard(number, suit), Poker.createCard(Poker.CARD_NUM_ACE, suit)));
 			}
 		}
 	}
 
 	@Test
 	public void testIsSameNumber() {
-		for(byte card : cards){
-			for(byte anotherCard : cards){
-				Poker.isSameNumber(card, anotherCard);
+		for(int i=2;i<15;++i){
+			byte number = (byte)i;
+			for(int j=1;j<5;++j){
+				byte suit = (byte)j;
+				Assert.assertFalse(!Poker.isSameNumber(Poker.createCard(number, suit), Poker.createCard(number, Poker.CARD_SUIT_HEART)));
 			}
 		}
 	}
@@ -118,22 +141,26 @@ public class PokerTest {
 	@Test
 	public void testCardsToLong() {
 		for(int i=0;i<fiveCards.size();++i){
-			Poker.cardsToLong(NumberUtil.toByteArray(fiveCards.get(i)));
+			byte[] source = NumberUtil.toByteArray(fiveCards.get(i));
+			long cardsToLong = Poker.cardsToLong(source);
+			Assert.assertArrayEquals(source, Poker.longToCards(cardsToLong));;
 		}
 	}
 
 	@Test
 	public void testLongToCards() {
 		for(int i=0;i<fiveCards.size();++i){
-			long cardsToLong = Poker.cardsToLong(NumberUtil.toByteArray(fiveCards.get(i)));
-			Poker.longToCards(cardsToLong);
+			byte[] source = NumberUtil.toByteArray(fiveCards.get(i));
+			long cardsToLong = Poker.cardsToLong(source);
+			Assert.assertArrayEquals(source, Poker.longToCards(cardsToLong));;
 		}
 	}
 
 	@Test
 	public void testToStringByte() {
 		for(byte card : cards){
-			Poker.toString(card);
+			String str = Poker.toString(card);
+			Assert.assertFalse(StringUtil.isEmptyOrNull(str));
 		}
 	}
 

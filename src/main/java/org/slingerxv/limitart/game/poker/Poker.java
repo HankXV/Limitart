@@ -144,7 +144,7 @@ public class Poker {
 	 * @return
 	 */
 	public static boolean isSameSuit(byte card, byte anotherCard) {
-		return (card & anotherCard) >> 4 != 0;
+		return ((card >> 4) == (anotherCard >> 4));
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class Poker {
 	 * @return
 	 */
 	public static boolean isSameNumber(byte card, byte anotherCard) {
-		return (card & anotherCard & 15) != 0;
+		return ((card & 15) == (anotherCard & 15));
 	}
 
 	/**
