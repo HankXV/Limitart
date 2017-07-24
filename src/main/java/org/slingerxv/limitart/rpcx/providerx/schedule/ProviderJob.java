@@ -98,10 +98,7 @@ public final class ProviderJob {
 		 * @return
 		 */
 		public ProviderJobBuilder jobName(String jobName) {
-			if (StringUtil.isEmptyOrNull(jobName)) {
-				throw new NullPointerException("jobName");
-			}
-			this.jobName = jobName;
+			this.jobName = Objects.requireNonNull(jobName, "jobName");
 			return this;
 		}
 
@@ -112,10 +109,7 @@ public final class ProviderJob {
 		 * @return
 		 */
 		public ProviderJobBuilder cronExpression(String cronExpression) {
-			if (StringUtil.isEmptyOrNull(cronExpression)) {
-				throw new NullPointerException("cronExpression");
-			}
-			this.cronExpression = cronExpression;
+			this.cronExpression = Objects.requireNonNull(jobName, "cronExpression");
 			return this;
 		}
 
