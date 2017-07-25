@@ -109,5 +109,15 @@ public class TXPotPool {
 		private long chips;
 		// 放入该边池筹码的玩家作为索引
 		private List<Integer> roles;
+		
+		public String getKey() {
+			return key;
+		}
+		public long getChips() {
+			return chips;
+		}
+		public List<Integer> getRoles() {
+			return roles;
+		}
 	}
 }
