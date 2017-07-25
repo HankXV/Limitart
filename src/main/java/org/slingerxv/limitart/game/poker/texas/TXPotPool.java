@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.game.poker.texas;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +23,13 @@ public class TXPotPool {
 	private List<List<Long>> composition = new ArrayList<>();
 
 	public void calTrigger(long[] bets, HashSet<Integer> allInSeats, long maxBet) {
+		if (bets == null || bets.length == 0) {
+			return;
+		}
+		long[] check = new long[bets.length];
+		if (Arrays.equals(check, bets)) {
+			return;
+		}
 		long min = Long.MAX_VALUE;
 		long tempMin = Long.MAX_VALUE;
 		long oldMin = 0;
@@ -39,7 +47,7 @@ public class TXPotPool {
 				break;
 			}
 			if (i == bets.length - 1 && min == Long.MAX_VALUE) {
-				i = 0;
+				i = -1;
 				oldMin = tempMin;
 				tempMin = Long.MAX_VALUE;
 			}
