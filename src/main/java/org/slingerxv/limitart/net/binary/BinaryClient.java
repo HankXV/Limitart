@@ -12,6 +12,7 @@ import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
+import org.slingerxv.limitart.net.binary.exception.BinaryMessageDecodeException;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
@@ -247,22 +248,28 @@ public class BinaryClient {
 		return factory;
 	}
 
-	private void channelRead0(ChannelHandlerContext ctx, Object arg) throws Exception {
+	private void channelRead0(ChannelHandlerContext ctx, Object arg)
+			throws InstantiationException, IllegalAccessException, BinaryMessageDecodeException {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
 			short messageId = decoder.readMessageId(ctx.channel(), buffer);
 			Message msg = factory.getMessage(messageId);
 			if (msg == null) {
-				throw new Exception(clientName + " message empty,id:" + messageId);
+				throw new BinaryMessageDecodeException(clientName + " message empty,id:" + messageId);
 			}
 			msg.buffer(buffer);
-			msg.decode();
+			try {
+				msg.decode();
+			} catch (Exception e) {
+				throw new BinaryMessageDecodeException(e);
+			}
 			msg.buffer(null);
 			@SuppressWarnings("unchecked")
 			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
 			if (handler == null) {
-				throw new Exception(clientName + " can not find handler for message,id:" + messageId);
+				throw new BinaryMessageDecodeException(
+						clientName + " can not find handler for message,id:" + messageId);
 			}
 			msg.setChannel(ctx.channel());
 			msg.setClient(this);
@@ -275,9 +282,7 @@ public class BinaryClient {
 						dispatchMessage.run(msg, handler);
 					} catch (Exception e) {
 						log.error(ctx.channel() + " cause:", e);
-						if (onExceptionCaught != null) {
-							onExceptionCaught.run(this, e);
-						}
+						Procs.invoke(onExceptionCaught, this, e);
 					}
 				} else {
 					log.warn(clientName + " no dispatch message listener!");

@@ -21,6 +21,7 @@ import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
+import org.slingerxv.limitart.net.binary.exception.BinaryMessageDecodeException;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
@@ -177,7 +178,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
 
 		@Override
-		protected void initChannel(SocketChannel ch) throws Exception {
+		protected void initChannel(SocketChannel ch) {
 			ch.pipeline()
 					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
 							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
@@ -189,13 +190,13 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 						}
 
 						@Override
-						public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+						public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 							log.error(ctx.channel() + " cause:", cause);
 							Procs.invoke(onExceptionCaught, ctx.channel(), cause);
 						}
 
 						@Override
-						public void channelActive(ChannelHandlerContext ctx) throws Exception {
+						public void channelActive(ChannelHandlerContext ctx) {
 							log.info(ctx.channel().remoteAddress() + " connected！");
 							if (whiteList != null && !whiteList.isEmpty()) {
 								InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
@@ -221,13 +222,13 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 						}
 
 						@Override
-						public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+						public void channelInactive(ChannelHandlerContext ctx) {
 							log.info(ctx.channel().remoteAddress() + " disconnected！");
 							Procs.invoke(onChannelStateChanged, ctx.channel(), false);
 						}
 
 						@Override
-						public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+						public void channelRead(ChannelHandlerContext ctx, Object msg) {
 							channelRead0(ctx, msg);
 						}
 					});
@@ -334,15 +335,20 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			short messageId = decoder.readMessageId(ctx.channel(), buffer);
 			Message msg = factory.getMessage(messageId);
 			if (msg == null) {
-				throw new Exception(serverName + " message empty,id:" + messageId);
+				throw new BinaryMessageDecodeException(serverName + " message empty,id:" + messageId);
 			}
 			msg.buffer(buffer);
-			msg.decode();
+			try {
+				msg.decode();
+			} catch (Exception e) {
+				throw new BinaryMessageDecodeException(e);
+			}
 			msg.buffer(null);
 			@SuppressWarnings("unchecked")
 			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
 			if (handler == null) {
-				throw new Exception(serverName + " can not find handler for message,id:" + messageId);
+				throw new BinaryMessageDecodeException(
+						serverName + " can not find handler for message,id:" + messageId);
 			}
 			msg.setChannel(ctx.channel());
 			msg.setServer(this);

@@ -185,10 +185,7 @@ public final class ProviderJob {
 		 * @return
 		 */
 		public ProviderJobBuilder listener(IProviderScheduleListener listener) {
-			if (listener == null) {
-				throw new NullPointerException("IProviderScheduleListener");
-			}
-			this.listener = listener;
+			this.listener = Objects.requireNonNull(listener, "listener");
 			if (StringUtil.isEmptyOrNull(this.jobName)) {
 				return jobName(listener.getClass().getName());
 			}
