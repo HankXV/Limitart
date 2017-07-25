@@ -16,7 +16,7 @@ import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
-import org.slingerxv.limitart.net.binary.message.exception.MessageDecodeException;
+import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
@@ -134,11 +134,15 @@ public class BinaryClient {
 
 	}
 
+	public void sendMessage(Message msg) {
+		sendMessage(msg, null);
+	}
+
 	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) {
 		channel.eventLoop().execute(() -> {
 			try {
 				SendMessageUtil.sendMessage(encoder, channel, msg, listener);
-			} catch (Exception e) {
+			} catch (MessageCodecException e) {
 				Procs.invoke(onExceptionCaught, BinaryClient.this, e);
 			}
 		});
@@ -249,27 +253,26 @@ public class BinaryClient {
 	}
 
 	private void channelRead0(ChannelHandlerContext ctx, Object arg)
-			throws InstantiationException, IllegalAccessException, MessageDecodeException {
+			throws InstantiationException, IllegalAccessException, MessageCodecException {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id
 			short messageId = decoder.readMessageId(ctx.channel(), buffer);
 			Message msg = factory.getMessage(messageId);
 			if (msg == null) {
-				throw new MessageDecodeException(clientName + " message empty,id:" + messageId);
+				throw new MessageCodecException(clientName + " message empty,id:" + messageId);
 			}
 			msg.buffer(buffer);
 			try {
 				msg.decode();
 			} catch (Exception e) {
-				throw new MessageDecodeException(e);
+				throw new MessageCodecException(e);
 			}
 			msg.buffer(null);
 			@SuppressWarnings("unchecked")
 			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
 			if (handler == null) {
-				throw new MessageDecodeException(
-						clientName + " can not find handler for message,id:" + messageId);
+				throw new MessageCodecException(clientName + " can not find handler for message,id:" + messageId);
 			}
 			msg.setChannel(ctx.channel());
 			msg.setClient(this);

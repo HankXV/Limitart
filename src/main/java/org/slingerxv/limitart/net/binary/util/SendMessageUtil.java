@@ -7,6 +7,7 @@ import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.message.Message;
+import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -20,7 +21,7 @@ public final class SendMessageUtil {
 	}
 
 	public static void sendMessage(AbstractBinaryEncoder encoder, Channel channel, Message msg,
-			Proc3<Boolean, Throwable, Channel> listener) throws Exception {
+			Proc3<Boolean, Throwable, Channel> listener) throws MessageCodecException {
 		if (channel == null) {
 			Procs.invoke(listener, false, new NullPointerException("channel"), null);
 			return;
@@ -33,7 +34,11 @@ public final class SendMessageUtil {
 		ByteBuf buffer = channel.alloc().ioBuffer();
 		encoder.beforeWriteBody(buffer, msg.getMessageId());
 		msg.buffer(buffer);
-		msg.encode();
+		try {
+			msg.encode();
+		} catch (Exception e) {
+			throw new MessageCodecException(e);
+		}
 		msg.buffer(null);
 		encoder.afterWriteBody(buffer);
 		ChannelFuture writeAndFlush = channel.writeAndFlush(buffer);
@@ -43,7 +48,7 @@ public final class SendMessageUtil {
 	}
 
 	public static void sendMessage(AbstractBinaryEncoder encoder, List<Channel> channels, Message msg,
-			Proc3<Boolean, Throwable, Channel> listener) throws Exception {
+			Proc3<Boolean, Throwable, Channel> listener) throws MessageCodecException {
 		if (channels == null || channels.isEmpty()) {
 			Procs.invoke(listener, false, new IOException(" channel list  is null"), null);
 			return;
@@ -51,7 +56,11 @@ public final class SendMessageUtil {
 		ByteBuf buffer = Unpooled.directBuffer(256);
 		encoder.beforeWriteBody(buffer, msg.getMessageId());
 		msg.buffer(buffer);
-		msg.encode();
+		try {
+			msg.encode();
+		} catch (Exception e) {
+			throw new MessageCodecException(e);
+		}
 		msg.buffer(null);
 		encoder.afterWriteBody(buffer);
 		for (int i = 0; i < channels.size(); ++i) {

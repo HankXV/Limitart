@@ -1,14 +1,14 @@
 package org.slingerxv.limitart.net.binary.message.exception;
 
-public class MessageDecodeException extends Exception {
+public class MessageCodecException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
-	public MessageDecodeException(String info) {
+	public MessageCodecException(String info) {
 		super(info);
 	}
 
-	public MessageDecodeException(Throwable ex) {
+	public MessageCodecException(Throwable ex) {
 		super(ex);
 	}
 }

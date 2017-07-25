@@ -1,17 +1,12 @@
 package org.slingerxv.limitart.net.binary;
 
 import java.net.InetSocketAddress;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.crypto.NoSuchPaddingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +20,7 @@ import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
-import org.slingerxv.limitart.net.binary.message.exception.MessageDecodeException;
+import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
@@ -98,13 +93,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		this.dispatchMessage = builder.dispatchMessage;
 		// 初始化内部消息
 		this.factory.registerMsg(new ConnectionValidateClientHandler());
-		// 初始化加密工具
-		try {
-			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(addressPair.getPass(), "20170106");
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-				| InvalidAlgorithmParameterException e) {
-			log.error(e, e);
-		}
 		boot = new ServerBootstrap();
 		if (Epoll.isAvailable()) {
 			boot.option(ChannelOption.SO_BACKLOG, 1024).channel(EpollServerSocketChannel.class)
@@ -118,14 +106,18 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializerImpl());
-		clearTask = new TimerTask() {
+		if (needPass()) {
+			// 初始化加密工具
+			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(addressPair.getPass(), "20170106");
+			clearTask = new TimerTask() {
 
-			@Override
-			public void run() {
-				clearUnvalidatedConnection();
-			}
-		};
-		TimerUtil.scheduleGlobal(1000, 1000, clearTask);
+				@Override
+				public void run() {
+					clearUnvalidatedConnection();
+				}
+			};
+			TimerUtil.scheduleGlobal(1000, 1000, clearTask);
+		}
 	}
 
 	@Override
@@ -153,23 +145,29 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		TimerUtil.unScheduleGlobal(clearTask);
 	}
 
-	public void sendMessage(Channel channel, Message msg, Proc3<Boolean, Throwable, Channel> listener)
-			throws Exception {
+	public void sendMessage(Channel channel, Message msg) {
+		sendMessage(channel, msg, null);
+	}
+
+	public void sendMessage(Channel channel, Message msg, Proc3<Boolean, Throwable, Channel> listener) {
 		channel.eventLoop().execute(() -> {
 			try {
 				SendMessageUtil.sendMessage(encoder, channel, msg, listener);
-			} catch (Exception e) {
+			} catch (MessageCodecException e) {
 				Procs.invoke(onExceptionCaught, channel, e);
 			}
 		});
 	}
 
-	public void sendMessage(List<Channel> channels, Message msg, Proc3<Boolean, Throwable, Channel> listener)
-			throws Exception {
+	public void sendMessage(List<Channel> channels, Message msg) {
+		sendMessage(channels, msg, null);
+	}
+
+	public void sendMessage(List<Channel> channels, Message msg, Proc3<Boolean, Throwable, Channel> listener) {
 		channel.eventLoop().execute(() -> {
 			try {
 				SendMessageUtil.sendMessage(encoder, channels, msg, listener);
-			} catch (Exception e) {
+			} catch (MessageCodecException e) {
 				Procs.invoke(onExceptionCaught, channel, e);
 			}
 		});
@@ -207,7 +205,10 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 									return;
 								}
 							}
-							if (addressPair.getPass() == null) {
+							Procs.invoke(onChannelStateChanged, ctx.channel(), true);
+							if (needPass()) {
+								startConnectionValidate(ctx.channel());
+							} else {
 								// 通知客户端成功
 								try {
 									sendMessage(channel, new ConnectionValidateSuccessServerMessage(), null);
@@ -215,10 +216,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 									log.error(e, e);
 								}
 								Procs.invoke(onConnectionEffective, channel);
-							} else {
-								startConnectionValidate(ctx.channel());
 							}
-							Procs.invoke(onChannelStateChanged, ctx.channel(), true);
 						}
 
 						@Override
@@ -335,20 +333,19 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			short messageId = decoder.readMessageId(ctx.channel(), buffer);
 			Message msg = factory.getMessage(messageId);
 			if (msg == null) {
-				throw new MessageDecodeException(serverName + " message empty,id:" + messageId);
+				throw new MessageCodecException(serverName + " message empty,id:" + messageId);
 			}
 			msg.buffer(buffer);
 			try {
 				msg.decode();
 			} catch (Exception e) {
-				throw new MessageDecodeException(e);
+				throw new MessageCodecException(e);
 			}
 			msg.buffer(null);
 			@SuppressWarnings("unchecked")
 			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
 			if (handler == null) {
-				throw new MessageDecodeException(
-						serverName + " can not find handler for message,id:" + messageId);
+				throw new MessageCodecException(serverName + " can not find handler for message,id:" + messageId);
 			}
 			msg.setChannel(ctx.channel());
 			msg.setServer(this);
@@ -406,6 +403,10 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 	public MessageFactory getFactory() {
 		return factory;
+	}
+
+	private boolean needPass() {
+		return addressPair.getPass() != null;
 	}
 
 	private class SessionValidateData {
