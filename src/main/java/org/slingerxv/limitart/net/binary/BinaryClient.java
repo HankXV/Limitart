@@ -260,7 +260,7 @@ public class BinaryClient {
 			short messageId = decoder.readMessageId(ctx.channel(), buffer);
 			Message msg = factory.getMessage(messageId);
 			if (msg == null) {
-				throw new MessageCodecException(clientName + " message empty,id:" + messageId);
+				throw new MessageCodecException(clientName + " message empty,id:" + Integer.toHexString(messageId));
 			}
 			msg.buffer(buffer);
 			try {
@@ -272,7 +272,8 @@ public class BinaryClient {
 			@SuppressWarnings("unchecked")
 			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
 			if (handler == null) {
-				throw new MessageCodecException(clientName + " can not find handler for message,id:" + messageId);
+				throw new MessageCodecException(
+						clientName + " can not find handler for message,id:" + Integer.toHexString(messageId));
 			}
 			msg.setChannel(ctx.channel());
 			msg.setClient(this);
