@@ -2,6 +2,7 @@ package org.slingerxv.limitart.game.poker.texas;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -16,61 +17,58 @@ import org.slingerxv.limitart.funcs.Procs;
  */
 public class TXPotPool {
 	private Map<String, TXPot> pots = new HashMap<>();
+	private List<List<Long>> composition = new ArrayList<>();
 
-	/**
-	 * 每轮触发的计算
-	 * 
-	 * @param bets
-	 *            座位索引对应玩家当轮的注数
-	 */
-	/**
-	 * 每轮触发的计算
-	 * 
-	 * @param bets
-	 *            座位索引对应玩家当轮的注数
-	 * @param smallBlind
-	 *            小盲注数值
-	 * @param times
-	 *            递归次数，调用时为1
-	 */
-	public void calTrigger(long[] bets, long smallBlind, int times) {
+	public void calTrigger(long[] bets, HashSet<Integer> allInSeats, long maxBet) {
 		long min = Long.MAX_VALUE;
-		for (long bet : bets) {
-			if (bet == 0) {
-				continue;
+		long tempMin = Long.MAX_VALUE;
+		long oldMin = 0;
+		for (int i = 0; i < bets.length; ++i) {
+			if (bets[i] < min && bets[i] > 0) {
+				if (bets[i] < tempMin && bets[i] > oldMin) {
+					tempMin = bets[i];
+				}
+				if (allInSeats.contains(i)) {
+					min = bets[i];
+				}
 			}
-			if (bet < min) {
-				min = bet;
+			if (i == bets.length - 1 && tempMin == maxBet) {
+				min = tempMin;
+				break;
+			}
+			if (i == bets.length - 1 && min == Long.MAX_VALUE) {
+				i = 0;
+				oldMin = tempMin;
+				tempMin = Long.MAX_VALUE;
 			}
 		}
-		long needReduce = 0;
-		if (min == smallBlind && times == 1) {
-			min = smallBlind * 2;
-			needReduce = smallBlind;
-		}
-		StringBuilder buffer = new StringBuilder();
-		List<Integer> list = new ArrayList<>();
+		TXPot pot = new TXPot();
+		List<Integer> roles = new ArrayList<>();
+		List<Long> chips = new ArrayList<>();
+		StringBuffer key = new StringBuffer();
 		for (int i = 0; i < bets.length; ++i) {
 			if (bets[i] == 0) {
+				chips.add(i, (long) 0);
 				continue;
 			}
-			bets[i] -= Math.min(bets[i], min);
-			list.add(i);
-			buffer.append(i);
+			key.append(i);
+			pot.chips += Math.min(min, bets[i]);
+			roles.add(i);
+			chips.add(i, Math.min(min, bets[i]));
+			bets[i] -= Math.min(min, bets[i]);
 		}
-		if (list.isEmpty()) {
+		pot.key = key.toString();
+		pot.roles = roles;
+		composition.add(chips);
+		if (pots.containsKey(pot.key)) {
+			pots.get(pot.key).chips += pot.chips;
+		} else {
+			pots.put(pot.key, pot);
+		}
+		if (min == maxBet) {
 			return;
 		}
-		String key = buffer.toString();
-		TXPot sidePot = pots.get(key);
-		if (sidePot == null) {
-			sidePot = new TXPot();
-			sidePot.key = key;
-			sidePot.roles = list;
-			pots.put(key, sidePot);
-		}
-		sidePot.chips += min * list.size() - needReduce;
-		calTrigger(bets, smallBlind, ++times);
+		calTrigger(bets, allInSeats, maxBet - min);
 	}
 
 	/**
@@ -98,7 +96,7 @@ public class TXPotPool {
 			Procs.invoke(listener, pot.key, pot.roles, pot.chips);
 		}
 	}
-	
+
 	public Map<String, TXPot> getPots() {
 		return pots;
 	}
@@ -109,7 +107,7 @@ public class TXPotPool {
 		private long chips;
 		// 放入该边池筹码的玩家作为索引
 		private List<Integer> roles;
-		
+
 		public String getKey() {
 			return key;
 		}
