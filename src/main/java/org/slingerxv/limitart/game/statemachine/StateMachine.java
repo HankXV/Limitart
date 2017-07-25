@@ -12,6 +12,7 @@ import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.game.statemachine.event.IEvent;
 import org.slingerxv.limitart.game.statemachine.exception.StateException;
 import org.slingerxv.limitart.game.statemachine.state.State;
+import org.slingerxv.limitart.util.Beta;
 
 /**
  * 状态机代理
@@ -19,6 +20,7 @@ import org.slingerxv.limitart.game.statemachine.state.State;
  * @author hank
  *
  */
+@Beta
 @SuppressWarnings("rawtypes")
 public class StateMachine {
 	private static Logger log = LogManager.getLogger();

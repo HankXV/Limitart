@@ -1,5 +1,6 @@
 package org.slingerxv.limitart.game.poker;
 
+import org.slingerxv.limitart.util.Beta;
 import org.slingerxv.limitart.util.RandomUtil;
 
 /**
@@ -8,6 +9,7 @@ import org.slingerxv.limitart.util.RandomUtil;
  * @author hank
  *
  */
+@Beta
 public class Poker {
 	private final static byte CARD_COUNT = 52;
 	private final static byte CARD_NUM_COUNT = 13;

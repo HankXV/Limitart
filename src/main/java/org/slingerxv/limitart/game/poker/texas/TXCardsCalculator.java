@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.slingerxv.limitart.game.poker.Poker;
+import org.slingerxv.limitart.util.Beta;
 import org.slingerxv.limitart.util.MathUtil;
 import org.slingerxv.limitart.util.NumberUtil;
 
@@ -13,6 +14,7 @@ import org.slingerxv.limitart.util.NumberUtil;
  * @author laiyongqiang
  *
  */
+@Beta
 public class TXCardsCalculator {
 	// 高牌
 	public final static long HIGH_CARD = 0x10000000000L;

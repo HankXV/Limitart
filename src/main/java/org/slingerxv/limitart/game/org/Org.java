@@ -19,6 +19,7 @@ import org.slingerxv.limitart.game.org.exception.JobNotExistException;
 import org.slingerxv.limitart.game.org.exception.NoAuthException;
 import org.slingerxv.limitart.game.org.exception.OrgMaxMemberException;
 import org.slingerxv.limitart.game.org.exception.OrgMemberNotExistException;
+import org.slingerxv.limitart.util.Beta;
 import org.slingerxv.limitart.util.StringUtil;
 
 /**
@@ -27,6 +28,7 @@ import org.slingerxv.limitart.util.StringUtil;
  * @author hank
  *
  */
+@Beta
 public abstract class Org {
 	private long OrgId;
 	private long creatorId;

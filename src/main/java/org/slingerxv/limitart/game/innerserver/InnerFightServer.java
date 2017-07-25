@@ -11,6 +11,7 @@ import org.slingerxv.limitart.net.binary.distributed.InnerSlaveServer;
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
 import org.slingerxv.limitart.net.define.IServer;
+import org.slingerxv.limitart.util.Beta;
 
 /**
  * 内部战斗服务器
@@ -18,6 +19,7 @@ import org.slingerxv.limitart.net.define.IServer;
  * @author Hank
  *
  */
+@Beta
 public abstract class InnerFightServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	private InnerMasterServer server;

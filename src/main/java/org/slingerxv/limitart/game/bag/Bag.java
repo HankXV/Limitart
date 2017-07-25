@@ -17,6 +17,7 @@ import org.slingerxv.limitart.game.bag.exception.ItemOverStackException;
 import org.slingerxv.limitart.game.bag.exception.ItemSliptNotEnoughNumException;
 import org.slingerxv.limitart.game.bag.exception.ItemZeroNumException;
 import org.slingerxv.limitart.game.item.AbstractItem;
+import org.slingerxv.limitart.util.Beta;
 
 /**
  * 包裹
@@ -24,6 +25,7 @@ import org.slingerxv.limitart.game.item.AbstractItem;
  * @author hank
  *
  */
+@Beta
 public abstract class Bag {
 	private static final int START_GRID = 0;
 

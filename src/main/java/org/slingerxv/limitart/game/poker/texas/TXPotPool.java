@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
+import org.slingerxv.limitart.util.Beta;
 
 /**
  * 德州扑克奖池
@@ -15,6 +16,7 @@ import org.slingerxv.limitart.funcs.Procs;
  * @author hank
  *
  */
+@Beta
 public class TXPotPool {
 	private Map<String, TXPot> pots = new HashMap<>();
 	private List<List<Long>> composition = new ArrayList<>();
@@ -101,6 +103,10 @@ public class TXPotPool {
 		return pots;
 	}
 
+	public List<List<Long>> getComposition() {
+		return composition;
+	}
+
 	public class TXPot {
 		private String key;
 		// 奖池数量
@@ -111,9 +117,11 @@ public class TXPotPool {
 		public String getKey() {
 			return key;
 		}
+
 		public long getChips() {
 			return chips;
 		}
+
 		public List<Integer> getRoles() {
 			return roles;
 		}
