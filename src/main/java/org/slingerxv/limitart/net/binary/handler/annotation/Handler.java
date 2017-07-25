@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.net.binary.message.anotation;
+package org.slingerxv.limitart.net.binary.handler.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -21,11 +21,11 @@ import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
-import org.slingerxv.limitart.net.binary.exception.BinaryMessageDecodeException;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
+import org.slingerxv.limitart.net.binary.message.exception.MessageDecodeException;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
@@ -335,19 +335,19 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			short messageId = decoder.readMessageId(ctx.channel(), buffer);
 			Message msg = factory.getMessage(messageId);
 			if (msg == null) {
-				throw new BinaryMessageDecodeException(serverName + " message empty,id:" + messageId);
+				throw new MessageDecodeException(serverName + " message empty,id:" + messageId);
 			}
 			msg.buffer(buffer);
 			try {
 				msg.decode();
 			} catch (Exception e) {
-				throw new BinaryMessageDecodeException(e);
+				throw new MessageDecodeException(e);
 			}
 			msg.buffer(null);
 			@SuppressWarnings("unchecked")
 			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
 			if (handler == null) {
-				throw new BinaryMessageDecodeException(
+				throw new MessageDecodeException(
 						serverName + " can not find handler for message,id:" + messageId);
 			}
 			msg.setChannel(ctx.channel());

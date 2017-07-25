@@ -64,32 +64,36 @@ public class InnerMasterServer implements IServer {
 					if (!active) {
 						Integer serverType = InnerServerUtil.getServerType(channel);
 						Integer serverId = InnerServerUtil.getServerId(channel);
-						if (serverType != null && serverId != null) {
-							ConcurrentHashMap<Integer, InnerServerData> concurrentHashMap = slaves.get(serverType);
-							if (concurrentHashMap != null) {
-								InnerServerData remove = concurrentHashMap.remove(serverId);
-								if (remove != null) {
-									log.info("slave server disconnected,type:" + serverType + ",serverId:" + serverId);
-									ResServerQuitMaster2SlaveMessage msg = new ResServerQuitMaster2SlaveMessage();
-									msg.serverId = remove.getServerId();
-									msg.serverType = remove.getServerType();
-									List<Channel> channelList = new ArrayList<>();
-									for (ConcurrentHashMap<Integer, InnerServerData> dats : slaves.values()) {
-										for (InnerServerData data : dats.values()) {
-											channelList.add(data.getChannel());
-										}
-									}
-									try {
-										server.sendMessage(channelList, msg, null);
-									} catch (Exception e) {
-										log.error(e, e);
-									}
-									Procs.invoke(onConnectionChanged, remove, false);
-								}
+						if (serverType == null || serverId == null) {
+							return;
+						}
+						ConcurrentHashMap<Integer, InnerServerData> concurrentHashMap = slaves.get(serverType);
+						if (concurrentHashMap == null) {
+							return;
+						}
+						InnerServerData remove = concurrentHashMap.remove(serverId);
+						if (remove == null) {
+							return;
+						}
+						log.info("slave server disconnected,type:" + serverType + ",serverId:" + serverId);
+						ResServerQuitMaster2SlaveMessage msg = new ResServerQuitMaster2SlaveMessage();
+						msg.serverId = remove.getServerId();
+						msg.serverType = remove.getServerType();
+						List<Channel> channelList = new ArrayList<>();
+						for (ConcurrentHashMap<Integer, InnerServerData> dats : slaves.values()) {
+							for (InnerServerData data : dats.values()) {
+								channelList.add(data.getChannel());
 							}
 						}
+						try {
+							server.sendMessage(channelList, msg, null);
+						} catch (Exception e) {
+							log.error(e, e);
+						}
+						Procs.invoke(onConnectionChanged, remove, false);
 					}
 				}).build();
+
 	}
 
 	/**
