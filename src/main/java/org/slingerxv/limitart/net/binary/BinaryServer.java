@@ -206,7 +206,17 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 									return;
 								}
 							}
-							startConnectionValidate(ctx.channel());
+							if (addressPair.getPass() == null) {
+								// 通知客户端成功
+								try {
+									sendMessage(channel, new ConnectionValidateSuccessServerMessage(), null);
+								} catch (Exception e) {
+									log.error(e, e);
+								}
+								Procs.invoke(onConnectionEffective, channel);
+							} else {
+								startConnectionValidate(ctx.channel());
+							}
 							Procs.invoke(onChannelStateChanged, ctx.channel(), true);
 						}
 
