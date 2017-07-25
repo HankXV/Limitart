@@ -11,14 +11,11 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 public final class StringUtil {
 	private static String PHONE_REG = "^((1[0-9][0-9]))\\d{8}$";
 	private static String EMAIL_REG = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
-	private final static String IP_REG = "([1-9]|[1-9][0-9]|1\\d\\d|2[0-4]\\d|25[0-5])\\."
-			+ "([1-9]|[1-9][0-9]|1\\d\\d|2[0-4]\\d|25[0-5])\\." + "([1-9]|[1-9][0-9]|1\\d\\d|2[0-4]\\d|25[0-5])\\."
-			+ "([1-9]|[1-9][0-9]|1\\d\\d|2[0-4]\\d|25[0-5])";
-	
-	
-	public boolean isInnerAddress(String remoteAddress){
-		return false;
-	}
+	private final static String IP_REG = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
+			+ "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\." + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+			+ "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$";
+	private static String IP_INNER_REG = "^((192\\.168|172\\.([1][6-9]|[2]\\d|3[01]))(\\.([2][0-4]\\d|[2][5][0-5]|[01]?\\d?\\d)){2}|10(\\.([2][0-4]\\d|[2][5][0-5]|[01]?\\d?\\d)){3})$";
+
 	private StringUtil() {
 	}
 
@@ -45,15 +42,19 @@ public final class StringUtil {
 	public static boolean isMail(String value) {
 		return matchReg(value, EMAIL_REG);
 	}
-	
+
 	/**
 	 * 是否是ip地址
 	 * 
 	 * @param value
 	 * @return
 	 */
-	public static boolean isIp(String value) {
+	public static boolean isIp4(String value) {
 		return matchReg(value, IP_REG);
+	}
+
+	public static boolean isInnerIp4(String value) {
+		return matchReg(value, IP_INNER_REG);
 	}
 
 	/**
@@ -85,14 +86,14 @@ public final class StringUtil {
 		return JSON.toJSONString(obj);
 	}
 
-	public static  <T> T toObject(String text, Class<T> clazz) {
+	public static <T> T toObject(String text, Class<T> clazz) {
 		if (text == null) {
 			return null;
 		}
 		return JSON.parseObject(text, clazz);
 	}
 
-	public static  <T> List<T> toArray(String text, Class<T> clazz) {
+	public static <T> List<T> toArray(String text, Class<T> clazz) {
 		if (text == null) {
 			return new ArrayList<>();
 		}

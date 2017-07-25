@@ -343,7 +343,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 
 		public HttpServerBuilder whiteList(String... remoteAddress) {
 			for (String ip : remoteAddress) {
-				if (StringUtil.isIp(ip)) {
+				if (StringUtil.isIp4(ip)) {
 					this.whiteList.add(ip);
 				}
 			}
