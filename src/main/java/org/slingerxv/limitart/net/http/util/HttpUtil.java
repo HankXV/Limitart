@@ -137,9 +137,9 @@ public final class HttpUtil {
 
 	public static String map2QueryParam(ConstraintMap<String> map) {
 		StringBuilder queryParamBuffer = new StringBuilder();
-		for (Entry<String, Object> entry : map.entrySet()) {
-			queryParamBuffer.append(entry.getKey()).append("=").append(entry.getValue().toString()).append("&");
-		}
+		map.foreach((k, v) -> {
+			queryParamBuffer.append(k).append("=").append(v.toString()).append("&");
+		});
 		if (queryParamBuffer.length() > 0) {
 			queryParamBuffer.deleteCharAt(queryParamBuffer.length() - 1);
 		}

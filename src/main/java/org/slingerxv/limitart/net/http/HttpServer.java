@@ -260,7 +260,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 						Attribute at = (Attribute) data;
 						String name = at.getName();
 						String value = at.getValue();
-						params.put(name, value);
+						params.putObj(name, value);
 					} else if (data instanceof FileUpload) {
 						FileUpload fileUpload = (FileUpload) data;
 						int readableBytes = fileUpload.content().readableBytes();

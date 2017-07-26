@@ -1,11 +1,13 @@
 package org.slingerxv.limitart.collections;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
+import java.util.function.BiConsumer;
 
+import org.slingerxv.limitart.funcs.Test2;
 import org.slingerxv.limitart.util.StringUtil;
 
 /**
@@ -14,7 +16,7 @@ import org.slingerxv.limitart.util.StringUtil;
  * @author hank
  *
  */
-public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
+public class ConstraintMap<K> {
 	private Map<K, Object> map;
 
 	protected ConstraintMap(Map<K, Object> map) {
@@ -33,126 +35,108 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 		return map.size();
 	}
 
-	@Override
-	public IPrimitiveTypeMap<K> putByte(K key, byte value) {
-		put(key, value);
+	public ConstraintMap<K> putByte(K key, byte value) {
+		putObj(key, value);
 		return this;
 	}
 
-	@Override
 	public byte getByte(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return (byte) get(key);
+		return getObj(key);
 	}
 
-	@Override
-	public IPrimitiveTypeMap<K> putShort(K key, short value) {
-		put(key, value);
+	public ConstraintMap<K> putShort(K key, short value) {
+		putObj(key, value);
 		return this;
 	}
 
-	@Override
 	public short getShort(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return (short) get(key);
+		return getObj(key);
 	}
 
-	@Override
-	public IPrimitiveTypeMap<K> putInt(K key, int value) {
-		put(key, value);
+	public ConstraintMap<K> putInt(K key, int value) {
+		putObj(key, value);
 		return this;
 	}
 
-	@Override
 	public int getInt(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return (int) get(key);
+		return getObj(key);
 	}
 
-	@Override
-	public IPrimitiveTypeMap<K> putLong(K key, long value) {
-		put(key, value);
+	public ConstraintMap<K> putLong(K key, long value) {
+		putObj(key, value);
 		return this;
 	}
 
-	@Override
 	public long getLong(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return (long) get(key);
+		return getObj(key);
 	}
 
-	@Override
-	public IPrimitiveTypeMap<K> putFloat(K key, float value) {
-		put(key, value);
+	public ConstraintMap<K> putFloat(K key, float value) {
+		putObj(key, value);
 		return this;
 	}
 
-	@Override
 	public float getFloat(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return (float) get(key);
+		return getObj(key);
 	}
 
-	@Override
-	public IPrimitiveTypeMap<K> putDouble(K key, double value) {
-		put(key, value);
+	public ConstraintMap<K> putDouble(K key, double value) {
+		putObj(key, value);
 		return this;
 	}
 
-	@Override
 	public double getDouble(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return (double) get(key);
+		return getObj(key);
 	}
 
-	@Override
-	public IPrimitiveTypeMap<K> putChar(K key, char value) {
-		put(key, value);
+	public ConstraintMap<K> putChar(K key, char value) {
+		putObj(key, value);
 		return this;
 	}
 
-	@Override
 	public char getChar(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return (char) get(key);
+		return getObj(key);
 	}
 
-	@Override
-	public IPrimitiveTypeMap<K> putBoolean(K key, boolean value) {
+	public ConstraintMap<K> putBoolean(K key, boolean value) {
 		putInt(key, value ? 1 : 0);
 		return this;
 	}
 
-	@Override
 	public boolean getBoolean(K key) {
 		return getInt(key) == 1;
 	}
 
-	@Override
-	public IPrimitiveTypeMap<K> putString(K key, String value) {
+	public ConstraintMap<K> putString(K key, String value) {
 		if (value == null) {
-			put(key, "");
+			putObj(key, "");
 		} else {
-			put(key, value);
+			putObj(key, value);
 		}
 		return this;
 	}
 
-	@Override
 	public String getString(K key) {
 		if (!containsKey(key)) {
 			return "";
@@ -160,16 +144,9 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 		return (String) map.get(key);
 	}
 
-	public Set<K> keySet() {
-		return map.keySet();
-	}
-
-	public Collection<Object> values() {
-		return map.values();
-	}
-
-	public Set<Entry<K, Object>> entrySet() {
-		return map.entrySet();
+	public ConstraintMap<K> foreach(BiConsumer<? super K, ? super Object> action) {
+		map.forEach(action);
+		return this;
 	}
 
 	public String toJSON() {
@@ -180,51 +157,53 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 		return StringUtil.toJSONWithClassInfo(this.map);
 	}
 
-	@Override
 	public boolean isEmpty() {
 		return map.isEmpty();
 	}
 
-	@Override
 	public boolean containsKey(Object key) {
 		return map.containsKey(Objects.requireNonNull(key, "key"));
 	}
 
-	@Override
 	public boolean containsValue(Object value) {
 		return map.containsValue(Objects.requireNonNull(value, "value"));
 	}
 
-	@Override
-	public Object get(Object key) {
-		return map.get(Objects.requireNonNull(key, "key"));
-	}
-
-	@Override
-	public Object put(K key, Object value) {
-		return map.put(Objects.requireNonNull(key, "key"), Objects.requireNonNull(value, "value"));
-	}
-
-	@Override
-	public IPrimitiveTypeMap<K> putObj(K key, Object value) {
-		put(key, value);
+	public ConstraintMap<K> putObj(K key, Object value) {
+		map.put(key, value);
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public <V> V getObj(K key) {
-		return (V) get(key);
+		return (V) map.get(key);
 	}
 
-	@Override
-	public Object remove(Object key) {
-		return map.remove(Objects.requireNonNull(key, "key"));
+	public ConstraintMap<K> remove(K key) {
+		map.remove(Objects.requireNonNull(key, "key"));
+		return this;
 	}
 
-	@Override
-	public void putAll(Map<? extends K, ? extends Object> map) {
+	public ConstraintMap<K> remove(Test2<K, Object> filter) {
+		Iterator<Entry<K, Object>> iterator = map.entrySet().iterator();
+		for (; iterator.hasNext();) {
+			Entry<K, Object> next = iterator.next();
+			if (filter.test(next.getKey(), next.getValue())) {
+				iterator.remove();
+			}
+		}
+		return this;
+	}
+
+	public ConstraintMap<K> putAll(Map<? extends K, ? extends Object> map) {
 		this.map.putAll(Objects.requireNonNull(map, "map"));
+		return this;
+	}
+
+	public ConstraintMap<K> putAll(ConstraintMap<K> map) {
+		Objects.requireNonNull(map, "map");
+		this.map.putAll(map.map);
+		return this;
 	}
 
 	public static <K> ConstraintMap<K> fromJSON(String jsonContent) {
@@ -248,7 +227,7 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 		for (int i = 0; i < kvs.length; i += 2) {
 			Objects.requireNonNull(kvs[i], "key");
 			Objects.requireNonNull(kvs[i + 1], "value");
-			empty.put((K) kvs[i], kvs[i + 1]);
+			empty.putObj((K) kvs[i], kvs[i + 1]);
 		}
 		return empty;
 	}
