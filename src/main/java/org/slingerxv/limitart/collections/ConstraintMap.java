@@ -1,10 +1,12 @@
 package org.slingerxv.limitart.collections;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.slingerxv.limitart.funcs.Test2;
@@ -147,6 +149,14 @@ public class ConstraintMap<K> {
 	public ConstraintMap<K> foreach(BiConsumer<? super K, ? super Object> action) {
 		map.forEach(action);
 		return this;
+	}
+
+	public Set<K> keys() {
+		return map.keySet();
+	}
+
+	public Collection<Object> values() {
+		return map.values();
 	}
 
 	public String toJSON() {
