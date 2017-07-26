@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.funcs.Func1;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.handler.annotation.Controller;
 import org.slingerxv.limitart.net.binary.handler.annotation.Handler;
@@ -36,6 +37,19 @@ public class MessageFactory {
 	private final HashMap<Short, ConstructorAccess<? extends Message>> msgs = new HashMap<>();
 	private final HashMap<Short, IHandler<? extends Message>> handlers = new HashMap<>();
 
+	@Beta
+	public static MessageFactory createByPackage(String packageName, Func1<Class<?>, Object> confirmInstance)
+			throws ReflectiveOperationException, IOException, MessageCodecException, MessageIDDuplicatedException {
+		MessageFactory messageFactory = new MessageFactory();
+		List<Class<?>> classesOfAnnotation = ReflectionUtil.getClassesByPackage(packageName, (clazz) -> {
+			return clazz.getAnnotation(Controller.class) != null;
+		});
+		for (Class<?> clzz : classesOfAnnotation) {
+			messageFactory.registerController(clzz, confirmInstance);
+		}
+		return messageFactory;
+	}
+
 	/**
 	 * 通过反射包来加载所有handler
 	 * 
@@ -50,9 +64,8 @@ public class MessageFactory {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static MessageFactory createByPackage(String packageName)
 			throws ReflectiveOperationException, IOException, MessageCodecException, MessageIDDuplicatedException {
-		checkMessageMetas(packageName);
-		MessageFactory messageFactory = new MessageFactory();
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, IHandler.class);
+		MessageFactory messageFactory = new MessageFactory();
 		for (Class<?> clzz : classesByPackage) {
 			if (Modifier.isAbstract(clzz.getModifiers()) || clzz.isAnonymousClass() || clzz.isMemberClass()
 					|| clzz.isLocalClass()) {
@@ -61,45 +74,39 @@ public class MessageFactory {
 			}
 			messageFactory.registerMsg(null, (IHandler) clzz.newInstance());
 		}
-		// DEMO 版本
-		List<Class<?>> classesOfAnnotation = ReflectionUtil.getClassesByPackage(packageName, (clazz) -> {
-			return clazz.getAnnotation(Controller.class) != null;
-		});
-		for (Class<?> clzz : classesOfAnnotation) {
-			messageFactory.registerController(clzz);
-		}
 		return messageFactory;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static void checkMessageMetas(String packageName)
+	private static void checkMessageMeta(MessageMeta meta)
 			throws ReflectiveOperationException, IOException, MessageCodecException {
-		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, MessageMeta.class);
-		for (Class<?> clzz : classesByPackage) {
-			if (Modifier.isAbstract(clzz.getModifiers()) || clzz.isAnonymousClass() || clzz.isMemberClass()
-					|| clzz.isLocalClass()) {
-				continue;
-			}
-			log.info("check message:" + clzz.getName());
-			Class<? extends MessageMeta> clazz = (Class<? extends MessageMeta>) clzz;
-			MessageMeta newInstance = clazz.newInstance();
-			ByteBuf buffer = Unpooled.directBuffer(256);
-			newInstance.buffer(buffer);
-			try {
-				newInstance.encode();
-				newInstance.decode();
-			} catch (Exception e) {
-				throw new MessageCodecException(e);
-			}
-			newInstance.buffer(null);
-			buffer.release();
+		log.info("check message:" + meta.getClass().getName());
+		ByteBuf buffer = Unpooled.directBuffer(256);
+		meta.buffer(buffer);
+		try {
+			meta.encode();
+			meta.decode();
+		} catch (Exception e) {
+			throw new MessageCodecException(e);
 		}
+		meta.buffer(null);
+		buffer.release();
 	}
 
 	@Beta
 	public MessageFactory registerController(Class<?> controllerClazz)
-			throws MessageIDDuplicatedException, ReflectiveOperationException {
-		Object newInstance = controllerClazz.newInstance();
+			throws MessageIDDuplicatedException, ReflectiveOperationException, IOException, MessageCodecException {
+		return registerController(controllerClazz, (clzz) -> {
+			try {
+				return clzz.newInstance();
+			} catch (ReflectiveOperationException e) {
+			}
+			return null;
+		});
+	}
+
+	@Beta
+	public MessageFactory registerController(Class<?> controllerClazz, Func1<Class<?>, Object> confirmInstance)
+			throws MessageIDDuplicatedException, ReflectiveOperationException, IOException, MessageCodecException {
 		MethodAccess methodAccess = MethodAccess.get(controllerClazz);
 		ArrayList<Method> methods = methodAccess.getMethods();
 		for (Method method : methods) {
@@ -111,7 +118,7 @@ public class MessageFactory {
 
 				@Override
 				public void handle(Message msg) {
-					methodAccess.invoke(newInstance, method.getName(), msg);
+					methodAccess.invoke(confirmInstance.run(controllerClazz), method.getName(), msg);
 				}
 			});
 		}
@@ -120,7 +127,8 @@ public class MessageFactory {
 
 	@SuppressWarnings("unchecked")
 	public synchronized MessageFactory registerMsg(Class<? extends Message> msgClazz,
-			IHandler<? extends Message> handler) throws MessageIDDuplicatedException, ReflectiveOperationException {
+			IHandler<? extends Message> handler)
+			throws MessageIDDuplicatedException, ReflectiveOperationException, IOException, MessageCodecException {
 		Class<? extends Message> msgClass = msgClazz;
 		if (msgClass == null) {
 			Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
@@ -141,6 +149,7 @@ public class MessageFactory {
 		}
 		// 这里先实例化一个出来获取其ID
 		Message newInstance = msgClass.newInstance();
+		checkMessageMeta(newInstance);
 		short id = newInstance.getMessageId();
 		if (msgs.containsKey(id)) {
 			Class<? extends Message> class1 = msgs.get(id).newInstance().getClass();
@@ -163,12 +172,12 @@ public class MessageFactory {
 
 	public MessageFactory registerMsg(Class<? extends IHandler<? extends Message>> handlerClass)
 			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException,
-			ReflectiveOperationException {
+			ReflectiveOperationException, IOException, MessageCodecException {
 		return registerMsg(null, handlerClass.newInstance());
 	}
 
 	public MessageFactory registerMsg(IHandler<? extends Message> handler)
-			throws MessageIDDuplicatedException, ReflectiveOperationException {
+			throws MessageIDDuplicatedException, ReflectiveOperationException, IOException, MessageCodecException {
 		return registerMsg(null, handler);
 	}
 
