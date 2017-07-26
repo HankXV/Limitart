@@ -213,7 +213,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			return;
 		}
 		String url;
-		ConstraintMap<String> params = new ConstraintMap<>();
+		ConstraintMap<String> params = ConstraintMap.empty();
 		if (msg.method() == GET) {
 			QueryStringDecoderV2 queryStringDecoder = new QueryStringDecoderV2(msg.uri());
 			url = queryStringDecoder.path();

@@ -19,7 +19,7 @@ public class QueryStringDecoderV2 {
 	private final boolean hasPath;
 	private final int maxParams;
 	private String path;
-	private ConstraintMap<String> params = new ConstraintMap<String>();
+	private ConstraintMap<String> params;
 	private int nParams;
 
 	public QueryStringDecoderV2(String uri) {
@@ -104,11 +104,11 @@ public class QueryStringDecoderV2 {
 				if (pathEndPos >= 0 && pathEndPos < uri.length() - 1) {
 					decodeParams(uri.substring(pathEndPos + 1));
 				} else {
-					params = new ConstraintMap<>();
+					params = ConstraintMap.empty();
 				}
 			} else {
 				if (uri.isEmpty()) {
-					params = new ConstraintMap<>();
+					params = ConstraintMap.empty();
 				} else {
 					decodeParams(uri);
 				}
@@ -118,7 +118,7 @@ public class QueryStringDecoderV2 {
 	}
 
 	private void decodeParams(String s) {
-		ConstraintMap<String> params = this.params = new ConstraintMap<>();
+		ConstraintMap<String> params = this.params = ConstraintMap.empty();
 		nParams = 0;
 		String name = null;
 		int pos = 0; // Beginning of the unprocessed region

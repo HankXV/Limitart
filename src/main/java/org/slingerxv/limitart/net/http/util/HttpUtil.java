@@ -147,7 +147,7 @@ public final class HttpUtil {
 	}
 
 	public static ConstraintMap<String> queryParam2Map(String queryParam) throws Exception {
-		ConstraintMap<String> map = new ConstraintMap<String>();
+		ConstraintMap<String> map = ConstraintMap.empty();
 		if (!StringUtil.isEmptyOrNull(queryParam)) {
 			String[] split2 = queryParam.split("[&]");
 			for (String temp : split2) {

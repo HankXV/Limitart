@@ -26,8 +26,8 @@ public class UrlMessageFactory {
 	private Map<String, HttpHandler<? extends UrlMessage>> handlers = new HashMap<>();
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static UrlMessageFactory createByPackage(String packageName) throws ClassNotFoundException, IOException,
-			MessageIDDuplicatedException, InstantiationException, IllegalAccessException {
+	public static UrlMessageFactory createByPackage(String packageName)
+			throws IOException, MessageIDDuplicatedException, ReflectiveOperationException {
 		UrlMessageFactory messageFactory = new UrlMessageFactory();
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, HttpHandler.class);
 		for (Class<?> clzz : classesByPackage) {
@@ -41,7 +41,7 @@ public class UrlMessageFactory {
 	}
 
 	public synchronized UrlMessageFactory registerMsg(HttpHandler<? extends UrlMessage> handler)
-			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
+			throws ReflectiveOperationException, MessageIDDuplicatedException {
 		Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
 		ParameterizedType handlerInterface = null;
 		for (Type temp : genericInterfaces) {
@@ -81,11 +81,11 @@ public class UrlMessageFactory {
 	}
 
 	public UrlMessageFactory registerMsg(Class<? extends HttpHandler<? extends UrlMessage>> handlerClass)
-			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException {
+			throws ReflectiveOperationException, MessageIDDuplicatedException {
 		return registerMsg(handlerClass.newInstance());
 	}
 
-	public UrlMessage getMessage(String url) throws InstantiationException, IllegalAccessException {
+	public UrlMessage getMessage(String url) throws ReflectiveOperationException {
 		if (!messages.containsKey(url)) {
 			return null;
 		}

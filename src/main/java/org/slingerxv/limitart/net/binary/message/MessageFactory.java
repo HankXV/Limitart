@@ -1,5 +1,6 @@
 package org.slingerxv.limitart.net.binary.message;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -13,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.handler.annotation.Controller;
 import org.slingerxv.limitart.net.binary.handler.annotation.Handler;
+import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.reflectasm.MethodAccess;
@@ -38,12 +40,16 @@ public class MessageFactory {
 	 * 通过反射包来加载所有handler
 	 * 
 	 * @param packageName
+	 * @throws MessageCodecException
+	 * @throws IOException
+	 * @throws ReflectiveOperationException
 	 * @throws MessageIDDuplicatedException
 	 * @returns
 	 * @throws Exception
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static MessageFactory createByPackage(String packageName) throws Exception {
+	public static MessageFactory createByPackage(String packageName)
+			throws ReflectiveOperationException, IOException, MessageCodecException, MessageIDDuplicatedException {
 		checkMessageMetas(packageName);
 		MessageFactory messageFactory = new MessageFactory();
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, IHandler.class);
@@ -66,7 +72,8 @@ public class MessageFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void checkMessageMetas(String packageName) throws Exception {
+	private static void checkMessageMetas(String packageName)
+			throws ReflectiveOperationException, IOException, MessageCodecException {
 		List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(packageName, MessageMeta.class);
 		for (Class<?> clzz : classesByPackage) {
 			if (Modifier.isAbstract(clzz.getModifiers()) || clzz.isAnonymousClass() || clzz.isMemberClass()
@@ -78,15 +85,20 @@ public class MessageFactory {
 			MessageMeta newInstance = clazz.newInstance();
 			ByteBuf buffer = Unpooled.directBuffer(256);
 			newInstance.buffer(buffer);
-			newInstance.encode();
-			newInstance.decode();
+			try {
+				newInstance.encode();
+				newInstance.decode();
+			} catch (Exception e) {
+				throw new MessageCodecException(e);
+			}
 			newInstance.buffer(null);
 			buffer.release();
 		}
 	}
 
 	@Beta
-	public MessageFactory registerController(Class<?> controllerClazz) throws Exception {
+	public MessageFactory registerController(Class<?> controllerClazz)
+			throws MessageIDDuplicatedException, ReflectiveOperationException {
 		Object newInstance = controllerClazz.newInstance();
 		MethodAccess methodAccess = MethodAccess.get(controllerClazz);
 		ArrayList<Method> methods = methodAccess.getMethods();
@@ -108,7 +120,7 @@ public class MessageFactory {
 
 	@SuppressWarnings("unchecked")
 	public synchronized MessageFactory registerMsg(Class<? extends Message> msgClazz,
-			IHandler<? extends Message> handler) throws Exception {
+			IHandler<? extends Message> handler) throws MessageIDDuplicatedException, ReflectiveOperationException {
 		Class<? extends Message> msgClass = msgClazz;
 		if (msgClass == null) {
 			Type[] genericInterfaces = handler.getClass().getGenericInterfaces();
@@ -149,15 +161,18 @@ public class MessageFactory {
 		return this;
 	}
 
-	public MessageFactory registerMsg(Class<? extends IHandler<? extends Message>> handlerClass) throws Exception {
+	public MessageFactory registerMsg(Class<? extends IHandler<? extends Message>> handlerClass)
+			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException,
+			ReflectiveOperationException {
 		return registerMsg(null, handlerClass.newInstance());
 	}
 
-	public MessageFactory registerMsg(IHandler<? extends Message> handler) throws Exception {
+	public MessageFactory registerMsg(IHandler<? extends Message> handler)
+			throws MessageIDDuplicatedException, ReflectiveOperationException {
 		return registerMsg(null, handler);
 	}
 
-	public Message getMessage(short msgId) throws InstantiationException, IllegalAccessException {
+	public Message getMessage(short msgId) throws ReflectiveOperationException {
 		if (!msgs.containsKey(msgId)) {
 			return null;
 		}
@@ -165,7 +180,7 @@ public class MessageFactory {
 		return constructorAccess.newInstance();
 	}
 
-	public IHandler<? extends Message> getHandler(short msgId) throws InstantiationException, IllegalAccessException {
+	public IHandler<? extends Message> getHandler(short msgId) throws ReflectiveOperationException {
 		return handlers.get(msgId);
 	}
 

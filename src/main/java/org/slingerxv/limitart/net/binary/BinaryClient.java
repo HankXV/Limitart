@@ -253,7 +253,7 @@ public class BinaryClient {
 	}
 
 	private void channelRead0(ChannelHandlerContext ctx, Object arg)
-			throws InstantiationException, IllegalAccessException, MessageCodecException {
+			throws MessageCodecException, ReflectiveOperationException {
 		ByteBuf buffer = (ByteBuf) arg;
 		try {
 			// 消息id

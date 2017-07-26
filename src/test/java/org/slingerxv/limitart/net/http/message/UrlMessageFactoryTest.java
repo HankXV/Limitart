@@ -26,7 +26,7 @@ public class UrlMessageFactoryTest {
 	public void registerMsg() {
 		try {
 			factory.registerMsg(UrlMessageCaseHandler.class);
-		} catch (InstantiationException | IllegalAccessException | MessageIDDuplicatedException e) {
+		} catch (MessageIDDuplicatedException | ReflectiveOperationException e) {
 			e.printStackTrace();
 			Assert.fail();
 		}
@@ -36,8 +36,7 @@ public class UrlMessageFactoryTest {
 	public void createByPackage() {
 		try {
 			UrlMessageFactory.createByPackage("org.slingerxv.limitart.net.http");
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IOException
-				| MessageIDDuplicatedException e) {
+		} catch (IOException | MessageIDDuplicatedException | ReflectiveOperationException e) {
 			e.printStackTrace();
 			Assert.fail();
 		}

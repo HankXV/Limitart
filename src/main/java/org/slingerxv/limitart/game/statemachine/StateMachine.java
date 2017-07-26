@@ -28,7 +28,7 @@ public class StateMachine {
 	private Queue<Integer> stateQueue = new LinkedList<>();
 	private State preState;
 	private State curState;
-	private ConstraintMap<Object> params = new ConstraintMap<Object>();
+	private ConstraintMap<Object> params = ConstraintMap.empty();
 	private long lastLoopTime = 0;
 	private int firstStateId;
 

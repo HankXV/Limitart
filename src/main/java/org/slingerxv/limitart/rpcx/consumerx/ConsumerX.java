@@ -374,10 +374,10 @@ public class ConsumerX {
 	 * 
 	 * @param packageName
 	 * @throws IOException
-	 * @throws ClassNotFoundException
+	 * @throws ReflectiveOperationException 
 	 * @throws Exception
 	 */
-	private void initRpcProxys() throws ServiceXProxyException, ClassNotFoundException, IOException {
+	private void initRpcProxys() throws ServiceXProxyException, IOException, ReflectiveOperationException {
 		clientProxys.clear();
 		List<Class<?>> classesByPackage = new ArrayList<>();
 		for (String temp : this.config.getServicePackages()) {

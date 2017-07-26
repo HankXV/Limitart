@@ -21,7 +21,7 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 		this.map = Objects.requireNonNull(map, "map");
 	}
 
-	public ConstraintMap() {
+	protected ConstraintMap() {
 		map = new HashMap<>();
 	}
 
@@ -34,8 +34,9 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
-	public void putByte(K key, byte value) {
+	public IPrimitiveTypeMap<K> putByte(K key, byte value) {
 		put(key, value);
+		return this;
 	}
 
 	@Override
@@ -47,8 +48,9 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
-	public void putShort(K key, short value) {
+	public IPrimitiveTypeMap<K> putShort(K key, short value) {
 		put(key, value);
+		return this;
 	}
 
 	@Override
@@ -60,8 +62,9 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
-	public void putInt(K key, int value) {
+	public IPrimitiveTypeMap<K> putInt(K key, int value) {
 		put(key, value);
+		return this;
 	}
 
 	@Override
@@ -73,8 +76,9 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
-	public void putLong(K key, long value) {
+	public IPrimitiveTypeMap<K> putLong(K key, long value) {
 		put(key, value);
+		return this;
 	}
 
 	@Override
@@ -86,8 +90,9 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
-	public void putFloat(K key, float value) {
+	public IPrimitiveTypeMap<K> putFloat(K key, float value) {
 		put(key, value);
+		return this;
 	}
 
 	@Override
@@ -99,8 +104,9 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
-	public void putDouble(K key, double value) {
+	public IPrimitiveTypeMap<K> putDouble(K key, double value) {
 		put(key, value);
+		return this;
 	}
 
 	@Override
@@ -112,8 +118,9 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
-	public void putChar(K key, char value) {
+	public IPrimitiveTypeMap<K> putChar(K key, char value) {
 		put(key, value);
+		return this;
 	}
 
 	@Override
@@ -125,8 +132,9 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
-	public void putBoolean(K key, boolean value) {
+	public IPrimitiveTypeMap<K> putBoolean(K key, boolean value) {
 		putInt(key, value ? 1 : 0);
+		return this;
 	}
 
 	@Override
@@ -135,12 +143,13 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
-	public void putString(K key, String value) {
+	public IPrimitiveTypeMap<K> putString(K key, String value) {
 		if (value == null) {
 			put(key, "");
 		} else {
 			put(key, value);
 		}
+		return this;
 	}
 
 	@Override
@@ -171,20 +180,6 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 		return StringUtil.toJSONWithClassInfo(this.map);
 	}
 
-	private void fromJSON(String jsonContent) {
-		if (!StringUtil.isEmptyOrNull(jsonContent)) {
-			@SuppressWarnings("unchecked")
-			HashMap<K, Object> object = StringUtil.toObject(jsonContent, HashMap.class);
-			map.putAll(object);
-		}
-	}
-
-	public static <T> ConstraintMap<T> createMap(String jsonContent) {
-		ConstraintMap<T> map = new ConstraintMap<>();
-		map.fromJSON(jsonContent);
-		return map;
-	}
-
 	@Override
 	public boolean isEmpty() {
 		return map.isEmpty();
@@ -211,6 +206,18 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	}
 
 	@Override
+	public IPrimitiveTypeMap<K> putObj(K key, Object value) {
+		put(key, value);
+		return this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <V> V getObj(K key) {
+		return (V) get(key);
+	}
+
+	@Override
 	public Object remove(Object key) {
 		return map.remove(Objects.requireNonNull(key, "key"));
 	}
@@ -218,6 +225,38 @@ public class ConstraintMap<K> implements IPrimitiveTypeMap<K>, Map<K, Object> {
 	@Override
 	public void putAll(Map<? extends K, ? extends Object> map) {
 		this.map.putAll(Objects.requireNonNull(map, "map"));
+	}
+
+	public static <K> ConstraintMap<K> fromJSON(String jsonContent) {
+		ConstraintMap<K> map = new ConstraintMap<>();
+		if (!StringUtil.isEmptyOrNull(jsonContent)) {
+			@SuppressWarnings("unchecked")
+			HashMap<K, Object> object = StringUtil.toObject(jsonContent, HashMap.class);
+			map.putAll(object);
+		}
+		return map;
+	}
+
+	public static <K> ConstraintMap<K> empty() {
+		return new ConstraintMap<K>();
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <K> ConstraintMap<K> just(Object... kvs) {
+		Objects.requireNonNull(kvs, "kvs");
+		ConstraintMap<K> empty = ConstraintMap.empty();
+		for (int i = 0; i < kvs.length; i += 2) {
+			Objects.requireNonNull(kvs[i], "key");
+			Objects.requireNonNull(kvs[i + 1], "value");
+			empty.put((K) kvs[i], kvs[i + 1]);
+		}
+		return empty;
+	}
+
+	public static <K> ConstraintMap<K> from(Map<? extends K, ? extends Object> map) {
+		ConstraintMap<K> empty = ConstraintMap.empty();
+		empty.putAll(map);
+		return empty;
 	}
 
 }

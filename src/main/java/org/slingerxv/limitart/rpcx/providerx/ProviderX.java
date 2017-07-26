@@ -125,13 +125,11 @@ public class ProviderX {
 	 * @param packageName
 	 * @throws ServiceXProxyException
 	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
+	 * @throws ReflectiveOperationException 
 	 * @throws Exception
 	 */
-	private void initAllServices() throws ServiceXProxyException, ClassNotFoundException, IOException,
-			InstantiationException, IllegalAccessException {
+	private void initAllServices() throws ServiceXProxyException, IOException,
+			ReflectiveOperationException {
 		services.clear();
 		List<Class<?>> classesByPackage = new ArrayList<>();
 		for (String temp : this.config.getServicePackages()) {

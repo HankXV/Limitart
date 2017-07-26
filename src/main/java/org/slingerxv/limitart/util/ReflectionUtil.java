@@ -65,7 +65,7 @@ public final class ReflectionUtil {
 	 * @throws ClassNotFoundException
 	 */
 	public static List<Class<?>> getClassesByPackage(String packageName, Class<?> superClass)
-			throws IOException, ClassNotFoundException {
+			throws IOException, ReflectiveOperationException {
 		return getClassesByPackage(packageName, (clazz) -> {
 			return superClass.isAssignableFrom(clazz) && !(superClass.equals(clazz));
 		});
