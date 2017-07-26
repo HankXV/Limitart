@@ -2,10 +2,8 @@ package org.slingerxv.limitart.game.poker.texas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
@@ -19,7 +17,7 @@ import org.slingerxv.limitart.util.Beta;
  */
 @Beta
 public class TXPotPool {
-	private Map<String, TXPot> pots = new HashMap<>();
+	private List<TXPot> pots = new ArrayList<>();
 	private List<List<Long>> composition = new ArrayList<>();
 
 	public void calTrigger(long[] bets, HashSet<Integer> allInSeats, long maxBet) {
@@ -70,10 +68,16 @@ public class TXPotPool {
 		pot.key = key.toString();
 		pot.roles = roles;
 		composition.add(chips);
-		if (pots.containsKey(pot.key)) {
-			pots.get(pot.key).chips += pot.chips;
-		} else {
-			pots.put(pot.key, pot);
+		for(int i=0;i<pots.size();++i){
+			boolean hasSamekey = false;
+			if(pots.get(i).key.equals(key)){
+				hasSamekey = true;
+ 			}
+			if(i == pots.size() - 1 && hasSamekey){
+				pots.get(i).chips += pot.chips;
+			}else if(i == pots.size() - 1 && !hasSamekey){
+				pots.add(pot);
+			}
 		}
 		if (min == maxBet) {
 			return;
@@ -88,7 +92,7 @@ public class TXPotPool {
 	 */
 	public long[] getSumChips() {
 		long[] result = new long[2];
-		for (TXPot pot : pots.values()) {
+		for (TXPot pot : pots) {
 			if (pot.roles.size() > 1) {
 				result[0] += pot.chips;
 			} else {
@@ -102,12 +106,12 @@ public class TXPotPool {
 	 * 触发发奖
 	 */
 	public void flushAward(Proc3<String, List<Integer>, Long> listener) {
-		for (TXPot pot : pots.values()) {
+		for (TXPot pot : pots) {
 			Procs.invoke(listener, pot.key, pot.roles, pot.chips);
 		}
 	}
 
-	public Map<String, TXPot> getPots() {
+	public List<TXPot> getPots() {
 		return pots;
 	}
 
