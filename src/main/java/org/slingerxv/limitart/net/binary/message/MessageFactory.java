@@ -126,7 +126,7 @@ public class MessageFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	public synchronized MessageFactory registerMsg(Class<? extends Message> msgClazz,
+	public synchronized <T extends Message> MessageFactory registerMsg(Class<T> msgClazz,
 			IHandler<? extends Message> handler)
 			throws MessageIDDuplicatedException, ReflectiveOperationException, IOException, MessageCodecException {
 		Class<? extends Message> msgClass = msgClazz;
@@ -170,7 +170,7 @@ public class MessageFactory {
 		return this;
 	}
 
-	public MessageFactory registerMsg(Class<? extends IHandler<? extends Message>> handlerClass)
+	public <T extends IHandler<? extends Message>> MessageFactory registerMsg(Class<T> handlerClass)
 			throws InstantiationException, IllegalAccessException, MessageIDDuplicatedException,
 			ReflectiveOperationException, IOException, MessageCodecException {
 		return registerMsg(null, handlerClass.newInstance());
