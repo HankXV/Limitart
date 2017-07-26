@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +29,10 @@ public abstract class AbstractScriptLoader<KEY> {
 	protected ConcurrentHashMap<KEY, IScript<KEY>> scriptMap = new ConcurrentHashMap<>();
 	protected ConcurrentHashMap<KEY, File> scriptPath = new ConcurrentHashMap<>();
 	private AtomicLong dynamicCodeCount = new AtomicLong(100000);
+
+	public void foreach(BiConsumer<? super KEY, ? super IScript<KEY>> action) {
+		scriptMap.forEach(action);
+	}
 
 	/**
 	 * 获取脚本
