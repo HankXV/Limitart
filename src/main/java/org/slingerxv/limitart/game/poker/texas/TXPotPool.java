@@ -18,9 +18,14 @@ import org.slingerxv.limitart.util.Beta;
 @Beta
 public class TXPotPool {
 	private List<TXPot> pots = new ArrayList<>();
-	private List<List<Long>> composition = new ArrayList<>();
+	private List<TXPot> potsInTurn = new ArrayList<>();
 
 	public void calTrigger(long[] bets, HashSet<Integer> allInSeats, long maxBet) {
+		potsInTurn = new ArrayList<>();
+		calTrigger0(bets,allInSeats,maxBet);
+	}
+	
+	private void calTrigger0(long[] bets, HashSet<Integer> allInSeats, long maxBet){
 		if (bets == null || bets.length == 0) {
 			return;
 		}
@@ -32,7 +37,7 @@ public class TXPotPool {
 		long tempMin = Long.MAX_VALUE;
 		long oldMin = 0;
 		for (int i = 0; i < bets.length; ++i) {
-			if (bets[i] < min && bets[i] > 0) {
+			if (bets[i] <= min && bets[i] > 0) {
 				if (bets[i] < tempMin && bets[i] > oldMin) {
 					tempMin = bets[i];
 				}
@@ -52,37 +57,37 @@ public class TXPotPool {
 		}
 		TXPot pot = new TXPot();
 		List<Integer> roles = new ArrayList<>();
-		List<Long> chips = new ArrayList<>();
 		StringBuffer key = new StringBuffer();
 		for (int i = 0; i < bets.length; ++i) {
 			if (bets[i] == 0) {
-				chips.add(i, (long) 0);
 				continue;
 			}
 			key.append(i);
 			pot.chips += Math.min(min, bets[i]);
 			roles.add(i);
-			chips.add(i, Math.min(min, bets[i]));
 			bets[i] -= Math.min(min, bets[i]);
 		}
 		pot.key = key.toString();
 		pot.roles = roles;
-		composition.add(chips);
+		boolean hasSamekey = false;
 		for(int i=0;i<pots.size();++i){
-			boolean hasSamekey = false;
-			if(pots.get(i).key.equals(key)){
+			if(pots.get(i).key.equals(pot.key)){ 
 				hasSamekey = true;
  			}
 			if(i == pots.size() - 1 && hasSamekey){
+				pot.index = i;
 				pots.get(i).chips += pot.chips;
-			}else if(i == pots.size() - 1 && !hasSamekey){
-				pots.add(pot);
 			}
 		}
+		if(!hasSamekey){
+			pot.index = pots.size();
+			pots.add(pot);
+		}
+		potsInTurn.add(pot);
 		if (min == maxBet) {
 			return;
 		}
-		calTrigger(bets, allInSeats, maxBet - min);
+		calTrigger0(bets, allInSeats, maxBet - min);
 	}
 
 	/**
@@ -115,16 +120,18 @@ public class TXPotPool {
 		return pots;
 	}
 
-	public List<List<Long>> getComposition() {
-		return composition;
+	public List<TXPot> getPotsInTurn() {
+		return potsInTurn;
 	}
-
+	
 	public class TXPot {
 		private String key;
 		// 奖池数量
 		private long chips;
 		// 放入该边池筹码的玩家作为索引
 		private List<Integer> roles;
+		// 奖池序号
+		private int index;
 
 		public String getKey() {
 			return key;
@@ -137,5 +144,10 @@ public class TXPotPool {
 		public List<Integer> getRoles() {
 			return roles;
 		}
+
+		public int getIndex() {
+			return index;
+		}
+		
 	}
 }
