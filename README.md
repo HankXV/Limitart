@@ -91,5 +91,18 @@ Jdk8或以上
 
 	消息长度(short,包含消息体长度+2)+消息ID(short)+消息体
 	
+# 游戏服务器开发思路
+	1.首先你需要对接好网络通信
+	2.根据游戏的不同来指定线程模型，在游戏中指定线程基本有两个目的，第一，IO操作或者复杂计算操作不能阻塞玩家的操作，第二，如果玩家有数据交互，他们应当在同一个线程
+	3.根据2的参考方式制定了线程模型，然后在服务器的`dispatchMessage`回调方法中发消息分发到不同线程中
+	4.如果你不做分发，直接在`dispatchMessage`中执行handler，那么就默认使用了Netty的work线程，他只保证了一个channel一定会在同一个线程运行
+	5.线程间通信的消息队列推荐使用`DisruptorTaskQueue`，如果你有使用类似地图或者房间的线程需求(既一组需要交互的玩家要在一个线程里)，推荐使用`AutoGrowthTaskQueueGroup`，如果你不知道你该怎么使用线程，那么推荐你使用`FunctionalTaskQueueGroup`
+	6.如果你需要使用控制台来操作服务器，那么可以使用`ConsoleServer`或者`HttpServer`嵌入游戏服务器中来进行交互
+	7.作者不提倡滥用线程，所以请使用者预估好使用场景，再做相应的线程安排
+	8.在`game`包下是属于游戏逻辑层的抽象，比如背包、道具、帮会、扑克等，后面会慢慢增加
+	9.如果你要做排行榜，推荐使用`FrequencyReadRankMap`或`FrequencyWriteRankMap`，推荐排行榜存储量为10万数量级及一下
+	10.游戏服务器的热更新请参考`org.slingerxv.limitart.script`
+	11.游戏中常用的唯一Id生成请参考`org.slingerxv.limitart.util.UniqueIdUtil`
+	12.带有`@beta`标记的代表此API是新加入的测试版
 # 更新日志
 ## v2.0-alpha
