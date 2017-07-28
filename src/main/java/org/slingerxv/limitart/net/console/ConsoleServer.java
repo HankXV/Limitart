@@ -211,7 +211,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 								}
 								Proc3<ConsoleUser, String, String[]> handler = commands.get(cmd);
 								if (handler == null) {
-									sendMessage(ch, "'" + cmd + "' is not a command!");
+									sendMessage(ch, "'" + cmd + "'is not a command!");
 									return;
 								}
 								Procs.invoke(dispatchMessage, consoleUser, cmd, params, handler);
