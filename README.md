@@ -3,7 +3,7 @@
 # 什么是Limitart?
 一个帮助您快速搭建起游戏服务器或者是中小型网络服务的框架
 # 怎么参与？
-	群：662555451
+[CONTRIBUTING](/CONTRIBUTING.md)
 ## 环境要求
 Jdk8或以上
 # 快速开始
