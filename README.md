@@ -99,7 +99,7 @@ Jdk8或以上
 5.线程间通信的消息队列推荐使用`DisruptorTaskQueue`，如果你有使用类似地图或者房间的线程需求(既一组需要交互的玩家要在一个线程里)，推荐使用`AutoGrowthTaskQueueGroup`，如果你不知道你该怎么使用线程，那么推荐你使用`FunctionalTaskQueueGroup`<br>
 6.如果你需要使用控制台来操作服务器，那么可以使用`ConsoleServer`或者`HttpServer`嵌入游戏服务器中来进行交互<br>
 7.作者不提倡滥用线程，所以请使用者预估好使用场景，再做相应的线程安排<br>
-8.在`game`包下是属于游戏逻辑层的抽象，比如背包、道具、帮会、扑克等，后面会慢慢增加<br>
+8.在`org.slingerxv.limitart.game`包下是属于游戏逻辑层的抽象，比如背包、道具、帮会、扑克等，后面会慢慢增加<br>
 9.如果你要做排行榜，推荐使用`FrequencyReadRankMap`或`FrequencyWriteRankMap`，推荐排行榜存储量为10万数量级及一下<br>
 10.游戏服务器的热更新请参考`org.slingerxv.limitart.script`<br>
 11.游戏中常用的唯一Id生成请参考`org.slingerxv.limitart.util.UniqueIdUtil`<br>
