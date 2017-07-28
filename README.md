@@ -1,71 +1,96 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/98c8a0ea3b43404aa8a820078e2c6e12)](https://www.codacy.com/app/104381832/Limitart?utm_source=github.com&utm_medium=referral&utm_content=HankXV/Limitart&utm_campaign=badger)
 [![Build Status](https://travis-ci.org/HankXV/Limitart.svg?branch=master)](https://travis-ci.org/HankXV/Limitart)
-# Brief Introduction
-This is a framework that designed to help you build a **Java Game Server** quickly.
-## Environment
-Jdk8 or above.
-# Quick Start
-First, we neet to determine which messages the server can handle. Let's create a message.
-```java
+# 什么是Limitart?
+一个帮助您快速搭建起游戏服务器或者是中小型网络服务的框架
+## 环境要求
+Jdk8或以上
+# 快速开始
+首先，我们需要定义一个网络通信的消息结构体
 
-	public class BinaryMessageDemo extends Message {
-		// transfer of information
-		public String info;
+	```java
 	
-		//  message id
-		@Override
-		public short getMessageId() {
-			return 1;
-		}
-	}
-
-```
-Create a Handler for the message. Here, we just simply print the contents of transmission.
-```java
-
-	public class BinaryHandlerDemo implements IHandler<BinaryMessageDemo> {
-	
-		@Override
-		public void handle(BinaryMessageDemo msg) {
-			System.out.println("server received message:" + msg.info);
+		public class BinaryMessageDemo extends Message {
+			// transfer of information
+			public String info;
+		
+			//  message id
+			@Override
+			public short getMessageId() {
+				return 1;
+			}
 		}
 	
-	}
+	```
+
+再创建一个处理上面消息的处理器
+
+	```java
 	
-```
-Construct a `MessageFactory` that registers message's handler.
-```java
-
-	MessageFactory factory = new MessageFactory().registerMsg(BinaryHandlerDemo.class);
+		public class BinaryHandlerDemo implements IHandler<BinaryMessageDemo> {
 		
-```
-Finally, initialize a server instance and bind it. 
-```java
-
-			new BinaryServer.BinaryServerBuilder()
-				// port
-				.addressPair(new AddressPair(8888))
-				// register factory
-				.factory(messageFactory).build();
-				.startServer();
+			@Override
+			public void handle(BinaryMessageDemo msg) {
+				System.out.println("server received message:" + msg.info);
+			}
 		
-```
-Look at the client below. Because we do not allow client processing messages only send messages, so we create a message into the message processor factory on the line. Now build the client, fill in the server address and port, and, of course, the client name. You can choose whether or not to reconnect, and we don't show it here.Write the code that sends the message to the server in the listener `onConnectionEffective`.
-```java
+		}
+		
+	```
 
-			new BinaryClient.BinaryClientBuilder()
-				.remoteAddress(new AddressPair("127.0.0.1", 8888))
-				.onConnectionEffective(c -> {
-					BinaryMessageDemo message = new BinaryMessageDemo();
-					message.info = "Hello Limitart!";
-					c.sendMessage(message, null);
-				}).build()
-				.connect();
-				
-```
-finished！The client link is successful, and the message is sent.The server verified that the link was successful and received the message! cool!!!!
-```
+初始化一个消息工厂把消息处理器注册进去
 
-	server received message:Hello Limitart!
+	```java
+	
+		MessageFactory factory = new MessageFactory().registerMsg(BinaryHandlerDemo.class);
+			
+	```
 
-```
+最后实例化一个服务器并且开启服务
+
+	```java
+	
+				new BinaryServer.BinaryServerBuilder()
+					// port
+					.addressPair(new AddressPair(8888))
+					// register factory
+					.factory(messageFactory).build();
+					.startServer();
+			
+	```
+
+初始化一个客户端，在客户端链接验证通过后发送上面的消息给服务器
+
+	```java
+	
+				new BinaryClient.BinaryClientBuilder()
+					.remoteAddress(new AddressPair("127.0.0.1", 8888))
+					.onConnectionEffective(c -> {
+						BinaryMessageDemo message = new BinaryMessageDemo();
+						message.info = "Hello Limitart!";
+						c.sendMessage(message, null);
+					}).build()
+					.connect();
+					
+	```
+
+最后服务器收到了消息
+
+	```
+	
+		server received message:Hello Limitart!
+	
+	```
+	
+# 消息编码
+如果你不使用此框架里而是其他语言的客户端，你需要了解次框架的默认链接过程和编码模式。
+
+	`客户端--socket-->服务器--发送验证码-->客户端--解析结果-->服务器--检查并发送成功消息-->客户端`
+		
+完成此过程后，服务器和客户端都会触发`onConnectionEffective`回调。其中链接验证消息参考：`org.slingerxv.limitart.net.binary.message.impl.validate`包，验证码加密解密参考`org.slingerxv.limitart.util.SymmetricEncryptionUtil`<br>
+消息二进制编码为：
+
+	```
+	消息长度(short,包含消息体长度+2)+消息ID(short)+消息体
+	```
+# 更新日志
+## v2.0-alpha
