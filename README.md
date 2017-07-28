@@ -86,7 +86,7 @@ Jdk8或以上
 
 	客户端--socket-->服务器--发送验证码-->客户端--解析结果-->服务器--检查并发送成功消息-->客户端
 		
-完成此过程后，服务器和客户端都会触发`onConnectionEffective`回调。其中链接验证消息参考：`org.slingerxv.limitart.net.binary.message.impl.validate`包，验证码加密解密参考`org.slingerxv.limitart.util.SymmetricEncryptionUtil`<br>
+完成此过程后，服务器和客户端都会触发`onConnectionEffective`回调。如果客户端在一定时间内未完成验证，其链接会被踢掉。其中链接验证消息参考：`org.slingerxv.limitart.net.binary.message.impl.validate`包，验证码加密解密参考`org.slingerxv.limitart.util.SymmetricEncryptionUtil`<br>
 消息二进制编码为：
 
 	消息长度(short,包含消息体长度+2)+消息ID(short)+消息体
