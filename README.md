@@ -7,79 +7,79 @@ Jdk8或以上
 # 快速开始
 首先，我们需要定义一个网络通信的消息结构体
 
-	```java
+```java
+
+	public class BinaryMessageDemo extends Message {
+		// transfer of information
+		public String info;
 	
-		public class BinaryMessageDemo extends Message {
-			// transfer of information
-			public String info;
-		
-			//  message id
-			@Override
-			public short getMessageId() {
-				return 1;
-			}
+		//  message id
+		@Override
+		public short getMessageId() {
+			return 1;
 		}
-	
-	```
+	}
+
+```
 
 再创建一个处理上面消息的处理器
 
-	```java
+```java
+
+	public class BinaryHandlerDemo implements IHandler<BinaryMessageDemo> {
 	
-		public class BinaryHandlerDemo implements IHandler<BinaryMessageDemo> {
-		
-			@Override
-			public void handle(BinaryMessageDemo msg) {
-				System.out.println("server received message:" + msg.info);
-			}
-		
+		@Override
+		public void handle(BinaryMessageDemo msg) {
+			System.out.println("server received message:" + msg.info);
 		}
-		
-	```
+	
+	}
+	
+```
 
 初始化一个消息工厂把消息处理器注册进去
 
-	```java
-	
-		MessageFactory factory = new MessageFactory().registerMsg(BinaryHandlerDemo.class);
-			
-	```
+```java
+
+	MessageFactory factory = new MessageFactory().registerMsg(BinaryHandlerDemo.class);
+		
+```
 
 最后实例化一个服务器并且开启服务
 
-	```java
-	
-				new BinaryServer.BinaryServerBuilder()
-					// port
-					.addressPair(new AddressPair(8888))
-					// register factory
-					.factory(messageFactory).build();
-					.startServer();
-			
-	```
+```java
+
+			new BinaryServer.BinaryServerBuilder()
+				// port
+				.addressPair(new AddressPair(8888))
+				// register factory
+				.factory(messageFactory).build();
+				.startServer();
+		
+```
 
 初始化一个客户端，在客户端链接验证通过后发送上面的消息给服务器
 
-	```java
-	
-				new BinaryClient.BinaryClientBuilder()
-					.remoteAddress(new AddressPair("127.0.0.1", 8888))
-					.onConnectionEffective(c -> {
-						BinaryMessageDemo message = new BinaryMessageDemo();
-						message.info = "Hello Limitart!";
-						c.sendMessage(message, null);
-					}).build()
-					.connect();
-					
-	```
+```java
+
+			new BinaryClient.BinaryClientBuilder()
+				.remoteAddress(new AddressPair("127.0.0.1", 8888))
+				.onConnectionEffective(c -> {
+					BinaryMessageDemo message = new BinaryMessageDemo();
+					message.info = "Hello Limitart!";
+					c.sendMessage(message, null);
+				}).build()
+				.connect();
+				
+```
 
 最后服务器收到了消息
 
-	```
-	
-		server received message:Hello Limitart!
-	
-	```
+```
+
+	server received message:Hello Limitart!
+
+```
 	
 # 消息编码
 如果你不使用此框架里而是其他语言的客户端，你需要了解次框架的默认链接过程和编码模式。
