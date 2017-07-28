@@ -107,14 +107,14 @@ public final class SecurityUtil {
 		return new String(hexEncode);
 	}
 
-	public String encodePassword(String rawPass, Object salt) throws NoSuchAlgorithmException {
+	public static String encodePassword(String rawPass, Object salt) throws NoSuchAlgorithmException {
 		String saltedPass = mergePasswordAndSalt(rawPass, salt, false);
 		MessageDigest messageDigest = MessageDigest.getInstance(ALGORITHM_MD5);
 		byte[] digest = messageDigest.digest(utf8Encode(saltedPass));
 		return new String(hexEncode(digest));
 	}
 
-	public boolean isPasswordValid(String encPass, String rawPass, Object salt) throws NoSuchAlgorithmException {
+	public static boolean isPasswordValid(String encPass, String rawPass, Object salt) throws NoSuchAlgorithmException {
 		String pass2 = encodePassword(rawPass, salt);
 		byte[] expectedBytes = encPass == null ? null : utf8Encode(encPass);
 		byte[] actualBytes = utf8Encode(pass2);
@@ -129,7 +129,7 @@ public final class SecurityUtil {
 		return (result == 0);
 	}
 
-	private String mergePasswordAndSalt(String password, Object salt, boolean strict) {
+	private static String mergePasswordAndSalt(String password, Object salt, boolean strict) {
 		if (password == null) {
 			password = "";
 		}

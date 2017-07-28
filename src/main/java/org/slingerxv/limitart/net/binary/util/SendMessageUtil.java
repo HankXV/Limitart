@@ -12,7 +12,6 @@ import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
 public final class SendMessageUtil {
@@ -41,8 +40,7 @@ public final class SendMessageUtil {
 		}
 		msg.buffer(null);
 		encoder.afterWriteBody(buffer);
-		ChannelFuture writeAndFlush = channel.writeAndFlush(buffer);
-		writeAndFlush.addListener((ChannelFutureListener) arg0 -> {
+		channel.writeAndFlush(buffer).addListener((ChannelFutureListener) arg0 -> {
 			Procs.invoke(listener, arg0.isSuccess(), arg0.cause(), arg0.channel());
 		});
 	}
@@ -70,8 +68,7 @@ public final class SendMessageUtil {
 						channel);
 				continue;
 			}
-			ChannelFuture writeAndFlush = channel.writeAndFlush(buffer.retainedSlice());
-			writeAndFlush.addListener((ChannelFutureListener) arg0 -> {
+			channel.writeAndFlush(buffer.retainedSlice()).addListener((ChannelFutureListener) arg0 -> {
 				Procs.invoke(listener, arg0.isSuccess(), arg0.cause(), arg0.channel());
 			});
 			if (i == channels.size() - 1) {

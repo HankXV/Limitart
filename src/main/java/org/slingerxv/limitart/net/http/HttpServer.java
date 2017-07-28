@@ -26,18 +26,13 @@ import org.slingerxv.limitart.net.http.util.HttpUtil;
 import org.slingerxv.limitart.util.StringUtil;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpContentDecompressor;
@@ -89,69 +84,56 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		this.dispatchMessage = builder.dispatchMessage;
 		this.onMessageOverSize = builder.onMessageOverSize;
 		this.onExceptionCaught = builder.onExceptionCaught;
-		boot = new ServerBootstrap();
-		if (Epoll.isAvailable()) {
-			boot.channel(EpollServerSocketChannel.class).option(ChannelOption.SO_BACKLOG, 1024);
-			log.info(serverName + " epoll init");
-		} else {
-			boot.channel(NioServerSocketChannel.class);
-			log.info(serverName + " nio init");
-		}
-		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-				.childHandler(new ChannelInitializer<SocketChannel>() {
+		boot = createSocketServerBoot(serverName, new ChannelInitializer<SocketChannel>() {
 
-					@Override
-					protected void initChannel(SocketChannel ch) throws Exception {
-						ch.pipeline().addLast(new HttpRequestDecoder())
-								.addLast(new HttpObjectAggregator(httpObjectAggregatorMax) {
-									@Override
-									protected void handleOversizedMessage(ChannelHandlerContext ctx,
-											HttpMessage oversized) throws Exception {
-										Exception e = new Exception(
-												ctx.channel() + " : " + oversized + " is over size");
-										log.error(e, e);
-										Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
-									}
-								}).addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
-								.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
-								.addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
+			@Override
+			protected void initChannel(SocketChannel ch) throws Exception {
+				ch.pipeline().addLast(new HttpRequestDecoder())
+						.addLast(new HttpObjectAggregator(httpObjectAggregatorMax) {
+							@Override
+							protected void handleOversizedMessage(ChannelHandlerContext ctx, HttpMessage oversized)
+									throws Exception {
+								Exception e = new Exception(ctx.channel() + " : " + oversized + " is over size");
+								log.error(e, e);
+								Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
+							}
+						}).addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
+						.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
+						.addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
 
-									@Override
-									protected void channelRead0(ChannelHandlerContext arg0, FullHttpRequest arg1)
-											throws Exception {
-										channelRead00(arg0, arg1);
-									}
+							@Override
+							protected void channelRead0(ChannelHandlerContext arg0, FullHttpRequest arg1)
+									throws Exception {
+								channelRead00(arg0, arg1);
+							}
 
-									@Override
-									public void channelActive(ChannelHandlerContext ctx) throws Exception {
-										Procs.invoke(onChannelStateChanged, ctx.channel(), true);
-									}
+							@Override
+							public void channelActive(ChannelHandlerContext ctx) throws Exception {
+								Procs.invoke(onChannelStateChanged, ctx.channel(), true);
+							}
 
-									@Override
-									public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-										if (whiteList != null && !whiteList.isEmpty()) {
-											InetSocketAddress insocket = (InetSocketAddress) ctx.channel()
-													.remoteAddress();
-											String remoteAddress = insocket.getAddress().getHostAddress();
-											if (!whiteList.contains(remoteAddress)) {
-												ctx.channel().close();
-												log.error("ip: " + remoteAddress + " rejected link!");
-												return;
-											}
-										}
-										Procs.invoke(onChannelStateChanged, ctx.channel(), false);
+							@Override
+							public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+								if (whiteList != null && !whiteList.isEmpty()) {
+									InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+									String remoteAddress = insocket.getAddress().getHostAddress();
+									if (!whiteList.contains(remoteAddress)) {
+										ctx.channel().close();
+										log.error("ip: " + remoteAddress + " rejected link!");
+										return;
 									}
+								}
+								Procs.invoke(onChannelStateChanged, ctx.channel(), false);
+							}
 
-									@Override
-									public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-											throws Exception {
-										log.error(ctx.channel() + " cause:", cause);
-										Procs.invoke(onExceptionCaught, ctx.channel(), cause);
-									}
-								});
-					}
-				});
+							@Override
+							public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+								log.error(ctx.channel() + " cause:", cause);
+								Procs.invoke(onExceptionCaught, ctx.channel(), cause);
+							}
+						});
+			}
+		});
 	}
 
 	@Override

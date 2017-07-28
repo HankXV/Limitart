@@ -35,17 +35,12 @@ import org.slingerxv.limitart.util.TimerUtil;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
@@ -93,19 +88,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		this.dispatchMessage = builder.dispatchMessage;
 		// 初始化内部消息
 		this.factory.registerMsg(new ConnectionValidateClientHandler());
-		boot = new ServerBootstrap();
-		if (Epoll.isAvailable()) {
-			boot.option(ChannelOption.SO_BACKLOG, 1024).channel(EpollServerSocketChannel.class)
-					.childOption(ChannelOption.SO_LINGER, 0).childOption(ChannelOption.SO_REUSEADDR, true)
-					.childOption(ChannelOption.SO_KEEPALIVE, true);
-			log.info(serverName + " epoll init");
-		} else {
-			boot.channel(NioServerSocketChannel.class);
-			log.info(serverName + " nio init");
-		}
-		boot.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-				.childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializerImpl());
+		boot = createSocketServerBoot(serverName, new ChannelInitializerImpl());
 		if (needPass()) {
 			// 初始化加密工具
 			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(addressPair.getPass(), "20170106");
@@ -436,7 +419,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		private int connectionValidateTimeInSec;
 		private AbstractBinaryDecoder decoder;
 		private AbstractBinaryEncoder encoder;
-		private HashSet<String> whiteList;
+		private HashSet<String> whiteList = new HashSet<>();
 		private MessageFactory factory;
 		// ---listener
 		private Proc2<Channel, Boolean> onChannelStateChanged;
@@ -451,7 +434,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			this.connectionValidateTimeInSec = 20;
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
-			this.whiteList = new HashSet<>();
 			this.dispatchMessage = (t1, t2) -> {
 				t2.handle(t1);
 			};
