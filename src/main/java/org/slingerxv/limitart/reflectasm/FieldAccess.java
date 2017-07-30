@@ -193,7 +193,7 @@ public abstract class FieldAccess {
 			access.fieldTypes = fieldTypes;
 			access.fields = fields.toArray(new Field[0]);
 			return access;
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			throw new RuntimeException("Error constructing field access class: " + accessClassName, t);
 		}
 	}

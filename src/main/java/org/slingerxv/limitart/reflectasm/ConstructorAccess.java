@@ -120,7 +120,7 @@ public abstract class ConstructorAccess<T> {
 		ConstructorAccess<T> access;
 		try {
 			access = (ConstructorAccess<T>) accessClass.newInstance();
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			throw new RuntimeException("Exception constructing constructor access class: " + accessClassName, t);
 		}
 		if (!(access instanceof PublicConstructorAccess)

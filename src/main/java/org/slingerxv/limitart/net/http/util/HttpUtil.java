@@ -60,11 +60,8 @@ public final class HttpUtil {
 			}
 			return buffer.toByteArray();
 		} finally {
-			if (conn != null) {
-				conn.disconnect(); // 中断连接
-			}
+			conn.disconnect(); // 中断连接
 		}
-
 	}
 
 	public static byte[] get(String hostUrl) throws IOException {
@@ -96,9 +93,7 @@ public final class HttpUtil {
 			}
 			return buffer.toByteArray();
 		} finally {
-			if (conn != null) {
-				conn.disconnect(); // 中断连接
-			}
+			conn.disconnect(); // 中断连接
 		}
 	}
 

@@ -327,7 +327,7 @@ public abstract class MethodAccess {
 			access.returnTypes = returnTypes;
 			access.methods = methods;
 			return access;
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			throw new RuntimeException("Error constructing method access class: " + accessClassName, t);
 		}
 	}
