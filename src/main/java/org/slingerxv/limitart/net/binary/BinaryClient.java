@@ -2,7 +2,7 @@ package org.slingerxv.limitart.net.binary;
 
 import java.net.SocketAddress;
 import java.util.Objects;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +23,6 @@ import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidat
 import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.SymmetricEncryptionUtil;
-import org.slingerxv.limitart.util.TimerUtil;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -52,7 +51,6 @@ public class BinaryClient {
 	private Bootstrap bootstrap;
 	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
-	private TimerTask reconnectTask;
 	// ----config
 	private String clientName;
 	private AddressPair remoteAddress;
@@ -86,13 +84,6 @@ public class BinaryClient {
 		log.info(clientName + " nio init");
 		bootstrap.group(group).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.handler(new ChannelInitializerImpl());
-		reconnectTask = new TimerTask() {
-
-			@Override
-			public void run() {
-				connect0();
-			}
-		};
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
@@ -192,7 +183,9 @@ public class BinaryClient {
 			channel = null;
 		}
 		if (waitSeconds > 0) {
-			TimerUtil.scheduleGlobal(waitSeconds * 1000, reconnectTask);
+			group.schedule(() -> {
+				connect0();
+			}, waitSeconds, TimeUnit.SECONDS);
 		} else {
 			connect0();
 		}

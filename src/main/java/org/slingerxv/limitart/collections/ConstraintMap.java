@@ -46,7 +46,7 @@ public class ConstraintMap<K> {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return getObj(key);
+		return Byte.valueOf(getObj(key).toString());
 	}
 
 	public ConstraintMap<K> putShort(K key, short value) {
@@ -58,7 +58,7 @@ public class ConstraintMap<K> {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return getObj(key);
+		return Short.valueOf(getObj(key).toString());
 	}
 
 	public ConstraintMap<K> putInt(K key, int value) {
@@ -70,7 +70,7 @@ public class ConstraintMap<K> {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return getObj(key);
+		return Integer.valueOf(getObj(key).toString());
 	}
 
 	public ConstraintMap<K> putLong(K key, long value) {
@@ -82,7 +82,7 @@ public class ConstraintMap<K> {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return getObj(key);
+		return Long.valueOf(getObj(key).toString());
 	}
 
 	public ConstraintMap<K> putFloat(K key, float value) {
@@ -94,7 +94,7 @@ public class ConstraintMap<K> {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return getObj(key);
+		return Float.valueOf(getObj(key).toString());
 	}
 
 	public ConstraintMap<K> putDouble(K key, double value) {
@@ -106,7 +106,7 @@ public class ConstraintMap<K> {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return getObj(key);
+		return Double.valueOf(getObj(key).toString());
 	}
 
 	public ConstraintMap<K> putChar(K key, char value) {

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -30,11 +31,11 @@ public final class HttpUtil {
 	private HttpUtil() {
 	}
 
-	public static byte[] post(String hostUrl, ConstraintMap<String> param, HashMap<String, String> requestProperty)
+	public static HttpResult post(String hostUrl, ConstraintMap<String> param, HashMap<String, String> requestProperty)
 			throws IOException {
-		HttpURLConnection conn = null;
+		HttpResult result = new HttpResult();
 		URL url = new URL(hostUrl);
-		conn = (HttpURLConnection) url.openConnection();
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setConnectTimeout(5000);
 		conn.setRequestMethod("POST");
 		conn.setDoOutput(true);
@@ -45,53 +46,60 @@ public final class HttpUtil {
 			}
 		}
 		try (DataOutputStream ds = new DataOutputStream(conn.getOutputStream());) {
-			ds.write(HttpUtil.map2QueryParam(param).getBytes("utf-8"));
+			ds.write(map2QueryParam(param).getBytes("utf-8"));
 		}
-		// 判断是否正常响应数据
-		if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-			return null;
+		result.setStatus(conn.getResponseCode());
+		InputStream input = null;
+		if (result.getStatus() / 200 == 1) {
+			input = conn.getInputStream();
+		} else {
+			input = conn.getErrorStream();
 		}
-		try (DataInputStream inputStream = new DataInputStream(conn.getInputStream());
+		try (DataInputStream inputStream = new DataInputStream(input);
 				ByteArrayOutputStream buffer = new ByteArrayOutputStream();) {
 			byte[] b = new byte[1024];
 			int l;
 			while ((l = inputStream.read(b)) > 0) {
 				buffer.write(b, 0, l);
 			}
-			return buffer.toByteArray();
+			result.setResult(buffer.toByteArray());
+			return result;
 		} finally {
 			conn.disconnect(); // 中断连接
 		}
 	}
 
-	public static byte[] get(String hostUrl) throws IOException {
+	public static HttpResult get(String hostUrl) throws IOException {
 		return get(hostUrl, null);
 	}
 
-	public static byte[] get(String hostUrl, ConstraintMap<String> param) throws IOException {
-		HttpURLConnection conn = null;
+	public static HttpResult get(String hostUrl, ConstraintMap<String> param) throws IOException {
+		HttpResult result = new HttpResult();
 		URL url;
 		if (param == null) {
 			url = new URL(hostUrl);
 		} else {
 			url = new URL(hostUrl + "?" + map2QueryParam(param));
 		}
-		conn = (HttpURLConnection) url.openConnection();
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setConnectTimeout(5000);
 		conn.setRequestMethod("GET");
-		conn.connect();
-		// 判断是否正常响应数据
-		if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-			return null;
+		result.setStatus(conn.getResponseCode());
+		InputStream input = null;
+		if (result.getStatus() / 200 == 1) {
+			input = conn.getInputStream();
+		} else {
+			input = conn.getErrorStream();
 		}
-		try (DataInputStream inputStream = new DataInputStream(conn.getInputStream());
+		try (DataInputStream inputStream = new DataInputStream(input);
 				ByteArrayOutputStream buffer = new ByteArrayOutputStream();) {
 			byte[] b = new byte[1024];
 			int l;
 			while ((l = inputStream.read(b)) > 0) {
 				buffer.write(b, 0, l);
 			}
-			return buffer.toByteArray();
+			result.setResult(buffer.toByteArray());
+			return result;
 		} finally {
 			conn.disconnect(); // 中断连接
 		}
