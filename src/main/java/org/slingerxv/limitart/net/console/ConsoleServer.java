@@ -176,6 +176,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 										return;
 									} else {
 										ch.attr(USERNAME_TEMP_KEY).set(command);
+										log.info("remote:" + ch.remoteAddress() + " ready to login on:" + command);
 										sendMessage(ch, "password:");
 									}
 								} else {
@@ -198,6 +199,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 									}
 									temp.setChannel(ch);
 									ch.attr(USERNAME_KEY).set(temp.getUsername());
+									log.info("remote:" + ch.remoteAddress() + " login on:" + command + " success!");
 									sendMessage(ctx.channel(), "====Login " + serverName + " Success!====");
 									Procs.invoke(onUserLogin, temp);
 								}
@@ -214,6 +216,8 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 									sendMessage(ch, "'" + cmd + "'is not a command!");
 									return;
 								}
+								log.info("remote:" + ch.remoteAddress() + " login on:" + command + " execute cmd:"
+										+ cmd);
 								Procs.invoke(dispatchMessage, consoleUser, cmd, params, handler);
 							}
 						}
