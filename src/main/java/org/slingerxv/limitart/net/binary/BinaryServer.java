@@ -128,32 +128,22 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		TimerUtil.unScheduleGlobal(clearTask);
 	}
 
-	public void sendMessage(Channel channel, Message msg) {
+	public void sendMessage(Channel channel, Message msg) throws Exception {
 		sendMessage(channel, msg, null);
 	}
 
-	public void sendMessage(Channel channel, Message msg, Proc3<Boolean, Throwable, Channel> listener) {
-		channel.eventLoop().execute(() -> {
-			try {
-				SendMessageUtil.sendMessage(encoder, channel, msg, listener);
-			} catch (MessageCodecException e) {
-				Procs.invoke(onExceptionCaught, channel, e);
-			}
-		});
+	public void sendMessage(Channel channel, Message msg, Proc3<Boolean, Throwable, Channel> listener)
+			throws Exception {
+		SendMessageUtil.sendMessage(encoder, channel, msg, listener);
 	}
 
-	public void sendMessage(List<Channel> channels, Message msg) {
+	public void sendMessage(List<Channel> channels, Message msg) throws Exception {
 		sendMessage(channels, msg, null);
 	}
 
-	public void sendMessage(List<Channel> channels, Message msg, Proc3<Boolean, Throwable, Channel> listener) {
-		channel.eventLoop().execute(() -> {
-			try {
-				SendMessageUtil.sendMessage(encoder, channels, msg, listener);
-			} catch (MessageCodecException e) {
-				Procs.invoke(onExceptionCaught, channel, e);
-			}
-		});
+	public void sendMessage(List<Channel> channels, Message msg, Proc3<Boolean, Throwable, Channel> listener)
+			throws Exception {
+		SendMessageUtil.sendMessage(encoder, channels, msg, listener);
 	}
 
 	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {

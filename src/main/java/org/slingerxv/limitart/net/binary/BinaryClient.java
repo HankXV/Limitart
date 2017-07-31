@@ -112,6 +112,7 @@ public class BinaryClient {
 
 				@Override
 				public void channelActive(ChannelHandlerContext ctx) throws Exception {
+					channel = ctx.channel();
 					Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
 				}
 
@@ -125,18 +126,16 @@ public class BinaryClient {
 
 	}
 
-	public void sendMessage(Message msg) {
+	public void sendMessage(Message msg) throws Exception {
 		sendMessage(msg, null);
 	}
 
-	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) {
-		channel.eventLoop().execute(() -> {
-			try {
-				SendMessageUtil.sendMessage(encoder, channel, msg, listener);
-			} catch (MessageCodecException e) {
-				Procs.invoke(onExceptionCaught, BinaryClient.this, e);
-			}
-		});
+	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) throws Exception {
+		try {
+			SendMessageUtil.sendMessage(encoder, channel, msg, listener);
+		} catch (MessageCodecException e) {
+			Procs.invoke(onExceptionCaught, BinaryClient.this, e);
+		}
 	}
 
 	public BinaryClient disConnect() {
@@ -158,9 +157,8 @@ public class BinaryClient {
 		}
 		log.info(clientName + " start connect server：" + remoteAddress.getIp() + ":" + remoteAddress.getPort() + "...");
 		try {
-			bootstrap.connect(remoteAddress.getIp(), remoteAddress.getPort())
+			bootstrap.connect(remoteAddress.getIp(), remoteAddress.getPort()).sync()
 					.addListener((ChannelFutureListener) channelFuture -> {
-						channel = channelFuture.channel();
 						if (channelFuture.isSuccess()) {
 							log.info(clientName + " connect server：" + remoteAddress.getIp() + ":"
 									+ remoteAddress.getPort() + " success！");
