@@ -103,23 +103,27 @@ public class BinaryClient {
 				@Override
 				public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 					channelRead0(ctx, msg);
+					super.channelRead(ctx, msg);
 				}
 
 				@Override
 				public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 					Procs.invoke(onChannelStateChanged, BinaryClient.this, false);
+					super.channelInactive(ctx);
 				}
 
 				@Override
 				public void channelActive(ChannelHandlerContext ctx) throws Exception {
 					channel = ctx.channel();
 					Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
+					super.channelActive(ctx);
 				}
 
 				@Override
 				public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 					log.error(ctx.channel() + " cause:", cause);
 					Procs.invoke(onExceptionCaught, BinaryClient.this, cause);
+					super.exceptionCaught(ctx, cause);
 				}
 			});
 		}
