@@ -113,7 +113,7 @@ public abstract class RPCMeta extends Message {
 		} else if (type.equals(int[].class)) {
 			putIntArray((int[]) object);
 		} else if (type.equals(Byte.class) || type.equals(byte.class)) {
-			putByte((byte) object);
+			putByte((int) object);
 		} else if (type.equals(byte[].class)) {
 			putByteArray((byte[]) object);
 		} else if (type.equals(Short.class) || type.equals(short.class)) {

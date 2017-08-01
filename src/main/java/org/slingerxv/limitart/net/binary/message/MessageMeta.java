@@ -464,10 +464,10 @@ public abstract class MessageMeta {
 	 */
 	protected final void putMessageMeta(MessageMeta meta) throws Exception {
 		if (meta == null) {
-			putByte((byte) 0);
+			putByte(0);
 		} else {
-			putByte((byte) 1);
-			meta.buffer = this.buffer;
+			putByte(1);
+			meta.buffer(this.buffer);
 			meta.encode();
 		}
 	}
@@ -500,11 +500,9 @@ public abstract class MessageMeta {
 	 */
 	protected final <T extends MessageMeta> void putMessageMetaList(ArrayList<T> value) throws Exception {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (MessageMeta temp : value) {
 				putMessageMeta(temp);
 			}
@@ -544,11 +542,9 @@ public abstract class MessageMeta {
 	 */
 	protected final <T extends MessageMeta> void putMessageMetaArray(T[] value) throws Exception {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.length);
+			putShort(value.length);
 			for (T t : value) {
 				putMessageMeta(t);
 			}
@@ -619,11 +615,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putStringList(ArrayList<String> value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (String temp : value) {
 				putString(temp);
 			}
@@ -659,11 +653,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putStringArray(String[] value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.length);
+			putShort(value.length);
 			for (String temp : value) {
 				putString(temp);
 			}
@@ -719,11 +711,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putLongList(ArrayList<Long> value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (Long temp : value) {
 				putLong(temp);
 			}
@@ -759,11 +749,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putLongArray(long[] value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.length);
+			putShort(value.length);
 			for (long temp : value) {
 				putLong(temp);
 			}
@@ -827,11 +815,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putIntList(ArrayList<Integer> value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (Integer temp : value) {
 				putInt(temp);
 			}
@@ -888,11 +874,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putIntArray(int[] value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.length);
+			putShort(value.length);
 			for (int temp : value) {
 				putInt(temp);
 			}
@@ -926,7 +910,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putByte(byte value) {
+	protected final void putByte(int value) {
 		buffer.writeByte(value);
 	}
 
@@ -938,11 +922,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putByteList(ArrayList<Byte> value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (Byte temp : value) {
 				putByte(temp);
 			}
@@ -967,11 +949,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putByteArrayList(ArrayList<byte[]> list) {
 		if (list == null) {
-			putShort((short) -1);
-		} else if (list.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) list.size());
+			putShort(list.size());
 			for (byte[] bt : list) {
 				putByteArray(bt);
 			}
@@ -1005,11 +985,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putByteArray(byte[] bytes) {
 		if (bytes == null) {
-			putShort((short) -1);
-		} else if (bytes.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) bytes.length);
+			putShort(bytes.length);
 			buffer.writeBytes(bytes);
 		}
 	}
@@ -1061,11 +1039,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putBooleanList(ArrayList<Boolean> value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (boolean temp : value) {
 				putBoolean(temp);
 			}
@@ -1101,11 +1077,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putBooleanArray(boolean[] value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.length);
+			putShort(value.length);
 			for (boolean temp : value) {
 				putBoolean(temp);
 			}
@@ -1161,11 +1135,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putFloatList(ArrayList<Float> value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (Float temp : value) {
 				putFloat(temp);
 			}
@@ -1201,11 +1173,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putFloatArray(float[] value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.length);
+			putShort(value.length);
 			for (float temp : value) {
 				putFloat(temp);
 			}
@@ -1261,11 +1231,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putDoubleList(ArrayList<Double> value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (Double temp : value) {
 				putDouble(temp);
 			}
@@ -1301,11 +1269,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putDoubleArray(double[] value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.length);
+			putShort(value.length);
 			for (double temp : value) {
 				putDouble(temp);
 			}
@@ -1339,7 +1305,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putShort(short value) {
+	protected final void putShort(int value) {
 		buffer.writeShort(value);
 	}
 
@@ -1361,11 +1327,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putShortList(ArrayList<Short> value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (Short temp : value) {
 				putShort(temp);
 			}
@@ -1401,11 +1365,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putShortArray(short[] value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.length);
+			putShort(value.length);
 			for (short temp : value) {
 				putShort(temp);
 			}
@@ -1439,7 +1401,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putChar(char value) {
+	protected final void putChar(int value) {
 		buffer.writeChar(value);
 	}
 
@@ -1461,11 +1423,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putCharList(ArrayList<Character> value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.isEmpty()) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.size());
+			putShort(value.size());
 			for (Character temp : value) {
 				putChar(temp);
 			}
@@ -1501,11 +1461,9 @@ public abstract class MessageMeta {
 	 */
 	protected final void putCharArray(char[] value) {
 		if (value == null) {
-			putShort((short) -1);
-		} else if (value.length == 0) {
-			putShort((short) 0);
+			putShort(-1);
 		} else {
-			putShort((short) value.length);
+			putShort(value.length);
 			for (char temp : value) {
 				putChar(temp);
 			}

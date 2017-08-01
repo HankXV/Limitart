@@ -164,7 +164,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 						public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 							log.error(ctx.channel() + " cause:", cause);
 							Procs.invoke(onExceptionCaught, ctx.channel(), cause);
-							super.exceptionCaught(ctx, cause);
 						}
 
 						@Override
@@ -191,20 +190,17 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 								}
 								Procs.invoke(onConnectionEffective, channel);
 							}
-							super.channelActive(ctx);
 						}
 
 						@Override
 						public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 							log.info(ctx.channel().remoteAddress() + " disconnected！");
 							Procs.invoke(onChannelStateChanged, ctx.channel(), false);
-							super.channelInactive(ctx);
 						}
 
 						@Override
 						public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 							channelRead0(ctx, msg);
-							super.channelRead(ctx, msg);
 						}
 					});
 		}
