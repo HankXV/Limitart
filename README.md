@@ -104,7 +104,7 @@ Jdk8或以上
 7.如果你需要使用控制台来操作服务器，那么可以使用`ConsoleServer`或者`HttpServer`嵌入游戏服务器中来进行交互<br>
 8.作者不提倡滥用线程，所以请使用者预估好使用场景，再做相应的线程安排<br>
 9.在`org.slingerxv.limitart.game`包下是属于游戏逻辑层的抽象，比如背包、道具、帮会、扑克等，后面会慢慢增加<br>
-10.如果你要做排行榜，推荐使用`FrequencyReadRankMap`或`FrequencyWriteRankMap`，推荐排行榜存储量为10万数量级及一下<br>
+10.如果你要做排行榜，推荐使用`FrequencyReadRankMap`或`FrequencyWriteRankMap`，推荐排行榜存储量为10万数量级及以下<br>
 11.游戏服务器的热更新请参考`org.slingerxv.limitart.script`<br>
 12.游戏中常用的唯一Id生成请参考`org.slingerxv.limitart.util.UniqueIdUtil`<br>
 13.带有`@beta`标记的代表此API是新加入的测试版<br>
