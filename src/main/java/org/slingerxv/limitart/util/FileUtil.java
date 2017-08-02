@@ -81,6 +81,7 @@ public final class FileUtil {
 			}
 		}
 		File temp = new File(path + "//" + fileName);
+		temp.deleteOnExit();
 		if (!temp.createNewFile()) {
 			throw new IOException("create new file failed!");
 		}

@@ -9,6 +9,8 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
+import io.netty.util.CharsetUtil;
+
 public final class FTPUtil {
 	private FTPUtil() {
 	}
@@ -17,6 +19,9 @@ public final class FTPUtil {
 			String fileName) throws IOException {
 		FTPClient ftp = new FTPClient();
 		ftp.setConnectTimeout(5000);
+		ftp.setAutodetectUTF8(true);
+		ftp.setCharset(CharsetUtil.UTF_8);
+		ftp.setControlEncoding(CharsetUtil.UTF_8.name());
 		try {
 			ftp.connect(url, port);
 			ftp.login(username, password);// 登录
@@ -25,6 +30,7 @@ public final class FTPUtil {
 				throw new IOException("login fail!");
 			}
 			ftp.changeWorkingDirectory(remotePath);
+			ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
 			FTPFile[] fs = ftp.listFiles();
 			for (FTPFile ff : fs) {
 				if (ff.getName().equals(fileName)) {
@@ -50,6 +56,9 @@ public final class FTPUtil {
 		List<byte[]> result = new ArrayList<>();
 		FTPClient ftp = new FTPClient();
 		ftp.setConnectTimeout(5000);
+		ftp.setAutodetectUTF8(true);
+		ftp.setCharset(CharsetUtil.UTF_8);
+		ftp.setControlEncoding(CharsetUtil.UTF_8.name());
 		try {
 			ftp.connect(url, port);
 			ftp.login(username, password);// 登录
@@ -59,6 +68,7 @@ public final class FTPUtil {
 			}
 			ftp.changeWorkingDirectory(remotePath);
 			ftp.changeWorkingDirectory(dirName);
+			ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
 			FTPFile[] fs = ftp.listFiles();
 			for (FTPFile ff : fs) {
 				if (ff.getName().endsWith("." + filePattern)) {
