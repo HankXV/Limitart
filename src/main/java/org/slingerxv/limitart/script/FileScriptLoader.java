@@ -33,7 +33,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			InstantiationException, IllegalAccessException, ScriptException {
 		File file = scriptPath.get(scriptId);
 		Objects.requireNonNull(file, "script id:" + scriptId + " does not exist!");
-		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader())) {
+		try (GroovyClassLoader loader = new GroovyClassLoader(ClassLoader.getSystemClassLoader())) {
 			Class<?> parseClass = loader.parseClass(file);
 			Object newInstance = parseClass.newInstance();
 			if (!(newInstance instanceof IScript)) {
@@ -75,7 +75,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		if (typeByValue == null) {
 			throw new ScriptException("script type not supported" + type);
 		}
-		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader())) {
+		try (GroovyClassLoader loader = new GroovyClassLoader(ClassLoader.getSystemClassLoader())) {
 			@SuppressWarnings("rawtypes")
 			Class parseClass = loader.parseClass(file);
 			Object newInstance = parseClass.newInstance();
@@ -114,7 +114,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			throws IOException, InstantiationException, IllegalAccessException, ScriptException {
 		ConcurrentHashMap<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<>();
 		ConcurrentHashMap<KEY, File> scriptPath_new = new ConcurrentHashMap<>();
-		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader());) {
+		try (GroovyClassLoader loader = new GroovyClassLoader(ClassLoader.getSystemClassLoader());) {
 			File dir_root = new File(dir);
 			if (!dir_root.exists()) {
 				throw new IOException("scripts root dir does not exist:" + dir);
