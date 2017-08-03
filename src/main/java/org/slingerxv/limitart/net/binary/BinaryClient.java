@@ -108,6 +108,9 @@ public class BinaryClient {
 				@Override
 				public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 					Procs.invoke(onChannelStateChanged, BinaryClient.this, false);
+					if (autoReconnect > 0) {
+						tryReconnect(autoReconnect);
+					}
 				}
 
 				@Override
@@ -159,16 +162,8 @@ public class BinaryClient {
 		try {
 			bootstrap.connect(remoteAddress.getIp(), remoteAddress.getPort()).sync()
 					.addListener((ChannelFutureListener) channelFuture -> {
-						if (channelFuture.isSuccess()) {
-							log.info(clientName + " connect server：" + remoteAddress.getIp() + ":"
-									+ remoteAddress.getPort() + " success！");
-						} else {
-							log.error(clientName + " try connect server：" + remoteAddress.getIp() + ":"
-									+ remoteAddress.getPort() + " fail", channelFuture.cause().getMessage());
-							if (autoReconnect > 0) {
-								tryReconnect(autoReconnect);
-							}
-						}
+						log.info(clientName + " connect server：" + remoteAddress.getIp() + ":" + remoteAddress.getPort()
+								+ " success！");
 					});
 		} catch (Exception e) {
 			log.error(e, e);

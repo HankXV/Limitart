@@ -35,10 +35,10 @@ public abstract class InnerGameServer implements IServer {
 					return getGameServerLoad();
 				}).onNewSlaveQuit((serverType, serverId) -> {
 					if (serverType == InnerGameServerType.SERVER_TYPE_FIGHT) {
-						InnerSlaveServer innerSlaveServer = toFights.remove(serverId);
-						if (innerSlaveServer != null) {
-							innerSlaveServer.stopServer();
-						}
+//						InnerSlaveServer innerSlaveServer = toFights.remove(serverId);
+//						if (innerSlaveServer != null) {
+//							innerSlaveServer.stopServer();
+//						}
 					}
 				}).onNewSlaveJoin((info) -> {
 					// 有战斗服加入，主动去连接

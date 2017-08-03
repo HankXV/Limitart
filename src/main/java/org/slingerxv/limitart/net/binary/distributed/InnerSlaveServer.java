@@ -79,7 +79,6 @@ public class InnerSlaveServer implements IServer {
 				.remoteAddress(new AddressPair(getMasterIp(), getMasterInnerPort(), getMasterInnerPass()))
 				.factory(getFactory()).onChannelStateChanged((binaryClient, active) -> {
 					if (!active) {
-						TimerUtil.unScheduleGlobal(reportTask);
 						log.error(toMaster.getClientName() + " server disconnected," + binaryClient.channel());
 					}
 				}).onConnectionEffective(client -> {
@@ -105,7 +104,16 @@ public class InnerSlaveServer implements IServer {
 					} catch (Exception e) {
 						log.error(e, e);
 					}
-					TimerUtil.scheduleGlobal(5000, 5000, reportTask);
+					if (reportTask == null) {
+						reportTask = new TimerTask() {
+
+							@Override
+							public void run() {
+								reportLoad();
+							}
+						};
+						TimerUtil.scheduleGlobal(5000, 5000, reportTask);
+					}
 					Procs.invoke(onConnectMasterSuccess, InnerSlaveServer.this);
 				}).dispatchMessage((message, handler) -> {
 					message.setExtra(this);
@@ -115,13 +123,6 @@ public class InnerSlaveServer implements IServer {
 						log.error(e, e);
 					}
 				}).build();
-		reportTask = new TimerTask() {
-
-			@Override
-			public void run() {
-				reportLoad();
-			}
-		};
 	}
 
 	@Override
