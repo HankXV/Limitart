@@ -102,7 +102,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 	}
 
 	public void sendMessage(Channel channel, String msg, Proc3<Boolean, Throwable, Channel> listener) {
-		String info = "->" + msg + System.getProperty("line.separator");
+		String info = "->" + msg + System.getProperty("line.separator", "\n");  
 		channel.eventLoop().execute(() -> {
 			channel.writeAndFlush(info).addListener((ChannelFutureListener) arg0 -> {
 				Procs.invoke(listener, arg0.isSuccess(), arg0.cause(), arg0.channel());

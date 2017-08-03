@@ -18,7 +18,6 @@ import org.slingerxv.limitart.util.StringUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -106,8 +105,12 @@ public final class HttpUtil {
 	}
 
 	public static void sendResponse(Channel channel, HttpResponseStatus resultCode, String result, boolean isClose) {
-		ByteBuf buf = Unpooled.copiedBuffer(result.getBytes(CharsetUtil.UTF_8));
-		sendResponse(channel, resultCode, ContentTypes.text_plain, buf, isClose);
+		sendResponse(channel, resultCode, ContentTypes.text_plain, result.getBytes(CharsetUtil.UTF_8), isClose);
+	}
+
+	public static void sendResponse(Channel channel, HttpResponseStatus resultCode, ContentTypes contentType,
+			byte[] bytes, boolean isClose) {
+		sendResponse(channel, resultCode, contentType, Unpooled.wrappedBuffer(bytes), isClose);
 	}
 
 	public static void sendResponse(Channel channel, HttpResponseStatus resultCode, ContentTypes contentType,
@@ -115,13 +118,12 @@ public final class HttpUtil {
 		channel.eventLoop().execute(() -> {
 			FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, resultCode, result);
 			response.headers().add(HttpHeaderNames.CONTENT_TYPE, contentType.getValue());
-			response.headers().add(HttpHeaderNames.CONTENT_LENGTH, result.readableBytes() + "");
-			response.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-			response.headers().add(HttpHeaderNames.CONTENT_DISPOSITION, "inline;filename=\"stupid.jpg\"");
-			ChannelFuture future = channel.writeAndFlush(response);
-			if (isClose) {
-				future.addListener(ChannelFutureListener.CLOSE);
-			}
+			response.headers().add(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes() + "");
+			channel.writeAndFlush(response).addListener((ChannelFutureListener) arg0 -> {
+				if (arg0.isDone() && isClose) {
+					arg0.channel().close();
+				}
+			});
 		});
 	}
 
