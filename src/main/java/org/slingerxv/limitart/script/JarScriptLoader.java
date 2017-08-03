@@ -26,6 +26,7 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		if (!file.exists()) {
 			throw new IOException("file not exist:" + jarName);
 		}
+		// 这里要用系统自带的loader，不然会造成代码权限和作用域的问题
 		URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 		Method add = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
 		add.setAccessible(true);
