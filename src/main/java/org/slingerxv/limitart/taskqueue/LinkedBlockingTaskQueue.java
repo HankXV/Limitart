@@ -53,13 +53,9 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 			T take = null;
 			try {
 				take = queue.take();
-			} catch (InterruptedException e) {
-				log.error(e, e);
-			}
-			if (Tests.invoke(intercept, take)) {
-				continue;
-			}
-			try {
+				if (Tests.invoke(intercept, take)) {
+					continue;
+				}
 				Procs.invoke(handle, take);
 			} catch (Exception e) {
 				log.error(e, e);
