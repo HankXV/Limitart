@@ -260,6 +260,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_MESSAGE_PARSE, e.getMessage());
 			return;
 		}
+		message.setKeepAlive(io.netty.handler.codec.http.HttpUtil.isKeepAlive(msg));
 		if (dispatchMessage != null) {
 			try {
 				dispatchMessage.run(message, handler);

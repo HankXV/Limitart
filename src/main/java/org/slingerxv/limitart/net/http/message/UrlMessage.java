@@ -15,6 +15,7 @@ public abstract class UrlMessage extends ConstraintMap<String> {
 	private static ConcurrentHashMap<Class<? extends UrlMessage>, FieldAccess> messageMetaFieldCache = new ConcurrentHashMap<>();
 	private transient Channel channel;
 	private transient HashMap<String, byte[]> files = new HashMap<>();
+	private boolean keepAlive;
 
 	public abstract String getUrl();
 
@@ -66,5 +67,13 @@ public abstract class UrlMessage extends ConstraintMap<String> {
 
 	public HashMap<String, byte[]> getFiles() {
 		return files;
+	}
+
+	public boolean isKeepAlive() {
+		return keepAlive;
+	}
+
+	public void setKeepAlive(boolean keepAlive) {
+		this.keepAlive = keepAlive;
 	}
 }
