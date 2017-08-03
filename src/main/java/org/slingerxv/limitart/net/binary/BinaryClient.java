@@ -169,9 +169,12 @@ public class BinaryClient {
 								tryReconnect(autoReconnect);
 							}
 						}
-					}).sync();
+					});
 		} catch (Exception e) {
 			log.error(e, e);
+			if (autoReconnect > 0) {
+				tryReconnect(autoReconnect);
+			}
 		}
 	}
 
@@ -180,6 +183,7 @@ public class BinaryClient {
 			channel.close();
 			channel = null;
 		}
+		log.info(clientName + " try connect server：" + remoteAddress.getIp() + " after " + waitSeconds + " seconds");
 		if (waitSeconds > 0) {
 			group.schedule(() -> {
 				connect0();
