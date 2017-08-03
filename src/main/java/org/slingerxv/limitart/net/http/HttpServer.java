@@ -35,17 +35,14 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpMessage;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.FileUpload;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.stream.ChunkedWriteHandler;
 
 /**
  * Http服务器
@@ -88,17 +85,15 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 
 			@Override
 			protected void initChannel(SocketChannel ch) throws Exception {
-				ch.pipeline().addLast(new HttpRequestDecoder())
-						.addLast(new HttpObjectAggregator(httpObjectAggregatorMax) {
-							@Override
-							protected void handleOversizedMessage(ChannelHandlerContext ctx, HttpMessage oversized)
-									throws Exception {
-								Exception e = new Exception(ctx.channel() + " : " + oversized + " is over size");
-								log.error(e, e);
-								Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
-							}
-						}).addLast(new HttpContentCompressor()).addLast(new HttpContentDecompressor())
-						.addLast(new HttpResponseEncoder()).addLast(new ChunkedWriteHandler())
+				ch.pipeline().addLast(new HttpObjectAggregator(httpObjectAggregatorMax) {
+					@Override
+					protected void handleOversizedMessage(ChannelHandlerContext ctx, HttpMessage oversized)
+							throws Exception {
+						Exception e = new Exception(ctx.channel() + " : " + oversized + " is over size");
+						log.error(e, e);
+						Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
+					}
+				}).addLast(new HttpContentCompressor()).addLast(new HttpServerCodec())
 						.addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
 
 							@Override

@@ -120,7 +120,7 @@ public final class HttpUtil {
 			response.headers().add(HttpHeaderNames.CONTENT_TYPE, contentType.getValue());
 			response.headers().add(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes() + "");
 			channel.writeAndFlush(response).addListener((ChannelFutureListener) arg0 -> {
-				if (arg0.isDone() && isClose) {
+				if (isClose) {
 					arg0.channel().close();
 				}
 			});
