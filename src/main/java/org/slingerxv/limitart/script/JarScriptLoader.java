@@ -2,6 +2,8 @@ package org.slingerxv.limitart.script;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
@@ -17,15 +19,19 @@ import org.slingerxv.limitart.util.FTPUtil;
 import org.slingerxv.limitart.util.FileUtil;
 
 public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
-	private AbstractScriptLoader<KEY> loadScriptsByJar(String jarName) throws ClassNotFoundException, IOException,
-			InstantiationException, IllegalAccessException, ScriptException {
+	private AbstractScriptLoader<KEY> loadScriptsByJar(String jarName)
+			throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException, ScriptException,
+			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
 		File file = new File(jarName);
 		if (!file.exists()) {
 			throw new IOException("file not exist:" + jarName);
 		}
+		URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+		Method add = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
+		add.setAccessible(true);
+		add.invoke(classLoader, new Object[] { file.toURI().toURL() });
 		ConcurrentHashMap<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<KEY, IScript<KEY>>();
-		try (URLClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI().toURL() },
-				Thread.currentThread().getContextClassLoader()); JarFile jarFile = new JarFile(file);) {
+		try (JarFile jarFile = new JarFile(file)) {
 			Enumeration<JarEntry> entrys = jarFile.entries();
 			while (entrys.hasMoreElements()) {
 				JarEntry jarEntry = entrys.nextElement();
@@ -74,9 +80,14 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 	 * @throws IllegalAccessException
 	 * @throws IOException
 	 * @throws ScriptException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
 	 */
-	public void reloadScriptJarLocal(String jarPath) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, IOException, ScriptException {
+	public void reloadScriptJarLocal(String jarPath)
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, ScriptException,
+			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
 		log.info("start load local jar:" + jarPath);
 		loadScriptsByJar(jarPath);
 	}
@@ -95,10 +106,15 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 	 * @throws ClassNotFoundException
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
 	 */
 	public void reloadScriptJarFTP(String ftpIp, int ftpPort, String username, String password, String resourceDir,
-			String jarName) throws ScriptException, IOException, ClassNotFoundException, InstantiationException,
-			IllegalAccessException {
+			String jarName)
+			throws ScriptException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
 		log.info("strat load remote jar:" + jarName);
 		byte[] download = FTPUtil.download(ftpIp, ftpPort, username, password, resourceDir, jarName);
 		if (download == null) {
