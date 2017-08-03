@@ -11,4 +11,5 @@ import java.lang.annotation.Target;
 		ElementType.TYPE })
 @Documented
 public @interface Beta {
+	String value() default "";
 }
