@@ -85,7 +85,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 
 			@Override
 			protected void initChannel(SocketChannel ch) throws Exception {
-				ch.pipeline().addLast(new HttpObjectAggregator(httpObjectAggregatorMax) {
+				ch.pipeline().addLast(new HttpServerCodec()).addLast(new HttpObjectAggregator(httpObjectAggregatorMax) {
 					@Override
 					protected void handleOversizedMessage(ChannelHandlerContext ctx, HttpMessage oversized)
 							throws Exception {
@@ -93,40 +93,38 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 						log.error(e, e);
 						Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
 					}
-				}).addLast(new HttpContentCompressor()).addLast(new HttpServerCodec())
-						.addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
+				}).addLast(new HttpContentCompressor()).addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
 
-							@Override
-							protected void channelRead0(ChannelHandlerContext arg0, FullHttpRequest arg1)
-									throws Exception {
-								channelRead00(arg0, arg1);
-							}
+					@Override
+					protected void channelRead0(ChannelHandlerContext arg0, FullHttpRequest arg1) throws Exception {
+						channelRead00(arg0, arg1);
+					}
 
-							@Override
-							public void channelActive(ChannelHandlerContext ctx) throws Exception {
-								Procs.invoke(onChannelStateChanged, ctx.channel(), true);
-							}
+					@Override
+					public void channelActive(ChannelHandlerContext ctx) throws Exception {
+						Procs.invoke(onChannelStateChanged, ctx.channel(), true);
+					}
 
-							@Override
-							public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-								if (whiteList != null && !whiteList.isEmpty()) {
-									InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-									String remoteAddress = insocket.getAddress().getHostAddress();
-									if (!whiteList.contains(remoteAddress)) {
-										ctx.channel().close();
-										log.error("ip: " + remoteAddress + " rejected link!");
-										return;
-									}
-								}
-								Procs.invoke(onChannelStateChanged, ctx.channel(), false);
+					@Override
+					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+						if (whiteList != null && !whiteList.isEmpty()) {
+							InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+							String remoteAddress = insocket.getAddress().getHostAddress();
+							if (!whiteList.contains(remoteAddress)) {
+								ctx.channel().close();
+								log.error("ip: " + remoteAddress + " rejected link!");
+								return;
 							}
+						}
+						Procs.invoke(onChannelStateChanged, ctx.channel(), false);
+					}
 
-							@Override
-							public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-								log.error(ctx.channel() + " cause:", cause);
-								Procs.invoke(onExceptionCaught, ctx.channel(), cause);
-							}
-						});
+					@Override
+					public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+						log.error(ctx.channel() + " cause:", cause);
+						Procs.invoke(onExceptionCaught, ctx.channel(), cause);
+					}
+				});
 			}
 		});
 	}
