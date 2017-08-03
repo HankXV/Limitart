@@ -1,12 +1,9 @@
 package org.slingerxv.limitart.taskqueue;
 
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slingerxv.limitart.funcs.Proc1;
-import org.slingerxv.limitart.funcs.Proc2;
+import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.funcs.Test1;
 import org.slingerxv.limitart.funcs.Tests;
@@ -14,11 +11,8 @@ import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
 import org.slingerxv.limitart.thread.NamedThreadFactory;
 
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.EventTranslatorOneArg;
-import com.lmax.disruptor.LiteTimeoutBlockingWaitStrategy;
-import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.ExceptionHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
@@ -32,10 +26,9 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	private static Logger log = LogManager.getLogger();
 	private Disruptor<DisruptorTaskQueueEvent> disruptor;
 	private NamedThreadFactory threadFactory;
-	private TaskQueueEventProducerWithTraslator traslator;
 	private Test1<T> intercept;
 	private Proc1<T> handle;
-	private Proc2<T, Throwable> exception;
+	private Proc3<DisruptorTaskQueueEvent, Throwable, Long> exception;
 
 	public DisruptorTaskQueue(String threadName) {
 		this(threadName, 2048);
@@ -58,20 +51,39 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 				return threadName;
 			}
 		};
-		disruptor = new Disruptor<>((EventFactory<DisruptorTaskQueueEvent>) () -> new DisruptorTaskQueueEvent(),
-				bufferSize, this.threadFactory, ProducerType.MULTI,
-				new LiteTimeoutBlockingWaitStrategy(1, TimeUnit.SECONDS));
-		disruptor.handleEventsWith(new TaskQueueEventHandler());
-		disruptor.handleExceptionsFor(new EventHandler<DisruptorTaskQueueEvent>() {
-
-			@Override
-			public void onEvent(DisruptorTaskQueueEvent arg0, long arg1, boolean arg3) throws Exception {
-				Exception e = new Exception("exception catched:" + arg0.getMsg().getClass());
+		disruptor = new Disruptor<>(DisruptorTaskQueueEvent::new, bufferSize, this.threadFactory, ProducerType.MULTI,
+				new BlockingWaitStrategy());
+		disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
+			if (Tests.invoke(DisruptorTaskQueue.this.intercept, event.getMsg())) {
+				return;
+			}
+			try {
+				Procs.invoke(DisruptorTaskQueue.this.handle, event.getMsg());
+			} catch (Exception e) {
 				log.error(e, e);
-				Procs.invoke(exception, arg0.msg, e);
+			} finally {
+				event.setMsg(null);
 			}
 		});
-		traslator = new TaskQueueEventProducerWithTraslator(disruptor.getRingBuffer());
+		// prevent Worker Threads from dying
+		disruptor.setDefaultExceptionHandler(new ExceptionHandler<DisruptorTaskQueueEvent>() {
+
+			@Override
+			public void handleEventException(Throwable ex, long sequence, DisruptorTaskQueueEvent event) {
+				log.error("sequence " + sequence + " error!", ex);
+				Procs.invoke(exception, event, ex, sequence);
+			}
+
+			@Override
+			public void handleOnStartException(final Throwable ex) {
+				log.error("Exception during onStart()", ex);
+			}
+
+			@Override
+			public void handleOnShutdownException(final Throwable ex) {
+				log.error("Exception during onShutdown()", ex);
+			}
+		});
 	}
 
 	public ITaskQueue<T> intercept(Test1<T> intercept) {
@@ -84,7 +96,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 		return this;
 	}
 
-	public ITaskQueue<T> exception(Proc2<T, Throwable> exception) {
+	public ITaskQueue<T> exception(Proc3<DisruptorTaskQueueEvent, Throwable, Long> exception) {
 		this.exception = exception;
 		return this;
 	}
@@ -101,7 +113,6 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 			disruptor.shutdown();
 			log.info("thread " + threadFactory.getThreadName() + " stop!");
 			disruptor = null;
-			traslator = null;
 			threadFactory = null;
 		}
 	}
@@ -111,47 +122,12 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 		if (this.disruptor == null) {
 			throw new TaskQueueException(getThreadName() + " has not start yet!");
 		}
-		this.traslator.onData(Objects.requireNonNull(command, "command"));
+		disruptor.getRingBuffer().publishEvent((event, sequence) -> event.setMsg(command));
 	}
 
 	@Override
 	public String getThreadName() {
 		return threadFactory.getThreadName();
-	}
-
-	/**
-	 * 消息转换器
-	 * 
-	 * @author Hank
-	 *
-	 */
-	private class TaskQueueEventProducerWithTraslator {
-		private EventTranslatorOneArg<DisruptorTaskQueueEvent, T> translatorOneArg = (arg0, arg1, arg2) -> arg0
-				.setMsg(arg2);
-		private final RingBuffer<DisruptorTaskQueueEvent> ringBuffer;
-
-		public TaskQueueEventProducerWithTraslator(RingBuffer<DisruptorTaskQueueEvent> ringBuffer) {
-			this.ringBuffer = ringBuffer;
-		}
-
-		public void onData(T t) {
-			ringBuffer.publishEvent(translatorOneArg, t);
-		}
-	}
-
-	private class TaskQueueEventHandler implements EventHandler<DisruptorTaskQueueEvent> {
-
-		@Override
-		public void onEvent(DisruptorTaskQueueEvent event, long paramLong, boolean paramBoolean) throws Exception {
-			if (Tests.invoke(DisruptorTaskQueue.this.intercept, event.getMsg())) {
-				return;
-			}
-			try {
-				Procs.invoke(DisruptorTaskQueue.this.handle, event.getMsg());
-			} catch (Exception e) {
-				log.error(e, e);
-			}
-		}
 	}
 
 	private class DisruptorTaskQueueEvent {
