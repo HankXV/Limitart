@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
@@ -56,11 +57,8 @@ public class ProviderX {
 	}
 
 	public ProviderX(ProviderXConfig config, IProviderListener providerListener) throws Exception {
-		if (config == null) {
-			throw new NullPointerException("ProviderXConfig");
-		}
-		this.providerListener = providerListener;
-		this.config = config;
+		this.providerListener = Objects.requireNonNull(providerListener, "providerListener");
+		this.config = Objects.requireNonNull(config, "config");
 		MessageFactory factory = new MessageFactory();
 		// 初始化内部消息
 		factory.registerMsg(new RpcExecuteClientHandler());
@@ -125,11 +123,10 @@ public class ProviderX {
 	 * @param packageName
 	 * @throws ServiceXProxyException
 	 * @throws IOException
-	 * @throws ReflectiveOperationException 
+	 * @throws ReflectiveOperationException
 	 * @throws Exception
 	 */
-	private void initAllServices() throws ServiceXProxyException, IOException,
-			ReflectiveOperationException {
+	private void initAllServices() throws ServiceXProxyException, IOException, ReflectiveOperationException {
 		services.clear();
 		List<Class<?>> classesByPackage = new ArrayList<>();
 		for (String temp : this.config.getServicePackages()) {

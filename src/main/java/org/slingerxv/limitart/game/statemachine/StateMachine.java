@@ -98,7 +98,7 @@ public class StateMachine {
 	 * 
 	 * @throws StateException
 	 */
-	public synchronized StateMachine Reverse2PreState() throws StateException {
+	public synchronized StateMachine reverse2PreState() throws StateException {
 		if (preState != null) {
 			changeState(preState.getStateId());
 		}
@@ -113,7 +113,7 @@ public class StateMachine {
 	@SuppressWarnings("unchecked")
 	public synchronized void loop() throws StateException {
 		Thread nowThread = Thread.currentThread();
-		if (lastThread != null && lastThread != nowThread) {
+		if (lastThread != null && lastThread.equals(nowThread)) {
 			throw new StateException("not allowed to run on a deferent thread,last:" + lastThread.getName() + ",now:"
 					+ nowThread.getName());
 		}

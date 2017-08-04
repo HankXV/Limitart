@@ -98,7 +98,7 @@ class AccessClassLoader extends ClassLoader {
 		return super.loadClass(name, resolve);
 	}
 
-	Class<?> defineClass(String name, byte[] bytes) throws ClassFormatError {
+	public Class<?> defineClass(String name, byte[] bytes) throws ClassFormatError {
 		try {
 			// Attempt to load the access class in the same loader, which makes protected
 			// and default access members accessible.
