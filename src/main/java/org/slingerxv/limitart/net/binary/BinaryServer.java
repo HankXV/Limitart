@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,6 +52,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
 	private SymmetricEncryptionUtil encrypUtil;
 	private TimerTask clearTask;
+	private AtomicInteger connectionCount = new AtomicInteger(0);
 
 	// --config
 	private String serverName;
@@ -60,6 +62,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private AbstractBinaryEncoder encoder;
 	private HashSet<String> whiteList;
 	private MessageFactory factory;
+	private int maxConnection;
 
 	// ---listener
 	private Proc2<Channel, Boolean> onChannelStateChanged;
@@ -82,6 +85,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		this.onServerBind = builder.onServerBind;
 		this.onConnectionEffective = builder.onConnectionEffective;
 		this.dispatchMessage = builder.dispatchMessage;
+		this.maxConnection = builder.maxConnection;
 		// 初始化内部消息
 		this.factory.registerMsg(new ConnectionValidateClientHandler());
 		if (needPass()) {
@@ -116,6 +120,12 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 					@Override
 					public void channelActive(ChannelHandlerContext ctx) throws Exception {
+						if (maxConnection > 0 && connectionCount.get() >= maxConnection) {
+							log.error("connection count is greater than " + maxConnection + " close channel:"
+									+ ctx.channel());
+							ctx.channel().close();
+							return;
+						}
 						log.info(ctx.channel().remoteAddress() + " connected！");
 						if (whiteList != null && !whiteList.isEmpty()) {
 							InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
@@ -126,6 +136,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 								return;
 							}
 						}
+						connectionCount.incrementAndGet();
 						Procs.invoke(onChannelStateChanged, ctx.channel(), true);
 						if (needPass()) {
 							startConnectionValidate(ctx.channel());
@@ -143,6 +154,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					@Override
 					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 						log.info(ctx.channel().remoteAddress() + " disconnected！");
+						connectionCount.decrementAndGet();
 						Procs.invoke(onChannelStateChanged, ctx.channel(), false);
 					}
 
@@ -155,6 +167,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 	@Override
 	public void startServer() {
+		connectionCount.set(0);
 		bind(addressPair.getPort(), onServerBind);
 	}
 
@@ -355,6 +368,14 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		return factory;
 	}
 
+	public int getMaxConnection() {
+		return maxConnection;
+	}
+
+	public int getConnectionCount() {
+		return connectionCount.get();
+	}
+
 	private boolean needPass() {
 		return addressPair.getPass() != null;
 	}
@@ -387,6 +408,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		private AbstractBinaryEncoder encoder;
 		private HashSet<String> whiteList = new HashSet<>();
 		private MessageFactory factory;
+		private int maxConnection;
 		// ---listener
 		private Proc2<Channel, Boolean> onChannelStateChanged;
 		private Proc2<Channel, Throwable> onExceptionCaught;
@@ -403,6 +425,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			this.dispatchMessage = (t1, t2) -> {
 				t2.handle(t1);
 			};
+			this.maxConnection = 0;
 		}
 
 		/**
@@ -494,6 +517,11 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 		public BinaryServerBuilder dispatchMessage(Proc2<Message, IHandler<Message>> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
+			return this;
+		}
+
+		public BinaryServerBuilder maxConnection(int maxConnection) {
+			this.maxConnection = maxConnection;
 			return this;
 		}
 	}
