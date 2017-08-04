@@ -10,7 +10,7 @@ public class BinaryServerDemo {
 				// 指定端口
 				.addressPair(new AddressPair(8888))
 				// 注册消息
-				.factory(messageFactory).build();
+				.factory(messageFactory).heartIntervalSec(5).build();
 		server.startServer();
 	}
 }

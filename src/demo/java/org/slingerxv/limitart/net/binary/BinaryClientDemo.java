@@ -16,7 +16,7 @@ public class BinaryClientDemo {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}).build();
+				}).heartIntervalSec(5).build();
 		client.connect();
 	}
 }

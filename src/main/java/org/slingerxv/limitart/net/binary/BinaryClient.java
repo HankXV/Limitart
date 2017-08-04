@@ -2,6 +2,7 @@ package org.slingerxv.limitart.net.binary;
 
 import java.net.SocketAddress;
 import java.util.Objects;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
@@ -20,9 +21,12 @@ import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
+import org.slingerxv.limitart.net.binary.message.impl.validate.HeartClientMessage;
+import org.slingerxv.limitart.net.binary.message.impl.validate.HeartServerMessage;
 import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.SymmetricEncryptionUtil;
+import org.slingerxv.limitart.util.TimerUtil;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -51,6 +55,9 @@ public class BinaryClient {
 	private Bootstrap bootstrap;
 	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
+	private long serverStartTime;
+	private long serverTime;
+	private TimerTask hearTask;
 	// ----config
 	private String clientName;
 	private AddressPair remoteAddress;
@@ -58,6 +65,7 @@ public class BinaryClient {
 	private AbstractBinaryDecoder decoder;
 	private AbstractBinaryEncoder encoder;
 	private MessageFactory factory;
+	private int heartIntervalSec;
 	// ----listener
 	private Proc2<BinaryClient, Boolean> onChannelStateChanged;
 	private Proc2<BinaryClient, Throwable> onExceptionCaught;
@@ -75,9 +83,10 @@ public class BinaryClient {
 		this.onExceptionCaught = builder.onExceptionCaught;
 		this.onConnectionEffective = builder.onConnectionEffective;
 		this.dispatchMessage = builder.dispatchMessage;
+		this.heartIntervalSec = builder.heartIntervalSec;
 		// 内部消息注册
 		factory.registerMsg(new ConnectionValidateServerHandler())
-				.registerMsg(new ConnectionValidateSuccessServerHandler());
+				.registerMsg(new ConnectionValidateSuccessServerHandler()).registerMsg(new HeartServerHandler());
 		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(remoteAddress.getPass());
 		bootstrap = new Bootstrap();
 		bootstrap.channel(NioSocketChannel.class);
@@ -107,6 +116,10 @@ public class BinaryClient {
 
 				@Override
 				public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+					log.error(clientName + " disconnected!");
+					if (heartIntervalSec > 0 && hearTask != null) {
+						TimerUtil.unScheduleGlobal(hearTask);
+					}
 					Procs.invoke(onChannelStateChanged, BinaryClient.this, false);
 					if (autoReconnect > 0) {
 						tryReconnect(autoReconnect);
@@ -115,6 +128,7 @@ public class BinaryClient {
 
 				@Override
 				public void channelActive(ChannelHandlerContext ctx) throws Exception {
+					log.error(clientName + " connected!");
 					channel = ctx.channel();
 					Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
 				}
@@ -203,7 +217,26 @@ public class BinaryClient {
 
 	private void onConnectionValidateSeccuss(String remote) {
 		log.info("server validate success,remote:" + remote);
+		if (heartIntervalSec > 0) {
+			hearTask = new TimerTask() {
+
+				@Override
+				public void run() {
+					try {
+						sendMessage(new HeartClientMessage());
+					} catch (Exception e) {
+						log.error(e, e);
+					}
+				}
+			};
+			TimerUtil.scheduleGlobal(0, heartIntervalSec * 1000, hearTask);
+		}
 		Procs.invoke(onConnectionEffective, this);
+	}
+
+	private void onHeartServer(long serverStartTime, long serverTime) {
+		this.serverStartTime = serverStartTime;
+		this.serverTime = serverTime;
 	}
 
 	public String channelLongID() {
@@ -240,6 +273,18 @@ public class BinaryClient {
 
 	public MessageFactory getFactory() {
 		return factory;
+	}
+
+	public long getServerStartTime() {
+		return serverStartTime;
+	}
+
+	public long getServerTime() {
+		return serverTime;
+	}
+
+	public int getHeartIntervalSec() {
+		return heartIntervalSec;
 	}
 
 	private void channelRead0(ChannelHandlerContext ctx, Object arg)
@@ -304,6 +349,14 @@ public class BinaryClient {
 		}
 	}
 
+	private class HeartServerHandler implements IHandler<HeartServerMessage> {
+
+		@Override
+		public void handle(HeartServerMessage msg) {
+			msg.getClient().onHeartServer(msg.serverStartTime, msg.serverTime);
+		}
+	}
+
 	public static class BinaryClientBuilder {
 		private String clientName;
 		private AddressPair remoteAddress;
@@ -311,6 +364,7 @@ public class BinaryClient {
 		private AbstractBinaryDecoder decoder;
 		private AbstractBinaryEncoder encoder;
 		private MessageFactory factory;
+		private int heartIntervalSec;
 		// ----listener
 		private Proc2<BinaryClient, Boolean> onChannelStateChanged;
 		private Proc2<BinaryClient, Throwable> onExceptionCaught;
@@ -324,6 +378,7 @@ public class BinaryClient {
 			this.decoder = AbstractBinaryDecoder.DEFAULT_DECODER;
 			this.encoder = AbstractBinaryEncoder.DEFAULT_ENCODER;
 			this.factory = new MessageFactory();
+			this.heartIntervalSec = 0;
 			this.dispatchMessage = (t1, t2) -> {
 				t2.handle(t1);
 			};
@@ -398,6 +453,11 @@ public class BinaryClient {
 
 		public BinaryClientBuilder dispatchMessage(Proc2<Message, IHandler<Message>> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
+			return this;
+		}
+
+		public BinaryClientBuilder heartIntervalSec(int heartIntervalSec) {
+			this.heartIntervalSec = heartIntervalSec;
 			return this;
 		}
 	}

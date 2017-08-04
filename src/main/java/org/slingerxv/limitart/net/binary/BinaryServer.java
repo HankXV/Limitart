@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
@@ -21,10 +22,14 @@ import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
+import org.slingerxv.limitart.net.binary.message.exception.HeartNotAnswerException;
+import org.slingerxv.limitart.net.binary.message.exception.HeartTooQuickException;
 import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateServerMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidateSuccessServerMessage;
+import org.slingerxv.limitart.net.binary.message.impl.validate.HeartClientMessage;
+import org.slingerxv.limitart.net.binary.message.impl.validate.HeartServerMessage;
 import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
 import org.slingerxv.limitart.net.define.AbstractNettyServer;
 import org.slingerxv.limitart.net.define.IServer;
@@ -40,6 +45,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.util.AttributeKey;
 
 /**
  * 二进制通信服务器
@@ -49,10 +55,16 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  */
 public class BinaryServer extends AbstractNettyServer implements IServer {
 	private static Logger log = LogManager.getLogger();
-	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
+	private static AttributeKey<Long> LAST_HEART_TIME = AttributeKey.newInstance("LAST_HEART_TIME");
+	private static AttributeKey<Long> FIRST_HEART_TIME = AttributeKey.newInstance("FIRST_HEART_TIME");
+	private static AttributeKey<Integer> HEART_COUNT = AttributeKey.newInstance("HEART_COUNT");
+	private ConcurrentHashMap<String, SessionValidateData> unvalidatedChannels = new ConcurrentHashMap<>();
+	private ConcurrentHashSet<Channel> validatedChannels = new ConcurrentHashSet<>();
 	private SymmetricEncryptionUtil encrypUtil;
 	private TimerTask clearTask;
+	private TimerTask heartTask;
 	private AtomicInteger connectionCount = new AtomicInteger(0);
+	private long startTime;
 
 	// --config
 	private String serverName;
@@ -63,6 +75,8 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private HashSet<String> whiteList;
 	private MessageFactory factory;
 	private int maxConnection;
+	private int heartIntervalSec;
+	private int checkHeartWhenConnectionCount;
 
 	// ---listener
 	private Proc2<Channel, Boolean> onChannelStateChanged;
@@ -86,8 +100,10 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		this.onConnectionEffective = builder.onConnectionEffective;
 		this.dispatchMessage = builder.dispatchMessage;
 		this.maxConnection = builder.maxConnection;
+		this.heartIntervalSec = builder.heartIntervalSec;
+		this.checkHeartWhenConnectionCount = builder.checkHeartWhenConnectionCount;
 		// 初始化内部消息
-		this.factory.registerMsg(new ConnectionValidateClientHandler());
+		this.factory.registerMsg(new ConnectionValidateClientHandler()).registerMsg(new HeartClientHandler());
 		if (needPass()) {
 			// 初始化加密工具
 			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(addressPair.getPass(), "20170106");
@@ -99,6 +115,16 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 				}
 			};
 			TimerUtil.scheduleGlobal(1000, 1000, clearTask);
+		}
+		if (heartIntervalSec > 0) {
+			heartTask = new TimerTask() {
+
+				@Override
+				public void run() {
+					clearUnheart();
+				}
+			};
+			TimerUtil.scheduleGlobal(5000, 5000, heartTask);
 		}
 	}
 
@@ -147,6 +173,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 							} catch (Exception e) {
 								log.error(e, e);
 							}
+							validatedChannels.add(ctx.channel());
 							Procs.invoke(onConnectionEffective, channel());
 						}
 					}
@@ -155,6 +182,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 						log.info(ctx.channel().remoteAddress() + " disconnected！");
 						connectionCount.decrementAndGet();
+						validatedChannels.remove(ctx.channel());
 						Procs.invoke(onChannelStateChanged, ctx.channel(), false);
 					}
 
@@ -167,6 +195,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 	@Override
 	public void startServer() {
+		startTime = System.currentTimeMillis();
 		connectionCount.set(0);
 		bind(addressPair.getPort(), onServerBind);
 	}
@@ -175,6 +204,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	public void stopServer() {
 		unbind();
 		TimerUtil.unScheduleGlobal(clearTask);
+		TimerUtil.unScheduleGlobal(heartTask);
 	}
 
 	public void sendMessage(Channel channel, Message msg) throws Exception {
@@ -204,7 +234,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		SessionValidateData data = new SessionValidateData(channel, System.currentTimeMillis(),
 				RandomUtil.randomInt(0, 10000));
 		// 增加到临时会话集合
-		tempChannels.put(data.channel.id().asLongText(), data);
+		unvalidatedChannels.put(data.channel.id().asLongText(), data);
 		// 通知客户端
 		ConnectionValidateServerMessage msg = new ConnectionValidateServerMessage();
 		String encode;
@@ -237,11 +267,11 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	 * 清理没通过验证的链接
 	 */
 	private void clearUnvalidatedConnection() {
-		if (tempChannels.isEmpty()) {
+		if (unvalidatedChannels.isEmpty()) {
 			return;
 		}
 		long now = System.currentTimeMillis();
-		Iterator<SessionValidateData> iterator = tempChannels.values().iterator();
+		Iterator<SessionValidateData> iterator = unvalidatedChannels.values().iterator();
 		for (; iterator.hasNext();) {
 			SessionValidateData data = iterator.next();
 			long startValidateTime = data.startValidateTime;
@@ -250,7 +280,33 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 				data.channel.close();
 				// 移除链接
 				log.error(serverName + " connection " + data.channel.remoteAddress()
-						+ " discarded，validate time out,wait validate size:" + tempChannels.size());
+						+ " discarded，validate time out,wait validate size:" + unvalidatedChannels.size());
+			}
+		}
+	}
+
+	private void clearUnheart() {
+		if (checkHeartWhenConnectionCount > connectionCount.get()) {
+			return;
+		}
+		long now = System.currentTimeMillis();
+		for (Channel channel : validatedChannels) {
+			long last = 0;
+			long first = 0;
+			int count = 0;
+			if (channel.hasAttr(LAST_HEART_TIME)) {
+				last = channel.attr(LAST_HEART_TIME).get();
+			}
+			if (channel.hasAttr(FIRST_HEART_TIME)) {
+				first = channel.attr(FIRST_HEART_TIME).get();
+			}
+			if (channel.hasAttr(HEART_COUNT)) {
+				count = channel.attr(HEART_COUNT).get();
+			}
+			if (now - last > (heartIntervalSec + 2) * 1000) {
+				channel.pipeline().fireExceptionCaught(new HeartNotAnswerException(channel, first, last, count));
+				log.error(channel + " close,cause unheart!");
+				channel.close();
 			}
 		}
 	}
@@ -264,7 +320,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private void onClientConnectionValidate(Channel channel, int validateRandom) {
 		// 查找临时缓存
 		String asLongText = channel.id().asLongText();
-		SessionValidateData sessionValidateData = tempChannels.get(asLongText);
+		SessionValidateData sessionValidateData = unvalidatedChannels.get(asLongText);
 		if (sessionValidateData == null) {
 			channel.close();
 			// 移除链接
@@ -277,14 +333,15 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			log.info(serverName + " remote connection " + channel.remoteAddress() + " discarded，validate wrong！");
 			return;
 		}
-		tempChannels.remove(asLongText);
+		unvalidatedChannels.remove(asLongText);
 		log.info(serverName + " remote connection " + channel.remoteAddress() + " validate success!");
 		// 通知客户端成功
 		try {
 			sendMessage(channel, new ConnectionValidateSuccessServerMessage(), null);
 		} catch (Exception e) {
-			log.error(e, e);
+			channel.pipeline().fireExceptionCaught(e);
 		}
+		validatedChannels.add(channel);
 		Procs.invoke(onConnectionEffective, channel);
 	}
 
@@ -317,7 +374,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 				handler.handle(msg);
 			} else {
 				// 如果没通过验证，不接受消息
-				if (tempChannels.containsKey(ctx.channel().id().asLongText())) {
+				if (unvalidatedChannels.containsKey(ctx.channel().id().asLongText())) {
 					log.error("channel " + ctx.channel() + " has not validate yet!");
 					return;
 				}
@@ -376,6 +433,18 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		return connectionCount.get();
 	}
 
+	public long getStartTime() {
+		return startTime;
+	}
+
+	public int getHeartIntervalSec() {
+		return heartIntervalSec;
+	}
+
+	public int getCheckHeartWhenConnectionCount() {
+		return checkHeartWhenConnectionCount;
+	}
+
 	private boolean needPass() {
 		return addressPair.getPass() != null;
 	}
@@ -400,6 +469,45 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		}
 	}
 
+	private class HeartClientHandler implements IHandler<HeartClientMessage> {
+
+		@Override
+		public void handle(HeartClientMessage msg) {
+			long now = System.currentTimeMillis();
+			// 设置上次心跳时间
+			msg.getChannel().attr(LAST_HEART_TIME).set(now);
+
+			// 是否包含首次心跳
+			if (!msg.getChannel().hasAttr(FIRST_HEART_TIME)) {
+				msg.getChannel().attr(FIRST_HEART_TIME).set(now);
+				msg.getChannel().attr(HEART_COUNT).set(0);
+				return;
+			}
+			long first = msg.getChannel().attr(FIRST_HEART_TIME).get();
+			int times = msg.getChannel().attr(HEART_COUNT).get();
+			++times;
+			long between = now - first;
+			int allow = (int) (between / heartIntervalSec);
+			if (times > allow + 2) {
+				log.error(msg.getChannel() + " heart too quick,might be Game Accelerator,please check!");
+				msg.getChannel().pipeline()
+						.fireExceptionCaught(new HeartTooQuickException(msg.getChannel(), first, now, times, allow));
+				msg.getChannel().attr(FIRST_HEART_TIME).set(now);
+				msg.getChannel().attr(HEART_COUNT).set(0);
+			} else {
+				msg.getChannel().attr(HEART_COUNT).set(times);
+			}
+			HeartServerMessage message = new HeartServerMessage();
+			message.serverStartTime = startTime;
+			message.serverTime = now;
+			try {
+				sendMessage(msg.getChannel(), message);
+			} catch (Exception e) {
+				log.error(e, e);
+			}
+		}
+	}
+
 	public static class BinaryServerBuilder {
 		private String serverName;
 		private AddressPair addressPair;
@@ -409,6 +517,8 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		private HashSet<String> whiteList = new HashSet<>();
 		private MessageFactory factory;
 		private int maxConnection;
+		private int heartIntervalSec;
+		private int checkHeartWhenConnectionCount;
 		// ---listener
 		private Proc2<Channel, Boolean> onChannelStateChanged;
 		private Proc2<Channel, Throwable> onExceptionCaught;
@@ -426,6 +536,8 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 				t2.handle(t1);
 			};
 			this.maxConnection = 0;
+			this.heartIntervalSec = 0;
+			this.checkHeartWhenConnectionCount = 2000;
 		}
 
 		/**
@@ -522,6 +634,16 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 		public BinaryServerBuilder maxConnection(int maxConnection) {
 			this.maxConnection = maxConnection;
+			return this;
+		}
+
+		public BinaryServerBuilder heartIntervalSec(int heartIntervalSec) {
+			this.heartIntervalSec = heartIntervalSec;
+			return this;
+		}
+
+		public BinaryServerBuilder checkHeartWhenConnectionCount(int checkHeartWhenConnectionCount) {
+			this.checkHeartWhenConnectionCount = checkHeartWhenConnectionCount;
 			return this;
 		}
 	}

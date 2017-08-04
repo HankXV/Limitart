@@ -19,8 +19,15 @@ public enum InnerMessageEnum {
 	/**
 	 * 验证链接成功服务器
 	 */
-	ConnectionValidateSuccessServerMessage((short)3),;
-
+	ConnectionValidateSuccessServerMessage((short)3),
+	/**
+	 * 客户端发送心跳
+	 */
+	HeartClientMessage((short)4),
+	/**
+	 * 服务器回复心跳
+	 */
+	HeartServerMessage((short)5),;
 	private short messageId;
 
 	InnerMessageEnum(short messageId) {
