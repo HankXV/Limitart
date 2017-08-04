@@ -34,11 +34,14 @@ public class StateMachine {
 	private Thread lastThread;
 
 	/**
-	 * 重置状态机
+	 * 开启
 	 * 
 	 * @throws StateException
 	 */
-	public synchronized void revert() throws StateException {
+	public synchronized void start() throws StateException {
+		if (curState != null) {
+			throw new StateException("called once");
+		}
 		this.stateQueue.clear();
 		this.params.clear();
 		this.lastLoopTime = 0;
@@ -113,7 +116,7 @@ public class StateMachine {
 	@SuppressWarnings("unchecked")
 	public synchronized void loop() throws StateException {
 		Thread nowThread = Thread.currentThread();
-		if (lastThread != null && lastThread.equals(nowThread)) {
+		if (lastThread != null && !lastThread.equals(nowThread)) {
 			throw new StateException("not allowed to run on a deferent thread,last:" + lastThread.getName() + ",now:"
 					+ nowThread.getName());
 		}
