@@ -31,20 +31,21 @@ public class StateMachine {
 	private ConstraintMap<Object> params = ConstraintMap.empty();
 	private long lastLoopTime = 0;
 	private int firstStateId;
+	private Thread lastThread;
 
 	/**
 	 * 重置状态机
 	 * 
 	 * @throws StateException
 	 */
-	public void revert() throws StateException {
+	public synchronized void revert() throws StateException {
 		this.stateQueue.clear();
 		this.params.clear();
 		this.lastLoopTime = 0;
 		changeState(this.firstStateId);
 	}
 
-	public void firstState(int stateId) {
+	public synchronized void firstState(int stateId) {
 		this.firstStateId = stateId;
 	}
 
@@ -61,11 +62,11 @@ public class StateMachine {
 	 * @param state
 	 * @throws Exception
 	 */
-	public StateMachine addState(State state) throws StateException {
+	public synchronized StateMachine addState(State state) throws StateException {
 		Objects.requireNonNull(state, "state");
 		Objects.requireNonNull(state.getStateId(), "stateId");
 		if (this.stateMap.containsKey(state.getStateId())) {
-			throw new StateException("NodeId:" + state.getStateId() + " duplicated in this FSM !");
+			throw new StateException("stateId:" + state.getStateId() + " duplicated in this FSM !");
 		}
 		this.stateMap.put(state.getStateId(), state);
 		log.info("ADD:{}", state.getStateId());
@@ -85,7 +86,7 @@ public class StateMachine {
 			return this;
 		}
 		if (!stateMap.containsKey(stateId)) {
-			throw new StateException(MessageFormat.format("NodeId:{0} does not exist !", stateId));
+			throw new StateException(MessageFormat.format("stateId:{0} does not exist !", stateId));
 		}
 		stateQueue.offer(stateId);
 		log.debug("CHANGE:{}", stateId);
@@ -97,7 +98,7 @@ public class StateMachine {
 	 * 
 	 * @throws StateException
 	 */
-	public StateMachine Reverse2PreState() throws StateException {
+	public synchronized StateMachine Reverse2PreState() throws StateException {
 		if (preState != null) {
 			changeState(preState.getStateId());
 		}
@@ -110,10 +111,16 @@ public class StateMachine {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public void loop() throws StateException {
+	public synchronized void loop() throws StateException {
+		Thread nowThread = Thread.currentThread();
+		if (lastThread != null && lastThread != nowThread) {
+			throw new StateException("not allowed to run on a deferent thread,last:" + lastThread.getName() + ",now:"
+					+ nowThread.getName());
+		}
+		lastThread = nowThread;
 		long now = System.currentTimeMillis();
 		long deltaTimeInMills = this.lastLoopTime == 0 ? 0 : now - this.lastLoopTime;
-		lastLoopTime = System.currentTimeMillis();
+		lastLoopTime = now;
 		Integer nextNode = getNextNode();
 		State next = null;
 		if (nextNode != null) {
@@ -141,7 +148,7 @@ public class StateMachine {
 				int nextNodeId = con.getNextStateId();
 				if (!this.stateMap.containsKey(nextNodeId)) {
 					throw new StateException(MessageFormat.format(
-							"condition:{0} in node:{1}, it's next nodeId:{2} does't exist in this FSM !",
+							"condition:{0} in state:{1}, it's next stateId:{2} does't exist in this FSM !",
 							con.getClass().getSimpleName(), curState.getClass().getSimpleName(), con.getNextStateId()));
 				}
 				changeState(nextNodeId);
