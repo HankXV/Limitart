@@ -24,6 +24,9 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.LineEncoder;
+import io.netty.handler.codec.string.LineSeparator;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.Attribute;
@@ -80,7 +83,9 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 
 	@Override
 	protected void initPipeline(ChannelPipeline pipeline) {
-		pipeline.addLast(new StringDecoder(CharsetUtil.UTF_8)).addLast(new StringEncoder(CharsetUtil.UTF_8))
+		pipeline.addLast(new LineBasedFrameDecoder(256)).addLast(new StringDecoder(CharsetUtil.UTF_8))
+				.addLast(new StringEncoder(CharsetUtil.UTF_8))
+				.addLast(new LineEncoder(LineSeparator.DEFAULT, CharsetUtil.UTF_8))
 				.addLast(new ChannelInboundHandlerAdapter() {
 					@Override
 					public boolean isSharable() {
@@ -125,10 +130,6 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 						if (StringUtil.isEmptyOrNull(command)) {
 							return;
 						}
-						command = command.substring(0, command.length() - 2);
-						if (StringUtil.isEmptyOrNull(command)) {
-							return;
-						}
 						Channel ch = ctx.channel();
 						ConsoleUser consoleUser = getConsoleUser(ch);
 						// 未通过验证的用户
@@ -164,7 +165,8 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 								}
 								temp.setChannel(ch);
 								ch.attr(USERNAME_KEY).set(temp.getUsername());
-								log.info("remote:" + ch.remoteAddress() + " login on:" + command + " success!");
+								log.info("remote:" + ch.remoteAddress() + " login on:" + ch.attr(USERNAME_KEY).get()
+										+ " success!");
 								sendMessage(ctx.channel(), "====Login " + serverName + " Success!====");
 								Procs.invoke(onUserLogin, temp);
 							}
@@ -181,7 +183,10 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 								sendMessage(ch, "'" + cmd + "'is not a command!");
 								return;
 							}
-							log.info("remote:" + ch.remoteAddress() + " login on:" + command + " execute cmd:" + cmd);
+							log.info("remote:" + ch.remoteAddress() + " login on:" + ch.attr(USERNAME_KEY).get()
+									+ " execute cmd:" + cmd);
+							String info = "<-" + command;
+							ch.writeAndFlush(info);
 							Procs.invoke(dispatchMessage, consoleUser, cmd, params, handler);
 						}
 					}
@@ -193,7 +198,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 	}
 
 	public void sendMessage(Channel channel, String msg, Proc3<Boolean, Throwable, Channel> listener) {
-		String info = "->" + msg + System.getProperty("line.separator", "\n");
+		String info = "->" + msg;
 		channel.writeAndFlush(info).addListener((ChannelFutureListener) arg0 -> {
 			Procs.invoke(listener, arg0.isSuccess(), arg0.cause(), arg0.channel());
 		});
