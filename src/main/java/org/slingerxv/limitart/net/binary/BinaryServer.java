@@ -33,14 +33,11 @@ import org.slingerxv.limitart.util.StringUtil;
 import org.slingerxv.limitart.util.SymmetricEncryptionUtil;
 import org.slingerxv.limitart.util.TimerUtil;
 
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
@@ -51,8 +48,6 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  */
 public class BinaryServer extends AbstractNettyServer implements IServer {
 	private static Logger log = LogManager.getLogger();
-	private ServerBootstrap boot;
-	private Channel channel;
 	private ConcurrentHashMap<String, SessionValidateData> tempChannels = new ConcurrentHashMap<>();
 	private SymmetricEncryptionUtil encrypUtil;
 	private TimerTask clearTask;
@@ -74,6 +69,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private Proc2<Message, IHandler<Message>> dispatchMessage;
 
 	private BinaryServer(BinaryServerBuilder builder) throws Exception {
+		super(builder.serverName);
 		this.serverName = builder.serverName;
 		this.addressPair = Objects.requireNonNull(builder.addressPair, "addressPair");
 		this.connectionValidateTimeInSec = builder.connectionValidateTimeInSec;
@@ -88,7 +84,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		this.dispatchMessage = builder.dispatchMessage;
 		// 初始化内部消息
 		this.factory.registerMsg(new ConnectionValidateClientHandler());
-		boot = createSocketServerBoot(serverName, new ChannelInitializerImpl());
 		if (needPass()) {
 			// 初始化加密工具
 			encrypUtil = SymmetricEncryptionUtil.getEncodeInstance(addressPair.getPass(), "20170106");
@@ -104,27 +99,68 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	}
 
 	@Override
-	public void startServer() {
-		new Thread(() -> {
-			try {
-				boot.bind(addressPair.getPort()).addListener((ChannelFuture arg0) -> {
-					if (arg0.isSuccess()) {
-						channel = arg0.channel();
-						log.info(serverName + " bind at port:" + addressPair.getPort());
-						Procs.invoke(onServerBind, arg0.channel());
+	protected void initPipeline(ChannelPipeline pipeline) {
+		pipeline.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(), decoder.getLengthFieldOffset(),
+				decoder.getLengthFieldLength(), decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()))
+				.addLast(new ChannelInboundHandlerAdapter() {
+					@Override
+					public boolean isSharable() {
+						return true;
 					}
-				}).sync().channel().closeFuture().sync();
-			} catch (InterruptedException e) {
-				log.error(e, e);
-			}
-		}, serverName + "-Binder").start();
+
+					@Override
+					public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+						log.error(ctx.channel() + " cause:", cause);
+						Procs.invoke(onExceptionCaught, ctx.channel(), cause);
+					}
+
+					@Override
+					public void channelActive(ChannelHandlerContext ctx) throws Exception {
+						log.info(ctx.channel().remoteAddress() + " connected！");
+						if (whiteList != null && !whiteList.isEmpty()) {
+							InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+							String remoteAddress = insocket.getAddress().getHostAddress();
+							if (!whiteList.contains(remoteAddress)) {
+								ctx.channel().close();
+								log.info("ip: " + remoteAddress + " rejected link!");
+								return;
+							}
+						}
+						Procs.invoke(onChannelStateChanged, ctx.channel(), true);
+						if (needPass()) {
+							startConnectionValidate(ctx.channel());
+						} else {
+							// 通知客户端成功
+							try {
+								sendMessage(channel(), new ConnectionValidateSuccessServerMessage(), null);
+							} catch (Exception e) {
+								log.error(e, e);
+							}
+							Procs.invoke(onConnectionEffective, channel());
+						}
+					}
+
+					@Override
+					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+						log.info(ctx.channel().remoteAddress() + " disconnected！");
+						Procs.invoke(onChannelStateChanged, ctx.channel(), false);
+					}
+
+					@Override
+					public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+						channelRead0(ctx, msg);
+					}
+				});
+	}
+
+	@Override
+	public void startServer() {
+		bind(addressPair.getPort(), onServerBind);
 	}
 
 	@Override
 	public void stopServer() {
-		if (channel != null) {
-			channel.close();
-		}
+		unbind();
 		TimerUtil.unScheduleGlobal(clearTask);
 	}
 
@@ -144,66 +180,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	public void sendMessage(List<Channel> channels, Message msg, Proc3<Boolean, Throwable, Channel> listener)
 			throws Exception {
 		SendMessageUtil.sendMessage(encoder, channels, msg, listener);
-	}
-
-	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
-
-		@Override
-		protected void initChannel(SocketChannel ch) {
-			ch.pipeline()
-					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
-							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
-							decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()))
-					.addLast(new ChannelInboundHandlerAdapter() {
-						@Override
-						public boolean isSharable() {
-							return true;
-						}
-
-						@Override
-						public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-							log.error(ctx.channel() + " cause:", cause);
-							Procs.invoke(onExceptionCaught, ctx.channel(), cause);
-						}
-
-						@Override
-						public void channelActive(ChannelHandlerContext ctx) throws Exception {
-							log.info(ctx.channel().remoteAddress() + " connected！");
-							if (whiteList != null && !whiteList.isEmpty()) {
-								InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-								String remoteAddress = insocket.getAddress().getHostAddress();
-								if (!whiteList.contains(remoteAddress)) {
-									ctx.channel().close();
-									log.info("ip: " + remoteAddress + " rejected link!");
-									return;
-								}
-							}
-							Procs.invoke(onChannelStateChanged, ctx.channel(), true);
-							if (needPass()) {
-								startConnectionValidate(ctx.channel());
-							} else {
-								// 通知客户端成功
-								try {
-									sendMessage(channel, new ConnectionValidateSuccessServerMessage(), null);
-								} catch (Exception e) {
-									log.error(e, e);
-								}
-								Procs.invoke(onConnectionEffective, channel);
-							}
-						}
-
-						@Override
-						public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-							log.info(ctx.channel().remoteAddress() + " disconnected！");
-							Procs.invoke(onChannelStateChanged, ctx.channel(), false);
-						}
-
-						@Override
-						public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-							channelRead0(ctx, msg);
-						}
-					});
-		}
 	}
 
 	/**
@@ -337,7 +313,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 						dispatchMessage.run(msg, handler);
 					} catch (Exception e) {
 						log.error(ctx.channel() + " cause:", e);
-						Procs.invoke(onExceptionCaught, channel, e);
+						Procs.invoke(onExceptionCaught, channel(), e);
 					}
 				} else {
 					log.warn(serverName + " no dispatch message listener!");
@@ -521,4 +497,5 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 	}
+
 }

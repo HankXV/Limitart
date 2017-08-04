@@ -25,14 +25,11 @@ import org.slingerxv.limitart.net.http.message.UrlMessageFactory;
 import org.slingerxv.limitart.net.http.util.HttpUtil;
 import org.slingerxv.limitart.util.StringUtil;
 
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpMessage;
@@ -53,8 +50,6 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 @Sharable
 public class HttpServer extends AbstractNettyServer implements IServer {
 	private static Logger log = LogManager.getLogger();
-	private ServerBootstrap boot;
-	private Channel channel;
 	// config
 	private String serverName;
 	private int port;
@@ -70,6 +65,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 	private Proc2<Channel, Throwable> onExceptionCaught;
 
 	private HttpServer(HttpServerBuilder builder) {
+		super(builder.serverName);
 		this.port = builder.port;
 		this.httpObjectAggregatorMax = builder.httpObjectAggregatorMax;
 		this.serverName = builder.serverName;
@@ -81,77 +77,59 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		this.dispatchMessage = builder.dispatchMessage;
 		this.onMessageOverSize = builder.onMessageOverSize;
 		this.onExceptionCaught = builder.onExceptionCaught;
-		boot = createSocketServerBoot(serverName, new ChannelInitializer<SocketChannel>() {
+	}
+
+	@Override
+	protected void initPipeline(ChannelPipeline pipeline) {
+		pipeline.addLast(new HttpServerCodec()).addLast(new HttpObjectAggregator(httpObjectAggregatorMax) {
+			@Override
+			protected void handleOversizedMessage(ChannelHandlerContext ctx, HttpMessage oversized) throws Exception {
+				Exception e = new Exception(ctx.channel() + " : " + oversized + " is over size");
+				log.error(e, e);
+				Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
+			}
+		}).addLast(new HttpContentCompressor()).addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
 
 			@Override
-			protected void initChannel(SocketChannel ch) throws Exception {
-				ch.pipeline().addLast(new HttpServerCodec()).addLast(new HttpObjectAggregator(httpObjectAggregatorMax) {
-					@Override
-					protected void handleOversizedMessage(ChannelHandlerContext ctx, HttpMessage oversized)
-							throws Exception {
-						Exception e = new Exception(ctx.channel() + " : " + oversized + " is over size");
-						log.error(e, e);
-						Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
-					}
-				}).addLast(new HttpContentCompressor()).addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
+			protected void channelRead0(ChannelHandlerContext arg0, FullHttpRequest arg1) throws Exception {
+				channelRead00(arg0, arg1);
+			}
 
-					@Override
-					protected void channelRead0(ChannelHandlerContext arg0, FullHttpRequest arg1) throws Exception {
-						channelRead00(arg0, arg1);
-					}
+			@Override
+			public void channelActive(ChannelHandlerContext ctx) throws Exception {
+				Procs.invoke(onChannelStateChanged, ctx.channel(), true);
+			}
 
-					@Override
-					public void channelActive(ChannelHandlerContext ctx) throws Exception {
-						Procs.invoke(onChannelStateChanged, ctx.channel(), true);
+			@Override
+			public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+				if (whiteList != null && !whiteList.isEmpty()) {
+					InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+					String remoteAddress = insocket.getAddress().getHostAddress();
+					if (!whiteList.contains(remoteAddress)) {
+						ctx.channel().close();
+						log.error("ip: " + remoteAddress + " rejected link!");
+						return;
 					}
+				}
+				Procs.invoke(onChannelStateChanged, ctx.channel(), false);
+			}
 
-					@Override
-					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-						if (whiteList != null && !whiteList.isEmpty()) {
-							InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-							String remoteAddress = insocket.getAddress().getHostAddress();
-							if (!whiteList.contains(remoteAddress)) {
-								ctx.channel().close();
-								log.error("ip: " + remoteAddress + " rejected link!");
-								return;
-							}
-						}
-						Procs.invoke(onChannelStateChanged, ctx.channel(), false);
-					}
-
-					@Override
-					public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-						log.error(ctx.channel() + " cause:", cause);
-						Procs.invoke(onExceptionCaught, ctx.channel(), cause);
-					}
-				});
+			@Override
+			public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+				log.error(ctx.channel() + " cause:", cause);
+				Procs.invoke(onExceptionCaught, ctx.channel(), cause);
 			}
 		});
 	}
 
 	@Override
 	public void startServer() {
-		new Thread(() -> {
-			try {
-				boot.bind(port).addListener((ChannelFutureListener) channelFuture -> {
-					if (channelFuture.isSuccess()) {
-						channel = channelFuture.channel();
-						log.info(serverName + " bind at port:" + port);
-						Procs.invoke(onServerBind, channel);
-					}
-				}).sync().channel().closeFuture().sync();
-			} catch (InterruptedException e) {
-				log.error(e, e);
-			}
-		}, serverName + "-Binder").start();
+		bind(port, onServerBind);
 	}
 
 	@Override
 	public void stopServer() {
-		if (channel != null) {
-			channel.close();
-			channel = null;
-		}
+		unbind();
 	}
 
 	public String getServerName() {
@@ -266,7 +244,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 				dispatchMessage.run(message, handler);
 			} catch (Exception e) {
 				log.error(ctx.channel() + " cause:", e);
-				Procs.invoke(onExceptionCaught, channel, e);
+				Procs.invoke(onExceptionCaught, channel(), e);
 			}
 		} else {
 			log.warn(serverName + " no dispatch message listener!");
