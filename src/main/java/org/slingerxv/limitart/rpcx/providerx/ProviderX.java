@@ -57,7 +57,7 @@ public class ProviderX {
 	}
 
 	public ProviderX(ProviderXConfig config, IProviderListener providerListener) throws Exception {
-		this.providerListener = Objects.requireNonNull(providerListener, "providerListener");
+		this.providerListener = providerListener;
 		this.config = Objects.requireNonNull(config, "config");
 		MessageFactory factory = new MessageFactory();
 		// 初始化内部消息
