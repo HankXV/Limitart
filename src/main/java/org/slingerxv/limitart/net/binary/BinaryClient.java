@@ -55,7 +55,7 @@ public class BinaryClient {
 	private Bootstrap bootstrap;
 	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
-	private long serverStartTime;
+//	private long serverStartTime;
 	private long serverTime;
 	private TimerTask hearTask;
 	// ----config
@@ -234,8 +234,8 @@ public class BinaryClient {
 		Procs.invoke(onConnectionEffective, this);
 	}
 
-	private void onHeartServer(long serverStartTime, long serverTime) {
-		this.serverStartTime = serverStartTime;
+	private void onHeartServer(long serverTime) {
+		// this.serverStartTime = serverStartTime;
 		this.serverTime = serverTime;
 	}
 
@@ -275,9 +275,9 @@ public class BinaryClient {
 		return factory;
 	}
 
-	public long getServerStartTime() {
-		return serverStartTime;
-	}
+//	public long getServerStartTime() {
+//		return serverStartTime;
+//	}
 
 	public long getServerTime() {
 		return serverTime;
@@ -353,7 +353,7 @@ public class BinaryClient {
 
 		@Override
 		public void handle(HeartServerMessage msg) {
-			msg.getClient().onHeartServer(msg.serverStartTime, msg.serverTime);
+			msg.getClient().onHeartServer(msg.serverTime);
 		}
 	}
 
