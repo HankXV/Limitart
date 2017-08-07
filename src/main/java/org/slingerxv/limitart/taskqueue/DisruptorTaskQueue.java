@@ -31,7 +31,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 	private Proc3<DisruptorTaskQueueEvent, Throwable, Long> exception;
 
 	public DisruptorTaskQueue(String threadName) {
-		this(threadName, 2048);
+		this(threadName, 2 << 12);//4096
 	}
 
 	/**

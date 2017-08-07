@@ -20,6 +20,7 @@ import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
+import org.slingerxv.limitart.net.binary.handler.annotation.Controller;
 import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
@@ -55,6 +56,7 @@ import io.netty.util.AttributeKey;
  * @author Hank
  *
  */
+@Controller
 public class BinaryServer extends AbstractNettyServer implements IServer {
 	private static Logger log = LogManager.getLogger();
 	private static AttributeKey<Long> LAST_HEART_TIME = AttributeKey.newInstance("LAST_HEART_TIME");
@@ -387,6 +389,60 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		}
 	}
 
+	private void connectionValidateClient(ConnectionValidateClientMessage msg) {
+		// 查找临时缓存
+		String asLongText = msg.getChannel().id().asLongText();
+		SessionValidateData sessionValidateData = unvalidatedChannels.get(asLongText);
+		if (sessionValidateData == null) {
+			msg.getChannel().close();
+			// 移除链接
+			log.info(serverName + " remote connection " + msg.getChannel().remoteAddress()
+					+ " discarded，validate time out！");
+			return;
+		}
+		// 对比结果
+		if (sessionValidateData.validateRandom != msg.validateRandom) {
+			// 移除链接
+			log.info(serverName + " remote connection " + msg.getChannel().remoteAddress()
+					+ " discarded，validate wrong！");
+			return;
+		}
+		unvalidatedChannels.remove(asLongText);
+		log.info(serverName + " remote connection " + msg.getChannel().remoteAddress() + " validate success!");
+		// 通知客户端成功
+		try {
+			sendMessage(msg.getChannel(), new ConnectionValidateSuccessServerMessage(), null);
+		} catch (Exception e) {
+			msg.getChannel().pipeline().fireExceptionCaught(e);
+		}
+		validatedChannels.add(msg.getChannel());
+		Procs.invoke(onConnectionEffective, msg.getChannel());
+	}
+
+	private void heartClient(HeartClientMessage msg) {
+		long now = System.currentTimeMillis();
+		// 设置上次心跳时间
+		msg.getChannel().attr(LAST_HEART_TIME).set(now);
+
+		// 是否包含首次心跳
+		if (!msg.getChannel().hasAttr(FIRST_HEART_TIME)) {
+			msg.getChannel().attr(FIRST_HEART_TIME).set(now);
+			msg.getChannel().attr(HEART_COUNT).set(0);
+			return;
+		}
+		int times = msg.getChannel().attr(HEART_COUNT).get();
+		msg.getChannel().attr(HEART_COUNT).set(++times);
+		HeartServerMessage message = new HeartServerMessage();
+		// message.serverStartTime = startTime;
+		message.serverTime = now;
+		message.timeLocale = TimeZone.getDefault().getOffset(now);
+		try {
+			sendMessage(msg.getChannel(), message);
+		} catch (Exception e) {
+			log.error(e, e);
+		}
+	}
+
 	public String getServerName() {
 		return serverName;
 	}
@@ -459,33 +515,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 		@Override
 		public void handle(ConnectionValidateClientMessage msg) {
-			// 查找临时缓存
-			String asLongText = msg.getChannel().id().asLongText();
-			SessionValidateData sessionValidateData = unvalidatedChannels.get(asLongText);
-			if (sessionValidateData == null) {
-				msg.getChannel().close();
-				// 移除链接
-				log.info(serverName + " remote connection " + msg.getChannel().remoteAddress()
-						+ " discarded，validate time out！");
-				return;
-			}
-			// 对比结果
-			if (sessionValidateData.validateRandom != msg.validateRandom) {
-				// 移除链接
-				log.info(serverName + " remote connection " + msg.getChannel().remoteAddress()
-						+ " discarded，validate wrong！");
-				return;
-			}
-			unvalidatedChannels.remove(asLongText);
-			log.info(serverName + " remote connection " + msg.getChannel().remoteAddress() + " validate success!");
-			// 通知客户端成功
-			try {
-				sendMessage(msg.getChannel(), new ConnectionValidateSuccessServerMessage(), null);
-			} catch (Exception e) {
-				msg.getChannel().pipeline().fireExceptionCaught(e);
-			}
-			validatedChannels.add(msg.getChannel());
-			Procs.invoke(onConnectionEffective, msg.getChannel());
+			msg.getServer().connectionValidateClient(msg);
 		}
 	}
 
@@ -493,27 +523,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 		@Override
 		public void handle(HeartClientMessage msg) {
-			long now = System.currentTimeMillis();
-			// 设置上次心跳时间
-			msg.getChannel().attr(LAST_HEART_TIME).set(now);
-
-			// 是否包含首次心跳
-			if (!msg.getChannel().hasAttr(FIRST_HEART_TIME)) {
-				msg.getChannel().attr(FIRST_HEART_TIME).set(now);
-				msg.getChannel().attr(HEART_COUNT).set(0);
-				return;
-			}
-			int times = msg.getChannel().attr(HEART_COUNT).get();
-			msg.getChannel().attr(HEART_COUNT).set(++times);
-			HeartServerMessage message = new HeartServerMessage();
-			// message.serverStartTime = startTime;
-			message.serverTime = now;
-			message.timeLocale = TimeZone.getDefault().getOffset(now);
-			try {
-				sendMessage(msg.getChannel(), message);
-			} catch (Exception e) {
-				log.error(e, e);
-			}
+			msg.getServer().heartClient(msg);
 		}
 	}
 
@@ -548,7 +558,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			this.maxConnection = 20000;
 			this.heartIntervalSec = 0;
 			this.checkHeartWhenConnectionCount = 0;
-			receiveIntervalMills = 0;
+			this.receiveIntervalMills = 0;
 		}
 
 		/**
@@ -741,5 +751,4 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 	}
-
 }
