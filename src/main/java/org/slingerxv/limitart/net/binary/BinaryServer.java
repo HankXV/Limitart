@@ -309,15 +309,14 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			if (channel.hasAttr(HEART_COUNT)) {
 				count = channel.attr(HEART_COUNT).get();
 			}
-			long between = now - first;
-			int allow = (int) (between / (heartIntervalSec * 1000));
-			if (count > allow + 2) {
+			int allow = (int) ((now - first) / (heartIntervalSec * 1000));
+			if (count - 2 > allow) {
 				log.error(channel + " heart too quick,might be Game Accelerator,please check!");
 				channel.pipeline().fireExceptionCaught(new HeartTooQuickException(channel, first, now, count, allow));
 				channel.attr(FIRST_HEART_TIME).set(now);
 				channel.attr(HEART_COUNT).set(0);
 			}
-			if (count + 2 < allow) {
+			if (count < allow - 2) {
 				channel.pipeline().fireExceptionCaught(new HeartNotAnswerException(channel, first, last, count));
 				channel.close();
 			}
