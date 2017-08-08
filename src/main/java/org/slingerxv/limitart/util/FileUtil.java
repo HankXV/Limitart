@@ -1,10 +1,9 @@
 package org.slingerxv.limitart.util;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,13 +80,12 @@ public final class FileUtil {
 			}
 		}
 		File temp = new File(path + "//" + fileName);
-		temp.deleteOnExit();
-		if (!temp.createNewFile()) {
-			throw new IOException("create new file failed!");
+		if (!temp.exists()) {
+			if (!temp.createNewFile()) {
+				throw new IOException("create new file failed!");
+			}
 		}
-		try (DataOutputStream out = new DataOutputStream(new FileOutputStream(temp))) {
-			out.write(content);
-		}
+		Files.write(temp.toPath(), content);
 	}
 
 	/**
