@@ -145,7 +145,7 @@ public class StateMachine {
 			if (!curState.finished()) {
 				this.curState.execute0(deltaTimeInMills, this);
 			}
-			log.debug("EXE:{}", this.curState.getStateId());
+			// log.debug("EXE:{}", this.curState.getStateId());
 			IEvent con = this.curState.EventTrigger(this, deltaTimeInMills);
 			if (con != null) {
 				int nextNodeId = con.getNextStateId();
