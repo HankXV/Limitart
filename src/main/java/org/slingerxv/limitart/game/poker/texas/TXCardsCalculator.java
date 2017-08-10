@@ -1,3 +1,17 @@
+/*
+ * Copyright (c) 2016-present The Limitart Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 package org.slingerxv.limitart.game.poker.texas;
 
 import java.util.ArrayList;
@@ -129,12 +143,12 @@ public class TXCardsCalculator {
 			for (int k = 0; k < newCards.length; k++) {
 				if (k == newCards.length - 1) {
 					newCards[k] = tempCards[0];
-				}else{
+				} else {
 					newCards[k] = tempCards[k + 1];
 				}
 			}
 			cards = newCards;
-		}else{
+		} else {
 			cards = tempCards;
 		}
 		// 评估数值
@@ -212,10 +226,10 @@ public class TXCardsCalculator {
 					break;
 				}
 				// 满足A2345特殊情况
-				if(j == -1 && cardNumbers[cardNumbers.length - 1] > 0){
+				if (j == -1 && cardNumbers[cardNumbers.length - 1] > 0) {
 					maxNumberOfStraight = (byte) (i + 2);
 					break;
-				}else if(j == -1 && cardNumbers[cardNumbers.length - 1] <= 0){
+				} else if (j == -1 && cardNumbers[cardNumbers.length - 1] <= 0) {
 					break;
 				}
 				// 不连续

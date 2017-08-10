@@ -1,3 +1,17 @@
+/*
+ * Copyright (c) 2016-present The Limitart Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 package org.slingerxv.limitart.util;
 
 import java.text.ParseException;
@@ -102,9 +116,9 @@ public final class TimeUtil {
 		int herYear = herCal.get(Calendar.YEAR);
 		int herMonth = herCal.get(Calendar.MONTH);
 		int herDay = herCal.get(Calendar.DAY_OF_MONTH);
-        return nowYear == herYear && nowMonth == herMonth && nowDay == herDay;
+		return nowYear == herYear && nowMonth == herMonth && nowDay == herDay;
 
-    }
+	}
 
 	/**
 	 * 是否是同一个月
@@ -121,8 +135,8 @@ public final class TimeUtil {
 		int nowMonth = nowCal.get(Calendar.MONTH);
 		int herYear = herCal.get(Calendar.YEAR);
 		int herMonth = herCal.get(Calendar.MONTH);
-        return nowYear == herYear && nowMonth == herMonth;
-    }
+		return nowYear == herYear && nowMonth == herMonth;
+	}
 
 	/**
 	 * 是否是同一年
@@ -137,8 +151,8 @@ public final class TimeUtil {
 		herCal.setTime(date);
 		int nowYear = nowCal.get(Calendar.YEAR);
 		int herYear = herCal.get(Calendar.YEAR);
-        return nowYear == herYear;
-    }
+		return nowYear == herYear;
+	}
 
 	public static long str2Date(String str) {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.SIMPLIFIED_CHINESE);
