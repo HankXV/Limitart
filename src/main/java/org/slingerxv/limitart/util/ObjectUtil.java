@@ -12,4 +12,8 @@ public class ObjectUtil {
 		}
 	}
 
+	public static int bool2Int(boolean value) {
+		return value ? 1 : 0;
+	}
+
 }
