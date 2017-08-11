@@ -15,19 +15,19 @@
  */
 package org.slingerxv.limitart.taskqueue;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.net.binary.message.MessageHandlerWrapper;
 
 public class TaskQueueHandles {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(TaskQueueHandles.class);
 	public static final Proc1<MessageHandlerWrapper> MESSAGE_HANDLER = (wrapper) -> {
 		long now = System.currentTimeMillis();
 		try {
 			wrapper.handle();
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error("invoke error", e);
 		}
 		now = System.currentTimeMillis() - now;
 		if (now > 100) {

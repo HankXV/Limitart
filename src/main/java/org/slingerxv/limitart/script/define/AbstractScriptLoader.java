@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.script.constant.ScriptFileType;
 import org.slingerxv.limitart.script.exception.ScriptException;
 
@@ -40,7 +40,7 @@ import groovy.lang.GroovyClassLoader;
  *            脚本Id
  */
 public abstract class AbstractScriptLoader<KEY> {
-	protected static final Logger log = LogManager.getLogger();
+	protected static final Logger log = LoggerFactory.getLogger(AbstractScriptLoader.class);
 	protected ConcurrentHashMap<KEY, IScript<KEY>> scriptMap = new ConcurrentHashMap<>();
 	protected ConcurrentHashMap<KEY, File> scriptPath = new ConcurrentHashMap<>();
 	private AtomicLong dynamicCodeCount = new AtomicLong(100000);

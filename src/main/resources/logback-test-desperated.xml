@@ -1,0 +1,16 @@
+<configuration scan="false">
+	<Property name="logPattern"
+		value="[%p %d{yyyy-MM-dd HH:mm:ss}][%C{0}:%L:%t]%m%n" />
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${logPattern}</pattern>
+		</encoder>
+	</appender>
+
+
+	<root>
+		<level value="info" />
+		<appender-ref ref="CONSOLE" />
+	</root>
+</configuration>  

@@ -21,8 +21,8 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.game.statemachine.event.IEvent;
 import org.slingerxv.limitart.game.statemachine.exception.StateException;
@@ -38,7 +38,7 @@ import org.slingerxv.limitart.util.Beta;
 @Beta
 @SuppressWarnings("rawtypes")
 public class StateMachine {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(StateMachine.class);
 	private ConcurrentHashMap<Integer, State> stateMap = new ConcurrentHashMap<>();
 	private Queue<Integer> stateQueue = new LinkedList<>();
 	private State preState;

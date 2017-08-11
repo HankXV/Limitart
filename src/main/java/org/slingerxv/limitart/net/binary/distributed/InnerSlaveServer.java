@@ -18,8 +18,8 @@ package org.slingerxv.limitart.net.binary.distributed;
 import java.util.Objects;
 import java.util.TimerTask;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Func;
 import org.slingerxv.limitart.funcs.Funcs;
 import org.slingerxv.limitart.funcs.Proc1;
@@ -45,7 +45,7 @@ import org.slingerxv.limitart.util.TimerUtil;
  *
  */
 public class InnerSlaveServer implements IServer {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(InnerSlaveServer.class);
 	private BinaryClient toMaster;
 	private TimerTask reportTask;
 	// config---
@@ -117,7 +117,7 @@ public class InnerSlaveServer implements IServer {
 							}
 						});
 					} catch (Exception e) {
-						log.error(e, e);
+						log.error("report message error", e);
 					}
 					if (reportTask == null) {
 						reportTask = new TimerTask() {
@@ -135,7 +135,7 @@ public class InnerSlaveServer implements IServer {
 					try {
 						handler.handle(message);
 					} catch (Exception e) {
-						log.error(e, e);
+						log.error("handle error", e);
 					}
 				}).build();
 	}
@@ -166,7 +166,7 @@ public class InnerSlaveServer implements IServer {
 				}
 			});
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error("report load error", e);
 		}
 	}
 

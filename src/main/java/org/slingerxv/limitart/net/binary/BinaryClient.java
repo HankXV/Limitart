@@ -20,8 +20,8 @@ import java.util.Objects;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
@@ -65,12 +65,12 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  *
  */
 public class BinaryClient {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(BinaryClient.class);
 	private static EventLoopGroup group = new NioEventLoopGroup();
 	private Bootstrap bootstrap;
 	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
-//	private long serverStartTime;
+	// private long serverStartTime;
 	private long serverTime;
 	private TimerTask hearTask;
 	// ----config
@@ -195,7 +195,7 @@ public class BinaryClient {
 								+ " success！");
 					});
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error(e.getMessage(), e);
 			if (autoReconnect > 0) {
 				tryReconnect(autoReconnect);
 			}
@@ -226,7 +226,7 @@ public class BinaryClient {
 			sendMessage(msg, null);
 			log.info(clientName + " parse validate code success，return result：" + validateRandom);
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error(e.getMessage(), e);
 		}
 	}
 
@@ -240,7 +240,7 @@ public class BinaryClient {
 					try {
 						sendMessage(new HeartClientMessage());
 					} catch (Exception e) {
-						log.error(e, e);
+						log.error(e.getMessage(), e);
 					}
 				}
 			};
@@ -290,9 +290,9 @@ public class BinaryClient {
 		return factory;
 	}
 
-//	public long getServerStartTime() {
-//		return serverStartTime;
-//	}
+	// public long getServerStartTime() {
+	// return serverStartTime;
+	// }
 
 	public long getServerTime() {
 		return serverTime;

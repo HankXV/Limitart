@@ -17,8 +17,8 @@ package org.slingerxv.limitart.game.innerserver;
 
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.game.innerserver.config.InnerFightServerConfig;
 import org.slingerxv.limitart.game.innerserver.constant.InnerGameServerType;
 import org.slingerxv.limitart.net.binary.distributed.InnerMasterServer;
@@ -36,7 +36,7 @@ import org.slingerxv.limitart.util.Beta;
  */
 @Beta
 public abstract class InnerFightServer implements IServer {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(InnerFightServer.class);
 	private InnerMasterServer server;
 	private InnerSlaveServer toMaster;
 

@@ -18,12 +18,12 @@ package org.slingerxv.limitart.rpcx.center.schedule;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.rpcx.center.struct.ServiceXServerSession;
 import org.slingerxv.limitart.rpcx.message.schedule.TriggerScheduleServiceCenterToProviderServiceCenterMessage;
@@ -31,7 +31,7 @@ import org.slingerxv.limitart.util.RandomUtil;
 import org.slingerxv.limitart.util.TimeUtil;
 
 public class ScheduleTask implements Job {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(ScheduleTask.class);
 	public static String RPCSERVERS = "RPCSERVERS";
 	public static String SCHEDULES = "SCHEDULES";
 

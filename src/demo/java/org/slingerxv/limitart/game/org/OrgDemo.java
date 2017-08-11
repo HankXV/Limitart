@@ -1,7 +1,7 @@
 package org.slingerxv.limitart.game.org;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.game.org.exception.AlreadyJoinException;
 import org.slingerxv.limitart.game.org.exception.AuthIDErrorException;
 import org.slingerxv.limitart.game.org.exception.JobIDDuplicatedException;
@@ -13,7 +13,7 @@ import org.slingerxv.limitart.game.org.exception.NoAuthException;
 import org.slingerxv.limitart.game.org.exception.OrgMaxMemberException;
 
 public class OrgDemo {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(OrgDemo.class);
 
 	public static void main(String[] args) throws AlreadyJoinException, OrgMaxMemberException, JobIDDuplicatedException,
 			NoAuthException, JobMemberMaxException, AuthIDErrorException, JobNotExistException, JobNameEmptyException,

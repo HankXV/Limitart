@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Func1;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.handler.annotation.Controller;
@@ -47,7 +47,7 @@ import io.netty.buffer.Unpooled;
  *
  */
 public class MessageFactory {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(MessageFactory.class);
 	// !!这里的asm应用经测试在JAVA8下最优
 	private final HashMap<Short, ConstructorAccess<? extends Message>> msgs = new HashMap<>();
 	private final HashMap<Short, IHandler<? extends Message>> handlers = new HashMap<>();

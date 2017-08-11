@@ -18,8 +18,8 @@ package org.slingerxv.limitart.taskqueue;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Procs;
@@ -35,7 +35,7 @@ import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
  * @param <T>
  */
 public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(LinkedBlockingTaskQueue.class);
 	private LinkedBlockingQueue<T> queue = new LinkedBlockingQueue<>();
 	private boolean start = false;
 	private Test1<T> intercept;
@@ -73,7 +73,7 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
 				}
 				Procs.invoke(handle, take);
 			} catch (Exception e) {
-				log.error(e, e);
+				log.error("invoke error", e);
 				Procs.invoke(exception, take, e);
 			}
 		}

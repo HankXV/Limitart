@@ -15,8 +15,8 @@
  */
 package org.slingerxv.limitart.taskqueue;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
@@ -37,7 +37,7 @@ import com.lmax.disruptor.dsl.ProducerType;
  *
  */
 public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(DisruptorTaskQueue.class);
 	private Disruptor<DisruptorTaskQueueEvent> disruptor;
 	private NamedThreadFactory threadFactory;
 	private Test1<T> intercept;
@@ -74,7 +74,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
 			try {
 				Procs.invoke(DisruptorTaskQueue.this.handle, event.getMsg());
 			} catch (Exception e) {
-				log.error(e, e);
+				log.error("invoke handler error", e);
 			} finally {
 				event.setMsg(null);
 			}

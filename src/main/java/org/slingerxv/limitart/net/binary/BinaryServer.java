@@ -25,8 +25,8 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
@@ -73,7 +73,7 @@ import io.netty.util.AttributeKey;
  */
 @Controller
 public class BinaryServer extends AbstractNettyServer implements IServer {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(BinaryServer.class);
 	private static AttributeKey<Long> LAST_HEART_TIME = AttributeKey.newInstance("LAST_HEART_TIME");
 	private static AttributeKey<Long> FIRST_HEART_TIME = AttributeKey.newInstance("FIRST_HEART_TIME");
 	private static AttributeKey<Long> LAST_RECEIVE_MSG_TIME = AttributeKey.newInstance("LAST_RECEIVE_MSG_TIME");
@@ -193,7 +193,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 							try {
 								sendMessage(channel(), new ConnectionValidateSuccessServerMessage(), null);
 							} catch (Exception e) {
-								log.error(e, e);
+								log.error("error", e);
 							}
 							validatedChannels.add(ctx.channel());
 							Procs.invoke(onConnectionEffective, channel());
@@ -228,21 +228,21 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		TimerUtil.unScheduleGlobal(heartTask);
 	}
 
-	public void sendMessage(Channel channel, Message msg) throws Exception {
+	public void sendMessage(Channel channel, Message msg) throws MessageCodecException {
 		sendMessage(channel, msg, null);
 	}
 
 	public void sendMessage(Channel channel, Message msg, Proc3<Boolean, Throwable, Channel> listener)
-			throws Exception {
+			throws MessageCodecException {
 		SendMessageUtil.sendMessage(encoder, channel, msg, listener);
 	}
 
-	public void sendMessage(List<Channel> channels, Message msg) throws Exception {
+	public void sendMessage(List<Channel> channels, Message msg) throws MessageCodecException {
 		sendMessage(channels, msg, null);
 	}
 
 	public void sendMessage(List<Channel> channels, Message msg, Proc3<Boolean, Throwable, Channel> listener)
-			throws Exception {
+			throws MessageCodecException {
 		SendMessageUtil.sendMessage(encoder, channels, msg, listener);
 	}
 
@@ -262,7 +262,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		try {
 			encode = encrypUtil.encode(data.validateRandom + "");
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error("encode link validate code error", e);
 			channel.close();
 			log.info(serverName + " remote connection " + data.channel.remoteAddress()
 					+ " discarded，server encryp util error！");
@@ -280,7 +280,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 				}
 			});
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error("send vlidate error", e);
 		}
 	}
 
@@ -453,7 +453,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		try {
 			sendMessage(msg.getChannel(), message);
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error("send heart error", e);
 		}
 	}
 

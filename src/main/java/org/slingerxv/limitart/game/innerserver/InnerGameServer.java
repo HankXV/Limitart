@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.game.innerserver.config.InnerGameServerConfig;
 import org.slingerxv.limitart.game.innerserver.constant.InnerGameServerType;
 import org.slingerxv.limitart.net.binary.distributed.InnerSlaveServer;
@@ -36,7 +36,7 @@ import org.slingerxv.limitart.util.Beta;
  */
 @Beta
 public abstract class InnerGameServer implements IServer {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(InnerGameServer.class);
 	private ConcurrentHashMap<Integer, InnerSlaveServer> toFights = new ConcurrentHashMap<>();
 	private InnerSlaveServer toPublic;
 
@@ -80,7 +80,7 @@ public abstract class InnerGameServer implements IServer {
 							toFights.put(info.serverId, client);
 							client.startServer();
 						} catch (Exception e) {
-							log.error(e, e);
+							log.error(e.getMessage(), e);
 						}
 					}
 				}).onConnectMasterSuccess((slave) -> {

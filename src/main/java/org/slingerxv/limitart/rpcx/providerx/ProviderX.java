@@ -20,11 +20,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.net.binary.BinaryClient;
 import org.slingerxv.limitart.net.binary.BinaryServer;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
@@ -32,7 +32,6 @@ import org.slingerxv.limitart.net.binary.message.MessageFactory;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.define.ServiceX;
 import org.slingerxv.limitart.rpcx.exception.ServiceError;
-import org.slingerxv.limitart.rpcx.exception.ServiceXExecuteException;
 import org.slingerxv.limitart.rpcx.exception.ServiceXProxyException;
 import org.slingerxv.limitart.rpcx.message.schedule.AddScheduleToServiceCenterProviderMessage;
 import org.slingerxv.limitart.rpcx.message.schedule.TriggerScheduleServiceCenterToProviderServiceCenterMessage;
@@ -58,7 +57,7 @@ import io.netty.channel.Channel;
  * @author hank
  */
 public class ProviderX {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(ProviderX.class);
 	private BinaryServer server;
 	private BinaryClient serviceCenterClient;
 	private IProviderListener providerListener;
@@ -84,7 +83,7 @@ public class ProviderX {
 					try {
 						handler.handle(message);
 					} catch (Exception e) {
-						log.error(e, e);
+						log.error(e.getMessage(), e);
 					}
 				}).onServerBind(channel -> {
 					if (this.providerListener != null) {
@@ -109,7 +108,7 @@ public class ProviderX {
 						try {
 							handler.handle(message);
 						} catch (Exception e) {
-							log.error(e, e);
+							log.error(e.getMessage(), e);
 						}
 					}).build();
 		}
@@ -265,15 +264,13 @@ public class ProviderX {
 		try {
 			RpcServiceInstance serviceInstanceData = services.get(moduleName);
 			if (serviceInstanceData == null) {
-				log.error(
-						new ServiceXExecuteException("RPC消费者：" + channel.remoteAddress() + "发送了未知的服务名：" + moduleName));
+				log.error("RPC消费者：" + channel.remoteAddress() + "发送了未知的服务名：" + moduleName);
 				msg.setErrorCode(ServiceError.SERVER_HAS_NO_MODULE);
 				return;
 			}
 			Method method = serviceInstanceData.getMethods().get(methodName);
 			if (method == null) {
-				log.error(new ServiceXExecuteException(
-						"RPC消费者：" + channel.remoteAddress() + "发送了未知的方法名：" + methodName + "，服务名为：" + moduleName));
+				log.error("RPC消费者：" + channel.remoteAddress() + "发送了未知的方法名：" + methodName + "，服务名为：" + moduleName);
 				msg.setErrorCode(ServiceError.SERVER_HAS_NO_METHOD);
 				return;
 			}
@@ -285,14 +282,14 @@ public class ProviderX {
 						msg.setReturnVal(result);
 					}
 				} catch (Exception e) {
-					log.error(e, e);
+					log.error(e.getMessage(), e);
 				}
 			}
 		} finally {
 			try {
 				server.sendMessage(channel, msg, null);
 			} catch (Exception e) {
-				log.error(e, e);
+				log.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -309,7 +306,7 @@ public class ProviderX {
 		try {
 			server.sendMessage(channel, msg, null);
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error(e.getMessage(), e);
 		}
 	}
 
@@ -329,7 +326,7 @@ public class ProviderX {
 		try {
 			serviceCenterClient.sendMessage(msg, null);
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error(e.getMessage(), e);
 		}
 	}
 
@@ -408,7 +405,7 @@ public class ProviderX {
 				((ProviderX) msg.getExtra()).executeRPC(msg.getChannel(), msg.requestId, msg.moduleName, msg.methodName,
 						msg.params);
 			} catch (Exception e) {
-				log.error(e, e);
+				log.error(e.getMessage(), e);
 			}
 		}
 	}

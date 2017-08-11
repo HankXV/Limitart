@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.BinaryServer;
@@ -48,7 +48,7 @@ import io.netty.channel.Channel;
  *
  */
 public class InnerMasterServer implements IServer {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(InnerMasterServer.class);
 	// 从服务器集合
 	private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, InnerServerData>> slaves = new ConcurrentHashMap<>();
 	private BinaryServer server;
@@ -73,7 +73,7 @@ public class InnerMasterServer implements IServer {
 					try {
 						handler.handle(message);
 					} catch (Exception e) {
-						log.error(e, e);
+						log.error("handle error", e);
 					}
 				}).onChannelStateChanged((channel, active) -> {
 					if (!active) {
@@ -103,7 +103,7 @@ public class InnerMasterServer implements IServer {
 						try {
 							server.sendMessage(channelList, msg, null);
 						} catch (Exception e) {
-							log.error(e, e);
+							log.error("send message error", e);
 						}
 						Procs.invoke(onConnectionChanged, remove, false);
 					}
@@ -200,7 +200,7 @@ public class InnerMasterServer implements IServer {
 					}
 				});
 			} catch (Exception e) {
-				log.error(e, e);
+				log.error(e.getMessage(), e);
 			}
 		}
 		// 告诉新服所有服信息
@@ -223,7 +223,7 @@ public class InnerMasterServer implements IServer {
 					}
 				});
 			} catch (Exception e) {
-				log.error(e, e);
+				log.error(e.getMessage(), e);
 			}
 		}
 		concurrentHashMap.put(serverInfo.serverId, data);

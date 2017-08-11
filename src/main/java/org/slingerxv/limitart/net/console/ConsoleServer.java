@@ -21,8 +21,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
@@ -56,7 +56,7 @@ import io.netty.util.CharsetUtil;
  */
 @Beta
 public class ConsoleServer extends AbstractNettyServer implements IServer {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(ConsoleServer.class);
 	private static AttributeKey<String> USERNAME_KEY = AttributeKey.newInstance("USERNAME_KEY");
 
 	private static AttributeKey<String> USERNAME_TEMP_KEY = AttributeKey.newInstance("USERNAME_TEMP_KEY");
@@ -169,7 +169,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 										return;
 									}
 								} catch (NoSuchAlgorithmException e) {
-									log.error(e, e);
+									log.error(e.getMessage(), e);
 								}
 								Channel oldChannel = temp.getChannel();
 								if (oldChannel != null) {

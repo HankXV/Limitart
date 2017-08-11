@@ -19,8 +19,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Func1;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
@@ -34,7 +34,7 @@ import org.slingerxv.limitart.taskqueuegroup.struct.AutoGrowthSegment;
  *
  */
 public class AutoGrowthTaskQueueGroup<T> {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(AutoGrowthTaskQueueGroup.class);
 	private AtomicInteger threadId = new AtomicInteger(0);
 	private ConcurrentHashMap<Integer, AutoGrowthSegment<T>> threads = new ConcurrentHashMap<>();
 	private int entityCountPerThread;

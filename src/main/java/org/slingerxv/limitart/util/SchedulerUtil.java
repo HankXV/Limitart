@@ -18,8 +18,6 @@ package org.slingerxv.limitart.util;
 import java.util.Collection;
 import java.util.Properties;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
@@ -32,6 +30,8 @@ import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 定时任务作业
@@ -40,7 +40,7 @@ import org.quartz.impl.StdSchedulerFactory;
  *
  */
 public final class SchedulerUtil {
-	private static final Logger log = LogManager.getLogger();
+	private static final Logger log = LoggerFactory.getLogger(SchedulerUtil.class);
 	private static SchedulerUtil INSTANCE = new SchedulerUtil();
 	private SchedulerFactory SF;
 
@@ -57,7 +57,7 @@ public final class SchedulerUtil {
 		try {
 			SF = new StdSchedulerFactory(prop);
 		} catch (SchedulerException e) {
-			log.error(e, e);
+			log.error("init StdSchedulerFactory error", e);
 		}
 	}
 
@@ -194,7 +194,7 @@ public final class SchedulerUtil {
 				s.shutdown();
 			}
 		} catch (SchedulerException e) {
-			log.error(e, e);
+			log.error("shut down error!", e);
 		}
 	}
 }

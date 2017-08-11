@@ -23,8 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
@@ -64,7 +64,7 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData;
  */
 @Sharable
 public class HttpServer extends AbstractNettyServer implements IServer {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(HttpServer.class);
 	// config
 	private String serverName;
 	private int port;
@@ -100,7 +100,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			@Override
 			protected void handleOversizedMessage(ChannelHandlerContext ctx, HttpMessage oversized) throws Exception {
 				Exception e = new Exception(ctx.channel() + " : " + oversized + " is over size");
-				log.error(e, e);
+				log.error(e.getMessage(), e);
 				Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
 			}
 		}).addLast(new HttpContentCompressor()).addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
@@ -241,7 +241,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 					}
 				}
 			} catch (Exception e) {
-				log.error(e, e);
+				log.error(e.getMessage(), e);
 				HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_POST_ERROR);
 				return;
 			}

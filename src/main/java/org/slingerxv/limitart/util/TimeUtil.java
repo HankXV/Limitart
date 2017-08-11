@@ -21,11 +21,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class TimeUtil {
-	private static final Logger log = LogManager.getLogger();
+	private static final Logger log = LoggerFactory.getLogger(TimeUtil.class);
 	private static final long ONE_MINUTE = 60000L;
 	private static final long ONE_HOUR = 3600000L;
 	private static final long ONE_DAY = 86400000L;
@@ -161,7 +161,7 @@ public final class TimeUtil {
 		try {
 			parse = format.parse(str);
 		} catch (ParseException e) {
-			log.error(e, e);
+			log.error("parse error", e);
 			return 0;
 		}
 		return parse.getTime();

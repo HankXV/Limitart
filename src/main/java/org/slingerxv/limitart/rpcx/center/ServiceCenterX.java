@@ -21,11 +21,11 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.quartz.JobDataMap;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.net.binary.BinaryServer;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
@@ -55,7 +55,7 @@ import io.netty.channel.Channel;
  *
  */
 public class ServiceCenterX {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(ServiceCenterX.class);
 	private ServiceCenterXConfig config;
 	private BinaryServer binaryServer;
 	// RPC服务器组<提供者Id,session>
@@ -83,7 +83,7 @@ public class ServiceCenterX {
 					try {
 						handler.handle(message);
 					} catch (Exception e) {
-						log.error(e, e);
+						log.error("handle error", e);
 					}
 				}).build();
 	}
@@ -231,7 +231,7 @@ public class ServiceCenterX {
 			int providerId) {
 		if (rpcServers.containsKey(providerId)) {
 			channel.close();
-			log.error(new Exception("服务提供者ID重复，断开链接，IP：" + channel.remoteAddress() + "，服务者ID：" + providerId));
+			log.error("服务提供者ID重复，断开链接，IP：" + channel.remoteAddress() + "，服务者ID：" + providerId);
 			return null;
 		}
 		ServiceXServerSession session = new ServiceXServerSession();
@@ -306,7 +306,7 @@ public class ServiceCenterX {
 						log.info("删除定时服务：" + scheduleName + "，因为没有执行任务的provider");
 					}
 				} catch (SchedulerException e) {
-					log.error(e, e);
+					log.error("delete error", e);
 				}
 			}
 		}
@@ -333,7 +333,7 @@ public class ServiceCenterX {
 				return;
 			}
 		} catch (SchedulerException e) {
-			log.error(e, e);
+			log.error("check error", e);
 		}
 		JobDataMap map = new JobDataMap();
 		map.put(ScheduleTask.RPCSERVERS, this.rpcServers);
@@ -345,7 +345,7 @@ public class ServiceCenterX {
 				log.info("初始化定时任务，名称：" + jobName + "表达式：" + cronExpression + "，下次执行时间："
 						+ TimeUtil.date2Str(addSchedule.getNextFireTime().getTime()));
 			} catch (SchedulerException e) {
-				log.error(e, e);
+				log.error("init error", e);
 			}
 		} else {
 			try {
@@ -355,7 +355,7 @@ public class ServiceCenterX {
 						+ intervalInSeconds + "，毫秒：" + intervalInMillis + "，重复次数：" + repeatCount + "，下次执行时间："
 						+ TimeUtil.date2Str(addSchedule.getNextFireTime().getTime()));
 			} catch (SchedulerException e) {
-				log.error(e, e);
+				log.error("init error", e);
 			}
 		}
 	}

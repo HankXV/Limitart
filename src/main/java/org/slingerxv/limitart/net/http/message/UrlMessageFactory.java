@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIDDuplicatedException;
 import org.slingerxv.limitart.net.http.handler.HttpHandler;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
@@ -36,7 +36,7 @@ import org.slingerxv.limitart.util.ReflectionUtil;
  *
  */
 public class UrlMessageFactory {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(UrlMessageFactory.class);
 	private Map<String, ConstructorAccess<? extends UrlMessage>> messages = new HashMap<>();
 	private Map<String, HttpHandler<? extends UrlMessage>> handlers = new HashMap<>();
 

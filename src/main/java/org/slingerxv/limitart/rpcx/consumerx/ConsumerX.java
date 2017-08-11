@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.net.binary.BinaryClient;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
@@ -68,7 +68,7 @@ import org.slingerxv.limitart.util.StringUtil;
  *
  */
 public class ConsumerX {
-	private static Logger log = LogManager.getLogger();
+	private static Logger log = LoggerFactory.getLogger(ConsumerX.class);
 	// Rpc客户端到服务器链接集合,服务器分配Id
 	private ConcurrentHashMap<Integer, BinaryClient> clients = new ConcurrentHashMap<>();
 	private BinaryClient serviceCenterClient;
@@ -132,7 +132,7 @@ public class ConsumerX {
 						try {
 							handler.handle(message);
 						} catch (Exception e) {
-							log.error(e, e);
+							log.error(e.getMessage(), e);
 						}
 					}).build();
 			serviceCenterClient.connect();
@@ -162,7 +162,7 @@ public class ConsumerX {
 					try {
 						handler.handle(message);
 					} catch (Exception e) {
-						log.error(e, e);
+						log.error(e.getMessage(), e);
 					}
 				}).build();
 		return client;
@@ -177,7 +177,7 @@ public class ConsumerX {
 		try {
 			client.sendMessage(new DirectFetchProviderServicesMessage(), null);
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error(e.getMessage(), e);
 		}
 	}
 
@@ -230,7 +230,7 @@ public class ConsumerX {
 		try {
 			serviceCenterClient.sendMessage(new SubscribeServiceFromServiceCenterConsumerMessage(), null);
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error(e.getMessage(), e);
 		}
 	}
 
@@ -270,7 +270,7 @@ public class ConsumerX {
 							binaryClient.connect();
 						}
 					} catch (Exception e) {
-						log.error(e, e);
+						log.error(e.getMessage(), e);
 					}
 				}
 			}
@@ -562,17 +562,12 @@ public class ConsumerX {
 			binaryClient.sendMessage(msg, (isSuccess, cause, channel) -> {
 				if (!isSuccess) {
 					futures.remove(msg.requestId);
-					try {
-						throw new ServiceXIOException("动态代理方法：" + methodOverloadName + "，服务器：" + selectServer
-								+ "失败！网络未连接！" + "，id：" + msg.requestId);
-					} catch (ServiceXIOException e) {
-						log.error(e, e);
-						log.error(cause, cause);
-					}
+					log.error("动态代理方法：" + methodOverloadName + "，服务器：" + selectServer + "失败！网络未连接！" + "，id："
+							+ msg.requestId);
 				}
 			});
 		} catch (Exception e) {
-			log.error(e, e);
+			log.error(e.getMessage(), e);
 		}
 		return future;
 	}
@@ -589,7 +584,7 @@ public class ConsumerX {
 		int requestId = msg.getRequestId();
 		RemoteFuture rpcFuture = futures.get(requestId);
 		if (rpcFuture == null) {
-			log.error(new ServiceXExecuteException("requestId:" + requestId + "找不到回调！"));
+			log.error("requestId:" + requestId + "找不到回调！");
 			return;
 		}
 		rpcFuture.setResponseResult(msg);
