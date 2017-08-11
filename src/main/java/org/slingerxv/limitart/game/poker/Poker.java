@@ -51,7 +51,7 @@ public class Poker {
 	}
 
 	public static byte createCard(byte number, byte color) {
-		return (byte) ((number) | (color << 4));
+		return (byte) ((number) | color << 4);
 	}
 
 	/**
@@ -182,12 +182,13 @@ public class Poker {
 	 * @return
 	 */
 	public static long cardsToLong(byte[] cards) {
+
 		if (cards.length > Long.BYTES) {
 			throw new IllegalArgumentException("length <=" + Long.BYTES);
 		}
 		long longOfCards = 0;
 		for (int i = 0; i < cards.length; i++) {
-			longOfCards |= ((long) cards[i]) << (i << 3);
+			longOfCards |= (Byte.toUnsignedLong(cards[i])) << (i << 3);
 		}
 		return longOfCards;
 	}
