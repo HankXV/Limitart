@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 
 public final class FileUtil {
 	private FileUtil() {
@@ -72,7 +72,7 @@ public final class FileUtil {
 	}
 
 	public static ByteBuf readFile(File file) throws IOException {
-		ByteBuf buf = PooledByteBufAllocator.DEFAULT.ioBuffer();
+		ByteBuf buf = Unpooled.buffer();
 		try (FileInputStream input = new FileInputStream(file)) {
 			byte[] buffer = new byte[1024];
 			int len = -1;

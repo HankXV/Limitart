@@ -131,7 +131,7 @@ public class BinaryClient {
 
 				@Override
 				public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-					log.error(clientName + " disconnected!");
+					log.info(clientName + " disconnected!");
 					if (heartIntervalSec > 0 && hearTask != null) {
 						TimerUtil.unScheduleGlobal(hearTask);
 					}
@@ -143,7 +143,7 @@ public class BinaryClient {
 
 				@Override
 				public void channelActive(ChannelHandlerContext ctx) throws Exception {
-					log.error(clientName + " connected!");
+					log.info(clientName + " connected!");
 					channel = ctx.channel();
 					Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
 				}

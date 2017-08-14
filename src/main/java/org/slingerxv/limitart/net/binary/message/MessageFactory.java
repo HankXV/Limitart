@@ -95,7 +95,7 @@ public class MessageFactory {
 	private static void checkMessageMeta(MessageMeta meta)
 			throws ReflectiveOperationException, IOException, MessageCodecException {
 		log.info("check message:" + meta.getClass().getName());
-		ByteBuf buffer = Unpooled.directBuffer(256);
+		ByteBuf buffer = Unpooled.buffer();
 		meta.buffer(buffer);
 		try {
 			meta.encode();

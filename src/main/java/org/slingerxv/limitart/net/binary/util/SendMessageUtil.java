@@ -25,7 +25,7 @@ import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 
@@ -45,7 +45,7 @@ public final class SendMessageUtil {
 					channel);
 			return;
 		}
-		ByteBuf buffer = PooledByteBufAllocator.DEFAULT.ioBuffer();
+		ByteBuf buffer = Unpooled.buffer();
 		encoder.beforeWriteBody(buffer, msg.getMessageId());
 		msg.buffer(buffer);
 		try {
@@ -66,7 +66,7 @@ public final class SendMessageUtil {
 			Procs.invoke(listener, false, new IOException(" channel list  is null"), null);
 			return;
 		}
-		ByteBuf buffer = PooledByteBufAllocator.DEFAULT.ioBuffer();
+		ByteBuf buffer = Unpooled.buffer();
 		encoder.beforeWriteBody(buffer, msg.getMessageId());
 		msg.buffer(buffer);
 		try {
