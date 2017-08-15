@@ -30,6 +30,8 @@ import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.net.binary.BinaryServer;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
+import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException;
+import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.center.config.ServiceCenterXConfig;
 import org.slingerxv.limitart.rpcx.center.schedule.ScheduleTask;
@@ -162,7 +164,11 @@ public class ServiceCenterX {
 		}
 		// 查找所有客户端
 		for (ServiceXClientSession session : rpcClients.values()) {
-			session.getSession().writeAndFlush(msg);
+			try {
+				binaryServer.sendMessage(session.getSession(), msg);
+			} catch (MessageCodecException e) {
+				log.error("send error", e);
+			}
 			log.info("服务中心广播[" + providerId + "]的服务到" + session.getSession().remoteAddress());
 		}
 	}

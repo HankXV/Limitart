@@ -179,10 +179,6 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 			// 因为防止老对象被更改值，所以要删除一次
 			int binarySearch = binarySearch(obj, false);
 			list.remove(binarySearch);
-		} else {
-			if (!list.isEmpty() && comparator.compare(list.get(list.size() - 1), value) < 0) {
-				return null;
-			}
 		}
 		int binarySearch = 0;
 		if (size() > 0) {
