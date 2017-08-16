@@ -122,4 +122,20 @@ public final class RandomUtil {
 	public static int randomOne(Random random) {
 		return 1 | (random.nextInt() >> 31);
 	}
+
+	public static int randomWeight(int[] weight) {
+		int sumProb = 0;
+		for (int prob : weight) {
+			sumProb += prob;
+		}
+		int randomInt = randomInt(0, sumProb);
+		int step = 0;
+		for (int i = 0; i < weight.length; ++i) {
+			step += weight[i];
+			if (randomInt <= step) {
+				return i;
+			}
+		}
+		return 0;
+	}
 }
