@@ -153,12 +153,18 @@ public class TXCardsCalculator {
 			cards = tempCards;
 		}
 		// 评估数值
-		evaluator = rank;
-		for (int i = 0; i < cards.length; ++i) {
-			evaluator |= ((long) Poker.getCardNumber(cards[i])) << ((cards.length - i - 1) << 3);
-		}
+		evaluator = evaluator(rank, cards);
 	}
 
+	// 评估数值
+	public static long evaluator(long rank, byte[] txCards) {
+		long evaluatorNum = rank;
+		for (int i = 0; i < txCards.length; ++i) {
+			evaluatorNum |= ((long) Poker.getCardNumber(txCards[i])) << ((txCards.length - i - 1) << 3);
+		}
+		return evaluatorNum;
+	}
+	
 	/**
 	 * 获取牌型
 	 * 
