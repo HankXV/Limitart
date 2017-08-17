@@ -32,14 +32,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.handler.codec.string.LineSeparator;
 
 public final class SendMessageUtil {
 	public static boolean IS_FLOW = true;
 	private static FlowComparator COMPARATOR = new FlowComparator();
 	private static ConcurrentHashMap<Class<? extends Message>, Integer> FLOW_MIN = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Class<? extends Message>, Integer> FLOW_MAX = new ConcurrentHashMap<>();
-	private static ConcurrentHashMap<Class<? extends Message>, Integer> FLOW_COUNT = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<Class<? extends Message>, Long> FLOW_COUNT = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Class<? extends Message>, Long> FLOW_SIZE = new ConcurrentHashMap<>();
 
 	private SendMessageUtil() {
@@ -118,7 +117,7 @@ public final class SendMessageUtil {
 		}
 		FLOW_MIN.putIfAbsent(clazz, Integer.MAX_VALUE);
 		FLOW_MAX.putIfAbsent(clazz, 0);
-		FLOW_COUNT.putIfAbsent(clazz, 0);
+		FLOW_COUNT.putIfAbsent(clazz, 0L);
 		FLOW_SIZE.putIfAbsent(clazz, 0L);
 		int readableBytes = buf.readableBytes();
 		FLOW_MIN.put(clazz, Math.min(FLOW_MIN.get(clazz), readableBytes));
@@ -155,7 +154,7 @@ public final class SendMessageUtil {
 			meta.setValue(entry.getValue());
 			max.put(entry.getKey(), meta);
 		}
-		for (Entry<Class<? extends Message>, Integer> entry : FLOW_COUNT.entrySet()) {
+		for (Entry<Class<? extends Message>, Long> entry : FLOW_COUNT.entrySet()) {
 			FlowMeta meta = new FlowMeta();
 			meta.setClazz(entry.getKey());
 			meta.setValue(entry.getValue());
@@ -172,24 +171,24 @@ public final class SendMessageUtil {
 		List<FlowMeta> countRange = count.getRange(0, top);
 		List<FlowMeta> sizeRange = size.getRange(0, top);
 		StringBuilder sb = new StringBuilder();
-		sb.append("=======min:").append(LineSeparator.DEFAULT.value());
+		sb.append("=======min:").append("\r\n");
 		for (FlowMeta meta : minRange) {
-			sb.append(meta.toString()).append(LineSeparator.DEFAULT.value());
+			sb.append(meta.toString()).append("\r\n");
 		}
 
-		sb.append("=======max:").append(LineSeparator.DEFAULT.value());
+		sb.append("=======max:").append("\r\n");
 		for (FlowMeta meta : maxRange) {
-			sb.append(meta.toString()).append(LineSeparator.DEFAULT.value());
+			sb.append(meta.toString()).append("\r\n");
 		}
 
-		sb.append("=======count:").append(LineSeparator.DEFAULT.value());
+		sb.append("=======count:").append("\r\n");
 		for (FlowMeta meta : countRange) {
-			sb.append(meta.toString()).append(LineSeparator.DEFAULT.value());
+			sb.append(meta.toString()).append("\r\n");
 		}
 
-		sb.append("=======size:").append(LineSeparator.DEFAULT.value());
+		sb.append("=======size:").append("\r\n");
 		for (FlowMeta meta : sizeRange) {
-			sb.append(meta.toString()).append(LineSeparator.DEFAULT.value());
+			sb.append(meta.toString()).append("\r\n");
 		}
 		return sb.toString();
 	}

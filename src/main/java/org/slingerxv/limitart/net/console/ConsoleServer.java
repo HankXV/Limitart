@@ -40,8 +40,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.handler.codec.string.LineEncoder;
-import io.netty.handler.codec.string.LineSeparator;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.Attribute;
@@ -99,9 +97,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 	@Override
 	protected void initPipeline(ChannelPipeline pipeline) {
 		pipeline.addLast(new LineBasedFrameDecoder(256)).addLast(new StringDecoder(CharsetUtil.UTF_8))
-				.addLast(new StringEncoder(CharsetUtil.UTF_8))
-				.addLast(new LineEncoder(LineSeparator.DEFAULT, CharsetUtil.UTF_8))
-				.addLast(new ChannelInboundHandlerAdapter() {
+				.addLast(new StringEncoder(CharsetUtil.UTF_8)).addLast(new ChannelInboundHandlerAdapter() {
 					@Override
 					public boolean isSharable() {
 						return true;
@@ -200,8 +196,6 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 							}
 							log.info("remote:" + ch.remoteAddress() + " login on:" + ch.attr(USERNAME_KEY).get()
 									+ " execute cmd:" + cmd);
-							String info = "<-" + command;
-							ch.writeAndFlush(info);
 							Procs.invoke(dispatchMessage, consoleUser, cmd, params, handler);
 						}
 					}
@@ -213,7 +207,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 	}
 
 	public void sendMessage(Channel channel, String msg, Proc3<Boolean, Throwable, Channel> listener) {
-		String info = "->" + msg;
+		String info = "->" + msg + "\r\n";
 		channel.writeAndFlush(info).addListener((ChannelFutureListener) arg0 -> {
 			Procs.invoke(listener, arg0.isSuccess(), arg0.cause(), arg0.channel());
 		});
