@@ -21,40 +21,40 @@ public final class CollectionUtil {
 	private CollectionUtil() {
 	}
 
-	public static boolean contains(int[] value, int expect) {
-		for (int temp : value) {
-			if (temp == expect) {
-				return true;
+	public static int contains(int[] value, int expect) {
+		for (int i = 0; i < value.length; ++i) {
+			if (value[i] == expect) {
+				return i;
 			}
 		}
-		return false;
+		return -1;
 	}
 
-	public static boolean contains(long[] value, long expect) {
-		for (long temp : value) {
-			if (temp == expect) {
-				return true;
+	public static int contains(long[] value, long expect) {
+		for (int i = 0; i < value.length; ++i) {
+			if (value[i] == expect) {
+				return i;
 			}
 		}
-		return false;
+		return -1;
 	}
 
-	public static boolean contains(byte[] value, byte expect) {
-		for (byte temp : value) {
-			if (temp == expect) {
-				return true;
+	public static int contains(byte[] value, byte expect) {
+		for (int i = 0; i < value.length; ++i) {
+			if (value[i] == expect) {
+				return i;
 			}
 		}
-		return false;
+		return -1;
 	}
 
-	public static boolean contains(short[] value, short expect) {
-		for (short temp : value) {
-			if (temp == expect) {
-				return true;
+	public static int contains(short[] value, short expect) {
+		for (int i = 0; i < value.length; ++i) {
+			if (value[i] == expect) {
+				return i;
 			}
 		}
-		return false;
+		return -1;
 	}
 
 	public static byte[] toByteArray(Collection<? extends Number> collection) {
