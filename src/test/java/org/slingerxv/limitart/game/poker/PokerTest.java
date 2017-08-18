@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slingerxv.limitart.util.MathUtil;
-import org.slingerxv.limitart.util.NumberUtil;
+import org.slingerxv.limitart.util.CollectionUtil;
 import org.slingerxv.limitart.util.StringUtil;
 
 public class PokerTest {
@@ -141,7 +141,7 @@ public class PokerTest {
 	@Test
 	public void testCardsToLong() {
 		for(int i=0;i<fiveCards.size();++i){
-			byte[] source = NumberUtil.toByteArray(fiveCards.get(i));
+			byte[] source = CollectionUtil.toByteArray(fiveCards.get(i));
 			long cardsToLong = Poker.cardsToLong(source);
 			Assert.assertArrayEquals(source, Poker.longToCards(cardsToLong));;
 		}
@@ -150,7 +150,7 @@ public class PokerTest {
 	@Test
 	public void testLongToCards() {
 		for(int i=0;i<fiveCards.size();++i){
-			byte[] source = NumberUtil.toByteArray(fiveCards.get(i));
+			byte[] source = CollectionUtil.toByteArray(fiveCards.get(i));
 			long cardsToLong = Poker.cardsToLong(source);
 			Assert.assertArrayEquals(source, Poker.longToCards(cardsToLong));;
 		}

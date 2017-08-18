@@ -21,7 +21,7 @@ import java.util.List;
 import org.slingerxv.limitart.game.poker.Poker;
 import org.slingerxv.limitart.util.Beta;
 import org.slingerxv.limitart.util.MathUtil;
-import org.slingerxv.limitart.util.NumberUtil;
+import org.slingerxv.limitart.util.CollectionUtil;
 
 /**
  * 德州扑克牌型判定
@@ -91,7 +91,7 @@ public class TXCardsCalculator {
 		long maxValue = 0;
 		TXCardsCalculator maxEval = null;
 		for (List<Byte> list : cnm) {
-			TXCardsCalculator temp = new TXCardsCalculator(NumberUtil.toByteArray(list));
+			TXCardsCalculator temp = new TXCardsCalculator(CollectionUtil.toByteArray(list));
 			if (temp.getValue() > maxValue) {
 				maxEval = temp;
 				maxValue = temp.getValue();

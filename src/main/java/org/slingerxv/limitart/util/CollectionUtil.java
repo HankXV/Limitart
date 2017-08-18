@@ -17,8 +17,44 @@ package org.slingerxv.limitart.util;
 
 import java.util.Collection;
 
-public final class NumberUtil {
-	private NumberUtil() {
+public final class CollectionUtil {
+	private CollectionUtil() {
+	}
+
+	public static boolean contains(int[] value, int expect) {
+		for (int temp : value) {
+			if (temp == expect) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean contains(long[] value, long expect) {
+		for (long temp : value) {
+			if (temp == expect) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean contains(byte[] value, byte expect) {
+		for (byte temp : value) {
+			if (temp == expect) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean contains(short[] value, short expect) {
+		for (short temp : value) {
+			if (temp == expect) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static byte[] toByteArray(Collection<? extends Number> collection) {
