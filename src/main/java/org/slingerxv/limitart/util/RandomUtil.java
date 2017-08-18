@@ -15,6 +15,8 @@
  */
 package org.slingerxv.limitart.util;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 
 /**
@@ -23,7 +25,15 @@ import java.util.Random;
  * @author Hank
  */
 public final class RandomUtil {
-	public static Random DEFAULT = new Random();
+	public static Random DEFAULT;
+	public static Random SECURITY;
+	static {
+		DEFAULT = new Random();
+		try {
+			SECURITY = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e) {
+		}
+	}
 
 	private RandomUtil() {
 	}
@@ -37,6 +47,10 @@ public final class RandomUtil {
 	 */
 	public static int randomInt(int min, int max) {
 		return randomInt(DEFAULT, min, max);
+	}
+
+	public static int randomIntSecure(int min, int max) {
+		return randomInt(SECURITY, min, max);
 	}
 
 	/**
@@ -62,6 +76,10 @@ public final class RandomUtil {
 	 */
 	public static long randomLong(long start, long end) {
 		return randomLong(DEFAULT, start, end);
+	}
+
+	public static long randomLongSecure(long start, long end) {
+		return randomLong(SECURITY, start, end);
 	}
 
 	/**
@@ -90,6 +108,10 @@ public final class RandomUtil {
 		return randomFloat(DEFAULT, start, end);
 	}
 
+	public static float randomFloatSecure(float start, float end) {
+		return randomFloat(SECURITY, start, end);
+	}
+
 	/**
 	 * 随机浮点数(包含边界)
 	 *
@@ -112,6 +134,10 @@ public final class RandomUtil {
 	 */
 	public static int randomOne() {
 		return randomOne(DEFAULT);
+	}
+
+	public static int randomOneSecure() {
+		return randomOne(SECURITY);
 	}
 
 	/**

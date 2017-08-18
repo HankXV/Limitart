@@ -25,13 +25,13 @@ public class ServiceError {
 	/**
 	 * 成功
 	 */
-	public static int SUCCESS = 0;
+	public final static int SUCCESS = 0;
 	/**
 	 * 没有模块
 	 */
-	public static int SERVER_HAS_NO_MODULE = 1;
+	public final static int SERVER_HAS_NO_MODULE = 1;
 	/**
 	 * 没有方法
 	 */
-	public static int SERVER_HAS_NO_METHOD = 2;
+	public final static int SERVER_HAS_NO_METHOD = 2;
 }
