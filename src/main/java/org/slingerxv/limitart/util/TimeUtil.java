@@ -108,9 +108,8 @@ public final class TimeUtil {
 	 */
 	public static boolean isSameDay(long time) {
 		Calendar nowCal = Calendar.getInstance();
-		Date date = new Date(time);
 		Calendar herCal = Calendar.getInstance();
-		herCal.setTime(date);
+		herCal.setTimeInMillis(time);
 		int nowYear = nowCal.get(Calendar.YEAR);
 		int nowMonth = nowCal.get(Calendar.MONTH);
 		int nowDay = nowCal.get(Calendar.DAY_OF_MONTH);
@@ -129,9 +128,8 @@ public final class TimeUtil {
 	 */
 	public static boolean isSameMonth(long time) {
 		Calendar nowCal = Calendar.getInstance();
-		Date date = new Date(time);
 		Calendar herCal = Calendar.getInstance();
-		herCal.setTime(date);
+		herCal.setTimeInMillis(time);
 		int nowYear = nowCal.get(Calendar.YEAR);
 		int nowMonth = nowCal.get(Calendar.MONTH);
 		int herYear = herCal.get(Calendar.YEAR);
@@ -147,9 +145,8 @@ public final class TimeUtil {
 	 */
 	public static boolean isSameYear(long time) {
 		Calendar nowCal = Calendar.getInstance();
-		Date date = new Date(time);
 		Calendar herCal = Calendar.getInstance();
-		herCal.setTime(date);
+		herCal.setTimeInMillis(time);
 		int nowYear = nowCal.get(Calendar.YEAR);
 		int herYear = herCal.get(Calendar.YEAR);
 		return nowYear == herYear;
