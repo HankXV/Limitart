@@ -34,6 +34,7 @@ public abstract class State<T extends StateMachine> {
 	private List<IEvent<T>> conditions = new LinkedList<>();
 	private List<Ticker> tickers = new LinkedList<>();
 	private boolean finished = false;
+	private long executedTime;
 
 	public abstract Integer getStateId();
 
@@ -71,6 +72,7 @@ public abstract class State<T extends StateMachine> {
 				}
 			}
 		}
+		executedTime += deltaTimeInMills;
 		execute(deltaTimeInMills, fsm);
 	}
 
@@ -83,6 +85,7 @@ public abstract class State<T extends StateMachine> {
 	protected abstract void execute(long deltaTimeInMills, T fsm);
 
 	public State<T> reset() {
+		executedTime = 0;
 		tickers.clear();
 		finished = false;
 		return this;
@@ -126,6 +129,10 @@ public abstract class State<T extends StateMachine> {
 	 */
 	public void finish() {
 		this.finished = true;
+	}
+
+	public long getExecutedTime() {
+		return executedTime;
 	}
 
 	private static class Ticker {
