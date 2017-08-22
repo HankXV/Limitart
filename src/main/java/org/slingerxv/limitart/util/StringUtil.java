@@ -140,4 +140,19 @@ public final class StringUtil {
 		}
 		return result;
 	}
+
+	public static String toShortStr(long num) {
+		if (num < 100000L)// 十万
+			return num + "";
+		else if (num < 1000000L)
+			return num / 1000L + "K";
+		else if (num < 1000000000L)
+			return num / 1000000L + "M";
+		else if (num < 1000000000000L)
+			return num / 1000000000L + "B";
+		else if (num < 100000000)
+			return num / 1000000000000L + "T";
+		else
+			return num / 1000000000000000L + "P";
+	}
 }
