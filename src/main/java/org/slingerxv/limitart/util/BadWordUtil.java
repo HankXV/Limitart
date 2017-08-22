@@ -121,18 +121,19 @@ public class BadWordUtil {
 	 * @param index
 	 */
 	private static void insertNode(Node node, char[] cs, int index) {
-		Node n = findNode(node, cs[index]);
+		int start = index;
+		Node n = findNode(node, cs[start]);
 		if (n == null) {
-			n = new Node(cs[index]);
-			node.nodes.put(String.valueOf(cs[index]), n);
+			n = new Node(cs[start]);
+			node.nodes.put(String.valueOf(cs[start]), n);
 		}
 
 		if (index == (cs.length - 1))
 			n.flag = 1;
 
-		index++;
-		if (index < cs.length)
-			insertNode(n, cs, index);
+		start++;
+		if (start < cs.length)
+			insertNode(n, cs, start);
 	}
 
 	private static Node findNode(Node node, char c) {
@@ -143,12 +144,7 @@ public class BadWordUtil {
 		public int flag;
 		public HashMap<String, Node> nodes = new HashMap<String, Node>();
 
-		public Node(char c) {
-			this.flag = 0;
-		}
-
-		@SuppressWarnings("unused")
-		public Node(char c, int flag) {
+		public Node(int flag) {
 			this.flag = flag;
 		}
 	}

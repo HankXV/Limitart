@@ -14,12 +14,11 @@
  */
 package org.slingerxv.limitart.util;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -35,8 +34,8 @@ public class BadWordUtilTest {
 		words.add("g");
 		words.add("世界");
 		BadWordUtil.init(words);
-		Assert.assertTrue("aabef*cdee*h你好**234$%^&sd*".equals(BadWordUtil.filter(source, "*")));
-		Assert.assertTrue(BadWordUtil.hasBadWords(source));
+		assertTrue("aabef*cdee*h你好**234$%^&sd*".equals(BadWordUtil.filter(source, "*")));
+		assertTrue(BadWordUtil.hasBadWords(source));
 	}
 
 }
