@@ -29,16 +29,17 @@ import org.slf4j.LoggerFactory;
  */
 public class BadWordUtil {
 	private static Logger log = LoggerFactory.getLogger(BadWordUtil.class);
-	private static List<String> arrt = new ArrayList<String>();
 	private static Node rootNode = new Node('R');
 
 	public synchronized static void init(List<String> words) {
 		rootNode = new Node('R');
-		arrt.clear();
-		log.info("开始加载敏感词...");
-		arrt.addAll(words);
-		createTree();
-		log.info("加载敏感词完毕：" + arrt.size());
+		log.info("start load sensative words...");
+		for (String str : words) {
+			char[] chars = str.toCharArray();
+			if (chars.length > 0)
+				insertNode(rootNode, chars, 0);
+		}
+		log.info("load sensative words：" + words.size());
 	}
 
 	/**
@@ -110,14 +111,6 @@ public class BadWordUtil {
 			a++;
 		}
 		return buffer.toString();
-	}
-
-	private static void createTree() {
-		for (String str : arrt) {
-			char[] chars = str.toCharArray();
-			if (chars.length > 0)
-				insertNode(rootNode, chars, 0);
-		}
 	}
 
 	/**
