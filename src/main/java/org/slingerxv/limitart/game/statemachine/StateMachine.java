@@ -86,6 +86,9 @@ public class StateMachine {
 		if (this.stateMap.containsKey(state.getStateId())) {
 			throw new StateException("stateId:" + state.getStateId() + " duplicated in this FSM !");
 		}
+		if (stateMap.isEmpty()) {
+			firstState(state.getStateId());
+		}
 		this.stateMap.put(state.getStateId(), state);
 		log.info("ADD:{}", state.getStateId());
 		return this;
