@@ -1,3 +1,3 @@
 set program_name=YourJarName
-java -Dfile.encoding=UTF-8 -server -Xmx2g -Xms2g -Xmn1g -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=768m -XX:+UseConcMarkSweepGC -XX:+ParallelRefProcEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -Xloggc:./logs/GC.log -XX:+PrintGCDateStamps -XX:+PrintGCDetails -jar %program_name%.jar
+java -Dfile.encoding=UTF-8 -server -Xmx1g -Xms1g -Xmn512m -XX:MaxMetaspaceSize=256m -XX:+UseConcMarkSweepGC -XX:+ParallelRefProcEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=./oom.dump -Xloggc:./logs/GC.log -XX:+PrintGCDateStamps -XX:+PrintGCDetails -jar %program_name%.jar
 PAUSE
