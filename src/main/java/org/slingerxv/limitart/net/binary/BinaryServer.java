@@ -351,6 +351,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 			try {
 				msg.decode();
 			} catch (Exception e) {
+				log.error("message id:" + Integer.toHexString(messageId) + " decode error!");
 				throw new MessageCodecException(e);
 			}
 			msg.buffer(null);
