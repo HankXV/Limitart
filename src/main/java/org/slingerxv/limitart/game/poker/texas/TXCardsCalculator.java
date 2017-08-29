@@ -165,7 +165,7 @@ public class TXCardsCalculator {
 	 * @return
 	 */
 	public static long getCardRank(long evaluator, int cardCount) {
-		return evaluator >> (cardCount * 3);
+		return evaluator >> (cardCount << 3);
 	}
 
 	// 评估数值
