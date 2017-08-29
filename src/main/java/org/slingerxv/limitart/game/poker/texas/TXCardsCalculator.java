@@ -156,6 +156,18 @@ public class TXCardsCalculator {
 		evaluator = evaluator(rank, cards);
 	}
 
+	/**
+	 * 
+	 * 解析评估数值获得牌型
+	 * 
+	 * @param evaluator
+	 * @param cardCount
+	 * @return
+	 */
+	public static long getCardRank(long evaluator, int cardCount) {
+		return evaluator >> (cardCount * 3);
+	}
+
 	// 评估数值
 	public static long evaluator(long rank, byte[] txCards) {
 		long evaluatorNum = rank;
@@ -164,7 +176,7 @@ public class TXCardsCalculator {
 		}
 		return evaluatorNum;
 	}
-	
+
 	/**
 	 * 获取牌型
 	 * 

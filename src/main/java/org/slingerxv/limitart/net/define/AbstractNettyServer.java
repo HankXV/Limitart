@@ -87,20 +87,20 @@ public abstract class AbstractNettyServer {
 
 	protected abstract void initPipeline(ChannelPipeline pipeline);
 
+	/**
+	 * bind without block
+	 * 
+	 * @param port
+	 * @param listener
+	 */
 	protected void bind(int port, Proc1<Channel> listener) {
-		new Thread(() -> {
-			try {
-				bootstrap.bind(port).addListener((ChannelFuture arg0) -> {
-					if (arg0.isSuccess()) {
-						log.info(serverName + " bind at port:" + port);
-						channel = arg0.channel();
-						Procs.invoke(listener, arg0.channel());
-					}
-				}).sync().channel().closeFuture().sync();
-			} catch (InterruptedException e) {
-				log.error(e.getMessage(), e);
+		bootstrap.bind(port).addListener((ChannelFuture arg0) -> {
+			if (arg0.isSuccess()) {
+				log.info(serverName + " bind at port:" + port);
+				channel = arg0.channel();
+				Procs.invoke(listener, arg0.channel());
 			}
-		}, serverName + "-Binder").start();
+		});
 	}
 
 	protected void unbind() {
