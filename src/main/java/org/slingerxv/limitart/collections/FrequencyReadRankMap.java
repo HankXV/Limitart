@@ -107,17 +107,16 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 	@Override
 	public V getAt(int at) {
 		int size = size();
-		int index = at;
 		if (size == 0) {
 			return null;
 		}
-		if (index < 0) {
-			index = 0;
+		if (at < 0) {
+			return null;
 		}
-		if (index >= size) {
-			index = size - 1;
+		if (at >= size) {
+			return null;
 		}
-		return list.get(index);
+		return list.get(at);
 	}
 
 	@Override

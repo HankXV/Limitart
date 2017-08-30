@@ -116,24 +116,23 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements IRankMap<K, 
 	@Override
 	public V getAt(int at) {
 		int size = size();
-		int index = at;
 		if (size == 0) {
 			return null;
 		}
-		if (index < 0) {
-			index = 0;
+		if (at < 0) {
+			return null;
 		}
-		if (index >= size) {
-			index = size - 1;
+		if (at >= size) {
+			return null;
 		}
-		if (index == 0) {
+		if (at == 0) {
 			return treeSet.first();
 		}
-		if (index == size() - 1) {
+		if (at == size() - 1) {
 			return treeSet.last();
 		}
 		checkModified();
-		return indexList.get(index);
+		return indexList.get(at);
 	}
 
 	@Override
