@@ -99,6 +99,8 @@ public abstract class AbstractNettyServer {
 				log.info(serverName + " bind at port:" + port);
 				channel = arg0.channel();
 				Procs.invoke(listener, arg0.channel());
+			} else {
+				log.error(serverName + " bind at port error:" + arg0.cause());
 			}
 		});
 	}
