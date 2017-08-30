@@ -80,7 +80,7 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V
 	public List<V> getRange(int startIndex, int endIndex) {
 		List<V> temp = new ArrayList<>();
 		int start = startIndex;
-		int end = endIndex;
+		int end = endIndex + 1;
 		int size = size();
 		if (size == 0) {
 			return temp;

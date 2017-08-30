@@ -89,7 +89,7 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements IRankMap<K, 
 		List<V> temp = new ArrayList<>();
 		int size = size();
 		int start = startIndex;
-		int end = endIndex;
+		int end = endIndex + 1;
 		if (size == 0) {
 			return temp;
 		}

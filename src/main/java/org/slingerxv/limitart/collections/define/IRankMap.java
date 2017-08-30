@@ -41,7 +41,9 @@ public interface IRankMap<K, V extends Func<K>> extends Map<K, V> {
 	 * 获取一个范围的数据
 	 * 
 	 * @param start
+	 *            开始索引(包含边界)
 	 * @param end
+	 *            结束索引(包含边界)
 	 * @return
 	 */
 	List<V> getRange(int start, int end);
