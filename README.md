@@ -116,9 +116,9 @@
 12.游戏中常用的唯一Id生成请参考`org.slingerxv.limitart.util.UniqueIdUtil`<br>
 13.带有`@beta`标记的代表此API是新加入的测试版<br>
 # 更新日志
-## ![](https://img.shields.io/badge/version--v2.0-release--green.svg)
+## v2.0-release
 	1.增加敏感词过滤(BadWordUtil)
-## ![](https://img.shields.io/badge/version--v2.0-alpha--green.svg)
+## v2.0-alpha
 	1.注册消息通过Handler直接注册，而不用指定消息Id和消息本身
 	2.可以通过扫描包的形式直接注册所有消息
 	3.消息可以自动序列化了，使用者不用关心序列化过程
