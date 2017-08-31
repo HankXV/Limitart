@@ -1,4 +1,5 @@
 [![TeamCity (simple build status)](https://img.shields.io/badge/maven-v2.0--alpha-green.svg)](https://mvnrepository.com/artifact/org.slingerxv/limitart)
+[![](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 # 什么是Limitart?
 一个帮助您快速搭建起游戏服务器的框架
 # 怎么参与？
