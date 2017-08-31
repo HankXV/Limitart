@@ -5,15 +5,16 @@
 [CONTRIBUTING](/CONTRIBUTING.md)
 ## 环境要求
 Jdk8或以上
-## Maven
+# 快速开始
+### Maven
 	<dependency>
 	    <groupId>org.slingerxv</groupId>
 	    <artifactId>limitart</artifactId>
 	    <version>2.0-alpha</version>
 	</dependency>
-## Gradle
+### Gradle
 	compile 'org.slingerxv:limitart:2.0-alpha'
-# 快速开始
+	
 首先，我们需要定义一个网络通信的消息类
 
 ```java
