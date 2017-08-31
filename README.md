@@ -1,11 +1,10 @@
 [![](https://img.shields.io/badge/maven-v2.0--alpha-green.svg)](https://mvnrepository.com/artifact/org.slingerxv/limitart)
 [![](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![](https://img.shields.io/badge/jdk-1.8-green.svg)]
 # 什么是Limitart?
 一个帮助您快速搭建起游戏服务器的框架
 # 怎么参与？
 	群：662555451
-## 环境要求
-Jdk8或以上
 # 快速开始
 ### Maven
 	<dependency>
@@ -117,9 +116,9 @@ Jdk8或以上
 12.游戏中常用的唯一Id生成请参考`org.slingerxv.limitart.util.UniqueIdUtil`<br>
 13.带有`@beta`标记的代表此API是新加入的测试版<br>
 # 更新日志
-## v2.0-release
+## [![](https://img.shields.io/badge/version-v2.0-release-green.svg)]
 	1.增加敏感词过滤(BadWordUtil)
-## v2.0-alpha
+## [![](https://img.shields.io/badge/version-v2.0-alpha-green.svg)]
 	1.注册消息通过Handler直接注册，而不用指定消息Id和消息本身
 	2.可以通过扫描包的形式直接注册所有消息
 	3.消息可以自动序列化了，使用者不用关心序列化过程
