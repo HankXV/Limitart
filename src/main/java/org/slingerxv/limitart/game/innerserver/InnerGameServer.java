@@ -17,6 +17,7 @@ package org.slingerxv.limitart.game.innerserver;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ import org.slingerxv.limitart.util.Beta;
 @Beta
 public abstract class InnerGameServer implements IServer {
 	private static Logger log = LoggerFactory.getLogger(InnerGameServer.class);
-	private ConcurrentHashMap<Integer, InnerSlaveServer> toFights = new ConcurrentHashMap<>();
+	private Map<Integer, InnerSlaveServer> toFights = new ConcurrentHashMap<>();
 	private InnerSlaveServer toPublic;
 
 	public InnerGameServer(InnerGameServerConfig config) throws Exception {

@@ -17,6 +17,7 @@ package org.slingerxv.limitart.game.statemachine;
 
 import java.text.MessageFormat;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +40,7 @@ import org.slingerxv.limitart.util.Beta;
 @SuppressWarnings("rawtypes")
 public class StateMachine {
 	private static Logger log = LoggerFactory.getLogger(StateMachine.class);
-	private ConcurrentHashMap<Integer, State> stateMap = new ConcurrentHashMap<>();
+	private Map<Integer, State> stateMap = new ConcurrentHashMap<>();
 	private Queue<Integer> stateQueue = new LinkedList<>();
 	private State preState;
 	private State curState;

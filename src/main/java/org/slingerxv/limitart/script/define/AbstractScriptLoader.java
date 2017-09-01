@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -41,8 +42,8 @@ import groovy.lang.GroovyClassLoader;
  */
 public abstract class AbstractScriptLoader<KEY> {
 	protected static final Logger log = LoggerFactory.getLogger(AbstractScriptLoader.class);
-	protected ConcurrentHashMap<KEY, IScript<KEY>> scriptMap = new ConcurrentHashMap<>();
-	protected ConcurrentHashMap<KEY, File> scriptPath = new ConcurrentHashMap<>();
+	protected Map<KEY, IScript<KEY>> scriptMap = new ConcurrentHashMap<>();
+	protected Map<KEY, File> scriptPath = new ConcurrentHashMap<>();
 	private AtomicLong dynamicCodeCount = new AtomicLong(100000);
 
 	public void foreach(BiConsumer<? super KEY, ? super IScript<KEY>> action) {

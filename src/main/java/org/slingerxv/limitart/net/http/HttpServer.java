@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 	// 消息聚合最大（1024KB）,即Content-Length
 	private int httpObjectAggregatorMax;
 	private UrlMessageFactory facotry;
-	private HashSet<String> whiteList;
+	private Set<String> whiteList;
 	// listener
 	private Proc1<Channel> onServerBind;
 	private Proc2<Channel, Boolean> onChannelStateChanged;
@@ -159,7 +160,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		return httpObjectAggregatorMax;
 	}
 
-	public HashSet<String> getWhiteList() {
+	public Set<String> getWhiteList() {
 		return whiteList;
 	}
 
@@ -271,7 +272,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		private int port;
 		private int httpObjectAggregatorMax;
 		private UrlMessageFactory facotry;
-		private HashSet<String> whiteList;
+		private Set<String> whiteList;
 		// listener
 		private Proc1<Channel> onServerBind;
 		private Proc2<Channel, Boolean> onChannelStateChanged;

@@ -1,8 +1,8 @@
 package org.slingerxv.limitart.rpcx;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.slingerxv.limitart.rpcx.bean.PersonInfo;
 import org.slingerxv.limitart.rpcx.consumerx.ConsumerX;
@@ -34,9 +34,9 @@ public class ConsumerXDemo {
 				}
 				List<PersonInfo> helloPersonList = createProxy.helloPersonList();
 				System.out.println(helloPersonList);
-				HashMap<String, PersonInfo> personMap = createProxy.getPersonMap();
+				Map<String, PersonInfo> personMap = createProxy.getPersonMap();
 				System.out.println(personMap.get("test"));
-				HashSet<PersonInfo> personSet = createProxy.getPersonSet();
+				Set<PersonInfo> personSet = createProxy.getPersonSet();
 				System.out.println(personSet);
 			} catch (Exception e) {
 				e.printStackTrace();

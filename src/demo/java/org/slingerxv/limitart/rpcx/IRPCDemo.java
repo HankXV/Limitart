@@ -1,8 +1,8 @@
 package org.slingerxv.limitart.rpcx;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.slingerxv.limitart.rpcx.bean.PersonInfo;
 import org.slingerxv.limitart.rpcx.define.ServiceX;
@@ -20,7 +20,7 @@ public interface IRPCDemo {
 
 	List<PersonInfo> helloPersonList() throws Exception;
 
-	HashMap<String, PersonInfo> getPersonMap() throws Exception;
+	Map<String, PersonInfo> getPersonMap() throws Exception;
 
-	HashSet<PersonInfo> getPersonSet() throws Exception;
+	Set<PersonInfo> getPersonSet() throws Exception;
 }

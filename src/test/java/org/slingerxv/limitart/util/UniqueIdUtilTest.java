@@ -1,5 +1,6 @@
 package org.slingerxv.limitart.util;
 
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -10,7 +11,7 @@ import org.junit.Test;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 
 public class UniqueIdUtilTest {
-	private ConcurrentHashSet<Long> sets;
+	private Set<Long> sets;
 	private LongAdder adder;
 	private CountDownLatch count;
 	private static int THREAD_COUNT = 100;

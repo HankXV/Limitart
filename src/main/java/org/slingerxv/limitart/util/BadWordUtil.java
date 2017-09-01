@@ -17,6 +17,7 @@ package org.slingerxv.limitart.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +143,7 @@ public class BadWordUtil {
 
 	private static class Node {
 		public int flag;
-		public HashMap<String, Node> nodes = new HashMap<String, Node>();
+		public Map<String, Node> nodes = new HashMap<String, Node>();
 
 		public Node(int flag) {
 			this.flag = flag;

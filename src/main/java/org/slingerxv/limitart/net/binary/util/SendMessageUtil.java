@@ -17,6 +17,7 @@ package org.slingerxv.limitart.net.binary.util;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,10 +37,10 @@ import io.netty.channel.ChannelFutureListener;
 public final class SendMessageUtil {
 	public static boolean IS_FLOW = true;
 	private static FlowComparator COMPARATOR = new FlowComparator();
-	private static ConcurrentHashMap<Class<? extends Message>, Integer> FLOW_MIN = new ConcurrentHashMap<>();
-	private static ConcurrentHashMap<Class<? extends Message>, Integer> FLOW_MAX = new ConcurrentHashMap<>();
-	private static ConcurrentHashMap<Class<? extends Message>, Long> FLOW_COUNT = new ConcurrentHashMap<>();
-	private static ConcurrentHashMap<Class<? extends Message>, Long> FLOW_SIZE = new ConcurrentHashMap<>();
+	private static Map<Class<? extends Message>, Integer> FLOW_MIN = new ConcurrentHashMap<>();
+	private static Map<Class<? extends Message>, Integer> FLOW_MAX = new ConcurrentHashMap<>();
+	private static Map<Class<? extends Message>, Long> FLOW_COUNT = new ConcurrentHashMap<>();
+	private static Map<Class<? extends Message>, Long> FLOW_SIZE = new ConcurrentHashMap<>();
 
 	private SendMessageUtil() {
 	}

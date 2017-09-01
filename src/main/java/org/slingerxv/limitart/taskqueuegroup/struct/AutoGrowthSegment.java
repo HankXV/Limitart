@@ -15,6 +15,8 @@
  */
 package org.slingerxv.limitart.taskqueuegroup.struct;
 
+import java.util.Set;
+
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 
@@ -27,13 +29,13 @@ import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 public class AutoGrowthSegment<T> {
 	private int threadIndex;
 	private ITaskQueue<T> thread;
-	private ConcurrentHashSet<AutoGrowthEntity> entities = new ConcurrentHashSet<>();
+	private Set<AutoGrowthEntity> entities = new ConcurrentHashSet<>();
 
-	public ConcurrentHashSet<AutoGrowthEntity> getEntities() {
+	public Set<AutoGrowthEntity> getEntities() {
 		return entities;
 	}
 
-	public void setEntities(ConcurrentHashSet<AutoGrowthEntity> entities) {
+	public void setEntities(Set<AutoGrowthEntity> entities) {
 		this.entities = entities;
 	}
 

@@ -13,7 +13,7 @@ import org.slingerxv.limitart.game.item.AbstractItem;
 
 public class BagDemo extends Bag {
 	private Logger log = LoggerFactory.getLogger(BagDemo.class);
-	private ConcurrentHashMap<Integer, AbstractItem> bag = new ConcurrentHashMap<>();
+	private Map<Integer, AbstractItem> bag = new ConcurrentHashMap<>();
 
 	public static void main(String[] args) {
 		BagDemo bag = new BagDemo();

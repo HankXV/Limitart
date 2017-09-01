@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slingerxv.limitart.net.binary.message.exception.MessageIOException;
@@ -40,8 +41,8 @@ import io.netty.util.CharsetUtil;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class MessageMeta {
 	private static final boolean COMPRESS_INT = false;
-	private static ConcurrentHashMap<Class<? extends MessageMeta>, ConstructorAccess> messageMetaCache = new ConcurrentHashMap<>();
-	private static ConcurrentHashMap<Class<? extends MessageMeta>, FieldAccess> messageMetaFieldCache = new ConcurrentHashMap<>();
+	private static Map<Class<? extends MessageMeta>, ConstructorAccess> messageMetaCache = new ConcurrentHashMap<>();
+	private static Map<Class<? extends MessageMeta>, FieldAccess> messageMetaFieldCache = new ConcurrentHashMap<>();
 	private ByteBuf buffer;
 
 	public void encode() throws Exception {

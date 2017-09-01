@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +50,8 @@ import io.netty.buffer.Unpooled;
 public class MessageFactory {
 	private static Logger log = LoggerFactory.getLogger(MessageFactory.class);
 	// !!这里的asm应用经测试在JAVA8下最优
-	private final HashMap<Short, ConstructorAccess<? extends Message>> msgs = new HashMap<>();
-	private final HashMap<Short, IHandler<? extends Message>> handlers = new HashMap<>();
+	private final Map<Short, ConstructorAccess<? extends Message>> msgs = new HashMap<>();
+	private final Map<Short, IHandler<? extends Message>> handlers = new HashMap<>();
 
 	@Beta
 	public static MessageFactory createByPackage(String packageName, Func1<Class<?>, Object> confirmInstance)

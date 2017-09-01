@@ -17,6 +17,7 @@ package org.slingerxv.limitart.collections;
 
 import java.util.AbstractSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConcurrentHashSet<E> extends AbstractSet<E> implements java.io.Serializable {
@@ -25,7 +26,7 @@ public class ConcurrentHashSet<E> extends AbstractSet<E> implements java.io.Seri
 
 	private static final Object PRESENT = new Object();
 
-	private final ConcurrentHashMap<E, Object> map;
+	private final Map<E, Object> map;
 
 	public ConcurrentHashSet() {
 		map = new ConcurrentHashMap<>();

@@ -90,7 +90,7 @@ public abstract class RPCMeta extends Message {
 			}
 			String keyType = getString();
 			String valueType = getString();
-			HashMap<Object, Object> map = new HashMap<>();
+			Map<Object, Object> map = new HashMap<>();
 			for (int i = 0; i < length; ++i) {
 				map.put(decodeObj(keyType), decodeObj(valueType));
 			}
@@ -101,7 +101,7 @@ public abstract class RPCMeta extends Message {
 				return null;
 			}
 			String setType = getString();
-			HashSet<Object> set = new HashSet<>();
+			Set<Object> set = new HashSet<>();
 			for (int i = 0; i < length; ++i) {
 				set.add(decodeObj(setType));
 			}

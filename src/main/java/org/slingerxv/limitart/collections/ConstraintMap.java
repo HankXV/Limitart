@@ -235,11 +235,11 @@ public class ConstraintMap<K> {
 		ConstraintMap<K> map = new ConstraintMap<>();
 		if (!StringUtil.isEmptyOrNull(jsonContent)) {
 			@SuppressWarnings("unchecked")
-			HashMap<K, Object> object = StringUtil.toObject(jsonContent, HashMap.class);
+			Map<K, Object> object = StringUtil.toObject(jsonContent, HashMap.class);
 			map.putAll(object);
 		}
 		return map;
-	}
+	}	
 
 	public static <K> ConstraintMap<K> empty() {
 		return new ConstraintMap<K>();

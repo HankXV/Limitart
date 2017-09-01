@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.slingerxv.limitart.collections.ConstraintMap;
@@ -45,7 +45,7 @@ public final class HttpUtil {
 	private HttpUtil() {
 	}
 
-	public static HttpResult post(String hostUrl, ConstraintMap<String> param, HashMap<String, String> requestProperty)
+	public static HttpResult post(String hostUrl, ConstraintMap<String> param, Map<String, String> requestProperty)
 			throws IOException {
 		HttpResult result = new HttpResult();
 		URL url = new URL(hostUrl);

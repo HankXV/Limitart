@@ -50,7 +50,7 @@ import io.netty.channel.Channel;
 public class InnerMasterServer implements IServer {
 	private static Logger log = LoggerFactory.getLogger(InnerMasterServer.class);
 	// 从服务器集合
-	private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, InnerServerData>> slaves = new ConcurrentHashMap<>();
+	private Map<Integer, Map<Integer, InnerServerData>> slaves = new ConcurrentHashMap<>();
 	private BinaryServer server;
 	// config---
 	private String serverName;
@@ -82,11 +82,11 @@ public class InnerMasterServer implements IServer {
 						if (serverType == null || serverId == null) {
 							return;
 						}
-						ConcurrentHashMap<Integer, InnerServerData> concurrentHashMap = slaves.get(serverType);
-						if (concurrentHashMap == null) {
+						Map<Integer, InnerServerData> map = slaves.get(serverType);
+						if (map == null) {
 							return;
 						}
-						InnerServerData remove = concurrentHashMap.remove(serverId);
+						InnerServerData remove = map.remove(serverId);
 						if (remove == null) {
 							return;
 						}
@@ -95,7 +95,7 @@ public class InnerMasterServer implements IServer {
 						msg.serverId = remove.getServerId();
 						msg.serverType = remove.getServerType();
 						List<Channel> channelList = new ArrayList<>();
-						for (ConcurrentHashMap<Integer, InnerServerData> dats : slaves.values()) {
+						for (Map<Integer, InnerServerData> dats : slaves.values()) {
 							for (InnerServerData data : dats.values()) {
 								channelList.add(data.getChannel());
 							}
@@ -159,10 +159,10 @@ public class InnerMasterServer implements IServer {
 		data.setOutPort(serverInfo.outPort);
 		data.setServerId(serverInfo.serverId);
 		data.setServerLoad(0);
-		ConcurrentHashMap<Integer, InnerServerData> concurrentHashMap = slaves.get(serverInfo.serverType);
+		Map<Integer, InnerServerData> concurrentHashMap = slaves.get(serverInfo.serverType);
 		if (concurrentHashMap == null) {
 			concurrentHashMap = new ConcurrentHashMap<>();
-			ConcurrentHashMap<Integer, InnerServerData> putIfAbsent = slaves.putIfAbsent(serverInfo.serverType,
+			Map<Integer, InnerServerData> putIfAbsent = slaves.putIfAbsent(serverInfo.serverType,
 					concurrentHashMap);
 			if (putIfAbsent != null) {
 				concurrentHashMap = putIfAbsent;
@@ -181,7 +181,7 @@ public class InnerMasterServer implements IServer {
 		ResServerJoinMaster2SlaveMessage sjm0 = new ResServerJoinMaster2SlaveMessage();
 		sjm0.infos.add(serverData2ServerInfo(data));
 		List<Channel> channelList = new ArrayList<>();
-		for (ConcurrentHashMap<Integer, InnerServerData> map : slaves.values()) {
+		for (Map<Integer, InnerServerData> map : slaves.values()) {
 			for (InnerServerData temp : map.values()) {
 				channelList.add(temp.getChannel());
 			}
@@ -205,7 +205,7 @@ public class InnerMasterServer implements IServer {
 		}
 		// 告诉新服所有服信息
 		ResServerJoinMaster2SlaveMessage sjm = new ResServerJoinMaster2SlaveMessage();
-		for (ConcurrentHashMap<Integer, InnerServerData> map : slaves.values()) {
+		for (Map<Integer, InnerServerData> map : slaves.values()) {
 			for (InnerServerData temp : map.values()) {
 				InnerServerInfo info = serverData2ServerInfo(temp);
 				sjm.infos.add(info);
@@ -242,7 +242,7 @@ public class InnerMasterServer implements IServer {
 			log.error("can not find server info:" + msg.getChannel());
 			return;
 		}
-		ConcurrentHashMap<Integer, InnerServerData> map = slaves.get(serverType);
+		Map<Integer, InnerServerData> map = slaves.get(serverType);
 		if (map == null) {
 			log.error("server type :" + serverType + ",has not servers!");
 			return;
@@ -258,7 +258,7 @@ public class InnerMasterServer implements IServer {
 
 	public List<InnerServerData> getSlaves(int serverType) {
 		List<InnerServerData> result = new ArrayList<>();
-		ConcurrentHashMap<Integer, InnerServerData> concurrentHashMap = slaves.get(serverType);
+		Map<Integer, InnerServerData> concurrentHashMap = slaves.get(serverType);
 		if (concurrentHashMap == null) {
 			return result;
 		}
@@ -267,7 +267,7 @@ public class InnerMasterServer implements IServer {
 	}
 
 	public InnerServerData getSlave(int serverType, int serverId) {
-		ConcurrentHashMap<Integer, InnerServerData> concurrentHashMap = slaves.get(serverType);
+		Map<Integer, InnerServerData> concurrentHashMap = slaves.get(serverType);
 		if (concurrentHashMap == null) {
 			return null;
 		}

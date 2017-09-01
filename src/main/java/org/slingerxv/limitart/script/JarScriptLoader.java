@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -46,7 +47,7 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		Method add = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
 		add.setAccessible(true);
 		add.invoke(classLoader, new Object[] { file.toURI().toURL() });
-		ConcurrentHashMap<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<KEY, IScript<KEY>>();
+		Map<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<KEY, IScript<KEY>>();
 		try (JarFile jarFile = new JarFile(file)) {
 			Enumeration<JarEntry> entrys = jarFile.entries();
 			while (entrys.hasMoreElements()) {

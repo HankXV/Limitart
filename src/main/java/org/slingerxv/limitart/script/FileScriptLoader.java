@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -127,8 +128,8 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 	 */
 	public AbstractScriptLoader<KEY> loadScriptsBySourceDir(String dir, ScriptFileType... scriptTypes)
 			throws IOException, InstantiationException, IllegalAccessException, ScriptException {
-		ConcurrentHashMap<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<>();
-		ConcurrentHashMap<KEY, File> scriptPath_new = new ConcurrentHashMap<>();
+		Map<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<>();
+		Map<KEY, File> scriptPath_new = new ConcurrentHashMap<>();
 		try (GroovyClassLoader loader = new GroovyClassLoader(ClassLoader.getSystemClassLoader());) {
 			File dir_root = new File(dir);
 			if (!dir_root.exists()) {

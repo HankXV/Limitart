@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
@@ -62,9 +63,9 @@ public class ProviderX {
 	private BinaryClient serviceCenterClient;
 	private IProviderListener providerListener;
 	private ProviderXConfig config;
-	private HashMap<String, RpcServiceInstance> services = new HashMap<>();
+	private Map<String, RpcServiceInstance> services = new HashMap<>();
 	// 定时任务回调列表
-	private HashMap<String, ProviderJob> scheduleJobs = new HashMap<>();
+	private Map<String, ProviderJob> scheduleJobs = new HashMap<>();
 
 	public ProviderX(ProviderXConfig config) throws Exception {
 		this(config, null);
@@ -148,7 +149,7 @@ public class ProviderX {
 			classesByPackage.addAll(ReflectionUtil.getClassesByPackage(temp, Object.class));
 		}
 		// RPC接口集合
-		HashMap<Class<?>, HashMap<String, Method>> rpcInterfaces = new HashMap<>();
+		Map<Class<?>, Map<String, Method>> rpcInterfaces = new HashMap<>();
 		// 查找所有RPC接口
 		for (Class<?> clazz : classesByPackage) {
 			// 必须是一个接口
@@ -170,7 +171,7 @@ public class ProviderX {
 			}
 			// 检查方法
 			Method[] methods = clazz.getMethods();
-			HashMap<String, Method> methodSet = new HashMap<>();
+			Map<String, Method> methodSet = new HashMap<>();
 			// 检查方法参数是否合法
 			for (Method method : methods) {
 				String methodOverloadName = ReflectionUtil.getMethodOverloadName(method);
@@ -212,11 +213,11 @@ public class ProviderX {
 				continue;
 			}
 			// 检查实现的接口实例的所有RPC服务
-			HashMap<String, Class<?>> serviceNames = new HashMap<>();
+			Map<String, Class<?>> serviceNames = new HashMap<>();
 			Object instance = null;
 			// 遍历接口（主要处理一个实例，实现了多个RPC接口的情况）
 			for (Class<?> temp : interfaces) {
-				HashMap<String, Method> hashMap = rpcInterfaces.get(temp);
+				Map<String, Method> hashMap = rpcInterfaces.get(temp);
 				// 没有RPC服务
 				if (hashMap == null) {
 					continue;

@@ -15,6 +15,7 @@
  */
 package org.slingerxv.limitart.taskqueuegroup;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,7 +37,7 @@ import org.slingerxv.limitart.taskqueuegroup.struct.AutoGrowthSegment;
 public class AutoGrowthTaskQueueGroup<T> {
 	private static Logger log = LoggerFactory.getLogger(AutoGrowthTaskQueueGroup.class);
 	private AtomicInteger threadId = new AtomicInteger(0);
-	private ConcurrentHashMap<Integer, AutoGrowthSegment<T>> threads = new ConcurrentHashMap<>();
+	private Map<Integer, AutoGrowthSegment<T>> threads = new ConcurrentHashMap<>();
 	private int entityCountPerThread;
 	private int coreThreadCount;
 	private int maxThreadCount;

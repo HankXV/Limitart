@@ -15,6 +15,7 @@
  */
 package org.slingerxv.limitart.game.org;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slingerxv.limitart.funcs.Proc1;
@@ -47,8 +48,8 @@ import org.slingerxv.limitart.util.StringUtil;
 public abstract class Org {
 	private long OrgId;
 	private long creatorId;
-	private ConcurrentHashMap<Integer, Job> jobs = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<Long, OrgMember> members = new ConcurrentHashMap<>();
+	private Map<Integer, Job> jobs = new ConcurrentHashMap<>();
+	private Map<Long, OrgMember> members = new ConcurrentHashMap<>();
 	private transient Proc3<Org, OrgMember, OrgMember> onChangeCreator;
 	private transient Proc5<Org, OrgMember, OrgMember, Job, Job> onChangeJob;
 	private transient Proc2<Org, OrgMember> onQuit;

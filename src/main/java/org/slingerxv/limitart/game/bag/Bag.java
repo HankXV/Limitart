@@ -234,7 +234,7 @@ public abstract class Bag {
 	 * @return
 	 */
 	public synchronized void makeUp() {
-		ConcurrentHashMap<Integer, AbstractItem> tempGrids = new ConcurrentHashMap<>();
+		Map<Integer, AbstractItem> tempGrids = new ConcurrentHashMap<>();
 		// 全部尝试合并
 		for (int i = START_GRID; i < capacity(); ++i) {
 			for (int j = i + 1; j < capacity(); ++j) {

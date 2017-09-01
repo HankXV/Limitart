@@ -17,8 +17,10 @@ package org.slingerxv.limitart.rpcx.center;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.quartz.JobDataMap;
@@ -60,13 +62,13 @@ public class ServiceCenterX {
 	private ServiceCenterXConfig config;
 	private BinaryServer binaryServer;
 	// RPC服务器组<提供者Id,session>
-	private ConcurrentHashMap<Integer, ServiceXServerSession> rpcServers = new ConcurrentHashMap<>();
+	private Map<Integer, ServiceXServerSession> rpcServers = new ConcurrentHashMap<>();
 	// RPC客户端组<客户端ChannelId,session>
-	private ConcurrentHashMap<String, ServiceXClientSession> rpcClients = new ConcurrentHashMap<>();
+	private Map<String, ServiceXClientSession> rpcClients = new ConcurrentHashMap<>();
 	// 服务名称-服务器集合(ProviderId)
-	private ConcurrentHashMap<String, ConcurrentHashSet<Integer>> service2Providers = new ConcurrentHashMap<>();
+	private Map<String, Set<Integer>> service2Providers = new ConcurrentHashMap<>();
 	// 定时任务集合
-	private ConcurrentHashMap<String, ConcurrentHashSet<Integer>> schedules = new ConcurrentHashMap<>();
+	private Map<String, Set<Integer>> schedules = new ConcurrentHashMap<>();
 
 	public ServiceCenterX(ServiceCenterXConfig config) throws Exception {
 		Objects.requireNonNull(config, "config");
@@ -115,10 +117,10 @@ public class ServiceCenterX {
 			List<String> servicesName) {
 		log.info("生产者：" + providerUID + "，ip：" + channel.remoteAddress() + "开始发布服务...");
 		for (String serviceName : servicesName) {
-			ConcurrentHashSet<Integer> rpcServiceLBData = service2Providers.get(serviceName);
+			Set<Integer> rpcServiceLBData = service2Providers.get(serviceName);
 			if (rpcServiceLBData == null) {
 				rpcServiceLBData = new ConcurrentHashSet<>();
-				ConcurrentHashSet<Integer> putIfAbsent = service2Providers.putIfAbsent(serviceName, rpcServiceLBData);
+				Set<Integer> putIfAbsent = service2Providers.putIfAbsent(serviceName, rpcServiceLBData);
 				if (putIfAbsent != null) {
 					rpcServiceLBData = putIfAbsent;
 				}
@@ -142,8 +144,8 @@ public class ServiceCenterX {
 			return;
 		}
 		SubscribeServiceResultServiceCenterMessage msg = new SubscribeServiceResultServiceCenterMessage();
-		for (Entry<String, ConcurrentHashSet<Integer>> entry : service2Providers.entrySet()) {
-			ConcurrentHashSet<Integer> data = entry.getValue();
+		for (Entry<String, Set<Integer>> entry : service2Providers.entrySet()) {
+			Set<Integer> data = entry.getValue();
 			if (!data.contains(providerId)) {
 				continue;
 			}
@@ -182,9 +184,9 @@ public class ServiceCenterX {
 			return;
 		}
 		SubscribeServiceResultServiceCenterMessage msg = new SubscribeServiceResultServiceCenterMessage();
-		for (Entry<String, ConcurrentHashSet<Integer>> entry : service2Providers.entrySet()) {
+		for (Entry<String, Set<Integer>> entry : service2Providers.entrySet()) {
 			String serviceName = entry.getKey();
-			ConcurrentHashSet<Integer> data = entry.getValue();
+			Set<Integer> data = entry.getValue();
 			ProviderServiceMeta info = new ProviderServiceMeta();
 			msg.services.add(info);
 			info.serviceName = serviceName;
@@ -208,9 +210,9 @@ public class ServiceCenterX {
 	 * @param providerId
 	 */
 	private void onProviderDisconnected(int providerId) {
-		for (Entry<String, ConcurrentHashSet<Integer>> entry : service2Providers.entrySet()) {
+		for (Entry<String, Set<Integer>> entry : service2Providers.entrySet()) {
 			String serviceName = entry.getKey();
-			ConcurrentHashSet<Integer> data = entry.getValue();
+			Set<Integer> data = entry.getValue();
 			Iterator<Integer> iterator = data.iterator();
 			for (; iterator.hasNext();) {
 				Integer pid = iterator.next();
@@ -295,11 +297,11 @@ public class ServiceCenterX {
 			}
 		}
 		// 清除定时任务
-		Iterator<Entry<String, ConcurrentHashSet<Integer>>> iterator = schedules.entrySet().iterator();
+		Iterator<Entry<String, Set<Integer>>> iterator = schedules.entrySet().iterator();
 		for (; iterator.hasNext();) {
-			Entry<String, ConcurrentHashSet<Integer>> next = iterator.next();
+			Entry<String, Set<Integer>> next = iterator.next();
 			String scheduleName = next.getKey();
-			ConcurrentHashSet<Integer> providers = next.getValue();
+			Set<Integer> providers = next.getValue();
 			if (providers.contains(providerId)) {
 				providers.remove(providerId);
 				log.info("断开链接，删除定时服务" + scheduleName + "的ProviderId：" + providerId + "，剩余执行者大小：" + providers.size());
@@ -319,19 +321,19 @@ public class ServiceCenterX {
 
 	private void onAddSchedule(String jobName, int providerId, String cronExpression, int intervalInHours,
 			int intervalInMinutes, int intervalInSeconds, int intervalInMillis, int repeatCount) {
-		ConcurrentHashSet<Integer> concurrentHashSet = schedules.get(jobName);
-		if (concurrentHashSet == null) {
-			concurrentHashSet = new ConcurrentHashSet<>();
-			ConcurrentHashSet<Integer> putIfAbsent = schedules.putIfAbsent(jobName, concurrentHashSet);
+		Set<Integer> set = schedules.get(jobName);
+		if (set == null) {
+			set = new ConcurrentHashSet<>();
+			Set<Integer> putIfAbsent = schedules.putIfAbsent(jobName, set);
 			if (putIfAbsent != null) {
-				concurrentHashSet = putIfAbsent;
+				set = putIfAbsent;
 			}
 		}
-		if (concurrentHashSet.contains(providerId)) {
+		if (set.contains(providerId)) {
 			log.error("任务" + jobName + "的Provider" + providerId + "定时任务发布重复！");
 			return;
 		}
-		concurrentHashSet.add(providerId);
+		set.add(providerId);
 		log.info("Provider" + providerId + "注册了一个定时任务:" + jobName);
 		try {
 			if (SchedulerUtil.self().hasSchedule(jobName)) {

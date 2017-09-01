@@ -18,7 +18,9 @@ package org.slingerxv.limitart.net.console;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -61,9 +63,9 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 	private String serverName;
 	// 端口
 	private int port;
-	private HashSet<String> whiteList;
-	private ConcurrentHashMap<String, ConsoleUser> users = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, Proc3<ConsoleUser, String, String[]>> commands = new ConcurrentHashMap<>();
+	private Set<String> whiteList;
+	private Map<String, ConsoleUser> users = new ConcurrentHashMap<>();
+	private Map<String, Proc3<ConsoleUser, String, String[]>> commands = new ConcurrentHashMap<>();
 	private Proc2<Channel, Throwable> onExceptionCaught;
 	private Proc1<Channel> onServerBind;
 	private Proc1<ConsoleUser> onUserLogin;
@@ -228,9 +230,9 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 	public static class ConsoleServerBuilder {
 		private String serverName;
 		private int port;
-		private HashSet<String> whiteList = new HashSet<>();
-		private ConcurrentHashMap<String, ConsoleUser> users = new ConcurrentHashMap<>();
-		private ConcurrentHashMap<String, Proc3<ConsoleUser, String, String[]>> commands = new ConcurrentHashMap<>();
+		private Set<String> whiteList = new HashSet<>();
+		private Map<String, ConsoleUser> users = new ConcurrentHashMap<>();
+		private Map<String, Proc3<ConsoleUser, String, String[]>> commands = new ConcurrentHashMap<>();
 		private Proc2<Channel, Throwable> onExceptionCaught;
 		private Proc1<Channel> onServerBind;
 		private Proc1<ConsoleUser> onUserLogin;

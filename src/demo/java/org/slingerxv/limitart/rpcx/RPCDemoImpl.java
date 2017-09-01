@@ -3,6 +3,8 @@ package org.slingerxv.limitart.rpcx;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.slingerxv.limitart.rpcx.bean.PersonInfo;
 
@@ -48,15 +50,15 @@ public class RPCDemoImpl implements IRPCDemo {
 	}
 
 	@Override
-	public HashMap<String, PersonInfo> getPersonMap() throws Exception {
-		HashMap<String, PersonInfo> person = new HashMap<>();
+	public Map<String, PersonInfo> getPersonMap() throws Exception {
+		Map<String, PersonInfo> person = new HashMap<>();
 		person.put("test", new PersonInfo());
 		return person;
 	}
 
 	@Override
-	public HashSet<PersonInfo> getPersonSet() throws Exception {
-		HashSet<PersonInfo> set = new HashSet<>();
+	public Set<PersonInfo> getPersonSet() throws Exception {
+		Set<PersonInfo> set = new HashSet<>();
 		set.add(new PersonInfo());
 		return set;
 	}

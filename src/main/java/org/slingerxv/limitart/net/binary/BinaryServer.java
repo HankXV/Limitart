@@ -19,7 +19,9 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,8 +80,8 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private static AttributeKey<Long> FIRST_HEART_TIME = AttributeKey.newInstance("FIRST_HEART_TIME");
 	private static AttributeKey<Long> LAST_RECEIVE_MSG_TIME = AttributeKey.newInstance("LAST_RECEIVE_MSG_TIME");
 	private static AttributeKey<Integer> HEART_COUNT = AttributeKey.newInstance("HEART_COUNT");
-	private ConcurrentHashMap<String, SessionValidateData> unvalidatedChannels = new ConcurrentHashMap<>();
-	private ConcurrentHashSet<Channel> validatedChannels = new ConcurrentHashSet<>();
+	private Map<String, SessionValidateData> unvalidatedChannels = new ConcurrentHashMap<>();
+	private Set<Channel> validatedChannels = new ConcurrentHashSet<>();
 	private SymmetricEncryptionUtil encrypUtil;
 	private TimerTask clearTask;
 	private TimerTask heartTask;
@@ -92,7 +94,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private int connectionValidateTimeInSec;
 	private AbstractBinaryDecoder decoder;
 	private AbstractBinaryEncoder encoder;
-	private HashSet<String> whiteList;
+	private Set<String> whiteList;
 	private MessageFactory factory;
 	private int maxConnection;
 	private int heartIntervalSec;
@@ -478,7 +480,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		return encoder;
 	}
 
-	public HashSet<String> getWhiteList() {
+	public Set<String> getWhiteList() {
 		return whiteList;
 	}
 
@@ -548,7 +550,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		private int connectionValidateTimeInSec;
 		private AbstractBinaryDecoder decoder;
 		private AbstractBinaryEncoder encoder;
-		private HashSet<String> whiteList = new HashSet<>();
+		private Set<String> whiteList = new HashSet<>();
 		private MessageFactory factory;
 		private int maxConnection;
 		private int heartIntervalSec;

@@ -16,7 +16,8 @@
 package org.slingerxv.limitart.rpcx.center.schedule;
 
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -41,11 +42,11 @@ public class ScheduleTask implements Job {
 		TriggerScheduleServiceCenterToProviderServiceCenterMessage msg = new TriggerScheduleServiceCenterToProviderServiceCenterMessage();
 		String jobName = job.getJobDetail().getKey().getName();
 		JobDataMap jobDataMap = job.getJobDetail().getJobDataMap();
-		ConcurrentHashMap<Integer, ServiceXServerSession> rpcServers = (ConcurrentHashMap<Integer, ServiceXServerSession>) jobDataMap
+		Map<Integer, ServiceXServerSession> rpcServers = (Map<Integer, ServiceXServerSession>) jobDataMap
 				.get(RPCSERVERS);
-		ConcurrentHashMap<String, ConcurrentHashSet<Integer>> schedules = (ConcurrentHashMap<String, ConcurrentHashSet<Integer>>) jobDataMap
+		Map<String, Set<Integer>> schedules = (Map<String, Set<Integer>>) jobDataMap
 				.get(SCHEDULES);
-		ConcurrentHashSet<Integer> providerList = schedules.get(jobName);
+		Set<Integer> providerList = schedules.get(jobName);
 		if (providerList == null) {
 			log.error("Job:" + jobName + "找不到Provider");
 			return;

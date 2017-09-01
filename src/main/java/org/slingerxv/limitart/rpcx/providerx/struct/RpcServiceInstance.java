@@ -17,6 +17,7 @@ package org.slingerxv.limitart.rpcx.providerx.struct;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * RPC服务实现类
@@ -26,7 +27,7 @@ import java.util.HashMap;
  */
 public class RpcServiceInstance {
 	private Object instance;
-	private HashMap<String, Method> methods = new HashMap<>();
+	private Map<String, Method> methods = new HashMap<>();
 
 	public Object self() {
 		return instance;
@@ -36,7 +37,7 @@ public class RpcServiceInstance {
 		this.instance = instance;
 	}
 
-	public HashMap<String, Method> getMethods() {
+	public Map<String, Method> getMethods() {
 		return methods;
 	}
 

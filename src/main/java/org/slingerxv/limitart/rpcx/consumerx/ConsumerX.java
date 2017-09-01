@@ -23,7 +23,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -70,19 +72,19 @@ import org.slingerxv.limitart.util.StringUtil;
 public class ConsumerX {
 	private static Logger log = LoggerFactory.getLogger(ConsumerX.class);
 	// Rpc客户端到服务器链接集合,服务器分配Id
-	private ConcurrentHashMap<Integer, BinaryClient> clients = new ConcurrentHashMap<>();
+	private Map<Integer, BinaryClient> clients = new ConcurrentHashMap<>();
 	private BinaryClient serviceCenterClient;
 	private ConsumerXConfig config;
 	// 动态代理集合
-	private HashMap<Class<?>, Object> clientProxys = new HashMap<>();
+	private Map<Class<?>, Object> clientProxys = new HashMap<>();
 	// 服务对应的本地代理接口集合
-	private HashMap<String, Class<?>> serviceProxyClasses = new HashMap<>();
+	private Map<String, Class<?>> serviceProxyClasses = new HashMap<>();
 	// 服务对应的服务器ID集合
-	private ConcurrentHashMap<String, ConcurrentHashSet<Integer>> serviceServers = new ConcurrentHashMap<>();
+	private Map<String, Set<Integer>> serviceServers = new ConcurrentHashMap<>();
 	// RequestId生成器
 	private AtomicInteger requestIdCreater = new AtomicInteger(0);
 	// RPC调用回调集合
-	private ConcurrentHashMap<Integer, RemoteFuture> futures = new ConcurrentHashMap<>();
+	private Map<Integer, RemoteFuture> futures = new ConcurrentHashMap<>();
 	private LongAdder dropNum = new LongAdder();
 
 	private IConsumerListener listener;
@@ -190,17 +192,17 @@ public class ConsumerX {
 	 */
 	private void onDirectFetchProviderServices(BinaryClient bc, int providerId, List<String> services) {
 		// 检查服务是否完全匹配
-		HashSet<String> notMatchList = new HashSet<>(serviceProxyClasses.keySet());
+		Set<String> notMatchList = new HashSet<>(serviceProxyClasses.keySet());
 		for (String remoteService : services) {
 			if (!serviceProxyClasses.containsKey(remoteService)) {
 				continue;
 			}
 			// 将此服务器加入到服务列表中
 			notMatchList.remove(remoteService);
-			ConcurrentHashSet<Integer> list = serviceServers.get(remoteService);
+			Set<Integer> list = serviceServers.get(remoteService);
 			if (list == null) {
 				list = new ConcurrentHashSet<>();
-				ConcurrentHashSet<Integer> putIfAbsent = serviceServers.putIfAbsent(remoteService, list);
+				Set<Integer> putIfAbsent = serviceServers.putIfAbsent(remoteService, list);
 				if (putIfAbsent != null) {
 					list = putIfAbsent;
 				}
@@ -249,10 +251,10 @@ public class ConsumerX {
 				// 不需要的服务
 				continue;
 			}
-			ConcurrentHashSet<Integer> list = serviceServers.get(serviceName);
+			Set<Integer> list = serviceServers.get(serviceName);
 			if (list == null) {
 				list = new ConcurrentHashSet<>();
-				ConcurrentHashSet<Integer> putIfAbsent = serviceServers.putIfAbsent(serviceName, list);
+				Set<Integer> putIfAbsent = serviceServers.putIfAbsent(serviceName, list);
 				if (putIfAbsent != null) {
 					list = putIfAbsent;
 				}
@@ -293,9 +295,9 @@ public class ConsumerX {
 				iterator.remove();
 				log.info("RPC服务器断开链接，providerId:" + providerId + "，地址：" + client.remoteAddress());
 				// 删除服务
-				for (Entry<String, ConcurrentHashSet<Integer>> entry : serviceServers.entrySet()) {
+				for (Entry<String, Set<Integer>> entry : serviceServers.entrySet()) {
 					String serviceName = entry.getKey();
-					ConcurrentHashSet<Integer> provideIds = entry.getValue();
+					Set<Integer> provideIds = entry.getValue();
 					Iterator<Integer> pit = provideIds.iterator();
 					for (; pit.hasNext();) {
 						Integer nextProviderId = pit.next();
@@ -376,10 +378,9 @@ public class ConsumerX {
 	 */
 	public List<Integer> getProviderIds(RpcProviderName providerName, Class<?> clazz) throws ServiceXProxyException {
 		List<Integer> list = new ArrayList<>();
-		ConcurrentHashSet<Integer> concurrentHashSet = this.serviceServers
-				.get(RpcUtil.getServiceName(providerName, clazz));
-		if (concurrentHashSet != null) {
-			list.addAll(concurrentHashSet);
+		Set<Integer> set = this.serviceServers.get(RpcUtil.getServiceName(providerName, clazz));
+		if (set != null) {
+			list.addAll(set);
 		}
 		return list;
 	}
@@ -520,7 +521,7 @@ public class ConsumerX {
 	 */
 	private RemoteFuture rpcSend(String serviceName, String methodOverloadName, Object[] args,
 			IProviderSelector providerSelector) throws ServiceXIOException {
-		ConcurrentHashSet<Integer> list = serviceServers.get(serviceName);
+		Set<Integer> list = serviceServers.get(serviceName);
 		if (list == null) {
 			throw new ServiceXIOException("服务：" + serviceName + "找不到可用服务器列表");
 		}
