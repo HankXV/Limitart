@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,6 +56,7 @@ import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.RandomUtil;
 import org.slingerxv.limitart.util.StringUtil;
 import org.slingerxv.limitart.util.SymmetricEncryptionUtil;
+import org.slingerxv.limitart.util.TimeUtil;
 import org.slingerxv.limitart.util.TimerUtil;
 
 import io.netty.buffer.ByteBuf;
@@ -445,14 +445,11 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		if (!msg.getChannel().hasAttr(FIRST_HEART_TIME)) {
 			msg.getChannel().attr(FIRST_HEART_TIME).set(now);
 			msg.getChannel().attr(HEART_COUNT).set(0);
-			return;
 		}
 		int times = msg.getChannel().attr(HEART_COUNT).get();
 		msg.getChannel().attr(HEART_COUNT).set(++times);
 		HeartServerMessage message = new HeartServerMessage();
-		// message.serverStartTime = startTime;
-		message.serverTime = now;
-		message.timeLocale = TimeZone.getDefault().getOffset(now);
+		message.serverUtcTime = TimeUtil.getUTCTime();
 		try {
 			sendMessage(msg.getChannel(), message);
 		} catch (Exception e) {

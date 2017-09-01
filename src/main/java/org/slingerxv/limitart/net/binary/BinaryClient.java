@@ -71,7 +71,7 @@ public class BinaryClient {
 	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
 	// private long serverStartTime;
-	private long serverTime;
+	private long serverUTCTime;
 	private TimerTask hearTask;
 	// ----config
 	private String clientName;
@@ -249,9 +249,8 @@ public class BinaryClient {
 		Procs.invoke(onConnectionEffective, this);
 	}
 
-	private void onHeartServer(long serverTime) {
-		// this.serverStartTime = serverStartTime;
-		this.serverTime = serverTime;
+	private void onHeartServer(long serverUTCTime) {
+		this.serverUTCTime = serverUTCTime;
 	}
 
 	public String channelLongID() {
@@ -294,8 +293,8 @@ public class BinaryClient {
 	// return serverStartTime;
 	// }
 
-	public long getServerTime() {
-		return serverTime;
+	public long getServerUTCTime() {
+		return serverUTCTime;
 	}
 
 	public int getHeartIntervalSec() {
@@ -368,7 +367,7 @@ public class BinaryClient {
 
 		@Override
 		public void handle(HeartServerMessage msg) {
-			msg.getClient().onHeartServer(msg.serverTime);
+			msg.getClient().onHeartServer(msg.serverUtcTime);
 		}
 	}
 

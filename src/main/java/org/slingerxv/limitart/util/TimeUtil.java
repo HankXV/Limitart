@@ -186,4 +186,12 @@ public final class TimeUtil {
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar.getTimeInMillis();
 	}
+
+	public static long getUTCTime() {
+		Calendar cal = Calendar.getInstance();
+		int zoneOffset = cal.get(java.util.Calendar.ZONE_OFFSET);
+		int dstOffset = cal.get(java.util.Calendar.DST_OFFSET);
+		cal.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset));
+		return cal.getTimeInMillis();
+	}
 }

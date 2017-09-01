@@ -19,9 +19,7 @@ import org.slingerxv.limitart.net.binary.message.Message;
 import org.slingerxv.limitart.net.binary.message.constant.InnerMessageEnum;
 
 public class HeartServerMessage extends Message {
-	public long serverTime;
-//	public long serverStartTime;
-	public int timeLocale;
+	public long serverUtcTime;
 
 	@Override
 	public short getMessageId() {
