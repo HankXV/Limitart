@@ -33,6 +33,7 @@ import org.slingerxv.limitart.util.StringUtil;
 
 /**
  * 国际化字符串<br>
+ * 本地化资源名为(lang_语言简称.properties) <br>
  * 通过以本国熟悉语言(如：中国)作Key来索引其他语言<br>
  * 我爱你=我爱你(在lang_zh_cn.properties中)<br>
  * 我爱你=i love u(在lang_en.properties中)
@@ -99,7 +100,7 @@ public class I18NStrings {
 		for (Entry<Object, Object> entry : prop.entrySet()) {
 			add(lang, entry.getKey().toString(), entry.getValue().toString());
 		}
-		log.info("load lang {0} done,count:{1}", lang.name(), prop.size());
+		log.info("load lang {} done,count:{}", lang.name(), prop.size());
 	}
 
 	/**
@@ -121,7 +122,7 @@ public class I18NStrings {
 		}
 		Map<String, String> map = langs.get(lang);
 		if (map.containsKey(key)) {
-			log.error("lang {0} key duplicated {2}", lang.name(), key);
+			log.error("lang {} key duplicated {}", lang.name(), key);
 			return;
 		}
 		map.put(key, content);
@@ -140,13 +141,13 @@ public class I18NStrings {
 		Objects.requireNonNull(lang, "lang");
 		Objects.requireNonNull(key, "lang");
 		if (!langs.containsKey(lang)) {
-			log.error("language :" + lang.name() + " has no solution!");
+			log.error("language :{} has no solution!", lang.name());
 			dumpUntraslatedKey(lang, key);
 			return key;
 		}
 		Map<String, String> map = langs.get(lang);
 		if (!map.containsKey(key)) {
-			log.error("language :" + lang.name() + " has no key:" + key);
+			log.error("language :{} has no key:{}", lang.name(), key);
 			dumpUntraslatedKey(lang, key);
 			return key;
 		}
@@ -190,7 +191,18 @@ public class I18NStrings {
 	 * @param lang
 	 * @return
 	 */
-	public String getFileName(Languages lang) {
+	public static String getFileName(Languages lang) {
 		return "lang_" + lang.name() + ".properties";
+	}
+
+	/**
+	 * 通过文件名获取枚举
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public static Languages getTypeByFileName(String fileName) {
+		String substring = fileName.replace("lang_", "").replace(".properties", "");
+		return Languages.valueOf(substring);
 	}
 }
