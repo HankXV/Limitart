@@ -16,6 +16,7 @@ package org.slingerxv.limitart.i18n;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.util.StringUtil;
 
 /**
  * 国际化字符串<br>
@@ -55,6 +57,17 @@ public class I18NStrings {
 	 */
 	public void loadProperty(Languages lang, byte[] content) throws IOException {
 		loadProperty(lang, new ByteArrayInputStream(content));
+	}
+
+	/**
+	 * 通过文件加载
+	 * 
+	 * @param lang
+	 * @param file
+	 * @throws IOException
+	 */
+	public void loadProperty(Languages lang, File file) throws IOException {
+		loadProperty(lang, new FileInputStream(file));
 	}
 
 	/**
@@ -100,6 +113,9 @@ public class I18NStrings {
 	 *            内容
 	 */
 	public void add(Languages lang, String key, String content) {
+		if (StringUtil.isEmptyOrNull(content)) {
+			return;
+		}
 		if (!langs.containsKey(lang)) {
 			langs.put(lang, new HashMap<>());
 		}
