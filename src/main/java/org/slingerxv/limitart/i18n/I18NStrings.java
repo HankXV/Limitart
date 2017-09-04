@@ -29,6 +29,7 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.funcs.Func2;
 import org.slingerxv.limitart.util.StringUtil;
 
 /**
@@ -154,6 +155,16 @@ public class I18NStrings {
 		return map.get(key);
 	}
 
+	public void foreach(Func2<Languages, Map<String, String>, Boolean> func) {
+		for (Entry<Languages, Map<String, String>> entry : langs.entrySet()) {
+			Map<String, String> map = new HashMap<>();
+			map.putAll(entry.getValue());
+			if (!func.run(entry.getKey(), map)) {
+				break;
+			}
+		}
+	}
+
 	/**
 	 * 记录未翻译的key到文件
 	 * 
@@ -205,4 +216,5 @@ public class I18NStrings {
 		String substring = fileName.replace("lang_", "").replace(".properties", "");
 		return Languages.valueOf(substring);
 	}
+
 }
