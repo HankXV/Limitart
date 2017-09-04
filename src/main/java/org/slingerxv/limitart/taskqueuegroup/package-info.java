@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * 消息队列租
+ * 消息队列组
  *
  */
 package org.slingerxv.limitart.taskqueuegroup;
