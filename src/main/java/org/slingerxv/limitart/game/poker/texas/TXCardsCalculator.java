@@ -165,7 +165,7 @@ public class TXCardsCalculator {
 	 * @return
 	 */
 	public static TXCardRank getCardRank(long evaluator, int cardCount) {
-		return TXCardRank.getTXCardRank(evaluator >> (cardCount << 3));
+		return TXCardRank.getTXCardRank((int) (evaluator >> (cardCount << 3)));
 	}
 
 	// 评估数值
@@ -183,7 +183,7 @@ public class TXCardsCalculator {
 	 * @return
 	 */
 	public TXCardRank getRank() {
-		return TXCardRank.getTXCardRank(this.rank / 0x10000000000L);
+		return TXCardRank.getTXCardRank((int) (this.rank / 0x10000000000L));
 	}
 
 	/**

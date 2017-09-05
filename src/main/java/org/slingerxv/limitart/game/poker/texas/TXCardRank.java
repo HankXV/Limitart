@@ -1,7 +1,7 @@
 package org.slingerxv.limitart.game.poker.texas;
 
 /*
- * 货币类型
+ * 德州牌型
  */
 public enum TXCardRank {
 	/**
@@ -53,10 +53,10 @@ public enum TXCardRank {
 	public long getValue() {
 		return this.value;
 	}
-	
-	public static TXCardRank getTXCardRank(long num){
-		for(TXCardRank txCardRank : TXCardRank.values()){
-			if(num == txCardRank.getValue()){
+
+	public static TXCardRank getTXCardRank(int value) {
+		for (TXCardRank txCardRank : TXCardRank.values()) {
+			if (value == txCardRank.getValue()) {
 				return txCardRank;
 			}
 		}
