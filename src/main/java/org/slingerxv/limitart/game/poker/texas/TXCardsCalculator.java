@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.slingerxv.limitart.game.poker.Poker;
 import org.slingerxv.limitart.util.Beta;
-import org.slingerxv.limitart.util.MathUtil;
 import org.slingerxv.limitart.util.CollectionUtil;
+import org.slingerxv.limitart.util.MathUtil;
 
 /**
  * 德州扑克牌型判定
@@ -32,25 +32,25 @@ import org.slingerxv.limitart.util.CollectionUtil;
 @Beta
 public class TXCardsCalculator {
 	// 高牌
-	public final static long HIGH_CARD = 0x10000000000L;
+	private final static long HIGH_CARD = TXCardRank.HIGH_CARD.getValue() * 0x10000000000L;
 	// 一对
-	public final static long ONE_PAIR = 0x20000000000L;
+	private final static long ONE_PAIR = TXCardRank.ONE_PAIR.getValue() * 0x10000000000L;
 	// 两对
-	public final static long TWO_PAIR = 0x30000000000L;
+	private final static long TWO_PAIR = TXCardRank.TWO_PAIR.getValue() * 0x10000000000L;
 	// 三条
-	public final static long THREE_OF_A_KIND = 0x40000000000L;
+	private final static long THREE_OF_A_KIND = TXCardRank.THREE_OF_A_KIND.getValue() * 0x10000000000L;
 	// 顺子
-	public final static long STRAIGHT = 0x50000000000L;
+	private final static long STRAIGHT = TXCardRank.STRAIGHT.getValue() * 0x10000000000L;
 	// 同花
-	public final static long FLUSH = 0x60000000000L;
+	private final static long FLUSH = TXCardRank.FLUSH.getValue() * 0x10000000000L;
 	// 葫芦
-	public final static long FULL_HOUSE = 0x70000000000L;
+	private final static long FULL_HOUSE = TXCardRank.FULL_HOUSE.getValue() * 0x10000000000L;
 	// 四条
-	public final static long FOUR_OF_A_KIND = 0x80000000000L;
+	private final static long FOUR_OF_A_KIND = TXCardRank.FOUR_OF_A_KIND.getValue() * 0x10000000000L;
 	// 同花顺
-	public final static long STRAIGHT_FLUSH = 0x90000000000L;
+	private final static long STRAIGHT_FLUSH = TXCardRank.STRAIGHT_FLUSH.getValue() * 0x10000000000L;
 	// 皇家同花顺
-	public final static long ROYAL_FLUSH = 0xA0000000000L;
+	private final static long ROYAL_FLUSH = TXCardRank.ROYAL_FLUSH.getValue() * 0x10000000000L;
 	// 原始数据
 	private byte[] cards = null;
 	private byte[] numbers = new byte[5];
@@ -116,7 +116,7 @@ public class TXCardsCalculator {
 		// 为同花顺时，不去匹配其他牌型
 		if (isStraightFlush()) {
 			if (maxNumberOfStraight == Poker.CARD_NUM_ACE) {
-				rank = STRAIGHT_FLUSH;
+				rank = ROYAL_FLUSH;
 			}
 		} else {
 			// 匹配牌型
@@ -164,8 +164,8 @@ public class TXCardsCalculator {
 	 * @param cardCount
 	 * @return
 	 */
-	public static long getCardRank(long evaluator, int cardCount) {
-		return evaluator >> (cardCount << 3);
+	public static TXCardRank getCardRank(long evaluator, int cardCount) {
+		return TXCardRank.getTXCardRank(evaluator >> (cardCount << 3));
 	}
 
 	// 评估数值
@@ -182,8 +182,8 @@ public class TXCardsCalculator {
 	 * 
 	 * @return
 	 */
-	public long getRank() {
-		return this.rank;
+	public TXCardRank getRank() {
+		return TXCardRank.getTXCardRank(this.rank / 0x10000000000L);
 	}
 
 	/**
