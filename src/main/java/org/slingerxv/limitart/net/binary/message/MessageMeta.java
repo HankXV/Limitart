@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slingerxv.limitart.net.binary.message.exception.MessageIOException;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.reflectasm.FieldAccess;
+import org.slingerxv.limitart.util.Beta;
 import org.slingerxv.limitart.util.filter.FieldFilter;
 
 import io.netty.buffer.ByteBuf;
@@ -40,10 +41,20 @@ import io.netty.util.CharsetUtil;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class MessageMeta {
-	private static final boolean COMPRESS_INT = false;
+	@Beta
+	private static boolean COMPRESS_INT32_64 = false;
 	private static Map<Class<? extends MessageMeta>, ConstructorAccess> messageMetaCache = new ConcurrentHashMap<>();
 	private static Map<Class<? extends MessageMeta>, FieldAccess> messageMetaFieldCache = new ConcurrentHashMap<>();
 	private ByteBuf buffer;
+
+	/**
+	 * 设置是否开启int和long压缩
+	 * 
+	 * @param open
+	 */
+	public static void setCompressOpen(boolean open) {
+		COMPRESS_INT32_64 = open;
+	}
 
 	public void encode() throws Exception {
 		FieldAccess fieldAccess = getFieldAccess();
@@ -706,7 +717,11 @@ public abstract class MessageMeta {
 	 * @param value
 	 */
 	protected final void putLong(long value) {
-		buffer.writeLong(value);
+		if (COMPRESS_INT32_64) {
+			writeRawVarint64(value);
+		} else {
+			buffer.writeLong(value);
+		}
 	}
 
 	/**
@@ -716,7 +731,11 @@ public abstract class MessageMeta {
 	 * @return
 	 */
 	protected final long getLong() {
-		return buffer.readLong();
+		if (COMPRESS_INT32_64) {
+			return readRawVarint64();
+		} else {
+			return buffer.readLong();
+		}
 	}
 
 	/**
@@ -802,7 +821,7 @@ public abstract class MessageMeta {
 	 * @param value
 	 */
 	protected final void putInt(int value) {
-		if (COMPRESS_INT) {
+		if (COMPRESS_INT32_64) {
 			writeRawVarint32(value);
 		} else {
 			this.buffer.writeInt(value);
@@ -816,7 +835,7 @@ public abstract class MessageMeta {
 	 * @return
 	 */
 	protected final int getInt() {
-		if (COMPRESS_INT) {
+		if (COMPRESS_INT32_64) {
 			return readRawVarint32();
 		} else {
 			return this.buffer.readInt();
@@ -1507,64 +1526,65 @@ public abstract class MessageMeta {
 		}
 	}
 
-	private void writeRawVarint32(int val) {
-		int value = val;
+	private void writeRawVarint64(long value) {
 		while (true) {
-			if ((value & 0xFFFFFF80) == 0) {
-				this.buffer.writeByte(value);
+			if ((value & ~0x7FL) == 0) {
+				this.buffer.writeByte(((byte) value));
 				return;
+			} else {
+				this.buffer.writeByte((byte) (((int) value & 0x7F) | 0x80));
+				value >>>= 7;
 			}
-			this.buffer.writeByte(value & 0x7F | 0x80);
-			value >>>= 7;
+		}
+	}
+
+	private long readRawVarint64() {
+		int shift = 0;
+		long result = 0;
+		while (shift < 64) {
+			final byte b = this.buffer.readByte();
+			result |= (long) (b & 0x7F) << shift;
+			if ((b & 0x80) == 0) {
+				return result;
+			}
+			shift += 7;
+		}
+		throw new CorruptedFrameException("malformed varint.");
+	}
+
+	private void writeRawVarint32(int val) {
+		while (true) {
+			if ((val & ~0x7F) == 0) {
+				this.buffer.writeByte((byte) val);
+				return;
+			} else {
+				this.buffer.writeByte((byte) ((val & 0x7F) | 0x80));
+				val >>>= 7;
+			}
 		}
 	}
 
 	private int readRawVarint32() {
-		if (!(buffer.isReadable())) {
-			return 0;
-		}
-		buffer.markReaderIndex();
-		byte tmp = buffer.readByte();
-		if (tmp >= 0) {
-			return tmp;
-		}
-		int result = tmp & 0x7F;
-		if (!(buffer.isReadable())) {
-			buffer.resetReaderIndex();
-			return 0;
-		}
-		if ((tmp = buffer.readByte()) >= 0) {
-			result |= tmp << 7;
+		int x;
+		if ((x = buffer.readByte()) >= 0) {
+			return x;
+		} else if ((x ^= (buffer.readByte() << 7)) < 0L) {
+			x ^= (~0L << 7);
+		} else if ((x ^= (buffer.readByte() << 14)) >= 0L) {
+			x ^= (~0L << 7) ^ (~0L << 14);
+		} else if ((x ^= (buffer.readByte() << 21)) < 0L) {
+			x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21);
 		} else {
-			result |= (tmp & 0x7F) << 7;
-			if (!(buffer.isReadable())) {
-				buffer.resetReaderIndex();
-				return 0;
-			}
-			if ((tmp = buffer.readByte()) >= 0) {
-				result |= tmp << 14;
-			} else {
-				result |= (tmp & 0x7F) << 14;
-				if (!(buffer.isReadable())) {
-					buffer.resetReaderIndex();
-					return 0;
-				}
-				if ((tmp = buffer.readByte()) >= 0) {
-					result |= tmp << 21;
-				} else {
-					result |= (tmp & 0x7F) << 21;
-					if (!(buffer.isReadable())) {
-						buffer.resetReaderIndex();
-						return 0;
-					}
-					result |= (tmp = buffer.readByte()) << 28;
-					if (tmp < 0) {
-						throw new CorruptedFrameException("malformed varint.");
-					}
-				}
+			int y = buffer.readByte();
+			x ^= y << 28;
+			x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28);
+			if (y < 0) {
+				// 格式已经不对了
+				throw new CorruptedFrameException("malformed varint.");
 			}
 		}
-		return result;
+		return x;
+
 	}
 
 	private <T extends MessageMeta> T createInstance(Class<T> clazz) {
