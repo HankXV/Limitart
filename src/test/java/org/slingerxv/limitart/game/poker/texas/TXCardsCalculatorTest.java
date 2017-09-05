@@ -58,7 +58,7 @@ public class TXCardsCalculatorTest {
 		for (int i = 0; i < tableCards.size(); ++i) {
 			txCardsCalculator = TXCardsCalculator.calBestCards(CollectionUtil.toByteArray(tableCards.get(i)),
 					CollectionUtil.toByteArray(handCards.get(i)));
-			Assert.assertFalse(txCardsCalculator.getRank() < TXCardsCalculator.HIGH_CARD);
+			Assert.assertFalse(txCardsCalculator.getRank().getValue() < TXCardRank.HIGH_CARD.getValue());
 			txCardsCalculator = null;
 		}
 	}
@@ -67,7 +67,7 @@ public class TXCardsCalculatorTest {
 	public void testTXCardsCalculator() {
 		for (int i = 0; i < fiveCards.size(); ++i) {
 			txCardsCalculator = new TXCardsCalculator(CollectionUtil.toByteArray(fiveCards.get(i)));
-			Assert.assertFalse(txCardsCalculator.getRank() < TXCardsCalculator.HIGH_CARD);
+			Assert.assertFalse(txCardsCalculator.getRank().getValue() < TXCardRank.HIGH_CARD.getValue());
 			txCardsCalculator = null;
 		}
 	}
@@ -76,7 +76,7 @@ public class TXCardsCalculatorTest {
 	public void testGetRank() {
 		for (int i = 0; i < fiveCards.size(); ++i) {
 			txCardsCalculator = new TXCardsCalculator(CollectionUtil.toByteArray(fiveCards.get(i)));
-			Assert.assertFalse(txCardsCalculator.getRank() < TXCardsCalculator.HIGH_CARD);
+			Assert.assertFalse(txCardsCalculator.getRank().getValue() < TXCardRank.HIGH_CARD.getValue());
 			txCardsCalculator = null;
 		}
 	}
@@ -86,7 +86,7 @@ public class TXCardsCalculatorTest {
 		TXCardsCalculator calculator = new TXCardsCalculator(new byte[]{Poker.createCard((byte) 2, Poker.CARD_SUIT_HEART),
 				Poker.createCard((byte) 3, Poker.CARD_SUIT_SPADE), Poker.createCard((byte)4, Poker.CARD_SUIT_SPADE),
 				Poker.createCard((byte) 5, Poker.CARD_SUIT_SPADE), Poker.createCard((byte) 7, Poker.CARD_SUIT_SPADE)});
-		Assert.assertFalse("Class TXCardsCalculator constructor has error", calculator.getRank()<TXCardsCalculator.HIGH_CARD);
+		Assert.assertFalse("Class TXCardsCalculator constructor has error", calculator.getRank().getValue() < TXCardRank.HIGH_CARD.getValue());
 		long minValue = calculator.getValue();
 		for (int i = 0; i < fiveCards.size(); ++i) {
 			txCardsCalculator = new TXCardsCalculator(CollectionUtil.toByteArray(fiveCards.get(i)));
