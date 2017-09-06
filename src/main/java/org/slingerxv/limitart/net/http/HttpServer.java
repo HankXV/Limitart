@@ -236,7 +236,8 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 						// 没内容的文件GG掉
 						if (readableBytes > 0) {
 							String name = fileUpload.getFilename();
-							byte[] file = fileUpload.content().array();
+							byte[] file = new byte[readableBytes];
+							fileUpload.content().readBytes(file);
 							message.getFiles().put(name, file);
 						}
 					}

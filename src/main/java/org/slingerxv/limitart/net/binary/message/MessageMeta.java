@@ -42,7 +42,7 @@ import io.netty.util.CharsetUtil;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class MessageMeta {
 	@Beta
-	private static boolean COMPRESS_INT32_64 = false;
+	private static boolean COMPRESS_INT32_64 = true;
 	private static Map<Class<? extends MessageMeta>, ConstructorAccess> messageMetaCache = new ConcurrentHashMap<>();
 	private static Map<Class<? extends MessageMeta>, FieldAccess> messageMetaFieldCache = new ConcurrentHashMap<>();
 	private ByteBuf buffer;
@@ -303,7 +303,6 @@ public abstract class MessageMeta {
 			} else if (type == long.class) {
 				field.setLong(this, getLong());
 			} else if (type == float.class) {
-				putFloat(field.getFloat(this));
 				field.setFloat(this, getFloat());
 			} else if (type == double.class) {
 				field.setDouble(this, getDouble());
@@ -489,7 +488,7 @@ public abstract class MessageMeta {
 	 * @param meta
 	 * @throws Exception
 	 */
-	protected final void putMessageMeta(MessageMeta meta) throws Exception {
+	public final void putMessageMeta(MessageMeta meta) throws Exception {
 		if (meta == null) {
 			putByte(0);
 		} else {
@@ -506,7 +505,7 @@ public abstract class MessageMeta {
 	 * @param out
 	 * @throws Exception
 	 */
-	protected final <T extends MessageMeta> T getMessageMeta(Class<T> clazz) throws Exception {
+	public final <T extends MessageMeta> T getMessageMeta(Class<T> clazz) throws Exception {
 		byte len = getByte();
 		if (len == 0) {
 			return null;
@@ -525,7 +524,7 @@ public abstract class MessageMeta {
 	 * @param value
 	 * @throws Exception
 	 */
-	protected final <T extends MessageMeta> void putMessageMetaList(ArrayList<T> value) throws Exception {
+	public final <T extends MessageMeta> void putMessageMetaList(ArrayList<T> value) throws Exception {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -544,7 +543,7 @@ public abstract class MessageMeta {
 	 * @return
 	 * @throws Exception
 	 */
-	protected final <T extends MessageMeta> ArrayList<T> getMessageMetaList(Class<T> clazz) throws Exception {
+	public final <T extends MessageMeta> ArrayList<T> getMessageMetaList(Class<T> clazz) throws Exception {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -567,7 +566,7 @@ public abstract class MessageMeta {
 	 * @param value
 	 * @throws Exception
 	 */
-	protected final <T extends MessageMeta> void putMessageMetaArray(T[] value) throws Exception {
+	public final <T extends MessageMeta> void putMessageMetaArray(T[] value) throws Exception {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -585,7 +584,7 @@ public abstract class MessageMeta {
 	 * @return
 	 * @throws Exception
 	 */
-	protected final <T extends MessageMeta> T[] getMessageMetaArray(Class<T> clazz) throws Exception {
+	public final <T extends MessageMeta> T[] getMessageMetaArray(Class<T> clazz) throws Exception {
 		short length = getShort();
 		if (length == -1) {
 			return null;
@@ -606,7 +605,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putString(String value) {
+	public final void putString(String value) {
 		if (value == null) {
 			putByteArray(null);
 		} else if ("".equals(value)) {
@@ -623,7 +622,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final String getString() {
+	public final String getString() {
 		byte[] bytes = getByteArray();
 		if (bytes == null) {
 			return null;
@@ -640,7 +639,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putStringList(ArrayList<String> value) {
+	public final void putStringList(ArrayList<String> value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -657,7 +656,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<String> getStringList() {
+	public final ArrayList<String> getStringList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -678,7 +677,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putStringArray(String[] value) {
+	public final void putStringArray(String[] value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -695,7 +694,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final String[] getStringArray() {
+	public final String[] getStringArray() {
 		short length = getShort();
 		if (length == -1) {
 			return null;
@@ -716,7 +715,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putLong(long value) {
+	public final void putLong(long value) {
 		if (COMPRESS_INT32_64) {
 			writeRawVarint64(value);
 		} else {
@@ -730,7 +729,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final long getLong() {
+	public final long getLong() {
 		if (COMPRESS_INT32_64) {
 			return readRawVarint64();
 		} else {
@@ -744,7 +743,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putLongList(ArrayList<Long> value) {
+	public final void putLongList(ArrayList<Long> value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -761,7 +760,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<Long> getLongList() {
+	public final ArrayList<Long> getLongList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -782,7 +781,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putLongArray(long[] value) {
+	public final void putLongArray(long[] value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -799,7 +798,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final long[] getLongArray() {
+	public final long[] getLongArray() {
 		short length = getShort();
 		if (length == -1) {
 			return null;
@@ -820,7 +819,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putInt(int value) {
+	public final void putInt(int value) {
 		if (COMPRESS_INT32_64) {
 			writeRawVarint32(value);
 		} else {
@@ -834,7 +833,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final int getInt() {
+	public final int getInt() {
 		if (COMPRESS_INT32_64) {
 			return readRawVarint32();
 		} else {
@@ -848,7 +847,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putIntList(ArrayList<Integer> value) {
+	public final void putIntList(ArrayList<Integer> value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -865,7 +864,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<Integer> getIntList() {
+	public final ArrayList<Integer> getIntList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -886,7 +885,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<Byte> getByteList() {
+	public final ArrayList<Byte> getByteList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -907,7 +906,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putIntArray(int[] value) {
+	public final void putIntArray(int[] value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -924,7 +923,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final int[] getIntArray() {
+	public final int[] getIntArray() {
 		short length = getShort();
 		if (length == -1) {
 			return null;
@@ -945,7 +944,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putByte(int value) {
+	public final void putByte(int value) {
 		buffer.writeByte(value);
 	}
 
@@ -955,7 +954,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putByteList(ArrayList<Byte> value) {
+	public final void putByteList(ArrayList<Byte> value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -972,7 +971,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final byte getByte() {
+	public final byte getByte() {
 		return buffer.readByte();
 	}
 
@@ -982,7 +981,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param list
 	 */
-	protected final void putByteArrayList(ArrayList<byte[]> list) {
+	public final void putByteArrayList(ArrayList<byte[]> list) {
 		if (list == null) {
 			putShort(-1);
 		} else {
@@ -999,7 +998,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<byte[]> getByteArrayList() {
+	public final ArrayList<byte[]> getByteArrayList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -1018,7 +1017,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param bytes
 	 */
-	protected final void putByteArray(byte[] bytes) {
+	public final void putByteArray(byte[] bytes) {
 		if (bytes == null) {
 			putShort(-1);
 		} else {
@@ -1033,7 +1032,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final byte[] getByteArray() {
+	public final byte[] getByteArray() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -1052,7 +1051,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putBoolean(boolean value) {
+	public final void putBoolean(boolean value) {
 		buffer.writeBoolean(value);
 	}
 
@@ -1062,7 +1061,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final boolean getBoolean() {
+	public final boolean getBoolean() {
 		return buffer.readBoolean();
 	}
 
@@ -1072,7 +1071,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putBooleanList(ArrayList<Boolean> value) {
+	public final void putBooleanList(ArrayList<Boolean> value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1089,7 +1088,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<Boolean> getBooleanList() {
+	public final ArrayList<Boolean> getBooleanList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -1110,7 +1109,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putBooleanArray(boolean[] value) {
+	public final void putBooleanArray(boolean[] value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1127,7 +1126,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final boolean[] getBooleanArray() {
+	public final boolean[] getBooleanArray() {
 		short length = getShort();
 		if (length == -1) {
 			return null;
@@ -1148,7 +1147,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putFloat(float value) {
+	public final void putFloat(float value) {
 		buffer.writeFloat(value);
 	}
 
@@ -1158,7 +1157,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final float getFloat() {
+	public final float getFloat() {
 		return buffer.readFloat();
 	}
 
@@ -1168,7 +1167,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putFloatList(ArrayList<Float> value) {
+	public final void putFloatList(ArrayList<Float> value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1185,7 +1184,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<Float> getFloatList() {
+	public final ArrayList<Float> getFloatList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -1206,7 +1205,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putFloatArray(float[] value) {
+	public final void putFloatArray(float[] value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1223,7 +1222,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final float[] getFloatArray() {
+	public final float[] getFloatArray() {
 		short length = getShort();
 		if (length == -1) {
 			return null;
@@ -1244,7 +1243,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putDouble(double value) {
+	public final void putDouble(double value) {
 		buffer.writeDouble(value);
 	}
 
@@ -1254,7 +1253,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final double getDouble() {
+	public final double getDouble() {
 		return buffer.readDouble();
 	}
 
@@ -1264,7 +1263,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putDoubleList(ArrayList<Double> value) {
+	public final void putDoubleList(ArrayList<Double> value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1281,7 +1280,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<Double> getDoubleList() {
+	public final ArrayList<Double> getDoubleList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -1302,7 +1301,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putDoubleArray(double[] value) {
+	public final void putDoubleArray(double[] value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1319,7 +1318,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final double[] getDoubleArray() {
+	public final double[] getDoubleArray() {
 		short length = getShort();
 		if (length == -1) {
 			return null;
@@ -1340,8 +1339,12 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putShort(int value) {
-		buffer.writeShort(value);
+	public final void putShort(int value) {
+		if (COMPRESS_INT32_64) {
+			writeRawVarint32(value);
+		} else {
+			buffer.writeShort(value);
+		}
 	}
 
 	/**
@@ -1350,8 +1353,12 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final short getShort() {
-		return buffer.readShort();
+	public final short getShort() {
+		if (COMPRESS_INT32_64) {
+			return (short) readRawVarint32();
+		} else {
+			return buffer.readShort();
+		}
 	}
 
 	/**
@@ -1360,7 +1367,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putShortList(ArrayList<Short> value) {
+	public final void putShortList(ArrayList<Short> value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1377,7 +1384,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<Short> getShortList() {
+	public final ArrayList<Short> getShortList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -1398,7 +1405,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putShortArray(short[] value) {
+	public final void putShortArray(short[] value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1415,7 +1422,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final short[] getShortArray() {
+	public final short[] getShortArray() {
 		short length = getShort();
 		if (length == -1) {
 			return null;
@@ -1436,7 +1443,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putChar(int value) {
+	public final void putChar(int value) {
 		buffer.writeChar(value);
 	}
 
@@ -1446,7 +1453,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final char getChar() {
+	public final char getChar() {
 		return buffer.readChar();
 	}
 
@@ -1456,7 +1463,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putCharList(ArrayList<Character> value) {
+	public final void putCharList(ArrayList<Character> value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1473,7 +1480,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final ArrayList<Character> getCharList() {
+	public final ArrayList<Character> getCharList() {
 		short len = getShort();
 		if (len == -1) {
 			return null;
@@ -1494,7 +1501,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @param value
 	 */
-	protected final void putCharArray(char[] value) {
+	public final void putCharArray(char[] value) {
 		if (value == null) {
 			putShort(-1);
 		} else {
@@ -1511,7 +1518,7 @@ public abstract class MessageMeta {
 	 * @param buffer
 	 * @return
 	 */
-	protected final char[] getCharArray() {
+	public final char[] getCharArray() {
 		short length = getShort();
 		if (length == -1) {
 			return null;
@@ -1579,7 +1586,6 @@ public abstract class MessageMeta {
 			x ^= y << 28;
 			x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28);
 			if (y < 0) {
-				// 格式已经不对了
 				throw new CorruptedFrameException("malformed varint.");
 			}
 		}
