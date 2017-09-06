@@ -53,8 +53,8 @@ public class TXCardsCalculator {
 	private final static long ROYAL_FLUSH = TXCardRank.ROYAL_FLUSH.getValue() * 0x10000000000L;
 	// 原始数据
 	private byte[] cards = null;
-	private byte[] numbers = new byte[5];
-	private byte[] colors = new byte[5];
+	private byte[] numbers = null;
+	private byte[] colors = null;
 	// 对子数量
 	private byte pairCount = 0;
 	// 最大三条点数
@@ -101,9 +101,11 @@ public class TXCardsCalculator {
 	}
 
 	public TXCardsCalculator(byte[] txCards) {
-		if (txCards.length != 5) {
-			throw new IllegalArgumentException("the length has to be five");
+		if (txCards.length != 2 && txCards.length != 5) {
+			throw new IllegalArgumentException("the length must to be two or five");
 		}
+		numbers = new byte[txCards.length];
+		colors = new byte[txCards.length]; 
 		byte[] tempCards = new byte[txCards.length];
 		System.arraycopy(txCards, 0, tempCards, 0, txCards.length);
 		for (int i = 0; i < tempCards.length; ++i) {
