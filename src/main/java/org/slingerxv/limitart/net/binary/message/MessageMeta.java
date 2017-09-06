@@ -30,7 +30,6 @@ import org.slingerxv.limitart.util.Beta;
 import org.slingerxv.limitart.util.filter.FieldFilter;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.util.CharsetUtil;
 
 /**
@@ -717,7 +716,7 @@ public abstract class MessageMeta {
 	 */
 	public final void putLong(long value) {
 		if (COMPRESS_INT32_64) {
-			writeRawVarint64(value);
+			ByteBufs.writeRawVarint64(buffer, value);
 		} else {
 			buffer.writeLong(value);
 		}
@@ -731,7 +730,7 @@ public abstract class MessageMeta {
 	 */
 	public final long getLong() {
 		if (COMPRESS_INT32_64) {
-			return readRawVarint64();
+			return ByteBufs.readRawVarint64(buffer);
 		} else {
 			return buffer.readLong();
 		}
@@ -821,7 +820,7 @@ public abstract class MessageMeta {
 	 */
 	public final void putInt(int value) {
 		if (COMPRESS_INT32_64) {
-			writeRawVarint32(value);
+			ByteBufs.writeRawVarint32(buffer, value);
 		} else {
 			this.buffer.writeInt(value);
 		}
@@ -835,7 +834,7 @@ public abstract class MessageMeta {
 	 */
 	public final int getInt() {
 		if (COMPRESS_INT32_64) {
-			return readRawVarint32();
+			return ByteBufs.readRawVarint32(buffer);
 		} else {
 			return this.buffer.readInt();
 		}
@@ -1341,7 +1340,7 @@ public abstract class MessageMeta {
 	 */
 	public final void putShort(int value) {
 		if (COMPRESS_INT32_64) {
-			writeRawVarint32(value);
+			ByteBufs.writeRawVarint32(buffer, value);
 		} else {
 			buffer.writeShort(value);
 		}
@@ -1355,7 +1354,7 @@ public abstract class MessageMeta {
 	 */
 	public final short getShort() {
 		if (COMPRESS_INT32_64) {
-			return (short) readRawVarint32();
+			return (short) ByteBufs.readRawVarint32(buffer);
 		} else {
 			return buffer.readShort();
 		}
@@ -1531,66 +1530,6 @@ public abstract class MessageMeta {
 			}
 			return result;
 		}
-	}
-
-	private void writeRawVarint64(long value) {
-		while (true) {
-			if ((value & ~0x7FL) == 0) {
-				this.buffer.writeByte(((byte) value));
-				return;
-			} else {
-				this.buffer.writeByte((byte) (((int) value & 0x7F) | 0x80));
-				value >>>= 7;
-			}
-		}
-	}
-
-	private long readRawVarint64() {
-		int shift = 0;
-		long result = 0;
-		while (shift < 64) {
-			final byte b = this.buffer.readByte();
-			result |= (long) (b & 0x7F) << shift;
-			if ((b & 0x80) == 0) {
-				return result;
-			}
-			shift += 7;
-		}
-		throw new CorruptedFrameException("malformed varint.");
-	}
-
-	private void writeRawVarint32(int val) {
-		while (true) {
-			if ((val & ~0x7F) == 0) {
-				this.buffer.writeByte((byte) val);
-				return;
-			} else {
-				this.buffer.writeByte((byte) ((val & 0x7F) | 0x80));
-				val >>>= 7;
-			}
-		}
-	}
-
-	private int readRawVarint32() {
-		int x;
-		if ((x = buffer.readByte()) >= 0) {
-			return x;
-		} else if ((x ^= (buffer.readByte() << 7)) < 0L) {
-			x ^= (~0L << 7);
-		} else if ((x ^= (buffer.readByte() << 14)) >= 0L) {
-			x ^= (~0L << 7) ^ (~0L << 14);
-		} else if ((x ^= (buffer.readByte() << 21)) < 0L) {
-			x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21);
-		} else {
-			int y = buffer.readByte();
-			x ^= y << 28;
-			x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28);
-			if (y < 0) {
-				throw new CorruptedFrameException("malformed varint.");
-			}
-		}
-		return x;
-
 	}
 
 	private <T extends MessageMeta> T createInstance(Class<T> clazz) {
