@@ -13,13 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.net.console;
+package org.slingerxv.limitart.net.telnet;
 
-public class CommandDuplicatedException extends Exception {
+import io.netty.channel.Channel;
 
-	private static final long serialVersionUID = 1L;
+public class TelnetUser {
+	private String username;
+	private String pass;
+	private Channel channel;
 
-	public CommandDuplicatedException(String info) {
-		super(info);
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public Channel getChannel() {
+		return channel;
+	}
+
+	public void setChannel(Channel channel) {
+		this.channel = channel;
+	}
+
+	public String getPass() {
+		return pass;
+	}
+
+	public void setPass(String pass) {
+		this.pass = pass;
 	}
 }

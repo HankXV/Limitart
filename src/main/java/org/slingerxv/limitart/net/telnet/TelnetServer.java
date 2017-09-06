@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.net.console;
+package org.slingerxv.limitart.net.telnet;
 
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
@@ -55,8 +55,8 @@ import io.netty.util.CharsetUtil;
  *
  */
 @Beta
-public class ConsoleServer extends AbstractNettyServer implements IServer {
-	private static Logger log = LoggerFactory.getLogger(ConsoleServer.class);
+public class TelnetServer extends AbstractNettyServer implements IServer {
+	private static Logger log = LoggerFactory.getLogger(TelnetServer.class);
 	private static AttributeKey<String> USERNAME_KEY = AttributeKey.newInstance("USERNAME_KEY");
 
 	private static AttributeKey<String> USERNAME_TEMP_KEY = AttributeKey.newInstance("USERNAME_TEMP_KEY");
@@ -64,15 +64,15 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 	// 端口
 	private int port;
 	private Set<String> whiteList;
-	private Map<String, ConsoleUser> users = new ConcurrentHashMap<>();
-	private Map<String, Proc3<ConsoleUser, String, String[]>> commands = new ConcurrentHashMap<>();
+	private Map<String, TelnetUser> users = new ConcurrentHashMap<>();
+	private Map<String, Proc3<TelnetUser, String, String[]>> commands = new ConcurrentHashMap<>();
 	private Proc2<Channel, Throwable> onExceptionCaught;
 	private Proc1<Channel> onServerBind;
-	private Proc1<ConsoleUser> onUserLogin;
-	private Proc1<ConsoleUser> onUserLogout;
-	private Proc4<ConsoleUser, String, String[], Proc3<ConsoleUser, String, String[]>> dispatchMessage;
+	private Proc1<TelnetUser> onUserLogin;
+	private Proc1<TelnetUser> onUserLogout;
+	private Proc4<TelnetUser, String, String[], Proc3<TelnetUser, String, String[]>> dispatchMessage;
 
-	private ConsoleServer(ConsoleServerBuilder builder) {
+	private TelnetServer(ConsoleServerBuilder builder) {
 		super(builder.serverName);
 		this.serverName = builder.serverName;
 		this.port = builder.port;
@@ -130,7 +130,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 					@Override
 					public void channelInactive(ChannelHandlerContext ctx) {
 						log.info(ctx.channel().remoteAddress() + " disconnected！");
-						ConsoleUser consoleUser = getConsoleUser(ctx.channel());
+						TelnetUser consoleUser = getConsoleUser(ctx.channel());
 						if (consoleUser != null) {
 							consoleUser.setChannel(null);
 							Procs.invoke(onUserLogout, consoleUser);
@@ -144,13 +144,13 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 							return;
 						}
 						Channel ch = ctx.channel();
-						ConsoleUser consoleUser = getConsoleUser(ch);
+						TelnetUser consoleUser = getConsoleUser(ch);
 						// 未通过验证的用户
 						if (consoleUser == null) {
 							String tempUsername = ch.attr(USERNAME_TEMP_KEY).get();
 							if (tempUsername == null) {
 								// 未输入过用户名的用户
-								ConsoleUser temp = users.get(command);
+								TelnetUser temp = users.get(command);
 								if (temp == null) {
 									sendMessage(ch, "username not exist!");
 									return;
@@ -160,7 +160,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 									sendMessage(ch, "password:");
 								}
 							} else {
-								ConsoleUser temp = users.get(tempUsername);
+								TelnetUser temp = users.get(tempUsername);
 								try {
 									if (!SecurityUtil.isPasswordValid(temp.getPass(), command, temp.getUsername())) {
 										sendMessage(ch, "password error!");
@@ -191,7 +191,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 								params = new String[split.length - 1];
 								System.arraycopy(split, 1, params, 0, params.length);
 							}
-							Proc3<ConsoleUser, String, String[]> handler = commands.get(cmd);
+							Proc3<TelnetUser, String, String[]> handler = commands.get(cmd);
 							if (handler == null) {
 								sendMessage(ch, "'" + cmd + "'is not a command!");
 								return;
@@ -215,7 +215,7 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 		});
 	}
 
-	private ConsoleUser getConsoleUser(Channel channel) {
+	private TelnetUser getConsoleUser(Channel channel) {
 		Attribute<String> attr = channel.attr(USERNAME_KEY);
 		if (attr == null) {
 			return null;
@@ -231,21 +231,21 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 		private String serverName;
 		private int port;
 		private Set<String> whiteList = new HashSet<>();
-		private Map<String, ConsoleUser> users = new ConcurrentHashMap<>();
-		private Map<String, Proc3<ConsoleUser, String, String[]>> commands = new ConcurrentHashMap<>();
+		private Map<String, TelnetUser> users = new ConcurrentHashMap<>();
+		private Map<String, Proc3<TelnetUser, String, String[]>> commands = new ConcurrentHashMap<>();
 		private Proc2<Channel, Throwable> onExceptionCaught;
 		private Proc1<Channel> onServerBind;
-		private Proc1<ConsoleUser> onUserLogin;
-		private Proc1<ConsoleUser> onUserLogout;
-		private Proc4<ConsoleUser, String, String[], Proc3<ConsoleUser, String, String[]>> dispatchMessage;
+		private Proc1<TelnetUser> onUserLogin;
+		private Proc1<TelnetUser> onUserLogout;
+		private Proc4<TelnetUser, String, String[], Proc3<TelnetUser, String, String[]>> dispatchMessage;
 
 		public ConsoleServerBuilder() {
 			this.serverName = "Console-Server";
 			this.port = 7023;
-			this.dispatchMessage = new Proc4<ConsoleUser, String, String[], Proc3<ConsoleUser, String, String[]>>() {
+			this.dispatchMessage = new Proc4<TelnetUser, String, String[], Proc3<TelnetUser, String, String[]>>() {
 
 				@Override
-				public void run(ConsoleUser t1, String t2, String[] t3, Proc3<ConsoleUser, String, String[]> t4) {
+				public void run(TelnetUser t1, String t2, String[] t3, Proc3<TelnetUser, String, String[]> t4) {
 					t4.run(t1, t2, t3);
 				}
 			};
@@ -257,8 +257,8 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 		 * @return
 		 * @throws Exception
 		 */
-		public ConsoleServer build() {
-			return new ConsoleServer(this);
+		public TelnetServer build() {
+			return new TelnetServer(this);
 		}
 
 		public ConsoleServerBuilder serverName(String serverName) {
@@ -286,22 +286,22 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 
-		public ConsoleServerBuilder user(ConsoleUser... users)
-				throws NoSuchAlgorithmException, ConsoleUserDuplicatedException {
-			for (ConsoleUser temp : users) {
-				ConsoleUser newUser = new ConsoleUser();
+		public ConsoleServerBuilder user(TelnetUser... users)
+				throws NoSuchAlgorithmException, TelnetUserDuplicatedException {
+			for (TelnetUser temp : users) {
+				TelnetUser newUser = new TelnetUser();
 				newUser.setUsername(Objects.requireNonNull(temp.getUsername(), "username"));
 				newUser.setPass(SecurityUtil.encodePassword(Objects.requireNonNull(temp.getPass(), "pass"),
 						temp.getUsername()));
 				if (this.users.containsKey(newUser.getUsername())) {
-					throw new ConsoleUserDuplicatedException(newUser.getUsername());
+					throw new TelnetUserDuplicatedException(newUser.getUsername());
 				}
 				this.users.put(newUser.getUsername(), newUser);
 			}
 			return this;
 		}
 
-		public ConsoleServerBuilder cmd(String cmd, Proc3<ConsoleUser, String, String[]> handler)
+		public ConsoleServerBuilder cmd(String cmd, Proc3<TelnetUser, String, String[]> handler)
 				throws CommandDuplicatedException {
 			if (commands.containsKey(cmd)) {
 				throw new CommandDuplicatedException(cmd);
@@ -321,17 +321,17 @@ public class ConsoleServer extends AbstractNettyServer implements IServer {
 		}
 
 		public ConsoleServerBuilder dispatchMessage(
-				Proc4<ConsoleUser, String, String[], Proc3<ConsoleUser, String, String[]>> dispatchMessage) {
+				Proc4<TelnetUser, String, String[], Proc3<TelnetUser, String, String[]>> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
 			return this;
 		}
 
-		public ConsoleServerBuilder onUserLogin(Proc1<ConsoleUser> onUserLogin) {
+		public ConsoleServerBuilder onUserLogin(Proc1<TelnetUser> onUserLogin) {
 			this.onUserLogin = onUserLogin;
 			return this;
 		}
 
-		public ConsoleServerBuilder onUserLogout(Proc1<ConsoleUser> onUserLogout) {
+		public ConsoleServerBuilder onUserLogout(Proc1<TelnetUser> onUserLogout) {
 			this.onUserLogout = onUserLogout;
 			return this;
 		}

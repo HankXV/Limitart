@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.net.console;
+package org.slingerxv.limitart.net.telnet;
 
-public class ConsoleUserDuplicatedException extends Exception {
+public class CommandDuplicatedException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
-	public ConsoleUserDuplicatedException(String info) {
+	public CommandDuplicatedException(String info) {
 		super(info);
 	}
 }
