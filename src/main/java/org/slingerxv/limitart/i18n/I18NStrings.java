@@ -44,8 +44,8 @@ import org.slingerxv.limitart.util.StringUtil;
  */
 public class I18NStrings {
 	private static Logger log = LoggerFactory.getLogger(I18NStrings.class);
-	private Map<Languages, Map<String, String>> langs = new HashMap<>();
-	private Map<Languages, Properties> dumps = new HashMap<>();
+	private Map<String, Map<String, String>> langs = new HashMap<>();
+	private Map<String, Properties> dumps = new HashMap<>();
 	private static String DUMP_PATH = "lang_dumps";
 
 	/**
@@ -57,7 +57,7 @@ public class I18NStrings {
 	 *            文件内容
 	 * @throws IOException
 	 */
-	public void loadProperty(Languages lang, byte[] content) throws IOException {
+	public void loadProperty(String lang, byte[] content) throws IOException {
 		loadProperty(lang, new ByteArrayInputStream(content));
 	}
 
@@ -68,7 +68,7 @@ public class I18NStrings {
 	 * @param file
 	 * @throws IOException
 	 */
-	public void loadProperty(Languages lang, File file) throws IOException {
+	public void loadProperty(String lang, File file) throws IOException {
 		loadProperty(lang, new FileInputStream(file));
 	}
 
@@ -81,7 +81,7 @@ public class I18NStrings {
 	 *            输入流
 	 * @throws IOException
 	 */
-	public void loadProperty(Languages lang, InputStream inputStream) throws IOException {
+	public void loadProperty(String lang, InputStream inputStream) throws IOException {
 		Properties prop = new Properties();
 		prop.load(inputStream);
 		loadProperty(lang, prop);
@@ -97,11 +97,11 @@ public class I18NStrings {
 	 *            键值对文件
 	 * @throws IOException
 	 */
-	public void loadProperty(Languages lang, Properties prop) throws IOException {
+	public void loadProperty(String lang, Properties prop) throws IOException {
 		for (Entry<Object, Object> entry : prop.entrySet()) {
 			add(lang, entry.getKey().toString(), entry.getValue().toString());
 		}
-		log.info("load lang {} done,count:{}", lang.name(), prop.size());
+		log.info("load lang {} done,count:{}", lang, prop.size());
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class I18NStrings {
 	 * @param content
 	 *            内容
 	 */
-	public void add(Languages lang, String key, String content) {
+	public void add(String lang, String key, String content) {
 		if (StringUtil.isEmptyOrNull(content)) {
 			return;
 		}
@@ -123,7 +123,7 @@ public class I18NStrings {
 		}
 		Map<String, String> map = langs.get(lang);
 		if (map.containsKey(key)) {
-			log.error("lang {} key duplicated {}", lang.name(), key);
+			log.error("lang {} key duplicated {}", lang, key);
 			return;
 		}
 		map.put(key, content);
@@ -138,25 +138,25 @@ public class I18NStrings {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public String get(Languages lang, String key) throws FileNotFoundException, IOException {
+	public String get(String lang, String key) throws FileNotFoundException, IOException {
 		Objects.requireNonNull(lang, "lang");
 		Objects.requireNonNull(key, "lang");
 		if (!langs.containsKey(lang)) {
-			log.error("language :{} has no solution!", lang.name());
+			log.error("language :{} has no solution!", lang);
 			dumpUntraslatedKey(lang, key);
 			return key;
 		}
 		Map<String, String> map = langs.get(lang);
 		if (!map.containsKey(key)) {
-			log.error("language :{} has no key:{}", lang.name(), key);
+			log.error("language :{} has no key:{}", lang, key);
 			dumpUntraslatedKey(lang, key);
 			return key;
 		}
 		return map.get(key);
 	}
 
-	public void foreach(Func2<Languages, Map<String, String>, Boolean> func) {
-		for (Entry<Languages, Map<String, String>> entry : langs.entrySet()) {
+	public void foreach(Func2<String, Map<String, String>, Boolean> func) {
+		for (Entry<String, Map<String, String>> entry : langs.entrySet()) {
 			Map<String, String> map = new HashMap<>();
 			map.putAll(entry.getValue());
 			if (!func.run(entry.getKey(), map)) {
@@ -173,7 +173,7 @@ public class I18NStrings {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	private void dumpUntraslatedKey(Languages lang, String key) throws FileNotFoundException, IOException {
+	private void dumpUntraslatedKey(String lang, String key) throws FileNotFoundException, IOException {
 		checkDumpDir();
 		if (!dumps.containsKey(lang)) {
 			Properties properties = new Properties();
@@ -202,8 +202,8 @@ public class I18NStrings {
 	 * @param lang
 	 * @return
 	 */
-	public static String getFileName(Languages lang) {
-		return "lang_" + lang.name() + ".properties";
+	public static String getFileName(String lang) {
+		return "lang_" + lang + ".properties";
 	}
 
 	/**
@@ -212,9 +212,9 @@ public class I18NStrings {
 	 * @param fileName
 	 * @return
 	 */
-	public static Languages getTypeByFileName(String fileName) {
+	public static String getTypeByFileName(String fileName) {
 		String substring = fileName.replace("lang_", "").replace(".properties", "");
-		return Languages.valueOf(substring);
+		return substring;
 	}
 
 }
