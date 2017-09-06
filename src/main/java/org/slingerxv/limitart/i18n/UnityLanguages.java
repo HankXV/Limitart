@@ -48,7 +48,7 @@ public enum UnityLanguages {
 	/**
 	 * 
 	 */
-	Chinese(6),
+	// Chinese(6),
 	/**
 	 * 
 	 */
