@@ -3,8 +3,6 @@
 ![](https://img.shields.io/badge/jdk-1.8-green.svg)
 # 什么是Limitart?
 一个帮助您快速搭建起游戏服务器的框架
-# 怎么参与？
-	群：662555451
 # 快速开始
 ### Maven
 	<dependency>

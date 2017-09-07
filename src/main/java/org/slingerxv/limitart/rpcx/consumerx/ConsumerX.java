@@ -291,7 +291,7 @@ public class ConsumerX {
 			Entry<Integer, BinaryClient> next = iterator.next();
 			int providerId = next.getKey();
 			BinaryClient otherClient = next.getValue();
-			if (client.channelLongID().equals(otherClient.channelLongID())) {
+			if (client.channel().id().asLongText().equals(otherClient.channel().id().asLongText())) {
 				iterator.remove();
 				log.info("RPC服务器断开链接，providerId:" + providerId + "，地址：" + client.remoteAddress());
 				// 删除服务

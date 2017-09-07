@@ -72,7 +72,7 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 	private Proc1<TelnetUser> onUserLogout;
 	private Proc4<TelnetUser, String, String[], Proc3<TelnetUser, String, String[]>> dispatchMessage;
 
-	private TelnetServer(ConsoleServerBuilder builder) {
+	private TelnetServer(TelnetServerBuilder builder) {
 		super(builder.serverName);
 		this.serverName = builder.serverName;
 		this.port = builder.port;
@@ -227,7 +227,7 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 		return users.get(username);
 	}
 
-	public static class ConsoleServerBuilder {
+	public static class TelnetServerBuilder {
 		private String serverName;
 		private int port;
 		private Set<String> whiteList = new HashSet<>();
@@ -239,7 +239,7 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 		private Proc1<TelnetUser> onUserLogout;
 		private Proc4<TelnetUser, String, String[], Proc3<TelnetUser, String, String[]>> dispatchMessage;
 
-		public ConsoleServerBuilder() {
+		public TelnetServerBuilder() {
 			this.serverName = "Console-Server";
 			this.port = 7023;
 			this.dispatchMessage = new Proc4<TelnetUser, String, String[], Proc3<TelnetUser, String, String[]>>() {
@@ -261,7 +261,7 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 			return new TelnetServer(this);
 		}
 
-		public ConsoleServerBuilder serverName(String serverName) {
+		public TelnetServerBuilder serverName(String serverName) {
 			this.serverName = serverName;
 			return this;
 		}
@@ -272,12 +272,12 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 		 * @param port
 		 * @return
 		 */
-		public ConsoleServerBuilder port(int port) {
+		public TelnetServerBuilder port(int port) {
 			this.port = port;
 			return this;
 		}
 
-		public ConsoleServerBuilder whiteList(String... remoteAddress) {
+		public TelnetServerBuilder whiteList(String... remoteAddress) {
 			for (String ip : remoteAddress) {
 				if (StringUtil.isIp4(ip)) {
 					this.whiteList.add(ip);
@@ -286,7 +286,7 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 
-		public ConsoleServerBuilder user(TelnetUser... users)
+		public TelnetServerBuilder user(TelnetUser... users)
 				throws NoSuchAlgorithmException, TelnetUserDuplicatedException {
 			for (TelnetUser temp : users) {
 				TelnetUser newUser = new TelnetUser();
@@ -301,7 +301,7 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 
-		public ConsoleServerBuilder cmd(String cmd, Proc3<TelnetUser, String, String[]> handler)
+		public TelnetServerBuilder cmd(String cmd, Proc3<TelnetUser, String, String[]> handler)
 				throws CommandDuplicatedException {
 			if (commands.containsKey(cmd)) {
 				throw new CommandDuplicatedException(cmd);
@@ -310,28 +310,28 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 
-		public ConsoleServerBuilder onExceptionCaught(Proc2<Channel, Throwable> onExceptionCaught) {
+		public TelnetServerBuilder onExceptionCaught(Proc2<Channel, Throwable> onExceptionCaught) {
 			this.onExceptionCaught = onExceptionCaught;
 			return this;
 		}
 
-		public ConsoleServerBuilder onServerBind(Proc1<Channel> onServerBind) {
+		public TelnetServerBuilder onServerBind(Proc1<Channel> onServerBind) {
 			this.onServerBind = onServerBind;
 			return this;
 		}
 
-		public ConsoleServerBuilder dispatchMessage(
+		public TelnetServerBuilder dispatchMessage(
 				Proc4<TelnetUser, String, String[], Proc3<TelnetUser, String, String[]>> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
 			return this;
 		}
 
-		public ConsoleServerBuilder onUserLogin(Proc1<TelnetUser> onUserLogin) {
+		public TelnetServerBuilder onUserLogin(Proc1<TelnetUser> onUserLogin) {
 			this.onUserLogin = onUserLogin;
 			return this;
 		}
 
-		public ConsoleServerBuilder onUserLogout(Proc1<TelnetUser> onUserLogout) {
+		public TelnetServerBuilder onUserLogout(Proc1<TelnetUser> onUserLogout) {
 			this.onUserLogout = onUserLogout;
 			return this;
 		}

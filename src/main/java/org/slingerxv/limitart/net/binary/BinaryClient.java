@@ -18,7 +18,6 @@ package org.slingerxv.limitart.net.binary;
 import java.net.SocketAddress;
 import java.util.Objects;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,23 +38,16 @@ import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidat
 import org.slingerxv.limitart.net.binary.message.impl.validate.HeartClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.HeartServerMessage;
 import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
+import org.slingerxv.limitart.net.define.AbstractNettyClient;
 import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.SymmetricEncryptionUtil;
 import org.slingerxv.limitart.util.TimerUtil;
 
-import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
@@ -64,19 +56,14 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author hank
  *
  */
-public class BinaryClient {
+public class BinaryClient extends AbstractNettyClient {
 	private static Logger log = LoggerFactory.getLogger(BinaryClient.class);
-	private static EventLoopGroup group = new NioEventLoopGroup();
-	private Bootstrap bootstrap;
-	private Channel channel;
 	private SymmetricEncryptionUtil decodeUtil;
 	// private long serverStartTime;
 	private long serverUTCTime;
 	private TimerTask hearTask;
 	// ----config
-	private String clientName;
 	private AddressPair remoteAddress;
-	private int autoReconnect;
 	private AbstractBinaryDecoder decoder;
 	private AbstractBinaryEncoder encoder;
 	private MessageFactory factory;
@@ -88,9 +75,8 @@ public class BinaryClient {
 	private Proc2<Message, IHandler<Message>> dispatchMessage;
 
 	private BinaryClient(BinaryClientBuilder builder) throws Exception {
-		this.clientName = builder.clientName;
+		super(builder.clientName, builder.autoReconnect);
 		this.remoteAddress = Objects.requireNonNull(builder.remoteAddress, "remoteAddress");
-		this.autoReconnect = builder.autoReconnect;
 		this.decoder = Objects.requireNonNull(builder.decoder, "decoder");
 		this.encoder = Objects.requireNonNull(builder.encoder, "encoder");
 		this.factory = Objects.requireNonNull(builder.factory, "factory");
@@ -103,59 +89,7 @@ public class BinaryClient {
 		factory.registerMsg(new ConnectionValidateServerHandler())
 				.registerMsg(new ConnectionValidateSuccessServerHandler()).registerMsg(new HeartServerHandler());
 		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(remoteAddress.getPass());
-		bootstrap = new Bootstrap();
-		bootstrap.channel(NioSocketChannel.class);
-		log.info(clientName + " nio init");
-		bootstrap.group(group).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-				.handler(new ChannelInitializerImpl());
-	}
-
-	private class ChannelInitializerImpl extends ChannelInitializer<SocketChannel> {
-
-		@Override
-		protected void initChannel(SocketChannel ch) throws Exception {
-			ch.pipeline()
-					.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(),
-							decoder.getLengthFieldOffset(), decoder.getLengthFieldLength(),
-							decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()));
-			ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
-				@Override
-				public boolean isSharable() {
-					return true;
-				}
-
-				@Override
-				public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-					channelRead0(ctx, msg);
-				}
-
-				@Override
-				public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-					log.info(clientName + " disconnected!");
-					if (heartIntervalSec > 0 && hearTask != null) {
-						TimerUtil.unScheduleGlobal(hearTask);
-					}
-					Procs.invoke(onChannelStateChanged, BinaryClient.this, false);
-					if (autoReconnect > 0) {
-						tryReconnect(autoReconnect);
-					}
-				}
-
-				@Override
-				public void channelActive(ChannelHandlerContext ctx) throws Exception {
-					log.info(clientName + " connected!");
-					channel = ctx.channel();
-					Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
-				}
-
-				@Override
-				public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-					log.error(ctx.channel() + " cause:", cause);
-					Procs.invoke(onExceptionCaught, BinaryClient.this, cause);
-				}
-			});
-		}
-
+		log.info(getClientName() + " nio init");
 	}
 
 	public void sendMessage(Message msg) throws Exception {
@@ -164,57 +98,61 @@ public class BinaryClient {
 
 	public void sendMessage(Message msg, Proc3<Boolean, Throwable, Channel> listener) throws Exception {
 		try {
-			SendMessageUtil.sendMessage(encoder, channel, msg, listener);
+			SendMessageUtil.sendMessage(encoder, channel(), msg, listener);
 		} catch (MessageCodecException e) {
 			Procs.invoke(onExceptionCaught, BinaryClient.this, e);
 		}
 	}
 
-	public BinaryClient disConnect() {
-		if (channel != null) {
-			channel.close();
-			channel = null;
-		}
-		return this;
+	@Override
+	public void connect() {
+		tryReconnect(remoteAddress.getIp(), remoteAddress.getPort(), 0);
 	}
 
-	public BinaryClient connect() {
-		tryReconnect(0);
-		return this;
+	@Override
+	public void disConnect() {
+		tryDisConnect();
 	}
 
-	private void connect0() {
-		if (channel != null && channel.isWritable()) {
-			return;
-		}
-		log.info(clientName + " start connect server：" + remoteAddress.getIp() + ":" + remoteAddress.getPort() + "...");
-		try {
-			bootstrap.connect(remoteAddress.getIp(), remoteAddress.getPort()).sync()
-					.addListener((ChannelFutureListener) channelFuture -> {
-						log.info(clientName + " connect server：" + remoteAddress.getIp() + ":" + remoteAddress.getPort()
-								+ " success！");
-					});
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			if (autoReconnect > 0) {
-				tryReconnect(autoReconnect);
+	@Override
+	protected void initPipeline(ChannelPipeline pipeline) {
+		pipeline.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(), decoder.getLengthFieldOffset(),
+				decoder.getLengthFieldLength(), decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()));
+		pipeline.addLast(new ChannelInboundHandlerAdapter() {
+			@Override
+			public boolean isSharable() {
+				return true;
 			}
-		}
-	}
 
-	private void tryReconnect(int waitSeconds) {
-		if (channel != null) {
-			channel.close();
-			channel = null;
-		}
-		log.info(clientName + " try connect server：" + remoteAddress.getIp() + " after " + waitSeconds + " seconds");
-		if (waitSeconds > 0) {
-			group.schedule(() -> {
-				connect0();
-			}, waitSeconds, TimeUnit.SECONDS);
-		} else {
-			connect0();
-		}
+			@Override
+			public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+				channelRead0(ctx, msg);
+			}
+
+			@Override
+			public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+				log.info(getClientName() + " disconnected!");
+				if (heartIntervalSec > 0 && hearTask != null) {
+					TimerUtil.unScheduleGlobal(hearTask);
+				}
+				Procs.invoke(onChannelStateChanged, BinaryClient.this, false);
+				if (getAutoReconnect() > 0) {
+					tryReconnect(remoteAddress.getIp(), remoteAddress.getPort(), getAutoReconnect());
+				}
+			}
+
+			@Override
+			public void channelActive(ChannelHandlerContext ctx) throws Exception {
+				log.info(getClientName() + " connected!");
+				Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
+			}
+
+			@Override
+			public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+				log.error(ctx.channel() + " cause:", cause);
+				Procs.invoke(onExceptionCaught, BinaryClient.this, cause);
+			}
+		});
 	}
 
 	private void decodeConnectionValidateData(String validateStr) {
@@ -224,7 +162,7 @@ public class BinaryClient {
 			ConnectionValidateClientMessage msg = new ConnectionValidateClientMessage();
 			msg.validateRandom = validateRandom;
 			sendMessage(msg, null);
-			log.info(clientName + " parse validate code success，return result：" + validateRandom);
+			log.info(getClientName() + " parse validate code success，return result：" + validateRandom);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -253,28 +191,12 @@ public class BinaryClient {
 		this.serverUTCTime = serverUTCTime;
 	}
 
-	public String channelLongID() {
-		return this.channel.id().asLongText();
-	}
-
-	public Channel channel() {
-		return this.channel;
-	}
-
 	public SocketAddress remoteAddress() {
-		return this.channel.remoteAddress();
-	}
-
-	public String getClientName() {
-		return this.clientName;
+		return channel().remoteAddress();
 	}
 
 	public AddressPair getRemoteAddress() {
 		return remoteAddress;
-	}
-
-	public int getAutoReconnect() {
-		return autoReconnect;
 	}
 
 	public AbstractBinaryDecoder getDecoder() {
@@ -288,10 +210,6 @@ public class BinaryClient {
 	public MessageFactory getFactory() {
 		return factory;
 	}
-
-	// public long getServerStartTime() {
-	// return serverStartTime;
-	// }
 
 	public long getServerUTCTime() {
 		return serverUTCTime;
@@ -309,7 +227,8 @@ public class BinaryClient {
 			short messageId = decoder.readMessageId(ctx.channel(), buffer);
 			Message msg = factory.getMessage(messageId);
 			if (msg == null) {
-				throw new MessageCodecException(clientName + " message empty,id:" + Integer.toHexString(messageId));
+				throw new MessageCodecException(
+						getClientName() + " message empty,id:" + Integer.toHexString(messageId));
 			}
 			msg.buffer(buffer);
 			try {
@@ -322,7 +241,7 @@ public class BinaryClient {
 			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
 			if (handler == null) {
 				throw new MessageCodecException(
-						clientName + " can not find handler for message,id:" + Integer.toHexString(messageId));
+						getClientName() + " can not find handler for message,id:" + Integer.toHexString(messageId));
 			}
 			msg.setChannel(ctx.channel());
 			msg.setClient(this);
@@ -338,7 +257,7 @@ public class BinaryClient {
 						Procs.invoke(onExceptionCaught, this, e);
 					}
 				} else {
-					log.warn(clientName + " no dispatch message listener!");
+					log.warn(getClientName() + " no dispatch message listener!");
 				}
 			}
 		} finally {

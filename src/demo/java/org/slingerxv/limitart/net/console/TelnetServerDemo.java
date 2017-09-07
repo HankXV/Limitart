@@ -8,13 +8,13 @@ import org.slingerxv.limitart.net.telnet.TelnetServer;
 import org.slingerxv.limitart.net.telnet.TelnetUser;
 import org.slingerxv.limitart.net.telnet.TelnetUserDuplicatedException;
 
-public class ConsoleServerDemo {
+public class TelnetServerDemo {
 	public static void main(String[] args)
 			throws CommandDuplicatedException, NoSuchAlgorithmException, TelnetUserDuplicatedException {
 		TelnetUser consoleUser = new TelnetUser();
 		consoleUser.setUsername("hank");
 		consoleUser.setPass("123456");
-		new TelnetServer.ConsoleServerBuilder().user(consoleUser)
+		new TelnetServer.TelnetServerBuilder().user(consoleUser)
 				.cmd("hello", new Proc3<TelnetUser, String, String[]>() {
 
 					@Override
