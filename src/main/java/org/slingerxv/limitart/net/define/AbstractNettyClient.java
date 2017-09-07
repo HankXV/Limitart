@@ -24,6 +24,8 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -56,11 +58,49 @@ public abstract class AbstractNettyClient {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
 						initPipeline(ch.pipeline());
+						ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+							@Override
+							public boolean isSharable() {
+								return true;
+							}
+
+							@Override
+							public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+								channelRead0(ctx, msg);
+							}
+
+							@Override
+							public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+								log.info(getClientName() + " disconnected!");
+								channelInactive0(ctx);
+							}
+
+							@Override
+							public void channelActive(ChannelHandlerContext ctx) throws Exception {
+								channel = ctx.channel();
+								log.info(getClientName() + " connected!");
+								channelActive0(ctx);
+							}
+
+							@Override
+							public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+								log.error(ctx.channel() + " cause:", cause);
+								exceptionCaught0(ctx, cause);
+							}
+						});
 					}
 				});
 	}
 
 	protected abstract void initPipeline(ChannelPipeline pipeline);
+
+	protected abstract void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception;
+
+	public abstract void channelInactive0(ChannelHandlerContext ctx) throws Exception;
+
+	public abstract void channelActive0(ChannelHandlerContext ctx) throws Exception;
+
+	public abstract void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception;
 
 	protected AbstractNettyClient tryDisConnect() {
 		if (channel != null) {
@@ -81,7 +121,6 @@ public abstract class AbstractNettyClient {
 		log.info(clientName + " start connect server：" + ip + ":" + port + "...");
 		try {
 			bootstrap.connect(ip, port).sync().addListener((ChannelFutureListener) channelFuture -> {
-				channel = channelFuture.channel();
 				log.info(clientName + " connect server：" + ip + ":" + port + " success！");
 			});
 		} catch (Exception e) {

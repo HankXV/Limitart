@@ -26,6 +26,8 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -81,11 +83,48 @@ public abstract class AbstractNettyServer {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
 						initPipeline(ch.pipeline());
+						ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+							@Override
+							public boolean isSharable() {
+								return true;
+							}
+
+							@Override
+							public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+								log.error(ctx.channel() + " cause:", cause);
+								exceptionCaught0(ctx, cause);
+							}
+
+							@Override
+							public void channelActive(ChannelHandlerContext ctx) throws Exception {
+								log.info(ctx.channel().remoteAddress() + " connected！");
+								channelActive0(ctx);
+							}
+
+							@Override
+							public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+								log.info(ctx.channel().remoteAddress() + " disconnected！");
+								channelInactive0(ctx);
+							}
+
+							@Override
+							public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+								channelRead0(ctx, msg);
+							}
+						});
 					}
 				});
 	}
 
 	protected abstract void initPipeline(ChannelPipeline pipeline);
+
+	public abstract void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception;
+
+	public abstract void channelActive0(ChannelHandlerContext ctx) throws Exception;
+
+	public abstract void channelInactive0(ChannelHandlerContext ctx) throws Exception;
+
+	public abstract void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception;
 
 	/**
 	 * bind without block
@@ -109,6 +148,10 @@ public abstract class AbstractNettyServer {
 		if (channel != null) {
 			channel.close();
 		}
+	}
+
+	public String getServerName() {
+		return serverName;
 	}
 
 	public Channel channel() {

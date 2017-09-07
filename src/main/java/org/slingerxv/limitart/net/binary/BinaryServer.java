@@ -62,7 +62,6 @@ import org.slingerxv.limitart.util.TimerUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.util.AttributeKey;
@@ -89,7 +88,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	private long startTime;
 
 	// --config
-	private String serverName;
 	private AddressPair addressPair;
 	private int connectionValidateTimeInSec;
 	private AbstractBinaryDecoder decoder;
@@ -110,7 +108,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 
 	private BinaryServer(BinaryServerBuilder builder) throws Exception {
 		super(builder.serverName);
-		this.serverName = builder.serverName;
 		this.addressPair = Objects.requireNonNull(builder.addressPair, "addressPair");
 		this.connectionValidateTimeInSec = builder.connectionValidateTimeInSec;
 		this.decoder = Objects.requireNonNull(builder.decoder, "decoder");
@@ -155,66 +152,120 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 	@Override
 	protected void initPipeline(ChannelPipeline pipeline) {
 		pipeline.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(), decoder.getLengthFieldOffset(),
-				decoder.getLengthFieldLength(), decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()))
-				.addLast(new ChannelInboundHandlerAdapter() {
-					@Override
-					public boolean isSharable() {
-						return true;
-					}
+				decoder.getLengthFieldLength(), decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()));
+	}
 
-					@Override
-					public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-						log.error(ctx.channel() + " cause:", cause);
-						Procs.invoke(onExceptionCaught, ctx.channel(), cause);
-					}
+	@Override
+	public void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		Procs.invoke(onExceptionCaught, ctx.channel(), cause);
+	}
 
-					@Override
-					public void channelActive(ChannelHandlerContext ctx) throws Exception {
-						if (maxConnection > 0 && connectionCount.get() >= maxConnection) {
-							log.error("connection count is greater than " + maxConnection + " close channel:"
-									+ ctx.channel());
+	@Override
+	public void channelActive0(ChannelHandlerContext ctx) throws Exception {
+		if (maxConnection > 0 && connectionCount.get() >= maxConnection) {
+			log.error("connection count is greater than " + maxConnection + " close channel:" + ctx.channel());
+			ctx.channel().close();
+			return;
+		}
+		if (whiteList != null && !whiteList.isEmpty()) {
+			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+			String remoteAddress = insocket.getAddress().getHostAddress();
+			if (!whiteList.contains(remoteAddress)) {
+				ctx.channel().close();
+				log.info("ip: " + remoteAddress + " rejected link!");
+				return;
+			}
+		}
+		connectionCount.incrementAndGet();
+		Procs.invoke(onChannelStateChanged, ctx.channel(), true);
+		if (needPass()) {
+			startConnectionValidate(ctx.channel());
+		} else {
+			// 通知客户端成功
+			try {
+				sendMessage(channel(), new ConnectionValidateSuccessServerMessage(), null);
+			} catch (Exception e) {
+				log.error("error", e);
+			}
+			validatedChannels.add(ctx.channel());
+			Procs.invoke(onConnectionEffective, channel());
+		}
+	}
+
+	@Override
+	public void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+		connectionCount.decrementAndGet();
+		validatedChannels.remove(ctx.channel());
+		Procs.invoke(onChannelStateChanged, ctx.channel(), false);
+	}
+
+	@Override
+	public void channelRead0(ChannelHandlerContext ctx, Object arg) throws Exception {
+		ByteBuf buffer = (ByteBuf) arg;
+		try {
+			// 消息id
+			short messageId = decoder.readMessageId(ctx.channel(), buffer);
+			Message msg = factory.getMessage(messageId);
+			if (msg == null) {
+				throw new MessageCodecException(
+						getServerName() + " message empty,id:" + Integer.toHexString(messageId));
+			}
+			msg.buffer(buffer);
+			try {
+				msg.decode();
+			} catch (Exception e) {
+				log.error("message id:" + Integer.toHexString(messageId) + " decode error!");
+				throw new MessageCodecException(e);
+			}
+			msg.buffer(null);
+			@SuppressWarnings("unchecked")
+			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
+			if (handler == null) {
+				throw new MessageCodecException(
+						getServerName() + " can not find handler for message,id:" + Integer.toHexString(messageId));
+			}
+			msg.setChannel(ctx.channel());
+			msg.setServer(this);
+			// 如果是内部消息，则自己消化
+			if (InnerMessageEnum.getTypeByValue(messageId) != null) {
+				handler.handle(msg);
+			} else {
+				// 如果没通过验证，不接受消息
+				if (unvalidatedChannels.containsKey(ctx.channel().id().asLongText())) {
+					log.error("channel " + ctx.channel() + " has not validate yet!");
+					return;
+				}
+				long now = System.currentTimeMillis();
+				// 记录消息接收时间
+				if (receiveIntervalMills > 0) {
+					if (ctx.channel().hasAttr(LAST_RECEIVE_MSG_TIME)) {
+						Long lastReceiveTime = ctx.channel().attr(LAST_RECEIVE_MSG_TIME).get();
+						if (lastReceiveTime != null && (now - lastReceiveTime) < receiveIntervalMills) {
+							ctx.channel().pipeline().fireExceptionCaught(new SendMessageTooFastException(ctx.channel(),
+									receiveIntervalMills, (int) (now - lastReceiveTime)));
 							ctx.channel().close();
-							return;
-						}
-						log.info(ctx.channel().remoteAddress() + " connected！");
-						if (whiteList != null && !whiteList.isEmpty()) {
-							InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-							String remoteAddress = insocket.getAddress().getHostAddress();
-							if (!whiteList.contains(remoteAddress)) {
-								ctx.channel().close();
-								log.info("ip: " + remoteAddress + " rejected link!");
-								return;
-							}
-						}
-						connectionCount.incrementAndGet();
-						Procs.invoke(onChannelStateChanged, ctx.channel(), true);
-						if (needPass()) {
-							startConnectionValidate(ctx.channel());
-						} else {
-							// 通知客户端成功
-							try {
-								sendMessage(channel(), new ConnectionValidateSuccessServerMessage(), null);
-							} catch (Exception e) {
-								log.error("error", e);
-							}
-							validatedChannels.add(ctx.channel());
-							Procs.invoke(onConnectionEffective, channel());
 						}
 					}
+					ctx.channel().attr(LAST_RECEIVE_MSG_TIME).set(now);
+				}
+				if (dispatchMessage != null) {
+					try {
+						dispatchMessage.run(msg, handler);
+					} catch (Exception e) {
+						log.error(ctx.channel() + " cause:", e);
+						Procs.invoke(onExceptionCaught, ctx.channel(), e);
+					}
+				} else {
+					log.warn(getServerName() + " no dispatch message listener!");
+				}
+			}
+		} catch (Exception e) {
+			ctx.channel().close();
+			log.error("close session:" + ctx.channel(), e);
+		} finally {
+			buffer.release();
+		}
 
-					@Override
-					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-						log.info(ctx.channel().remoteAddress() + " disconnected！");
-						connectionCount.decrementAndGet();
-						validatedChannels.remove(ctx.channel());
-						Procs.invoke(onChannelStateChanged, ctx.channel(), false);
-					}
-
-					@Override
-					public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-						channelRead0(ctx, msg);
-					}
-				});
 	}
 
 	@Override
@@ -266,7 +317,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		} catch (Exception e) {
 			log.error("encode link validate code error", e);
 			channel.close();
-			log.info(serverName + " remote connection " + data.channel.remoteAddress()
+			log.info(getServerName() + " remote connection " + data.channel.remoteAddress()
 					+ " discarded，server encryp util error！");
 			return;
 		}
@@ -274,10 +325,10 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		try {
 			sendMessage(channel, msg, (isSuccess, cause, channel1) -> {
 				if (isSuccess) {
-					log.info(serverName + " send client " + channel1.remoteAddress() + " validate token:" + encode
+					log.info(getServerName() + " send client " + channel1.remoteAddress() + " validate token:" + encode
 							+ "success！");
 				} else {
-					log.error(serverName + " send client " + channel1.remoteAddress() + " validate token:" + encode
+					log.error(getServerName() + " send client " + channel1.remoteAddress() + " validate token:" + encode
 							+ "fail！", cause);
 				}
 			});
@@ -302,7 +353,7 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 				iterator.remove();
 				data.channel.close();
 				// 移除链接
-				log.error(serverName + " connection " + data.channel.remoteAddress()
+				log.error(getServerName() + " connection " + data.channel.remoteAddress()
 						+ " discarded，validate time out,wait validate size:" + unvalidatedChannels.size());
 			}
 		}
@@ -340,72 +391,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		}
 	}
 
-	private void channelRead0(ChannelHandlerContext ctx, Object arg) {
-		ByteBuf buffer = (ByteBuf) arg;
-		try {
-			// 消息id
-			short messageId = decoder.readMessageId(ctx.channel(), buffer);
-			Message msg = factory.getMessage(messageId);
-			if (msg == null) {
-				throw new MessageCodecException(serverName + " message empty,id:" + Integer.toHexString(messageId));
-			}
-			msg.buffer(buffer);
-			try {
-				msg.decode();
-			} catch (Exception e) {
-				log.error("message id:" + Integer.toHexString(messageId) + " decode error!");
-				throw new MessageCodecException(e);
-			}
-			msg.buffer(null);
-			@SuppressWarnings("unchecked")
-			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
-			if (handler == null) {
-				throw new MessageCodecException(
-						serverName + " can not find handler for message,id:" + Integer.toHexString(messageId));
-			}
-			msg.setChannel(ctx.channel());
-			msg.setServer(this);
-			// 如果是内部消息，则自己消化
-			if (InnerMessageEnum.getTypeByValue(messageId) != null) {
-				handler.handle(msg);
-			} else {
-				// 如果没通过验证，不接受消息
-				if (unvalidatedChannels.containsKey(ctx.channel().id().asLongText())) {
-					log.error("channel " + ctx.channel() + " has not validate yet!");
-					return;
-				}
-				long now = System.currentTimeMillis();
-				// 记录消息接收时间
-				if (receiveIntervalMills > 0) {
-					if (ctx.channel().hasAttr(LAST_RECEIVE_MSG_TIME)) {
-						Long lastReceiveTime = ctx.channel().attr(LAST_RECEIVE_MSG_TIME).get();
-						if (lastReceiveTime != null && (now - lastReceiveTime) < receiveIntervalMills) {
-							ctx.channel().pipeline().fireExceptionCaught(new SendMessageTooFastException(ctx.channel(),
-									receiveIntervalMills, (int) (now - lastReceiveTime)));
-							ctx.channel().close();
-						}
-					}
-					ctx.channel().attr(LAST_RECEIVE_MSG_TIME).set(now);
-				}
-				if (dispatchMessage != null) {
-					try {
-						dispatchMessage.run(msg, handler);
-					} catch (Exception e) {
-						log.error(ctx.channel() + " cause:", e);
-						Procs.invoke(onExceptionCaught, ctx.channel(), e);
-					}
-				} else {
-					log.warn(serverName + " no dispatch message listener!");
-				}
-			}
-		} catch (Exception e) {
-			ctx.channel().close();
-			log.error("close session:" + ctx.channel(), e);
-		} finally {
-			buffer.release();
-		}
-	}
-
 	private void connectionValidateClient(ConnectionValidateClientMessage msg) {
 		// 查找临时缓存
 		String asLongText = msg.getChannel().id().asLongText();
@@ -413,19 +398,19 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		if (sessionValidateData == null) {
 			msg.getChannel().close();
 			// 移除链接
-			log.info(serverName + " remote connection " + msg.getChannel().remoteAddress()
+			log.info(getServerName() + " remote connection " + msg.getChannel().remoteAddress()
 					+ " discarded，validate time out！");
 			return;
 		}
 		// 对比结果
 		if (sessionValidateData.validateRandom != msg.validateRandom) {
 			// 移除链接
-			log.info(serverName + " remote connection " + msg.getChannel().remoteAddress()
+			log.info(getServerName() + " remote connection " + msg.getChannel().remoteAddress()
 					+ " discarded，validate wrong！");
 			return;
 		}
 		unvalidatedChannels.remove(asLongText);
-		log.info(serverName + " remote connection " + msg.getChannel().remoteAddress() + " validate success!");
+		log.info(getServerName() + " remote connection " + msg.getChannel().remoteAddress() + " validate success!");
 		// 通知客户端成功
 		try {
 			sendMessage(msg.getChannel(), new ConnectionValidateSuccessServerMessage(), null);
@@ -455,10 +440,6 @@ public class BinaryServer extends AbstractNettyServer implements IServer {
 		} catch (Exception e) {
 			log.error("send heart error", e);
 		}
-	}
-
-	public String getServerName() {
-		return serverName;
 	}
 
 	public AddressPair getAddressPair() {

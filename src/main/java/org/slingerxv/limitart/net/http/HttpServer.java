@@ -45,7 +45,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpMessage;
@@ -104,75 +103,36 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 				log.error(e.getMessage(), e);
 				Procs.invoke(onMessageOverSize, ctx.channel(), oversized);
 			}
-		}).addLast(new HttpContentCompressor()).addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
-
-			@Override
-			protected void channelRead0(ChannelHandlerContext arg0, FullHttpRequest arg1) throws Exception {
-				channelRead00(arg0, arg1);
-			}
-
-			@Override
-			public void channelActive(ChannelHandlerContext ctx) throws Exception {
-				Procs.invoke(onChannelStateChanged, ctx.channel(), true);
-			}
-
-			@Override
-			public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-				if (whiteList != null && !whiteList.isEmpty()) {
-					InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-					String remoteAddress = insocket.getAddress().getHostAddress();
-					if (!whiteList.contains(remoteAddress)) {
-						ctx.channel().close();
-						log.error("ip: " + remoteAddress + " rejected link!");
-						return;
-					}
-				}
-				Procs.invoke(onChannelStateChanged, ctx.channel(), false);
-			}
-
-			@Override
-			public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-				log.error(ctx.channel() + " cause:", cause);
-				Procs.invoke(onExceptionCaught, ctx.channel(), cause);
-			}
-		});
+		}).addLast(new HttpContentCompressor());
 	}
 
 	@Override
-	public void startServer() {
-		bind(port, onServerBind);
+	public void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		Procs.invoke(onExceptionCaught, ctx.channel(), cause);
 	}
 
 	@Override
-	public void stopServer() {
-		unbind();
+	public void channelActive0(ChannelHandlerContext ctx) throws Exception {
+		if (whiteList != null && !whiteList.isEmpty()) {
+			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+			String remoteAddress = insocket.getAddress().getHostAddress();
+			if (!whiteList.contains(remoteAddress)) {
+				ctx.channel().close();
+				log.error("ip: " + remoteAddress + " rejected link!");
+				return;
+			}
+		}
+		Procs.invoke(onChannelStateChanged, ctx.channel(), true);
 	}
 
-	public String getServerName() {
-		return this.serverName;
+	@Override
+	public void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+		Procs.invoke(onChannelStateChanged, ctx.channel(), false);
 	}
 
-	public int getPort() {
-		return port;
-	}
-
-	public int getHttpObjectAggregatorMax() {
-		return httpObjectAggregatorMax;
-	}
-
-	public Set<String> getWhiteList() {
-		return whiteList;
-	}
-
-	public UrlMessageFactory getFacotry() {
-		return facotry;
-	}
-
-	public Proc1<Channel> getOnServerBind() {
-		return onServerBind;
-	}
-
-	private void channelRead00(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
+	@Override
+	public void channelRead0(ChannelHandlerContext ctx, Object arg) throws Exception {
+		FullHttpRequest msg = (FullHttpRequest) arg;
 		if (!msg.decoderResult().isSuccess()) {
 			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_DECODE_FAIL);
 			return;
@@ -266,6 +226,40 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 		} else {
 			log.warn(serverName + " no dispatch message listener!");
 		}
+	}
+
+	@Override
+	public void startServer() {
+		bind(port, onServerBind);
+	}
+
+	@Override
+	public void stopServer() {
+		unbind();
+	}
+
+	public String getServerName() {
+		return this.serverName;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public int getHttpObjectAggregatorMax() {
+		return httpObjectAggregatorMax;
+	}
+
+	public Set<String> getWhiteList() {
+		return whiteList;
+	}
+
+	public UrlMessageFactory getFacotry() {
+		return facotry;
+	}
+
+	public Proc1<Channel> getOnServerBind() {
+		return onServerBind;
 	}
 
 	public static class HttpServerBuilder {

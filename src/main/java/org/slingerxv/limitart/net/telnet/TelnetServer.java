@@ -39,7 +39,6 @@ import org.slingerxv.limitart.util.StringUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
@@ -99,109 +98,102 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 	@Override
 	protected void initPipeline(ChannelPipeline pipeline) {
 		pipeline.addLast(new LineBasedFrameDecoder(256)).addLast(new StringDecoder(CharsetUtil.UTF_8))
-				.addLast(new StringEncoder(CharsetUtil.UTF_8)).addLast(new ChannelInboundHandlerAdapter() {
-					@Override
-					public boolean isSharable() {
-						return true;
-					}
+				.addLast(new StringEncoder(CharsetUtil.UTF_8));
+	}
 
-					@Override
-					public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-						log.error(ctx.channel() + " cause:", cause);
-						Procs.invoke(onExceptionCaught, ctx.channel(), cause);
-					}
+	@Override
+	public void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		Procs.invoke(onExceptionCaught, ctx.channel(), cause);
+	}
 
-					@Override
-					public void channelActive(ChannelHandlerContext ctx) {
-						log.info(ctx.channel().remoteAddress() + " connected！");
-						if (whiteList != null && !whiteList.isEmpty()) {
-							InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-							String remoteAddress = insocket.getAddress().getHostAddress();
-							if (!whiteList.contains(remoteAddress)) {
-								ctx.channel().close();
-								log.info("ip: " + remoteAddress + " rejected link!");
-								return;
-							}
-						}
-						sendMessage(ctx.channel(), "====Welcome To " + serverName + " !====");
-						sendMessage(ctx.channel(), "username:");
-					}
+	@Override
+	public void channelActive0(ChannelHandlerContext ctx) throws Exception {
+		if (whiteList != null && !whiteList.isEmpty()) {
+			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+			String remoteAddress = insocket.getAddress().getHostAddress();
+			if (!whiteList.contains(remoteAddress)) {
+				ctx.channel().close();
+				log.info("ip: " + remoteAddress + " rejected link!");
+				return;
+			}
+		}
+		sendMessage(ctx.channel(), "====Welcome To " + serverName + " !====");
+		sendMessage(ctx.channel(), "username:");
+	}
 
-					@Override
-					public void channelInactive(ChannelHandlerContext ctx) {
-						log.info(ctx.channel().remoteAddress() + " disconnected！");
-						TelnetUser consoleUser = getConsoleUser(ctx.channel());
-						if (consoleUser != null) {
-							consoleUser.setChannel(null);
-							Procs.invoke(onUserLogout, consoleUser);
-						}
-					}
+	@Override
+	public void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+		TelnetUser consoleUser = getConsoleUser(ctx.channel());
+		if (consoleUser != null) {
+			consoleUser.setChannel(null);
+			Procs.invoke(onUserLogout, consoleUser);
+		}
 
-					@Override
-					public void channelRead(ChannelHandlerContext ctx, Object msg) {
-						String command = (String) msg;
-						if (StringUtil.isEmptyOrNull(command)) {
-							return;
-						}
-						Channel ch = ctx.channel();
-						TelnetUser consoleUser = getConsoleUser(ch);
-						// 未通过验证的用户
-						if (consoleUser == null) {
-							String tempUsername = ch.attr(USERNAME_TEMP_KEY).get();
-							if (tempUsername == null) {
-								// 未输入过用户名的用户
-								TelnetUser temp = users.get(command);
-								if (temp == null) {
-									sendMessage(ch, "username not exist!");
-									return;
-								} else {
-									ch.attr(USERNAME_TEMP_KEY).set(command);
-									log.info("remote:" + ch.remoteAddress() + " ready to login on:" + command);
-									sendMessage(ch, "password:");
-								}
-							} else {
-								TelnetUser temp = users.get(tempUsername);
-								try {
-									if (!SecurityUtil.isPasswordValid(temp.getPass(), command, temp.getUsername())) {
-										sendMessage(ch, "password error!");
-										return;
-									}
-								} catch (NoSuchAlgorithmException e) {
-									log.error(e.getMessage(), e);
-								}
-								Channel oldChannel = temp.getChannel();
-								if (oldChannel != null) {
-									sendMessage(oldChannel, "another client login from:" + ch.remoteAddress(),
-											(t1, t2, t3) -> {
-												oldChannel.close();
-											});
-								}
-								temp.setChannel(ch);
-								ch.attr(USERNAME_KEY).set(temp.getUsername());
-								log.info("remote:" + ch.remoteAddress() + " login on:" + ch.attr(USERNAME_KEY).get()
-										+ " success!");
-								sendMessage(ctx.channel(), "====Login " + serverName + " Success!====");
-								Procs.invoke(onUserLogin, temp);
-							}
-						} else {
-							String[] split = command.split(" ");
-							String[] params = new String[] {};
-							String cmd = split[0];
-							if (split.length > 1) {
-								params = new String[split.length - 1];
-								System.arraycopy(split, 1, params, 0, params.length);
-							}
-							Proc3<TelnetUser, String, String[]> handler = commands.get(cmd);
-							if (handler == null) {
-								sendMessage(ch, "'" + cmd + "'is not a command!");
-								return;
-							}
-							log.info("remote:" + ch.remoteAddress() + " login on:" + ch.attr(USERNAME_KEY).get()
-									+ " execute cmd:" + cmd);
-							Procs.invoke(dispatchMessage, consoleUser, cmd, params, handler);
-						}
+	}
+
+	@Override
+	public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+
+		String command = (String) msg;
+		if (StringUtil.isEmptyOrNull(command)) {
+			return;
+		}
+		Channel ch = ctx.channel();
+		TelnetUser consoleUser = getConsoleUser(ch);
+		// 未通过验证的用户
+		if (consoleUser == null) {
+			String tempUsername = ch.attr(USERNAME_TEMP_KEY).get();
+			if (tempUsername == null) {
+				// 未输入过用户名的用户
+				TelnetUser temp = users.get(command);
+				if (temp == null) {
+					sendMessage(ch, "username not exist!");
+					return;
+				} else {
+					ch.attr(USERNAME_TEMP_KEY).set(command);
+					log.info("remote:" + ch.remoteAddress() + " ready to login on:" + command);
+					sendMessage(ch, "password:");
+				}
+			} else {
+				TelnetUser temp = users.get(tempUsername);
+				try {
+					if (!SecurityUtil.isPasswordValid(temp.getPass(), command, temp.getUsername())) {
+						sendMessage(ch, "password error!");
+						return;
 					}
-				});
+				} catch (NoSuchAlgorithmException e) {
+					log.error(e.getMessage(), e);
+				}
+				Channel oldChannel = temp.getChannel();
+				if (oldChannel != null) {
+					sendMessage(oldChannel, "another client login from:" + ch.remoteAddress(), (t1, t2, t3) -> {
+						oldChannel.close();
+					});
+				}
+				temp.setChannel(ch);
+				ch.attr(USERNAME_KEY).set(temp.getUsername());
+				log.info("remote:" + ch.remoteAddress() + " login on:" + ch.attr(USERNAME_KEY).get() + " success!");
+				sendMessage(ctx.channel(), "====Login " + serverName + " Success!====");
+				Procs.invoke(onUserLogin, temp);
+			}
+		} else {
+			String[] split = command.split(" ");
+			String[] params = new String[] {};
+			String cmd = split[0];
+			if (split.length > 1) {
+				params = new String[split.length - 1];
+				System.arraycopy(split, 1, params, 0, params.length);
+			}
+			Proc3<TelnetUser, String, String[]> handler = commands.get(cmd);
+			if (handler == null) {
+				sendMessage(ch, "'" + cmd + "'is not a command!");
+				return;
+			}
+			log.info("remote:" + ch.remoteAddress() + " login on:" + ch.attr(USERNAME_KEY).get() + " execute cmd:"
+					+ cmd);
+			Procs.invoke(dispatchMessage, consoleUser, cmd, params, handler);
+		}
+
 	}
 
 	public void sendMessage(Channel channel, String msg) {

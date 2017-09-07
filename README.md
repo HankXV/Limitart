@@ -119,6 +119,7 @@
 	2.语言本地化(I18NStrings)
 	3.自定义编码部分增加了protobuf的压缩算法
 	4.ConsoleServer改名为TelnetServer
+	5.增加ProtoBuf服务器支持
 ## v2.0-alpha
 	1.注册消息通过Handler直接注册，而不用指定消息Id和消息本身
 	2.可以通过扫描包的形式直接注册所有消息

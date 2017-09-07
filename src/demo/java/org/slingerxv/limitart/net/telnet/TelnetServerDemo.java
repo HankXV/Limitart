@@ -1,4 +1,4 @@
-package org.slingerxv.limitart.net.console;
+package org.slingerxv.limitart.net.telnet;
 
 import java.security.NoSuchAlgorithmException;
 

@@ -46,7 +46,6 @@ import org.slingerxv.limitart.util.TimerUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
@@ -118,41 +117,75 @@ public class BinaryClient extends AbstractNettyClient {
 	protected void initPipeline(ChannelPipeline pipeline) {
 		pipeline.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(), decoder.getLengthFieldOffset(),
 				decoder.getLengthFieldLength(), decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()));
-		pipeline.addLast(new ChannelInboundHandlerAdapter() {
-			@Override
-			public boolean isSharable() {
-				return true;
-			}
+	}
 
-			@Override
-			public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-				channelRead0(ctx, msg);
+	@Override
+	protected void channelRead0(ChannelHandlerContext ctx, Object arg)
+			throws ReflectiveOperationException, MessageCodecException {
+		ByteBuf buffer = (ByteBuf) arg;
+		try {
+			// 消息id
+			short messageId = decoder.readMessageId(ctx.channel(), buffer);
+			Message msg = factory.getMessage(messageId);
+			if (msg == null) {
+				throw new MessageCodecException(
+						getClientName() + " message empty,id:" + Integer.toHexString(messageId));
 			}
-
-			@Override
-			public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-				log.info(getClientName() + " disconnected!");
-				if (heartIntervalSec > 0 && hearTask != null) {
-					TimerUtil.unScheduleGlobal(hearTask);
+			msg.buffer(buffer);
+			try {
+				msg.decode();
+			} catch (Exception e) {
+				throw new MessageCodecException(e);
+			}
+			msg.buffer(null);
+			@SuppressWarnings("unchecked")
+			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
+			if (handler == null) {
+				throw new MessageCodecException(
+						getClientName() + " can not find handler for message,id:" + Integer.toHexString(messageId));
+			}
+			msg.setChannel(ctx.channel());
+			msg.setClient(this);
+			// 如果是内部消息，则自己消化
+			if (InnerMessageEnum.getTypeByValue(messageId) != null) {
+				handler.handle(msg);
+			} else {
+				if (dispatchMessage != null) {
+					try {
+						dispatchMessage.run(msg, handler);
+					} catch (Exception e) {
+						log.error(ctx.channel() + " cause:", e);
+						Procs.invoke(onExceptionCaught, this, e);
+					}
+				} else {
+					log.warn(getClientName() + " no dispatch message listener!");
 				}
-				Procs.invoke(onChannelStateChanged, BinaryClient.this, false);
-				if (getAutoReconnect() > 0) {
-					tryReconnect(remoteAddress.getIp(), remoteAddress.getPort(), getAutoReconnect());
-				}
 			}
+		} finally {
+			buffer.release();
+		}
 
-			@Override
-			public void channelActive(ChannelHandlerContext ctx) throws Exception {
-				log.info(getClientName() + " connected!");
-				Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
-			}
+	}
 
-			@Override
-			public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-				log.error(ctx.channel() + " cause:", cause);
-				Procs.invoke(onExceptionCaught, BinaryClient.this, cause);
-			}
-		});
+	@Override
+	public void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+		if (heartIntervalSec > 0 && hearTask != null) {
+			TimerUtil.unScheduleGlobal(hearTask);
+		}
+		Procs.invoke(onChannelStateChanged, BinaryClient.this, false);
+		if (getAutoReconnect() > 0) {
+			tryReconnect(remoteAddress.getIp(), remoteAddress.getPort(), getAutoReconnect());
+		}
+	}
+
+	@Override
+	public void channelActive0(ChannelHandlerContext ctx) throws Exception {
+		Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
+	}
+
+	@Override
+	public void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		Procs.invoke(onExceptionCaught, BinaryClient.this, cause);
 	}
 
 	private void decodeConnectionValidateData(String validateStr) {
@@ -217,52 +250,6 @@ public class BinaryClient extends AbstractNettyClient {
 
 	public int getHeartIntervalSec() {
 		return heartIntervalSec;
-	}
-
-	private void channelRead0(ChannelHandlerContext ctx, Object arg)
-			throws MessageCodecException, ReflectiveOperationException {
-		ByteBuf buffer = (ByteBuf) arg;
-		try {
-			// 消息id
-			short messageId = decoder.readMessageId(ctx.channel(), buffer);
-			Message msg = factory.getMessage(messageId);
-			if (msg == null) {
-				throw new MessageCodecException(
-						getClientName() + " message empty,id:" + Integer.toHexString(messageId));
-			}
-			msg.buffer(buffer);
-			try {
-				msg.decode();
-			} catch (Exception e) {
-				throw new MessageCodecException(e);
-			}
-			msg.buffer(null);
-			@SuppressWarnings("unchecked")
-			IHandler<Message> handler = (IHandler<Message>) factory.getHandler(messageId);
-			if (handler == null) {
-				throw new MessageCodecException(
-						getClientName() + " can not find handler for message,id:" + Integer.toHexString(messageId));
-			}
-			msg.setChannel(ctx.channel());
-			msg.setClient(this);
-			// 如果是内部消息，则自己消化
-			if (InnerMessageEnum.getTypeByValue(messageId) != null) {
-				handler.handle(msg);
-			} else {
-				if (dispatchMessage != null) {
-					try {
-						dispatchMessage.run(msg, handler);
-					} catch (Exception e) {
-						log.error(ctx.channel() + " cause:", e);
-						Procs.invoke(onExceptionCaught, this, e);
-					}
-				} else {
-					log.warn(getClientName() + " no dispatch message listener!");
-				}
-			}
-		} finally {
-			buffer.release();
-		}
 	}
 
 	private class ConnectionValidateServerHandler implements IHandler<ConnectionValidateServerMessage> {
