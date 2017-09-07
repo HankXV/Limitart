@@ -102,12 +102,12 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 	}
 
 	@Override
-	public void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+	protected void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		Procs.invoke(onExceptionCaught, ctx.channel(), cause);
 	}
 
 	@Override
-	public void channelActive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelActive0(ChannelHandlerContext ctx) throws Exception {
 		if (whiteList != null && !whiteList.isEmpty()) {
 			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 			String remoteAddress = insocket.getAddress().getHostAddress();
@@ -122,7 +122,7 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 	}
 
 	@Override
-	public void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelInactive0(ChannelHandlerContext ctx) throws Exception {
 		TelnetUser consoleUser = getConsoleUser(ctx.channel());
 		if (consoleUser != null) {
 			consoleUser.setChannel(null);
@@ -132,8 +132,7 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 	}
 
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-
+	protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
 		String command = (String) msg;
 		if (StringUtil.isEmptyOrNull(command)) {
 			return;
@@ -196,10 +195,23 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 
 	}
 
+	/**
+	 * 发送消息
+	 * 
+	 * @param channel
+	 * @param msg
+	 */
 	public void sendMessage(Channel channel, String msg) {
 		sendMessage(channel, msg, null);
 	}
 
+	/**
+	 * 发送消息
+	 * 
+	 * @param channel
+	 * @param msg
+	 * @param listener
+	 */
 	public void sendMessage(Channel channel, String msg, Proc3<Boolean, Throwable, Channel> listener) {
 		String info = "->" + msg + "\r\n";
 		channel.writeAndFlush(info).addListener((ChannelFutureListener) arg0 -> {
@@ -253,6 +265,12 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 			return new TelnetServer(this);
 		}
 
+		/**
+		 * 服务器名称
+		 * 
+		 * @param serverName
+		 * @return
+		 */
 		public TelnetServerBuilder serverName(String serverName) {
 			this.serverName = serverName;
 			return this;
@@ -269,6 +287,12 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 
+		/**
+		 * 白名单
+		 * 
+		 * @param remoteAddress
+		 * @return
+		 */
 		public TelnetServerBuilder whiteList(String... remoteAddress) {
 			for (String ip : remoteAddress) {
 				if (StringUtil.isIp4(ip)) {
@@ -278,6 +302,14 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 
+		/**
+		 * 增加用户
+		 * 
+		 * @param users
+		 * @return
+		 * @throws NoSuchAlgorithmException
+		 * @throws TelnetUserDuplicatedException
+		 */
 		public TelnetServerBuilder user(TelnetUser... users)
 				throws NoSuchAlgorithmException, TelnetUserDuplicatedException {
 			for (TelnetUser temp : users) {
@@ -293,6 +325,14 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 
+		/**
+		 * 注册命令
+		 * 
+		 * @param cmd
+		 * @param handler
+		 * @return
+		 * @throws CommandDuplicatedException
+		 */
 		public TelnetServerBuilder cmd(String cmd, Proc3<TelnetUser, String, String[]> handler)
 				throws CommandDuplicatedException {
 			if (commands.containsKey(cmd)) {
@@ -302,27 +342,57 @@ public class TelnetServer extends AbstractNettyServer implements IServer {
 			return this;
 		}
 
+		/**
+		 * 异常触发回调
+		 * 
+		 * @param onExceptionCaught
+		 * @return
+		 */
 		public TelnetServerBuilder onExceptionCaught(Proc2<Channel, Throwable> onExceptionCaught) {
 			this.onExceptionCaught = onExceptionCaught;
 			return this;
 		}
 
+		/**
+		 * 服务器绑定成功回调
+		 * 
+		 * @param onServerBind
+		 * @return
+		 */
 		public TelnetServerBuilder onServerBind(Proc1<Channel> onServerBind) {
 			this.onServerBind = onServerBind;
 			return this;
 		}
 
+		/**
+		 * 分发消息回调
+		 * 
+		 * @param dispatchMessage
+		 * @return
+		 */
 		public TelnetServerBuilder dispatchMessage(
 				Proc4<TelnetUser, String, String[], Proc3<TelnetUser, String, String[]>> dispatchMessage) {
 			this.dispatchMessage = dispatchMessage;
 			return this;
 		}
 
+		/**
+		 * 用户登录回调
+		 * 
+		 * @param onUserLogin
+		 * @return
+		 */
 		public TelnetServerBuilder onUserLogin(Proc1<TelnetUser> onUserLogin) {
 			this.onUserLogin = onUserLogin;
 			return this;
 		}
 
+		/**
+		 * 用户登出回调
+		 * 
+		 * @param onUserLogout
+		 * @return
+		 */
 		public TelnetServerBuilder onUserLogout(Proc1<TelnetUser> onUserLogout) {
 			this.onUserLogout = onUserLogout;
 			return this;

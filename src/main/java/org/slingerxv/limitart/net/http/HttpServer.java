@@ -107,12 +107,12 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 	}
 
 	@Override
-	public void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+	protected void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		Procs.invoke(onExceptionCaught, ctx.channel(), cause);
 	}
 
 	@Override
-	public void channelActive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelActive0(ChannelHandlerContext ctx) throws Exception {
 		if (whiteList != null && !whiteList.isEmpty()) {
 			InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 			String remoteAddress = insocket.getAddress().getHostAddress();
@@ -126,12 +126,12 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 	}
 
 	@Override
-	public void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelInactive0(ChannelHandlerContext ctx) throws Exception {
 		Procs.invoke(onChannelStateChanged, ctx.channel(), false);
 	}
 
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, Object arg) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, Object arg) throws Exception {
 		FullHttpRequest msg = (FullHttpRequest) arg;
 		if (!msg.decoderResult().isSuccess()) {
 			HttpUtil.sendResponseError(ctx.channel(), RequestErrorCode.ERROR_DECODE_FAIL);

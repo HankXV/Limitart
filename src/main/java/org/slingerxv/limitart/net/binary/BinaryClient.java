@@ -168,7 +168,7 @@ public class BinaryClient extends AbstractNettyClient {
 	}
 
 	@Override
-	public void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelInactive0(ChannelHandlerContext ctx) throws Exception {
 		if (heartIntervalSec > 0 && hearTask != null) {
 			TimerUtil.unScheduleGlobal(hearTask);
 		}
@@ -179,12 +179,12 @@ public class BinaryClient extends AbstractNettyClient {
 	}
 
 	@Override
-	public void channelActive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelActive0(ChannelHandlerContext ctx) throws Exception {
 		Procs.invoke(onChannelStateChanged, BinaryClient.this, true);
 	}
 
 	@Override
-	public void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+	protected void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		Procs.invoke(onExceptionCaught, BinaryClient.this, cause);
 	}
 

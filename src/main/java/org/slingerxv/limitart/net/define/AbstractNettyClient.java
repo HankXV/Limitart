@@ -96,11 +96,11 @@ public abstract class AbstractNettyClient {
 
 	protected abstract void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception;
 
-	public abstract void channelInactive0(ChannelHandlerContext ctx) throws Exception;
+	protected abstract void channelInactive0(ChannelHandlerContext ctx) throws Exception;
 
-	public abstract void channelActive0(ChannelHandlerContext ctx) throws Exception;
+	protected abstract void channelActive0(ChannelHandlerContext ctx) throws Exception;
 
-	public abstract void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception;
+	protected abstract void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception;
 
 	protected AbstractNettyClient tryDisConnect() {
 		if (channel != null) {

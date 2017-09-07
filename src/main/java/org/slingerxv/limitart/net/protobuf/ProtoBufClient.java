@@ -122,7 +122,7 @@ public class ProtoBufClient extends AbstractNettyClient {
 	}
 
 	@Override
-	public void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelInactive0(ChannelHandlerContext ctx) throws Exception {
 		Procs.invoke(onChannelStateChanged, ProtoBufClient.this, false);
 		if (getAutoReconnect() > 0) {
 			tryReconnect(remoteAddress.getIp(), remoteAddress.getPort(), getAutoReconnect());
@@ -130,12 +130,12 @@ public class ProtoBufClient extends AbstractNettyClient {
 	}
 
 	@Override
-	public void channelActive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelActive0(ChannelHandlerContext ctx) throws Exception {
 		Procs.invoke(onChannelStateChanged, ProtoBufClient.this, true);
 	}
 
 	@Override
-	public void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+	protected void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		Procs.invoke(onExceptionCaught, ProtoBufClient.this, cause);
 	}
 

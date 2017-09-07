@@ -104,12 +104,12 @@ public class ProtoBufServer extends AbstractNettyServer implements IServer {
 	}
 
 	@Override
-	public void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+	protected void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		Procs.invoke(onExceptionCaught, ctx.channel(), cause);
 	}
 
 	@Override
-	public void channelActive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelActive0(ChannelHandlerContext ctx) throws Exception {
 		if (maxConnection > 0 && connectionCount.get() >= maxConnection) {
 			log.error("connection count is greater than " + maxConnection + " close channel:" + ctx.channel());
 			ctx.channel().close();
@@ -129,13 +129,13 @@ public class ProtoBufServer extends AbstractNettyServer implements IServer {
 	}
 
 	@Override
-	public void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+	protected void channelInactive0(ChannelHandlerContext ctx) throws Exception {
 		connectionCount.decrementAndGet();
 		Procs.invoke(onChannelStateChanged, ctx.channel(), false);
 	}
 
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
 
 		Message message = (Message) msg;
 		try {
