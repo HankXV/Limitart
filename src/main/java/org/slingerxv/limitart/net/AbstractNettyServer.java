@@ -53,14 +53,12 @@ public abstract class AbstractNettyServer {
 	private Channel channel;
 	private String serverName;
 	static {
-		if (bossGroup == null || workerGroup == null) {
-			if (Epoll.isAvailable()) {
-				bossGroup = new EpollEventLoopGroup(1);
-				workerGroup = new EpollEventLoopGroup();
-			} else {
-				bossGroup = new NioEventLoopGroup(1);
-				workerGroup = new NioEventLoopGroup();
-			}
+		if (Epoll.isAvailable()) {
+			bossGroup = new EpollEventLoopGroup(1);
+			workerGroup = new EpollEventLoopGroup();
+		} else {
+			bossGroup = new NioEventLoopGroup(1);
+			workerGroup = new NioEventLoopGroup();
 		}
 	}
 

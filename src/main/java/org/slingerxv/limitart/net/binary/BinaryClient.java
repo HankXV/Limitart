@@ -88,7 +88,6 @@ public class BinaryClient extends AbstractNettyClient {
 		factory.registerMsg(new ConnectionValidateServerHandler())
 				.registerMsg(new ConnectionValidateSuccessServerHandler()).registerMsg(new HeartServerHandler());
 		decodeUtil = SymmetricEncryptionUtil.getDecodeInstance(remoteAddress.getPass());
-		log.info(getClientName() + " nio init");
 	}
 
 	public void sendMessage(Message msg) throws Exception {

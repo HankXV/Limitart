@@ -30,6 +30,9 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -40,19 +43,28 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  */
 public abstract class AbstractNettyClient {
 	private static Logger log = LoggerFactory.getLogger(AbstractNettyServer.class);
-	protected static EventLoopGroup workerGroup = new NioEventLoopGroup();
+	protected static EventLoopGroup workerGroup;
 	private Bootstrap bootstrap;
 	private String clientName;
 	private Channel channel;
 	private int autoReconnect;
+	static {
+		workerGroup = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
+	}
 
 	protected AbstractNettyClient(String clientName, int autoReconnect) {
 		this.clientName = Objects.requireNonNull(clientName, "client name");
 		this.autoReconnect = autoReconnect;
 		bootstrap = new Bootstrap();
-		log.info(clientName + " nio init");
-		bootstrap.group(workerGroup).channel(NioSocketChannel.class)
-				.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+		bootstrap.group(workerGroup);
+		if (Epoll.isAvailable()) {
+			bootstrap.channel(EpollSocketChannel.class);
+			log.info(clientName + " epoll init");
+		} else {
+			bootstrap.channel(NioSocketChannel.class);
+			log.info(clientName + " nio init");
+		}
+		bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.handler(new ChannelInitializer<SocketChannel>() {
 
 					@Override
