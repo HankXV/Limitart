@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Procs;
+import org.slingerxv.limitart.net.AddressPair;
+import org.slingerxv.limitart.net.IServer;
 import org.slingerxv.limitart.net.binary.BinaryServer;
 import org.slingerxv.limitart.net.binary.distributed.handler.ReqConnectionReportSlave2MasterHandler;
 import org.slingerxv.limitart.net.binary.distributed.handler.ReqServerLoadSlave2MasterHandler;
@@ -36,8 +38,6 @@ import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster
 import org.slingerxv.limitart.net.binary.distributed.struct.InnerServerData;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.define.IServer;
-import org.slingerxv.limitart.net.struct.AddressPair;
 
 import io.netty.channel.Channel;
 

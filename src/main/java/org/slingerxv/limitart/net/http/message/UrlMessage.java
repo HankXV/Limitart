@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.net.http.constant.QueryMethod;
 import org.slingerxv.limitart.reflectasm.FieldAccess;
-import org.slingerxv.limitart.util.filter.FieldFilter;
+import org.slingerxv.limitart.util.FieldFilter;
 
 import io.netty.channel.Channel;
 

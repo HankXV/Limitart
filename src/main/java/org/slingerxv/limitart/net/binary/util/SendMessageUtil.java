@@ -22,7 +22,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slingerxv.limitart.collections.FrequencyReadRankMap;
-import org.slingerxv.limitart.collections.define.IRankMap;
+import org.slingerxv.limitart.collections.IRankMap;
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;

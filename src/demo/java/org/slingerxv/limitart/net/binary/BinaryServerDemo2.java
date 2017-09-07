@@ -1,9 +1,9 @@
 package org.slingerxv.limitart.net.binary;
 
+import org.slingerxv.limitart.net.AddressPair;
 import org.slingerxv.limitart.net.binary.handler.annotation.Controller;
 import org.slingerxv.limitart.net.binary.handler.annotation.Handler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.struct.AddressPair;
 
 @Controller
 public class BinaryServerDemo2 {

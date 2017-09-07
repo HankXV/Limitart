@@ -25,7 +25,6 @@ import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.funcs.Test1;
 import org.slingerxv.limitart.funcs.Tests;
-import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
 
 /**
  * 普通消息队列(TaskQueue更好)

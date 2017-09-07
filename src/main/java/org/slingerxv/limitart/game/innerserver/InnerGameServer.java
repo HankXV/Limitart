@@ -24,9 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.game.innerserver.config.InnerGameServerConfig;
 import org.slingerxv.limitart.game.innerserver.constant.InnerGameServerType;
+import org.slingerxv.limitart.net.IServer;
 import org.slingerxv.limitart.net.binary.distributed.InnerSlaveServer;
 import org.slingerxv.limitart.net.binary.distributed.util.InnerServerUtil;
-import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.util.Beta;
 
 /**

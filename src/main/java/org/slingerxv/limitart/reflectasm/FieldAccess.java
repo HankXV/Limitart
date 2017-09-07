@@ -30,8 +30,8 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.slingerxv.limitart.util.FieldFilter;
 import org.slingerxv.limitart.util.ReflectionUtil;
-import org.slingerxv.limitart.util.filter.FieldFilter;
 
 public abstract class FieldAccess {
 	private String[] fieldNames;

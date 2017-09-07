@@ -25,6 +25,8 @@ import org.slingerxv.limitart.funcs.Funcs;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Procs;
+import org.slingerxv.limitart.net.AddressPair;
+import org.slingerxv.limitart.net.IServer;
 import org.slingerxv.limitart.net.binary.BinaryClient;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerJoinMaster2SlaveHandler;
 import org.slingerxv.limitart.net.binary.distributed.handler.ResServerQuitMaster2SlaveHandler;
@@ -34,8 +36,6 @@ import org.slingerxv.limitart.net.binary.distributed.message.ReqServerLoadSlave2
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerJoinMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.distributed.message.ResServerQuitMaster2SlaveMessage;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.define.IServer;
-import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.TimerUtil;
 
 /**

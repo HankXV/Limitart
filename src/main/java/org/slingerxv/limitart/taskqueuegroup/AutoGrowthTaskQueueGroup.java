@@ -23,10 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Func1;
-import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
-import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
-import org.slingerxv.limitart.taskqueuegroup.struct.AutoGrowthEntity;
-import org.slingerxv.limitart.taskqueuegroup.struct.AutoGrowthSegment;
+import org.slingerxv.limitart.taskqueue.ITaskQueue;
+import org.slingerxv.limitart.taskqueue.TaskQueueException;
 
 /**
  * 自动增长消息线程组

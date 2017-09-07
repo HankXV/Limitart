@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.script.exception;
+package org.slingerxv.limitart.taskqueue;
 
-public class ScriptException extends Exception {
-	private static final long serialVersionUID = 1L;
+import org.slingerxv.limitart.net.IServer;
 
-	public ScriptException(String info) {
-		super(info);
-	}
+public interface ITaskQueue<T> extends IServer {
+
+	void addCommand(T t) throws TaskQueueException;
+
+	String getThreadName();
 }

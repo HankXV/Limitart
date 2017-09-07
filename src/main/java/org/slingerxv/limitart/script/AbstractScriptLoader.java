@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.script.define;
+package org.slingerxv.limitart.script;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,8 +27,6 @@ import java.util.function.BiConsumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slingerxv.limitart.script.constant.ScriptFileType;
-import org.slingerxv.limitart.script.exception.ScriptException;
 
 import groovy.lang.GroovyClassLoader;
 

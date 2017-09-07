@@ -22,8 +22,6 @@ import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.funcs.Test1;
 import org.slingerxv.limitart.funcs.Tests;
-import org.slingerxv.limitart.taskqueue.define.ITaskQueue;
-import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
 
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.ExceptionHandler;

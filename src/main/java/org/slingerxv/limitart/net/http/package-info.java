@@ -13,26 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.script.constant;
-
-public enum ScriptFileType {
-	JAVA("java"), GROOVY("groovy"),;
-	private String value;
-
-	ScriptFileType(String value) {
-		this.value = value;
-	}
-
-	public String getValue() {
-		return this.value;
-	}
-
-	public static ScriptFileType getTypeByValue(String value) {
-		for (ScriptFileType type : ScriptFileType.values()) {
-			if (type.getValue().equals(value)) {
-				return type;
-			}
-		}
-		return null;
-	}
-}
+/**
+ * 微型Http服务器
+ *
+ */
+package org.slingerxv.limitart.net.http;

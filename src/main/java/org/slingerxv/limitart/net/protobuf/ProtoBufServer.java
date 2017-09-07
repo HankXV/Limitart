@@ -26,12 +26,12 @@ import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
+import org.slingerxv.limitart.net.AbstractNettyServer;
+import org.slingerxv.limitart.net.AddressPair;
+import org.slingerxv.limitart.net.IServer;
 import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException;
-import org.slingerxv.limitart.net.define.AbstractNettyServer;
-import org.slingerxv.limitart.net.define.IServer;
 import org.slingerxv.limitart.net.protobuf.handler.ProtoBufHandler;
 import org.slingerxv.limitart.net.protobuf.message.ProtoBufFactory;
-import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.Beta;
 import org.slingerxv.limitart.util.StringUtil;
 

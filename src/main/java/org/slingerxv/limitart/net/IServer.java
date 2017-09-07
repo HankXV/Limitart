@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.taskqueue.exception;
+package org.slingerxv.limitart.net;
 
-public class TaskQueueException extends Exception {
+public interface IServer {
+	void startServer() throws Exception;
 
-	private static final long serialVersionUID = 1L;
-
-	public TaskQueueException(String info) {
-		super(info);
-	}
+	void stopServer() throws Exception;
 }

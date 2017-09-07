@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.net.struct;
+package org.slingerxv.limitart.net;
 
 import io.netty.util.internal.StringUtil;
 

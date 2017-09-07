@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.taskqueue.define;
+package org.slingerxv.limitart.taskqueue;
 
-import org.slingerxv.limitart.net.define.IServer;
-import org.slingerxv.limitart.taskqueue.exception.TaskQueueException;
+public class TaskQueueException extends Exception {
 
-public interface ITaskQueue<T> extends IServer {
+	private static final long serialVersionUID = 1L;
 
-	void addCommand(T t) throws TaskQueueException;
-
-	String getThreadName();
+	public TaskQueueException(String info) {
+		super(info);
+	}
 }

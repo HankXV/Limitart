@@ -28,8 +28,6 @@ import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.slingerxv.limitart.util.exception.InvalidBase64CharacterException;
-
 import io.netty.util.CharsetUtil;
 
 public final class SecurityUtil {

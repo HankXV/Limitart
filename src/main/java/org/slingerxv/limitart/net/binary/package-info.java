@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.script.define;
-
-public abstract class IDynamicCode implements IScript<Integer> {
-	@Override
-	public Integer getScriptId() {
-		return 0;
-	}
-
-	public abstract void execute();
-}
+/**
+ * 二进制自定义协议服务器
+ *
+ */
+package org.slingerxv.limitart.net.binary;

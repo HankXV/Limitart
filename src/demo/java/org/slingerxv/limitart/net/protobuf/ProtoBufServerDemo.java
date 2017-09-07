@@ -14,9 +14,9 @@
  */
 package org.slingerxv.limitart.net.protobuf;
 
+import org.slingerxv.limitart.net.AddressPair;
 import org.slingerxv.limitart.net.protobuf.ProtoBufServer.ProtoBufServerBuilder;
 import org.slingerxv.limitart.net.protobuf.message.ProtoBufFactory;
-import org.slingerxv.limitart.net.struct.AddressPair;
 
 /**
  * @author hank

@@ -31,7 +31,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.slingerxv.limitart.funcs.Func1;
-import org.slingerxv.limitart.util.filter.FieldFilter;
 
 /**
  * 反射工具

@@ -27,7 +27,7 @@ import org.slingerxv.limitart.net.binary.message.exception.MessageIOException;
 import org.slingerxv.limitart.reflectasm.ConstructorAccess;
 import org.slingerxv.limitart.reflectasm.FieldAccess;
 import org.slingerxv.limitart.util.Beta;
-import org.slingerxv.limitart.util.filter.FieldFilter;
+import org.slingerxv.limitart.util.FieldFilter;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;

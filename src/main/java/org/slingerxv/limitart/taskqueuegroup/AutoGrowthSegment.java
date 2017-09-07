@@ -13,24 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.taskqueuegroup.struct;
+package org.slingerxv.limitart.taskqueuegroup;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Set;
+
+import org.slingerxv.limitart.collections.ConcurrentHashSet;
+import org.slingerxv.limitart.taskqueue.ITaskQueue;
 
 /**
- * 自动增长触发单位
+ * 线程容器
  * 
  * @author Hank
  *
  */
-public class AutoGrowthEntity {
-	private transient AtomicInteger threadIndex = new AtomicInteger(0);
+public class AutoGrowthSegment<T> {
+	private int threadIndex;
+	private ITaskQueue<T> thread;
+	private Set<AutoGrowthEntity> entities = new ConcurrentHashSet<>();
+
+	public Set<AutoGrowthEntity> getEntities() {
+		return entities;
+	}
+
+	public void setEntities(Set<AutoGrowthEntity> entities) {
+		this.entities = entities;
+	}
 
 	public int getThreadIndex() {
-		return threadIndex.get();
+		return threadIndex;
 	}
 
 	public void setThreadIndex(int threadIndex) {
-		this.threadIndex.set(threadIndex);
+		this.threadIndex = threadIndex;
 	}
+
+	public ITaskQueue<T> getThread() {
+		return thread;
+	}
+
+	public void setThread(ITaskQueue<T> thread) {
+		this.thread = thread;
+	}
+
 }

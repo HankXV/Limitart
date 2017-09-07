@@ -25,6 +25,8 @@ import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
+import org.slingerxv.limitart.net.AbstractNettyClient;
+import org.slingerxv.limitart.net.AddressPair;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryDecoder;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
@@ -38,8 +40,6 @@ import org.slingerxv.limitart.net.binary.message.impl.validate.ConnectionValidat
 import org.slingerxv.limitart.net.binary.message.impl.validate.HeartClientMessage;
 import org.slingerxv.limitart.net.binary.message.impl.validate.HeartServerMessage;
 import org.slingerxv.limitart.net.binary.util.SendMessageUtil;
-import org.slingerxv.limitart.net.define.AbstractNettyClient;
-import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.util.SymmetricEncryptionUtil;
 import org.slingerxv.limitart.util.TimerUtil;
 

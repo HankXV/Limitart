@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.script.define;
+package org.slingerxv.limitart.script;
 
-public interface IScript<KEY> {
-	KEY getScriptId();
+public class ScriptException extends Exception {
+	private static final long serialVersionUID = 1L;
+
+	public ScriptException(String info) {
+		super(info);
+	}
 }

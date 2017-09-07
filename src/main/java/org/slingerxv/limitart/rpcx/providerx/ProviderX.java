@@ -26,11 +26,11 @@ import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.net.AddressPair;
 import org.slingerxv.limitart.net.binary.BinaryClient;
 import org.slingerxv.limitart.net.binary.BinaryServer;
 import org.slingerxv.limitart.net.binary.handler.IHandler;
 import org.slingerxv.limitart.net.binary.message.MessageFactory;
-import org.slingerxv.limitart.net.struct.AddressPair;
 import org.slingerxv.limitart.rpcx.define.ServiceX;
 import org.slingerxv.limitart.rpcx.exception.ServiceError;
 import org.slingerxv.limitart.rpcx.exception.ServiceXProxyException;

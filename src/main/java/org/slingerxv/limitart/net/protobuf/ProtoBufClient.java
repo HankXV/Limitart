@@ -23,11 +23,11 @@ import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.funcs.Proc2;
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
+import org.slingerxv.limitart.net.AbstractNettyClient;
+import org.slingerxv.limitart.net.AddressPair;
 import org.slingerxv.limitart.net.binary.message.exception.MessageCodecException;
-import org.slingerxv.limitart.net.define.AbstractNettyClient;
 import org.slingerxv.limitart.net.protobuf.handler.ProtoBufHandler;
 import org.slingerxv.limitart.net.protobuf.message.ProtoBufFactory;
-import org.slingerxv.limitart.net.struct.AddressPair;
 
 import com.google.protobuf.Message;
 

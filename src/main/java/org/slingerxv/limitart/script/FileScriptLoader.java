@@ -24,11 +24,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.groovy.control.CompilationFailedException;
-import org.slingerxv.limitart.script.constant.ScriptFileType;
-import org.slingerxv.limitart.script.define.AbstractScriptLoader;
-import org.slingerxv.limitart.script.define.IDynamicCode;
-import org.slingerxv.limitart.script.define.IScript;
-import org.slingerxv.limitart.script.exception.ScriptException;
 import org.slingerxv.limitart.util.FileUtil;
 
 import groovy.lang.GroovyClassLoader;

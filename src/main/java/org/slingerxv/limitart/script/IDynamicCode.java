@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.net.define;
+package org.slingerxv.limitart.script;
 
-public interface IServer {
-	void startServer() throws Exception;
+public abstract class IDynamicCode implements IScript<Integer> {
+	@Override
+	public Integer getScriptId() {
+		return 0;
+	}
 
-	void stopServer() throws Exception;
+	public abstract void execute();
 }

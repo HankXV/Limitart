@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.slingerxv.limitart.collections.define.IRankMap;
 import org.slingerxv.limitart.funcs.Func;
 
 /**
