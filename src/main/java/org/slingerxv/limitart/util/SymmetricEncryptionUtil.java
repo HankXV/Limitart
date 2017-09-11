@@ -102,10 +102,9 @@ public final class SymmetricEncryptionUtil {
 		} else {
 			jsonByteFillZero = bytes;
 		}
-		byte[] doFinal = null;
 		Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 		cipher.init(Cipher.ENCRYPT_MODE, generateKey, new IvParameterSpec(this.iv));
-		doFinal = cipher.doFinal(jsonByteFillZero);
+		byte[] doFinal = cipher.doFinal(jsonByteFillZero);
 		byte[] content = new byte[doFinal.length + this.iv.length];
 		System.arraycopy(this.iv, 0, content, 0, this.iv.length);
 		System.arraycopy(doFinal, 0, content, this.iv.length, doFinal.length);

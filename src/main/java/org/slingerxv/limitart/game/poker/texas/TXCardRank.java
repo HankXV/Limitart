@@ -50,7 +50,7 @@ public enum TXCardRank {
 		this.value = value;
 	}
 
-	public long getValue() {
+	public int getValue() {
 		return this.value;
 	}
 
