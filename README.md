@@ -114,6 +114,8 @@
 12.游戏中常用的唯一Id生成请参考`org.slingerxv.limitart.util.UniqueIdUtil`<br>
 13.带有`@beta`标记的代表此API是新加入的测试版<br>
 # 更新日志
+## v2.0.1-release
+	1.修复热加载jar包不能替换旧jar包的问题
 ## v2.0-release
 	1.增加敏感词过滤(BadWordUtil)
 	2.语言本地化(I18NStrings)
