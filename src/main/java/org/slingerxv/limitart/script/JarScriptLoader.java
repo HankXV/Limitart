@@ -18,7 +18,6 @@ package org.slingerxv.limitart.script;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
@@ -31,6 +30,7 @@ import org.slingerxv.limitart.util.FTPUtil;
 import org.slingerxv.limitart.util.FileUtil;
 
 public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
+
 	private AbstractScriptLoader<KEY> loadScriptsByJar(String jarName)
 			throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException, ScriptException,
 			NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
@@ -39,47 +39,47 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			throw new IOException("file not exist:" + jarName);
 		}
 		// 这里要用系统自带的loader，不然会造成代码权限和作用域的问题
-		URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-		Method add = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
-		add.setAccessible(true);
-		add.invoke(classLoader, new Object[] { file.toURI().toURL() });
-		Map<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<KEY, IScript<KEY>>();
-		try (JarFile jarFile = new JarFile(file)) {
-			Enumeration<JarEntry> entrys = jarFile.entries();
-			while (entrys.hasMoreElements()) {
-				JarEntry jarEntry = entrys.nextElement();
-				String entryName = jarEntry.getName();
-				if (entryName.endsWith(".class")) {
-					String className = entryName.replace("/", ".").substring(0, entryName.indexOf(".class"));
-					Class<?> clazz = classLoader.loadClass(className);
-					log.info("load class：" + className);
-					if (clazz == null) {
-						throw new ScriptException("class not found:" + className);
-					}
-					if (className.contains("$")) {
-						continue;
-					}
-					Object newInstance = clazz.newInstance();
-					if (newInstance instanceof IScript) {
-						if (newInstance instanceof IDynamicCode) {
+		try (URLClassLoader newLoader = URLClassLoader.newInstance(new URL[] { file.toURI().toURL() },
+				ClassLoader.getSystemClassLoader());) {
+			log.info("create class loader:" + newLoader.getClass().getName());
+			Map<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<KEY, IScript<KEY>>();
+			try (JarFile jarFile = new JarFile(file)) {
+				Enumeration<JarEntry> entrys = jarFile.entries();
+				while (entrys.hasMoreElements()) {
+					JarEntry jarEntry = entrys.nextElement();
+					String entryName = jarEntry.getName();
+					if (entryName.endsWith(".class")) {
+						String className = entryName.replace("/", ".").substring(0, entryName.indexOf(".class"));
+						Class<?> clazz = newLoader.loadClass(className);
+						log.info("load class：" + className);
+						if (clazz == null) {
+							throw new ScriptException("class not found:" + className);
+						}
+						if (className.contains("$")) {
 							continue;
 						}
-						@SuppressWarnings("unchecked")
-						IScript<KEY> script = (IScript<KEY>) newInstance;
-						KEY scriptId = script.getScriptId();
-						if (scriptMap_new.containsKey(scriptId)) {
-							log.error("script id duplicated,source:" + scriptPath.get(scriptId).getName() + ",yours:"
-									+ clazz.getName());
+						Object newInstance = clazz.newInstance();
+						if (newInstance instanceof IScript) {
+							if (newInstance instanceof IDynamicCode) {
+								continue;
+							}
+							@SuppressWarnings("unchecked")
+							IScript<KEY> script = (IScript<KEY>) newInstance;
+							KEY scriptId = script.getScriptId();
+							if (scriptMap_new.containsKey(scriptId)) {
+								log.error("script id duplicated,source:" + scriptPath.get(scriptId).getName()
+										+ ",yours:" + clazz.getName());
+							} else {
+								scriptMap_new.put(scriptId, script);
+								log.info("compile script success:" + clazz.getName());
+							}
 						} else {
-							scriptMap_new.put(scriptId, script);
-							log.info("compile script success:" + clazz.getName());
+							throw new ScriptException("script file must implement IScript:" + clazz.getName());
 						}
-					} else {
-						throw new ScriptException("script file must implement IScript:" + clazz.getName());
 					}
 				}
+				this.scriptMap = scriptMap_new;
 			}
-			this.scriptMap = scriptMap_new;
 		}
 		return this;
 	}
