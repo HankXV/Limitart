@@ -20,6 +20,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 并发HashSet
+ * 
+ * @author hank
+ *
+ * @param <E>
+ */
 public class ConcurrentHashSet<E> extends AbstractSet<E> implements java.io.Serializable {
 
 	private static final long serialVersionUID = -8672117787651310382L;

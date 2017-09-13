@@ -17,10 +17,17 @@ package org.slingerxv.limitart.collections;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-/*
+/**
  * 并发String约束性Map
+ * 
+ * @author hank
+ *
+ * @param <K>
  */
 public class ConcurrentConstraintMap<K> extends ConstraintMap<K> {
+	/**
+	 * 构造函数
+	 */
 	public ConcurrentConstraintMap() {
 		super(new ConcurrentHashMap<>());
 	}
