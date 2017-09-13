@@ -8,10 +8,10 @@
 	<dependency>
 	    <groupId>org.slingerxv</groupId>
 	    <artifactId>limitart</artifactId>
-	    <version>2.0-alpha</version>
+	    <version>2.0-release</version>
 	</dependency>
 ### Gradle
-	compile 'org.slingerxv:limitart:2.0-alpha'
+	compile 'org.slingerxv:limitart:2.0-release'
 	
 首先，我们需要定义一个网络通信的消息类
 
