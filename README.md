@@ -116,6 +116,7 @@
 # 更新日志
 ## v2.0.1-release
 	1.修复热加载jar包不能替换旧jar包的问题
+	2.热加载的脚本，如果父类是class，那么不能引用父类protected的字段，作用域由于加载器不同而无法引用，建议使用public方法获取或者把父类字段定义为public
 ## v2.0-release
 	1.增加敏感词过滤(BadWordUtil)
 	2.语言本地化(I18NStrings)
