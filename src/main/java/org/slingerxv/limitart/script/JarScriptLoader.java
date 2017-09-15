@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,10 +37,11 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		if (!file.exists()) {
 			throw new IOException("file not exist:" + jarName);
 		}
-		// 这里要用系统自带的loader，不然会造成代码权限和作用域的问题
-		try (URLClassLoader newLoader = URLClassLoader.newInstance(new URL[] { file.toURI().toURL() },
-				ClassLoader.getSystemClassLoader());) {
-			log.info("create class loader:" + newLoader.getClass().getName());
+		try (JarClassLoader newLoader = new JarClassLoader(new URL[] { file.toURI().toURL() })) {
+			log.info("create class loader:" + newLoader.getClass().getName() + ",parent:"
+					+ newLoader.getParent().getClass().getName());
+			log.info("current thread loader:" + Thread.currentThread().getContextClassLoader().getClass().getName());
+			log.info("system class loader:" + ClassLoader.getSystemClassLoader().getClass().getName());
 			Map<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<KEY, IScript<KEY>>();
 			try (JarFile jarFile = new JarFile(file)) {
 				Enumeration<JarEntry> entrys = jarFile.entries();
@@ -57,6 +57,10 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 						}
 						if (className.contains("$")) {
 							continue;
+						}
+						if (!clazz.getSuperclass().isInterface()) {
+							log.warn(
+									"parent better be interface,if your script's parent is class,reference field must be public!!!");
 						}
 						Object newInstance = clazz.newInstance();
 						if (newInstance instanceof IScript) {

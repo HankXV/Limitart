@@ -44,7 +44,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			InstantiationException, IllegalAccessException, ScriptException {
 		File file = scriptPath.get(scriptId);
 		Objects.requireNonNull(file, "script id:" + scriptId + " does not exist!");
-		try (GroovyClassLoader loader = new GroovyClassLoader(ClassLoader.getSystemClassLoader())) {
+		try (GroovyClassLoader loader = new GroovyClassLoader()) {
 			Class<?> parseClass = loader.parseClass(file);
 			Object newInstance = parseClass.newInstance();
 			if (!(newInstance instanceof IScript)) {
