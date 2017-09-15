@@ -58,9 +58,10 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 						if (className.contains("$")) {
 							continue;
 						}
-						if (!clazz.getSuperclass().isInterface()) {
+						Class<?> superclass = clazz.getSuperclass();
+						if (!superclass.isInterface()) {
 							log.warn(
-									"parent better be interface,if your script's parent is class,reference field must be public!!!");
+									"CAUTION!!!!parent better be INTERFACE,if your script's parent is CLASS,reference field must be PUBLIC!!!");
 						}
 						Object newInstance = clazz.newInstance();
 						if (newInstance instanceof IScript) {
