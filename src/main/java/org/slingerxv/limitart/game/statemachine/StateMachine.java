@@ -16,7 +16,9 @@
 package org.slingerxv.limitart.game.statemachine;
 
 import java.text.MessageFormat;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
@@ -25,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.collections.ConstraintMap;
+import org.slingerxv.limitart.funcs.Proc;
 import org.slingerxv.limitart.game.statemachine.event.IEvent;
 import org.slingerxv.limitart.game.statemachine.exception.StateException;
 import org.slingerxv.limitart.game.statemachine.state.State;
@@ -48,6 +51,7 @@ public class StateMachine {
 	private long lastLoopTime = 0;
 	private int firstStateId;
 	private Thread lastThread;
+	private List<Ticker> tickers = new LinkedList<>();
 
 	/**
 	 * 开启
@@ -127,6 +131,10 @@ public class StateMachine {
 		return this;
 	}
 
+	public synchronized void tick(long delay, int times, Proc listener) {
+		tickers.add(new Ticker(delay, times, listener));
+	}
+
 	/**
 	 * 状态机循环
 	 * 
@@ -143,6 +151,19 @@ public class StateMachine {
 		long now = System.currentTimeMillis();
 		long deltaTimeInMills = this.lastLoopTime == 0 ? 0 : now - this.lastLoopTime;
 		lastLoopTime = now;
+		Iterator<Ticker> iterator = tickers.iterator();
+		for (; iterator.hasNext();) {
+			Ticker ticker = iterator.next();
+			ticker.delayCounter += deltaTimeInMills;
+			if (ticker.delayCounter >= ticker.delay) {
+				ticker.delayCounter = 0;
+				ticker.times -= 1;
+				ticker.listener.run();
+				if (ticker.times <= 0) {
+					iterator.remove();
+				}
+			}
+		}
 		Integer nextNode = getNextNode();
 		State next = null;
 		if (nextNode != null) {
@@ -197,4 +218,16 @@ public class StateMachine {
 		return stateQueue.poll();
 	}
 
+	private static class Ticker {
+		private long delay;
+		private int times;
+		private long delayCounter;
+		private Proc listener;
+
+		public Ticker(long delay, int times, Proc listener) {
+			this.delay = delay;
+			this.times = times;
+			this.listener = listener;
+		}
+	}
 }

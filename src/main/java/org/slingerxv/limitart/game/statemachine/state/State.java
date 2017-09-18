@@ -15,11 +15,9 @@
  */
 package org.slingerxv.limitart.game.statemachine.state;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.slingerxv.limitart.funcs.Proc;
 import org.slingerxv.limitart.game.statemachine.StateMachine;
 import org.slingerxv.limitart.game.statemachine.event.IEvent;
 import org.slingerxv.limitart.game.statemachine.event.impl.FinishedEvent;
@@ -32,15 +30,10 @@ import org.slingerxv.limitart.game.statemachine.event.impl.FinishedEvent;
  */
 public abstract class State<T extends StateMachine> {
 	private List<IEvent<T>> conditions = new LinkedList<>();
-	private List<Ticker> tickers = new LinkedList<>();
 	private boolean finished = false;
 	private long executedTime;
 
 	public abstract Integer getStateId();
-
-	protected void tick(long delay, int times, Proc listener) {
-		tickers.add(new Ticker(delay, times, listener));
-	}
 
 	/**
 	 * 状态进入
@@ -59,19 +52,6 @@ public abstract class State<T extends StateMachine> {
 	public abstract void onExit(State<T> nextState, T fsm);
 
 	public void execute0(long deltaTimeInMills, T fsm) {
-		Iterator<Ticker> iterator = tickers.iterator();
-		for (; iterator.hasNext();) {
-			Ticker ticker = iterator.next();
-			ticker.delayCounter += deltaTimeInMills;
-			if (ticker.delayCounter >= ticker.delay) {
-				ticker.delayCounter = 0;
-				ticker.times -= 1;
-				ticker.listener.run();
-				if (ticker.times <= 0) {
-					iterator.remove();
-				}
-			}
-		}
 		executedTime += deltaTimeInMills;
 		execute(deltaTimeInMills, fsm);
 	}
@@ -86,7 +66,6 @@ public abstract class State<T extends StateMachine> {
 
 	public State<T> reset() {
 		executedTime = 0;
-		tickers.clear();
 		finished = false;
 		return this;
 	}
@@ -133,18 +112,5 @@ public abstract class State<T extends StateMachine> {
 
 	public long getExecutedTime() {
 		return executedTime;
-	}
-
-	private static class Ticker {
-		private long delay;
-		private int times;
-		private long delayCounter;
-		private Proc listener;
-
-		public Ticker(long delay, int times, Proc listener) {
-			this.delay = delay;
-			this.times = times;
-			this.listener = listener;
-		}
 	}
 }
