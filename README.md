@@ -1,4 +1,4 @@
-[![](https://img.shields.io/badge/maven-v2.0--alpha-green.svg)](https://mvnrepository.com/artifact/org.slingerxv/limitart)
+[![](https://img.shields.io/badge/maven-v2.0--release-green.svg)](https://mvnrepository.com/artifact/org.slingerxv/limitart)
 [![](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 ![](https://img.shields.io/badge/jdk-1.8-green.svg)
 # 什么是Limitart?
