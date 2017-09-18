@@ -16,13 +16,13 @@
 package org.slingerxv.limitart.game.statemachine;
 
 import java.text.MessageFormat;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ import org.slingerxv.limitart.util.Beta;
 @SuppressWarnings("rawtypes")
 public class StateMachine {
 	private static Logger log = LoggerFactory.getLogger(StateMachine.class);
-	private Map<Integer, State> stateMap = new ConcurrentHashMap<>();
+	private Map<Integer, State> stateMap = new HashMap<>();
 	private Queue<Integer> stateQueue = new LinkedList<>();
 	private State preState;
 	private State curState;
@@ -51,14 +51,14 @@ public class StateMachine {
 	private long lastLoopTime = 0;
 	private int firstStateId;
 	private Thread lastThread;
-	private List<Ticker> tickers = new LinkedList<>();
+	private List<Ticker> tickers = new ArrayList<>();
 
 	/**
 	 * 开启
 	 * 
 	 * @throws StateException
 	 */
-	public synchronized void start() throws StateException {
+	public void start() throws StateException {
 		if (curState != null) {
 			throw new StateException("called once");
 		}
@@ -68,7 +68,7 @@ public class StateMachine {
 		changeState(this.firstStateId);
 	}
 
-	public synchronized void firstState(int stateId) {
+	public void firstState(int stateId) {
 		this.firstStateId = stateId;
 	}
 
@@ -85,10 +85,13 @@ public class StateMachine {
 	 * @param state
 	 * @throws Exception
 	 */
-	public synchronized StateMachine addState(State state) throws StateException {
+	public StateMachine addState(State state) throws StateException {
+		if (curState != null) {
+			throw new StateException("already start");
+		}
 		Objects.requireNonNull(state, "state");
 		Objects.requireNonNull(state.getStateId(), "stateId");
-		if (this.stateMap.containsKey(state.getStateId())) {
+		if (stateMap.containsKey(state.getStateId())) {
 			throw new StateException("stateId:" + state.getStateId() + " duplicated in this FSM !");
 		}
 		if (stateMap.isEmpty()) {
@@ -119,19 +122,7 @@ public class StateMachine {
 		return this;
 	}
 
-	/**
-	 * 跳转回上一个状态
-	 * 
-	 * @throws StateException
-	 */
-	public synchronized StateMachine reverse2PreState() throws StateException {
-		if (preState != null) {
-			changeState(preState.getStateId());
-		}
-		return this;
-	}
-
-	public synchronized void tick(long delay, int times, Proc listener) {
+	public void tick(long delay, int times, Proc listener) {
 		tickers.add(new Ticker(delay, times, listener));
 	}
 
@@ -141,7 +132,7 @@ public class StateMachine {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized void loop() throws StateException {
+	public void loop() throws StateException {
 		Thread nowThread = Thread.currentThread();
 		if (lastThread != null && !lastThread.equals(nowThread)) {
 			throw new StateException("not allowed to run on a deferent thread,last:" + lastThread.getName() + ",now:"
@@ -151,16 +142,15 @@ public class StateMachine {
 		long now = System.currentTimeMillis();
 		long deltaTimeInMills = this.lastLoopTime == 0 ? 0 : now - this.lastLoopTime;
 		lastLoopTime = now;
-		Iterator<Ticker> iterator = tickers.iterator();
-		for (; iterator.hasNext();) {
-			Ticker ticker = iterator.next();
+		for (int i = tickers.size() - 1; i >= 0; --i) {
+			Ticker ticker = tickers.get(i);
 			ticker.delayCounter += deltaTimeInMills;
 			if (ticker.delayCounter >= ticker.delay) {
 				ticker.delayCounter = 0;
 				ticker.times -= 1;
 				ticker.listener.run();
 				if (ticker.times <= 0) {
-					iterator.remove();
+					tickers.remove(i);
 				}
 			}
 		}
