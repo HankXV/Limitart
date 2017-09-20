@@ -1,8 +1,6 @@
 [![](https://img.shields.io/badge/maven-v2.0--release-green.svg)](https://mvnrepository.com/artifact/org.slingerxv/limitart)
 [![](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 ![](https://img.shields.io/badge/jdk-1.8-green.svg)
-# 什么是Limitart?
-一个帮助您快速搭建起游戏服务器的框架
 # 快速开始
 ### Maven
 	<dependency>
@@ -99,20 +97,6 @@
 
 	消息长度(short,包含消息体长度+2)+消息ID(short)+消息体
 	
-# 游戏服务器开发思路
-1.首先你需要对接好网络通信，可以参考源码`MessageMeta`的封装，默认开启了压缩算法<br>
-2.建议把消息打成jar文件，多个进程间共享，防止消息不一致，无法正常通信<br>
-3.根据游戏的不同类型来制定线程模型，在游戏中制定线程模型基本抱着两个目的。第一，IO或者复杂计算不能阻塞玩家的操作。第二，如果玩家有数据交互，他们应当在同一个线程<br>
-4.根据2的参考方式制定了线程模型，然后在服务器的`dispatchMessage`回调方法里把消息分发到不同线程中<br>
-5.如果你不做分发，直接在`dispatchMessage`中执行handler，那么就默认使用了Netty的work线程，他只保证了一个channel一定会在同一个线程运行。如果你所制作的游戏中玩家没有强力的数据交互，则可以使用默认线程，但在交互操作的时候需要注意线程问题<br>
-6.线程间通信的消息队列推荐使用`DisruptorTaskQueue`，如果你有使用类似地图或者房间的线程需求(既一组需要交互的玩家要在一个线程里)，推荐使用`AutoGrowthTaskQueueGroup`，如果你不知道你该怎么使用线程，那么推荐你使用`FunctionalTaskQueueGroup`<br>
-7.如果你需要使用控制台来操作服务器，那么可以使用`ConsoleServer`或者`HttpServer`嵌入游戏服务器中来进行交互<br>
-8.作者不提倡滥用线程，所以请使用者预估好使用场景，再做相应的线程安排<br>
-9.在`org.slingerxv.limitart.game`包下是属于游戏逻辑层的抽象，比如背包、道具、帮会、扑克等，后面会慢慢增加<br>
-10.如果你要做排行榜，推荐使用`FrequencyReadRankMap`或`FrequencyWriteRankMap`，推荐排行榜存储量为10万数量级及以下<br>
-11.游戏服务器的热更新请参考`org.slingerxv.limitart.script`<br>
-12.游戏中常用的唯一Id生成请参考`org.slingerxv.limitart.util.UniqueIdUtil`<br>
-13.带有`@beta`标记的代表此API是新加入的测试版<br>
 # 更新日志
 ## v2.0.1-release
 	1.修复热加载jar包不能替换旧jar包的问题
