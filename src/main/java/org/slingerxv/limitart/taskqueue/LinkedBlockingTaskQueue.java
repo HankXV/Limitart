@@ -27,7 +27,7 @@ import org.slingerxv.limitart.funcs.Test1;
 import org.slingerxv.limitart.funcs.Tests;
 
 /**
- * 阻塞普通消息队列
+ * 阻塞消息队列
  * 
  * @author hank
  * @see DisruptorTaskQueue
