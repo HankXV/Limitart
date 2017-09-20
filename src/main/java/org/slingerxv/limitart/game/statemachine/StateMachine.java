@@ -142,6 +142,7 @@ public class StateMachine {
 		long now = System.currentTimeMillis();
 		long deltaTimeInMills = this.lastLoopTime == 0 ? 0 : now - this.lastLoopTime;
 		lastLoopTime = now;
+		// FIXME 与tick函数有多线程问题
 		for (int i = tickers.size() - 1; i >= 0; --i) {
 			Ticker ticker = tickers.get(i);
 			ticker.delayCounter += deltaTimeInMills;

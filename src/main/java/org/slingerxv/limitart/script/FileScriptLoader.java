@@ -86,7 +86,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		if (typeByValue == null) {
 			throw new ScriptException("script type not supported" + type);
 		}
-		try (GroovyClassLoader loader = new GroovyClassLoader(ClassLoader.getSystemClassLoader())) {
+		try (GroovyClassLoader loader = new GroovyClassLoader()) {
 			@SuppressWarnings("rawtypes")
 			Class parseClass = loader.parseClass(file);
 			Object newInstance = parseClass.newInstance();
@@ -125,7 +125,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			throws IOException, InstantiationException, IllegalAccessException, ScriptException {
 		Map<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<>();
 		Map<KEY, File> scriptPath_new = new ConcurrentHashMap<>();
-		try (GroovyClassLoader loader = new GroovyClassLoader(ClassLoader.getSystemClassLoader());) {
+		try (GroovyClassLoader loader = new GroovyClassLoader();) {
 			File dir_root = new File(dir);
 			if (!dir_root.exists()) {
 				throw new IOException("scripts root dir does not exist:" + dir);

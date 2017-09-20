@@ -88,7 +88,7 @@ public abstract class AbstractScriptLoader<KEY> {
 		if (typeByValue == null) {
 			throw new ScriptException("script type not supported:" + type);
 		}
-		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader())) {
+		try (GroovyClassLoader loader = new GroovyClassLoader()) {
 			@SuppressWarnings("rawtypes")
 			Class parseClass = loader.parseClass(file);
 			Object newInstance = parseClass.newInstance();

@@ -17,6 +17,12 @@ package org.slingerxv.limitart.util;
 
 import java.lang.reflect.Field;
 
+/**
+ * 对象操作
+ * 
+ * @author hank
+ *
+ */
 public class ObjectUtil {
 
 	public static void copyBean(Object oldOne, Object newOne) throws IllegalArgumentException, IllegalAccessException {

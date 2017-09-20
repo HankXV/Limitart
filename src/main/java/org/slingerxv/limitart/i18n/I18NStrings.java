@@ -140,7 +140,7 @@ public class I18NStrings {
 	 */
 	public String get(String lang, String key) throws FileNotFoundException, IOException {
 		Objects.requireNonNull(lang, "lang");
-		Objects.requireNonNull(key, "lang");
+		Objects.requireNonNull(key, "key");
 		if (!langs.containsKey(lang)) {
 			log.error("language :{} has no solution!", lang);
 			dumpUntraslatedKey(lang, key);

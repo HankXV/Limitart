@@ -26,6 +26,12 @@ import org.apache.commons.net.ftp.FTPReply;
 
 import io.netty.util.CharsetUtil;
 
+/**
+ * FTP下载工具
+ * 
+ * @author hank
+ *
+ */
 public final class FTPUtil {
 	private FTPUtil() {
 	}

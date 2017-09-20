@@ -23,6 +23,12 @@ import java.util.regex.Pattern;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
+/**
+ * 字符串工具类
+ * 
+ * @author hank
+ *
+ */
 public final class StringUtil {
 	public static final String BUDDHA = "\n                   _ooOoo_" + "\n" + "                  o8888888o" + "\n"
 			+ "                  88\" . \"88" + "\n" + "                  (| -_- |)" + "\n"

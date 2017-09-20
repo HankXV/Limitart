@@ -18,6 +18,12 @@ package org.slingerxv.limitart.util;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 数学相关
+ * 
+ * @author hank
+ *
+ */
 public final class MathUtil {
 	private MathUtil() {
 	}

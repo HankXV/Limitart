@@ -274,7 +274,6 @@ public abstract class MessageMeta {
 			} else if (type == String.class) {
 				putString((String) object);
 			} else {
-				System.err.println();
 				throw new MessageIOException(getClass()
 						+ " type error(non MessageMeta field must be primitive(or it's box object),array or List. array's component  and List's generic param as the same as non MessageMeta rule ):"
 						+ type.getName());

@@ -17,6 +17,12 @@ package org.slingerxv.limitart.util;
 
 import java.util.Collection;
 
+/**
+ * 集合操作
+ * 
+ * @author hank
+ *
+ */
 public final class CollectionUtil {
 	private CollectionUtil() {
 	}

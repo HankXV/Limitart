@@ -25,6 +25,12 @@ import java.util.List;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+/**
+ * 文件操作
+ * 
+ * @author hank
+ *
+ */
 public final class FileUtil {
 	private FileUtil() {
 	}
