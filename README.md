@@ -59,7 +59,7 @@
 				// port
 				.addressPair(new AddressPair(8888))
 				// register factory
-				.factory(messageFactory).build();
+				.factory(factory).build()
 				.startServer();
 		
 ```
