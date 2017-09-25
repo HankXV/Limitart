@@ -1,4 +1,4 @@
-[![](https://img.shields.io/badge/maven-v2.0--release-green.svg)](https://mvnrepository.com/artifact/org.slingerxv/limitart)
+[![](https://img.shields.io/badge/maven-v2.0.1--release-green.svg)](https://mvnrepository.com/artifact/org.slingerxv/limitart)
 [![](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 ![](https://img.shields.io/badge/jdk-1.8-green.svg)
 # 快速开始
@@ -6,10 +6,10 @@
 	<dependency>
 	    <groupId>org.slingerxv</groupId>
 	    <artifactId>limitart</artifactId>
-	    <version>2.0-release</version>
+	    <version>2.0.1-release</version>
 	</dependency>
 ### Gradle
-	compile 'org.slingerxv:limitart:2.0-release'
+	compile 'org.slingerxv:limitart:2.0.1-release'
 	
 首先，我们需要定义一个网络通信的消息类
 
