@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.slingerxv</groupId>
 	<artifactId>limitart</artifactId>
-	<version>2.0-release</version>
+	<version>2.0.1-release</version>
 	<name>limitart</name>
 	<description>A framework that designed to help you build a Java Game Server quickly</description>
 	<licenses>
