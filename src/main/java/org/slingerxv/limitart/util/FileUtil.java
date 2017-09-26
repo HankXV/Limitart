@@ -15,9 +15,12 @@
  */
 package org.slingerxv.limitart.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +80,33 @@ public final class FileUtil {
 		return result;
 	}
 
+	/**
+	 * 递归删除文件
+	 * 
+	 * @param root
+	 */
+	public static void deleteFile(File root) {
+		if (root.isDirectory()) {
+			File[] listFiles = root.listFiles();
+			if (listFiles != null) {
+				for (File temp : listFiles) {
+					if (temp == null) {
+						continue;
+					}
+					deleteFile(temp);
+				}
+			}
+		}
+		root.delete();
+	}
+
+	/**
+	 * 读取文件为ByteBuf(需要手动释放)
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
 	public static ByteBuf readFile(File file) throws IOException {
 		ByteBuf buf = Unpooled.buffer();
 		try (FileInputStream input = new FileInputStream(file)) {
@@ -89,6 +119,47 @@ public final class FileUtil {
 		return buf;
 	}
 
+	/**
+	 * 读取文件为byte[]
+	 * 
+	 * @param file
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static byte[] readFile1(File file) throws FileNotFoundException, IOException {
+		try (FileInputStream input = new FileInputStream(file)) {
+			return inputStream2ByteArray(input);
+		}
+
+	}
+
+	/**
+	 * 输入流转为byte[]
+	 * 
+	 * @param input
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] inputStream2ByteArray(InputStream input) throws IOException {
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+			byte[] buffer = new byte[1024];
+			int len = -1;
+			while ((len = input.read(buffer)) != -1) {
+				out.write(buffer, 0, len);
+			}
+			return out.toByteArray();
+		}
+	}
+
+	/**
+	 * 覆盖写新文件
+	 * 
+	 * @param path
+	 * @param fileName
+	 * @param content
+	 * @throws IOException
+	 */
 	public static void writeNewFile(String path, String fileName, byte[] content) throws IOException {
 		File file = new File(path);
 		if (!file.exists()) {

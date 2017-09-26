@@ -15,11 +15,31 @@
  */
 package org.slingerxv.limitart.script;
 
-public abstract class IDynamicCode implements IScript<Integer> {
-	@Override
-	public Integer getScriptId() {
-		return 0;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import javax.tools.SimpleJavaFileObject;
+
+import org.slingerxv.limitart.util.FileUtil;
+
+/**
+ * 源码型JavaFileObject
+ * 
+ * @author hank
+ *
+ */
+public class SourceCodeJavaFileObject extends SimpleJavaFileObject {
+
+	private String code;
+
+	public SourceCodeJavaFileObject(File sourceFile) throws FileNotFoundException, IOException {
+		super(sourceFile.toURI(), Kind.SOURCE);
+		this.code = new String(FileUtil.readFile1(sourceFile));
 	}
 
-	public abstract void execute();
+	@Override
+	public String getCharContent(boolean ignoreEncodingErrors) {
+		return this.code;
+	}
 }

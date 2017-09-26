@@ -65,9 +65,6 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 						}
 						Object newInstance = clazz.newInstance();
 						if (newInstance instanceof IScript) {
-							if (newInstance instanceof IDynamicCode) {
-								continue;
-							}
 							@SuppressWarnings("unchecked")
 							IScript<KEY> script = (IScript<KEY>) newInstance;
 							KEY scriptId = script.getScriptId();
