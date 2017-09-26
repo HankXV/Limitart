@@ -178,12 +178,6 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.37</version>
 		</dependency>
-		<!-- 脚本 -->
-		<dependency>
-			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy</artifactId>
-			<version>2.4.12</version>
-		</dependency>
 		<!-- 日志 -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
