@@ -128,7 +128,6 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 	 */
 	private void reloadAll0() throws IOException, ScriptConstructException, InstantiationException,
 			IllegalAccessException, NoSuchAlgorithmException, ScriptNotExistException, ScriptKeyDuplicatedException {
-		ByteCodeClassLoader loader = new ByteCodeClassLoader();
 		File dir_root = new File(scriptRootPath);
 		if (!dir_root.exists()) {
 			throw new IOException("scripts root dir does not exist:" + scriptRootPath);
@@ -136,6 +135,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		if (!dir_root.isDirectory()) {
 			throw new IOException("file is not dir:" + scriptRootPath);
 		}
+		ByteCodeClassLoader loader = new ByteCodeClassLoader();
 		List<File> result = FileUtil.getFiles(dir_root, "java");
 		for (File file : result) {
 			// 是否是老文件
@@ -152,7 +152,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 				IScript<KEY> script = (IScript<KEY>) newInstance;
 				registerScriptData(script, SecurityUtil.md5Encode32(readFile1), getFilePath(file));
 			} else {
-				reloadScript0(scriptKey);
+				reloadScript0(loader, scriptKey);
 			}
 		}
 	}
@@ -168,7 +168,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 			@Override
 			public void run() {
 				try {
-					reloadScript0(scriptId);
+					reloadScript0(new ByteCodeClassLoader(), scriptId);
 				} catch (InstantiationException | IllegalAccessException | NoSuchAlgorithmException | IOException
 						| ScriptNotExistException | ScriptConstructException | ScriptKeyDuplicatedException e) {
 					log.error("reload error:" + scriptId, e);
@@ -189,8 +189,9 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 	 * @throws ScriptConstructException
 	 * @throws ScriptKeyDuplicatedException
 	 */
-	private void reloadScript0(KEY scriptId) throws IOException, InstantiationException, IllegalAccessException,
-			NoSuchAlgorithmException, ScriptNotExistException, ScriptConstructException, ScriptKeyDuplicatedException {
+	private void reloadScript0(ByteCodeClassLoader loader, KEY scriptId)
+			throws IOException, InstantiationException, IllegalAccessException, NoSuchAlgorithmException,
+			ScriptNotExistException, ScriptConstructException, ScriptKeyDuplicatedException {
 		Objects.requireNonNull(scriptId, "scriptId");
 		String filePath = getFilePath(scriptId);
 		File file = new File(filePath);
@@ -199,7 +200,6 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		if (isSameCode(scriptId, md5Encode32)) {
 			return;
 		}
-		ByteCodeClassLoader loader = new ByteCodeClassLoader();
 		Class<?> parseClass = loader.parseClass(file.toURI(), readFile1);
 		Object newInstance = parseClass.newInstance();
 		if (!(newInstance instanceof IScript)) {
