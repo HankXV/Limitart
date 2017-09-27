@@ -72,33 +72,25 @@ public abstract class AbstractScriptLoader<KEY> {
 	protected void registerScriptData(IScript<KEY> scriptInstance, String codeMD5, String filePath)
 			throws ScriptKeyDuplicatedException {
 		KEY key = scriptInstance.getScriptId();
+		boolean replace = false;
 		if (scriptMap.containsKey(key)) {
-			throw new ScriptKeyDuplicatedException(scriptInstance.getScriptId());
+			replace = true;
+			ScriptData<KEY> scriptData = scriptMap.get(key);
+			// 这里 由于是不同加载器，所以比较类名就行了
+			if (!scriptData.getScriptInstance().getClass().getName().equals(scriptInstance.getClass().getName())) {
+				throw new ScriptKeyDuplicatedException(scriptData.getScriptInstance().getClass(),
+						scriptInstance.getClass(), scriptInstance.getScriptId());
+			}
 		}
 		scriptMap.put(key, new ScriptData<>(scriptInstance, codeMD5, filePath));
 		if (filePath != null) {
 			pathMap.put(filePath, key);
 		}
-		log.info("register script data on script:" + scriptInstance.getClass().getName());
-	}
-
-	/**
-	 * 替换脚本实例和源码MD5
-	 * 
-	 * @param scriptInstance
-	 * @param codeMD5
-	 * @throws ScriptNotExistException
-	 */
-	protected void repalceScriptData(IScript<KEY> scriptInstance, String codeMD5) throws ScriptNotExistException {
-		Objects.requireNonNull(scriptInstance, "scriptInstance");
-		Objects.requireNonNull(codeMD5, "codeMD5");
-		KEY key = scriptInstance.getScriptId();
-		ScriptData<KEY> scriptData = scriptMap.get(key);
-		if (scriptData == null) {
-			throw new ScriptNotExistException(key);
+		if (replace) {
+			log.info("replace script data on script:" + scriptInstance.getClass().getName());
+		} else {
+			log.info("register new script data on script:" + scriptInstance.getClass().getName());
 		}
-		scriptData.replace(scriptInstance, codeMD5);
-		log.info("replace script data on script:" + scriptInstance.getClass().getName());
 	}
 
 	/**
@@ -139,7 +131,12 @@ public abstract class AbstractScriptLoader<KEY> {
 		return pathMap.get(getFilePath(file));
 	}
 
+	protected KEY getScriptKey(String filePath) {
+		return pathMap.get(filePath);
+	}
+
 	protected String getFilePath(File file) {
 		return file.getAbsolutePath();
 	}
+
 }

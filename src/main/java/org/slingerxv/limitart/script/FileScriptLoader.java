@@ -170,7 +170,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 				try {
 					reloadScript0(scriptId);
 				} catch (InstantiationException | IllegalAccessException | NoSuchAlgorithmException | IOException
-						| ScriptNotExistException | ScriptConstructException e) {
+						| ScriptNotExistException | ScriptConstructException | ScriptKeyDuplicatedException e) {
 					log.error("reload error:" + scriptId, e);
 				}
 			}
@@ -187,9 +187,10 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 	 * @throws NoSuchAlgorithmException
 	 * @throws ScriptNotExistException
 	 * @throws ScriptConstructException
+	 * @throws ScriptKeyDuplicatedException
 	 */
 	private void reloadScript0(KEY scriptId) throws IOException, InstantiationException, IllegalAccessException,
-			NoSuchAlgorithmException, ScriptNotExistException, ScriptConstructException {
+			NoSuchAlgorithmException, ScriptNotExistException, ScriptConstructException, ScriptKeyDuplicatedException {
 		Objects.requireNonNull(scriptId, "scriptId");
 		String filePath = getFilePath(scriptId);
 		File file = new File(filePath);
@@ -206,6 +207,6 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 		}
 		@SuppressWarnings("unchecked")
 		IScript<KEY> newScript = (IScript<KEY>) newInstance;
-		repalceScriptData(newScript, md5Encode32);
+		registerScriptData(newScript, md5Encode32, getFilePath(file));
 	}
 }

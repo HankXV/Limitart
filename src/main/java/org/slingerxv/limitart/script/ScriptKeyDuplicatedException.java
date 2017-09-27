@@ -27,7 +27,7 @@ public class ScriptKeyDuplicatedException extends LimitartException {
 
 	private static final long serialVersionUID = 1L;
 
-	public ScriptKeyDuplicatedException(Object key) {
-		super("script key duplicated:" + key.toString());
+	public ScriptKeyDuplicatedException(Class<?> oldOne, Class<?> newOne, Object key) {
+		super("script key duplicated:" + key.toString() + ",old:" + oldOne.getName() + ",new:" + newOne.getName());
 	}
 }

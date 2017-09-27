@@ -48,29 +48,30 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
 				while (entrys.hasMoreElements()) {
 					JarEntry jarEntry = entrys.nextElement();
 					String entryName = jarEntry.getName();
-					if (entryName.endsWith(".class")) {
-						String className = entryName.replace("/", ".").substring(0, entryName.indexOf(".class"));
-						Class<?> clazz = newLoader.loadClass(className);
-						log.info("load class：" + className);
-						if (clazz == null) {
-							throw new ScriptConstructException(clazz);
-						}
-						if (className.contains("$")) {
-							continue;
-						}
-						Class<?> superclass = clazz.getSuperclass();
-						if (!superclass.isInterface()) {
-							log.warn(
-									"CAUTION!!!!parent better be INTERFACE,if your script's parent is CLASS,reference field must be PUBLIC!!!");
-						}
-						Object newInstance = clazz.newInstance();
-						if (!(newInstance instanceof IScript)) {
-							throw new ScriptConstructException(clazz);
-						}
-						@SuppressWarnings("unchecked")
-						IScript<KEY> script = (IScript<KEY>) newInstance;
-						registerScriptData(script, null, null);
+					if (!entryName.endsWith(".class")) {
+						continue;
 					}
+					String className = entryName.replace("/", ".").substring(0, entryName.indexOf(".class"));
+					Class<?> clazz = newLoader.loadClass(className);
+					log.info("load class：" + className);
+					if (clazz == null) {
+						throw new ClassNotFoundException(className);
+					}
+					if (className.contains("$")) {
+						continue;
+					}
+					Class<?> superclass = clazz.getSuperclass();
+					if (!superclass.isInterface()) {
+						log.warn(
+								"CAUTION!!!!parent better be INTERFACE,if your script's parent is CLASS,reference field must be PUBLIC!!!");
+					}
+					Object newInstance = clazz.newInstance();
+					if (!(newInstance instanceof IScript)) {
+						throw new ScriptConstructException(clazz);
+					}
+					@SuppressWarnings("unchecked")
+					IScript<KEY> script = (IScript<KEY>) newInstance;
+					registerScriptData(script, null, entryName);
 				}
 			}
 		}
