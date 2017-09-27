@@ -120,6 +120,14 @@ public final class SecurityUtil {
 		return new String(hexEncode);
 	}
 
+	public static String md5Encode32(byte[] source) throws NoSuchAlgorithmException {
+		MessageDigest mdTemp = MessageDigest.getInstance(ALGORITHM_MD5);
+		mdTemp.update(source);
+		byte[] md = mdTemp.digest();
+		char[] hexEncode = hexEncode(md);
+		return new String(hexEncode);
+	}
+
 	public static String encodePassword(String rawPass, Object salt) throws NoSuchAlgorithmException {
 		String saltedPass = mergePasswordAndSalt(rawPass, salt, false);
 		MessageDigest messageDigest = MessageDigest.getInstance(ALGORITHM_MD5);

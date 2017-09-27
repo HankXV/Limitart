@@ -23,6 +23,8 @@ import java.net.URI;
 import javax.tools.SimpleJavaFileObject;
 
 /**
+ * java字节码文件
+ * 
  * @author hank
  *
  */

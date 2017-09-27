@@ -18,10 +18,14 @@ package org.slingerxv.limitart.script;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 
 import javax.tools.SimpleJavaFileObject;
 
 import org.slingerxv.limitart.util.FileUtil;
+
+import io.netty.util.CharsetUtil;
 
 /**
  * 源码型JavaFileObject
@@ -35,7 +39,18 @@ public class SourceCodeJavaFileObject extends SimpleJavaFileObject {
 
 	public SourceCodeJavaFileObject(File sourceFile) throws FileNotFoundException, IOException {
 		super(sourceFile.toURI(), Kind.SOURCE);
-		this.code = new String(FileUtil.readFile1(sourceFile));
+		this.code = new String(FileUtil.readFile1(sourceFile), CharsetUtil.UTF_8);
+	}
+
+	public SourceCodeJavaFileObject(URI fileURI, InputStream fileInputStream)
+			throws FileNotFoundException, IOException {
+		super(fileURI, Kind.SOURCE);
+		this.code = new String(FileUtil.inputStream2ByteArray(fileInputStream), CharsetUtil.UTF_8);
+	}
+
+	public SourceCodeJavaFileObject(URI fileURI, byte[] fileContent) throws FileNotFoundException, IOException {
+		super(fileURI, Kind.SOURCE);
+		this.code = new String(fileContent, CharsetUtil.UTF_8);
 	}
 
 	@Override

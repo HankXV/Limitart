@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,13 +89,48 @@ public class ByteCodeClassLoader extends ClassLoader {
 	/**
 	 * 在内存中直接编译源文件
 	 * 
-	 * @param code
+	 * @param file
+	 * @return
 	 * @throws IOException
 	 */
 	public Class<?> parseClass(File file) throws IOException {
 		List<JavaFileObject> javaFileObjs = new ArrayList<>();
 		JavaFileObject javaFileObj = new SourceCodeJavaFileObject(file);
 		javaFileObjs.add(javaFileObj);
+		return parseClass0(javaFileObjs);
+	}
+
+	/**
+	 * 在内存中直接编译源文件
+	 * 
+	 * @param fileURI
+	 * @param content
+	 * @return
+	 * @throws IOException
+	 */
+	public Class<?> parseClass(URI fileURI, byte[] content) throws IOException {
+		List<JavaFileObject> javaFileObjs = new ArrayList<>();
+		JavaFileObject javaFileObj = new SourceCodeJavaFileObject(fileURI, content);
+		javaFileObjs.add(javaFileObj);
+		return parseClass0(javaFileObjs);
+	}
+
+	/**
+	 * 在内存中直接编译源文件
+	 * 
+	 * @param fileURI
+	 * @param input
+	 * @return
+	 * @throws IOException
+	 */
+	public Class<?> parseClass(URI fileURI, InputStream input) throws IOException {
+		List<JavaFileObject> javaFileObjs = new ArrayList<>();
+		JavaFileObject javaFileObj = new SourceCodeJavaFileObject(fileURI, input);
+		javaFileObjs.add(javaFileObj);
+		return parseClass0(javaFileObjs);
+	}
+
+	private Class<?> parseClass0(List<JavaFileObject> fileObjs) throws IOException {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
 		try (ForwardingClassFileManager fileManager = new ForwardingClassFileManager(
@@ -105,12 +141,11 @@ public class ByteCodeClassLoader extends ClassLoader {
 			options.add("-classpath");
 			options.add(System.getProperty("java.class.path"));
 			JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnostics, options, null,
-					javaFileObjs);
+					fileObjs);
 			if (!task.call()) {
 				diagnostics.getDiagnostics().forEach(item -> log.error(item.toString()));
 				return null;
 			}
-			log.info("compile " + file.getAbsolutePath() + " source file success!");
 			Class<?> mainClass = null;
 			for (int i = 0; i < fileManager.getJavaClassObjects().size(); ++i) {
 				JavaClassObject obj = fileManager.getJavaClassObjects().get(i);

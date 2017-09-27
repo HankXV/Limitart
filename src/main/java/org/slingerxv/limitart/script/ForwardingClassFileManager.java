@@ -25,6 +25,8 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 
 /**
+ * 编译后字节码文件管理器
+ * 
  * @author hank
  *
  */
