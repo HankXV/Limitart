@@ -19,13 +19,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.slingerxv.limitart.funcs.Test2;
-import org.slingerxv.limitart.util.StringUtil;
 
 /**
  * String键约束型Map
@@ -33,7 +31,7 @@ import org.slingerxv.limitart.util.StringUtil;
  * @author hank
  *
  */
-public class ConstraintMap<K> {
+public class ConstraintMap<K> implements Map<K, Object> {
 	private Map<K, Object> map;
 
 	protected ConstraintMap(Map<K, Object> map) {
@@ -47,6 +45,7 @@ public class ConstraintMap<K> {
 	/**
 	 * 清除
 	 */
+	@Override
 	public void clear() {
 		map.clear();
 	}
@@ -56,6 +55,7 @@ public class ConstraintMap<K> {
 	 * 
 	 * @return
 	 */
+	@Override
 	public int size() {
 		return map.size();
 	}
@@ -306,24 +306,6 @@ public class ConstraintMap<K> {
 	}
 
 	/**
-	 * 返回常规Json
-	 * 
-	 * @return
-	 */
-	public String toJSON() {
-		return StringUtil.toJSON(this.map);
-	}
-
-	/**
-	 * 返回带类信息的Json
-	 * 
-	 * @return
-	 */
-	public String toJSONWithClassInfo() {
-		return StringUtil.toJSONWithClassInfo(this.map);
-	}
-
-	/**
 	 * 是否为空
 	 * 
 	 * @return
@@ -376,17 +358,6 @@ public class ConstraintMap<K> {
 	}
 
 	/**
-	 * 指定Key移除
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public ConstraintMap<K> remove(K key) {
-		map.remove(Objects.requireNonNull(key, "key"));
-		return this;
-	}
-
-	/**
 	 * 通过条件移除
 	 * 
 	 * @param filter
@@ -404,17 +375,6 @@ public class ConstraintMap<K> {
 	}
 
 	/**
-	 * 放入一个Map
-	 * 
-	 * @param map
-	 * @return
-	 */
-	public ConstraintMap<K> putAll(Map<? extends K, ? extends Object> map) {
-		this.map.putAll(Objects.requireNonNull(map, "map"));
-		return this;
-	}
-
-	/**
 	 * 放入一个同类型Map
 	 * 
 	 * @param map
@@ -424,22 +384,6 @@ public class ConstraintMap<K> {
 		Objects.requireNonNull(map, "map");
 		this.map.putAll(map.map);
 		return this;
-	}
-
-	/**
-	 * 从一个Json中构造
-	 * 
-	 * @param jsonContent
-	 * @return
-	 */
-	public static <K> ConstraintMap<K> fromJSON(String jsonContent) {
-		ConstraintMap<K> map = new ConstraintMap<>();
-		if (!StringUtil.isEmptyOrNull(jsonContent)) {
-			@SuppressWarnings("unchecked")
-			Map<K, Object> object = StringUtil.toObject(jsonContent, HashMap.class);
-			map.putAll(object);
-		}
-		return map;
 	}
 
 	/**
@@ -481,4 +425,33 @@ public class ConstraintMap<K> {
 		return empty;
 	}
 
+	@Override
+	public Object get(Object key) {
+		return map.get(key);
+	}
+
+	@Override
+	public Object put(K key, Object value) {
+		return map.put(key, value);
+	}
+
+	@Override
+	public Object remove(Object value) {
+		return map.remove(value);
+	}
+
+	@Override
+	public void putAll(Map<? extends K, ? extends Object> m) {
+		this.map.putAll(m);
+	}
+
+	@Override
+	public Set<K> keySet() {
+		return map.keySet();
+	}
+
+	@Override
+	public Set<java.util.Map.Entry<K, Object>> entrySet() {
+		return map.entrySet();
+	}
 }
