@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 import org.slingerxv.limitart.funcs.Test2;
 
@@ -287,25 +286,6 @@ public class ConstraintMap<K> implements Map<K, Object> {
 	}
 
 	/**
-	 * 遍历
-	 * 
-	 * @param action
-	 * @return
-	 */
-	public ConstraintMap<K> foreach(BiConsumer<? super K, ? super Object> action) {
-		map.forEach(action);
-		return this;
-	}
-
-	public Set<K> keys() {
-		return map.keySet();
-	}
-
-	public Collection<Object> values() {
-		return map.values();
-	}
-
-	/**
 	 * 是否为空
 	 * 
 	 * @return
@@ -386,6 +366,41 @@ public class ConstraintMap<K> implements Map<K, Object> {
 		return this;
 	}
 
+	@Override
+	public Object get(Object key) {
+		return map.get(key);
+	}
+
+	@Override
+	public Object put(K key, Object value) {
+		return map.put(key, value);
+	}
+
+	@Override
+	public Object remove(Object value) {
+		return map.remove(value);
+	}
+
+	@Override
+	public void putAll(Map<? extends K, ? extends Object> m) {
+		this.map.putAll(m);
+	}
+
+	@Override
+	public Set<K> keySet() {
+		return map.keySet();
+	}
+
+	@Override
+	public Set<Entry<K, Object>> entrySet() {
+		return map.entrySet();
+	}
+
+	@Override
+	public Collection<Object> values() {
+		return map.values();
+	}
+
 	/**
 	 * 构造一个空的对象
 	 * 
@@ -423,35 +438,5 @@ public class ConstraintMap<K> implements Map<K, Object> {
 		ConstraintMap<K> empty = ConstraintMap.empty();
 		empty.putAll(map);
 		return empty;
-	}
-
-	@Override
-	public Object get(Object key) {
-		return map.get(key);
-	}
-
-	@Override
-	public Object put(K key, Object value) {
-		return map.put(key, value);
-	}
-
-	@Override
-	public Object remove(Object value) {
-		return map.remove(value);
-	}
-
-	@Override
-	public void putAll(Map<? extends K, ? extends Object> m) {
-		this.map.putAll(m);
-	}
-
-	@Override
-	public Set<K> keySet() {
-		return map.keySet();
-	}
-
-	@Override
-	public Set<java.util.Map.Entry<K, Object>> entrySet() {
-		return map.entrySet();
 	}
 }

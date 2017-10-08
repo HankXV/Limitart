@@ -157,7 +157,7 @@ public final class HttpUtil {
 
 	public static String map2QueryParam(ConstraintMap<String> map) {
 		StringBuilder queryParamBuffer = new StringBuilder();
-		map.foreach((k, v) -> {
+		map.forEach((k, v) -> {
 			queryParamBuffer.append(k).append("=").append(v.toString()).append("&");
 		});
 		if (queryParamBuffer.length() > 0) {
