@@ -20,6 +20,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
+import org.slingerxv.limitart.collections.ConstraintHashMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
 
 import io.netty.handler.codec.http.HttpConstants;
@@ -119,11 +120,11 @@ public class QueryStringDecoderV2 {
 				if (pathEndPos >= 0 && pathEndPos < uri.length() - 1) {
 					decodeParams(uri.substring(pathEndPos + 1));
 				} else {
-					params = ConstraintMap.empty();
+					params = ConstraintHashMap.empty();
 				}
 			} else {
 				if (uri.isEmpty()) {
-					params = ConstraintMap.empty();
+					params = ConstraintHashMap.empty();
 				} else {
 					decodeParams(uri);
 				}
@@ -133,7 +134,7 @@ public class QueryStringDecoderV2 {
 	}
 
 	private void decodeParams(String s) {
-		ConstraintMap<String> params = this.params = ConstraintMap.empty();
+		ConstraintMap<String> params = this.params = ConstraintHashMap.empty();
 		nParams = 0;
 		String name = null;
 		int pos = 0; // Beginning of the unprocessed region

@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.collections.ConstraintHashMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.funcs.Proc1;
 import org.slingerxv.limitart.funcs.Proc2;
@@ -142,7 +143,7 @@ public class HttpServer extends AbstractNettyServer implements IServer {
 			return;
 		}
 		String url;
-		ConstraintMap<String> params = ConstraintMap.empty();
+		ConstraintMap<String> params = ConstraintHashMap.empty();
 		if (msg.method() == GET) {
 			QueryStringDecoderV2 queryStringDecoder = new QueryStringDecoderV2(msg.uri());
 			url = queryStringDecoder.path();

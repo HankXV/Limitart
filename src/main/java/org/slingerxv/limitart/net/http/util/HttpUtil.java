@@ -25,6 +25,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slingerxv.limitart.collections.ConstraintHashMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.net.http.constant.ContentTypes;
 import org.slingerxv.limitart.net.http.constant.RequestErrorCode;
@@ -167,7 +168,7 @@ public final class HttpUtil {
 	}
 
 	public static ConstraintMap<String> queryParam2Map(String queryParam) throws Exception {
-		ConstraintMap<String> map = ConstraintMap.empty();
+		ConstraintMap<String> map = ConstraintHashMap.empty();
 		if (!StringUtil.isEmptyOrNull(queryParam)) {
 			String[] split2 = queryParam.split("[&]");
 			for (String temp : split2) {

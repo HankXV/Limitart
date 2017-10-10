@@ -10,7 +10,7 @@ public class ConstraintMapTest {
 
 	@Before
 	public void setUp() throws Exception {
-		map = new ConstraintMap<>();
+		map = ConstraintHashMap.empty();
 	}
 
 	@After

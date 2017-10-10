@@ -18,17 +18,15 @@ package org.slingerxv.limitart.collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 并发String约束性Map
- * 
- * @author hank
+ * @author Hank
  *
- * @param <K>
  */
-public class ConcurrentConstraintMap<K> extends ConstraintMap<K> {
-	/**
-	 * 构造函数
-	 */
-	public ConcurrentConstraintMap() {
+public class IntValueConcurrentMap<K> extends IntValueHashMap<K> {
+	private IntValueConcurrentMap() {
 		super(new ConcurrentHashMap<>());
+	}
+
+	public static <K> IntValueConcurrentMap<K> empty() {
+		return new IntValueConcurrentMap<>();
 	}
 }

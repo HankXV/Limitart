@@ -20,14 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slingerxv.limitart.collections.ConstraintMap;
+import org.slingerxv.limitart.collections.ConstraintHashMap;
 import org.slingerxv.limitart.net.http.constant.QueryMethod;
 import org.slingerxv.limitart.reflectasm.FieldAccess;
 import org.slingerxv.limitart.util.FieldFilter;
 
 import io.netty.channel.Channel;
 
-public abstract class UrlMessage extends ConstraintMap<String> {
+public abstract class UrlMessage extends ConstraintHashMap<String> {
 	private static Map<Class<? extends UrlMessage>, FieldAccess> messageMetaFieldCache = new ConcurrentHashMap<>();
 	private transient Channel channel;
 	private transient Map<String, byte[]> files = new HashMap<>();

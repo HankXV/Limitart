@@ -16,16 +16,18 @@
 package org.slingerxv.limitart.game.statemachine;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.collections.ConstraintConcurrentMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.funcs.Proc;
 import org.slingerxv.limitart.game.statemachine.event.IEvent;
@@ -47,11 +49,11 @@ public class StateMachine {
 	private Queue<Integer> stateQueue = new LinkedList<>();
 	private State preState;
 	private State curState;
-	private ConstraintMap<Object> params = ConstraintMap.empty();
+	private ConstraintMap<Object> params = ConstraintConcurrentMap.empty();
 	private long lastLoopTime = 0;
 	private int firstStateId;
 	private Thread lastThread;
-	private List<Ticker> tickers = new ArrayList<>();
+	private List<Ticker> tickers = new CopyOnWriteArrayList<>();
 
 	/**
 	 * 开启
@@ -142,16 +144,16 @@ public class StateMachine {
 		long now = System.currentTimeMillis();
 		long deltaTimeInMills = this.lastLoopTime == 0 ? 0 : now - this.lastLoopTime;
 		lastLoopTime = now;
-		// FIXME 与tick函数有多线程问题
-		for (int i = tickers.size() - 1; i >= 0; --i) {
-			Ticker ticker = tickers.get(i);
+		Iterator<Ticker> iterator = tickers.iterator();
+		for (; iterator.hasNext();) {
+			Ticker ticker = iterator.next();
 			ticker.delayCounter += deltaTimeInMills;
 			if (ticker.delayCounter >= ticker.delay) {
 				ticker.delayCounter = 0;
 				ticker.times -= 1;
 				ticker.listener.run();
 				if (ticker.times <= 0) {
-					tickers.remove(i);
+					iterator.remove();
 				}
 			}
 		}
