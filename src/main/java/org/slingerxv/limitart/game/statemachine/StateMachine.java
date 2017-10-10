@@ -18,7 +18,6 @@ package org.slingerxv.limitart.game.statemachine;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -153,16 +152,15 @@ public class StateMachine {
 		lastLoopTime = now;
 		try {
 			tickerLock.lock();
-			Iterator<Ticker> iterator = tickers.iterator();
-			for (; iterator.hasNext();) {
-				Ticker ticker = iterator.next();
+			for (int i = tickers.size() - 1; i >= 0; --i) {
+				Ticker ticker = tickers.get(i);
 				ticker.delayCounter += deltaTimeInMills;
 				if (ticker.delayCounter >= ticker.delay) {
 					ticker.delayCounter = 0;
 					ticker.times -= 1;
 					ticker.listener.run();
 					if (ticker.times <= 0) {
-						iterator.remove();
+						tickers.remove(i);
 					}
 				}
 			}
