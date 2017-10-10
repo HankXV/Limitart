@@ -60,97 +60,174 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 		return map.size();
 	}
 
-	@Override
+	/**
+	 * 放入Byte
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public ConstraintMap<K> putByte(K key, byte value) {
 		putObj(key, value);
 		return this;
 	}
 
-	@Override
+	/**
+	 * 获取Byte
+	 * 
+	 * @param key
+	 * @return 返回0或其他
+	 */
 	public byte getByte(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return getObj(key);
+		return Byte.valueOf(getObj(key).toString());
 	}
 
-	@Override
+	/**
+	 * 放入Short
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public ConstraintMap<K> putShort(K key, short value) {
 		putObj(key, value);
 		return this;
 	}
 
-	@Override
+	/**
+	 * 获取Short
+	 * 
+	 * @param key
+	 * @return 返回0或其他
+	 */
 	public short getShort(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return getObj(key);
+		return Short.valueOf(getObj(key).toString());
 	}
 
-	@Override
+	/**
+	 * 放入int
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public ConstraintMap<K> putInt(K key, int value) {
 		putObj(key, value);
 		return this;
 	}
 
-	@Override
+	/**
+	 * 获取int
+	 * 
+	 * @param key
+	 * @return 0或其他int
+	 */
 	public int getInt(K key) {
 		if (!containsKey(key)) {
 			return 0;
 		}
-		return getObj(key);
+		return Integer.valueOf(getObj(key).toString());
 	}
 
-	@Override
+	/**
+	 * 放入long
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public ConstraintMap<K> putLong(K key, long value) {
 		putObj(key, value);
 		return this;
 	}
 
-	@Override
+	/**
+	 * 获取long
+	 * 
+	 * @param key
+	 * @return 0L或者其他long
+	 */
 	public long getLong(K key) {
 		if (!containsKey(key)) {
 			return 0L;
 		}
-		return getObj(key);
+		return Long.valueOf(getObj(key).toString());
 	}
 
-	@Override
+	/**
+	 * 放入浮点
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public ConstraintMap<K> putFloat(K key, float value) {
 		putObj(key, value);
 		return this;
 	}
 
-	@Override
+	/**
+	 * 获取浮点
+	 * 
+	 * @param key
+	 * @return 0F或者其他浮点
+	 */
 	public float getFloat(K key) {
 		if (!containsKey(key)) {
 			return 0F;
 		}
-		return getObj(key);
+		return Float.valueOf(getObj(key).toString());
 	}
 
-	@Override
+	/**
+	 * 放入double
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public ConstraintMap<K> putDouble(K key, double value) {
 		putObj(key, value);
 		return this;
 	}
 
-	@Override
+	/**
+	 * 获取double
+	 * 
+	 * @param key
+	 * @return 0D或者其他double
+	 */
 	public double getDouble(K key) {
 		if (!containsKey(key)) {
 			return 0D;
 		}
-		return getObj(key);
+		return Double.valueOf(getObj(key).toString());
 	}
 
-	@Override
+	/**
+	 * 放入char
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public ConstraintMap<K> putChar(K key, char value) {
 		putObj(key, value);
 		return this;
 	}
 
-	@Override
+	/**
+	 * 获取char
+	 * 
+	 * @param key
+	 * @return 0或其他char
+	 */
 	public char getChar(K key) {
 		if (!containsKey(key)) {
 			return 0;
@@ -158,18 +235,35 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 		return getObj(key);
 	}
 
-	@Override
+	/**
+	 * 写入布尔
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public ConstraintMap<K> putBoolean(K key, boolean value) {
 		putInt(key, value ? 1 : 0);
 		return this;
 	}
 
-	@Override
+	/**
+	 * 获取布尔
+	 * 
+	 * @param key
+	 * @return
+	 */
 	public boolean getBoolean(K key) {
 		return getInt(key) == 1;
 	}
 
-	@Override
+	/**
+	 * 放入字符串
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public ConstraintMap<K> putString(K key, String value) {
 		if (value == null) {
 			putObj(key, "");
@@ -179,12 +273,17 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 		return this;
 	}
 
-	@Override
+	/**
+	 * 获取字符串
+	 * 
+	 * @param key
+	 * @return ""或其他字符串
+	 */
 	public String getString(K key) {
 		if (!containsKey(key)) {
 			return "";
 		}
-		return getObj(key);
+		return (String) map.get(key);
 	}
 
 	/**

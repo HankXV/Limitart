@@ -16,6 +16,7 @@
 package org.slingerxv.limitart.game.statemachine;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,8 @@ public class StateMachine {
 	private long lastLoopTime = 0;
 	private int firstStateId;
 	private Thread lastThread;
-	private List<Ticker> tickers = new CopyOnWriteArrayList<>();
+	private List<Ticker> tickers = new ArrayList<>();
+	private ReentrantLock tickerLock = new ReentrantLock();
 
 	/**
 	 * 开启
@@ -125,7 +127,12 @@ public class StateMachine {
 	}
 
 	public void tick(long delay, int times, Proc listener) {
-		tickers.add(new Ticker(delay, times, listener));
+		try {
+			tickerLock.lock();
+		} finally {
+			tickers.add(new Ticker(delay, times, listener));
+			tickerLock.unlock();
+		}
 	}
 
 	/**
@@ -144,18 +151,23 @@ public class StateMachine {
 		long now = System.currentTimeMillis();
 		long deltaTimeInMills = this.lastLoopTime == 0 ? 0 : now - this.lastLoopTime;
 		lastLoopTime = now;
-		Iterator<Ticker> iterator = tickers.iterator();
-		for (; iterator.hasNext();) {
-			Ticker ticker = iterator.next();
-			ticker.delayCounter += deltaTimeInMills;
-			if (ticker.delayCounter >= ticker.delay) {
-				ticker.delayCounter = 0;
-				ticker.times -= 1;
-				ticker.listener.run();
-				if (ticker.times <= 0) {
-					iterator.remove();
+		try {
+			tickerLock.lock();
+			Iterator<Ticker> iterator = tickers.iterator();
+			for (; iterator.hasNext();) {
+				Ticker ticker = iterator.next();
+				ticker.delayCounter += deltaTimeInMills;
+				if (ticker.delayCounter >= ticker.delay) {
+					ticker.delayCounter = 0;
+					ticker.times -= 1;
+					ticker.listener.run();
+					if (ticker.times <= 0) {
+						iterator.remove();
+					}
 				}
 			}
+		} finally {
+			tickerLock.unlock();
 		}
 		Integer nextNode = getNextNode();
 		State next = null;
