@@ -27,10 +27,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <K>
  */
 public class ConstraintConcurrentMap<K> extends ConstraintHashMap<K> {
+
 	/**
 	 * 构造函数
 	 */
-	protected ConstraintConcurrentMap() {
+	public ConstraintConcurrentMap() {
 		super(new ConcurrentHashMap<>());
 	}
 
@@ -67,7 +68,7 @@ public class ConstraintConcurrentMap<K> extends ConstraintHashMap<K> {
 	 * @param map
 	 * @return
 	 */
-	public static <K> ConstraintConcurrentMap<K> from(Map<? extends K, ? extends Object> map) {
+	public static <K> ConstraintConcurrentMap<K> from(Map<K, Object> map) {
 		ConstraintConcurrentMap<K> empty = ConstraintConcurrentMap.empty();
 		empty.putAll(map);
 		return empty;

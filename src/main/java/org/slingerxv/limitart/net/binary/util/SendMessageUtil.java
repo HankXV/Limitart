@@ -22,7 +22,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slingerxv.limitart.collections.FrequencyReadRankMap;
-import org.slingerxv.limitart.collections.IRankMap;
+import org.slingerxv.limitart.collections.RankMap;
 import org.slingerxv.limitart.funcs.Proc3;
 import org.slingerxv.limitart.funcs.Procs;
 import org.slingerxv.limitart.net.binary.codec.AbstractBinaryEncoder;
@@ -139,10 +139,10 @@ public final class SendMessageUtil {
 		if (top < 1) {
 			return "top error!";
 		}
-		IRankMap<Class<? extends Message>, FlowMeta> min = new FrequencyReadRankMap<>(COMPARATOR, top);
-		IRankMap<Class<? extends Message>, FlowMeta> max = new FrequencyReadRankMap<>(COMPARATOR, top);
-		IRankMap<Class<? extends Message>, FlowMeta> count = new FrequencyReadRankMap<>(COMPARATOR, top);
-		IRankMap<Class<? extends Message>, FlowMeta> size = new FrequencyReadRankMap<>(COMPARATOR, top);
+		RankMap<Class<? extends Message>, FlowMeta> min = new FrequencyReadRankMap<>(COMPARATOR, top);
+		RankMap<Class<? extends Message>, FlowMeta> max = new FrequencyReadRankMap<>(COMPARATOR, top);
+		RankMap<Class<? extends Message>, FlowMeta> count = new FrequencyReadRankMap<>(COMPARATOR, top);
+		RankMap<Class<? extends Message>, FlowMeta> size = new FrequencyReadRankMap<>(COMPARATOR, top);
 		for (Entry<Class<? extends Message>, Integer> entry : FLOW_MIN.entrySet()) {
 			FlowMeta meta = new FlowMeta();
 			meta.setClazz(entry.getKey());

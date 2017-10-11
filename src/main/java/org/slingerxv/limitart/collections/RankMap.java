@@ -15,28 +15,49 @@
  */
 package org.slingerxv.limitart.collections;
 
+import java.util.List;
 import java.util.Map;
 
-/**
- * @author hank
- *
- */
-public interface LongValueMap<K> extends Map<K, Long> {
-	public long getValue(K key);
+import org.slingerxv.limitart.funcs.Func;
 
-	public long setValue(K key, long value);
+public interface RankMap<K, V extends Func<K>> extends Map<K, V> {
 
-	public long getAndIncrement(K key);
+	/**
+	 * 集合大小
+	 * 
+	 * @return
+	 */
+	int size();
 
-	public long incrementAndGet(K key);
+	/**
+	 * 找到此Key在排行榜的名次
+	 * 
+	 * @param key
+	 * @return
+	 */
+	int getIndex(K key);
 
-	public long getAndDecrement(K key);
+	/**
+	 * 获取一个范围的数据
+	 * 
+	 * @param start
+	 *            开始索引(包含边界)
+	 * @param end
+	 *            结束索引(包含边界)
+	 * @return
+	 */
+	List<V> getRange(int start, int end);
 
-	public long decrementAndGet(K key);
+	List<V> getAll();
 
-	public long getAndAdd(K key, long value);
+	/**
+	 * 获取指定位置的元数
+	 * 
+	 * @param index
+	 * @return
+	 */
+	V getAt(int index);
 
-	public long addAndGet(K key, long value);
+	void clear();
 
-	public long sum();
 }

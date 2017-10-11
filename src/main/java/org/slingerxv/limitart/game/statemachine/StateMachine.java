@@ -128,8 +128,8 @@ public class StateMachine {
 	public void tick(long delay, int times, Proc listener) {
 		try {
 			tickerLock.lock();
-		} finally {
 			tickers.add(new Ticker(delay, times, listener));
+		} finally {
 			tickerLock.unlock();
 		}
 	}

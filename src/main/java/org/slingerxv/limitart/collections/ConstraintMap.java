@@ -17,8 +17,6 @@ package org.slingerxv.limitart.collections;
 
 import java.util.Map;
 
-import org.slingerxv.limitart.funcs.Test2;
-
 /**
  * 约束型Map
  * 
@@ -197,13 +195,4 @@ public interface ConstraintMap<K> extends Map<K, Object> {
 	 * @return null或对象
 	 */
 	<V> V getObj(K key);
-
-	/**
-	 * 通过条件移除
-	 * 
-	 * @param filter
-	 * @return
-	 */
-	ConstraintMap<K> remove(Test2<K, Object> filter);
-
 }

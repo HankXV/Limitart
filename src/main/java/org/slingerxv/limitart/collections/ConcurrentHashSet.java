@@ -27,9 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @param <E>
  */
-public class ConcurrentHashSet<E> extends AbstractSet<E> implements java.io.Serializable {
-
-	private static final long serialVersionUID = -8672117787651310382L;
+public class ConcurrentHashSet<E> extends AbstractSet<E> {
 
 	private static final Object PRESENT = new Object();
 

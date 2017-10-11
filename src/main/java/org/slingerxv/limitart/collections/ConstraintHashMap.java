@@ -17,12 +17,10 @@ package org.slingerxv.limitart.collections;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.slingerxv.limitart.funcs.Test2;
 import org.slingerxv.limitart.util.StringUtil;
 
 /**
@@ -34,30 +32,13 @@ import org.slingerxv.limitart.util.StringUtil;
 public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	private Map<K, Object> map;
 
+	public ConstraintHashMap() {
+		this(new HashMap<>());
+	}
+
 	protected ConstraintHashMap(Map<K, Object> map) {
-		this.map = Objects.requireNonNull(map, "map");
-	}
-
-	protected ConstraintHashMap() {
-		map = new HashMap<>();
-	}
-
-	/**
-	 * 清除
-	 */
-	@Override
-	public void clear() {
-		map.clear();
-	}
-
-	/**
-	 * 大小
-	 * 
-	 * @return
-	 */
-	@Override
-	public int size() {
-		return map.size();
+		Objects.requireNonNull(map, "map");
+		this.map = map;
 	}
 
 	/**
@@ -79,7 +60,7 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	 * @return 返回0或其他
 	 */
 	public byte getByte(K key) {
-		if (!containsKey(key)) {
+		if (!map.containsKey(key)) {
 			return 0;
 		}
 		return Byte.valueOf(getObj(key).toString());
@@ -104,7 +85,7 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	 * @return 返回0或其他
 	 */
 	public short getShort(K key) {
-		if (!containsKey(key)) {
+		if (!map.containsKey(key)) {
 			return 0;
 		}
 		return Short.valueOf(getObj(key).toString());
@@ -129,7 +110,7 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	 * @return 0或其他int
 	 */
 	public int getInt(K key) {
-		if (!containsKey(key)) {
+		if (!map.containsKey(key)) {
 			return 0;
 		}
 		return Integer.valueOf(getObj(key).toString());
@@ -154,7 +135,7 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	 * @return 0L或者其他long
 	 */
 	public long getLong(K key) {
-		if (!containsKey(key)) {
+		if (!map.containsKey(key)) {
 			return 0L;
 		}
 		return Long.valueOf(getObj(key).toString());
@@ -179,7 +160,7 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	 * @return 0F或者其他浮点
 	 */
 	public float getFloat(K key) {
-		if (!containsKey(key)) {
+		if (!map.containsKey(key)) {
 			return 0F;
 		}
 		return Float.valueOf(getObj(key).toString());
@@ -204,7 +185,7 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	 * @return 0D或者其他double
 	 */
 	public double getDouble(K key) {
-		if (!containsKey(key)) {
+		if (!map.containsKey(key)) {
 			return 0D;
 		}
 		return Double.valueOf(getObj(key).toString());
@@ -229,7 +210,7 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	 * @return 0或其他char
 	 */
 	public char getChar(K key) {
-		if (!containsKey(key)) {
+		if (!map.containsKey(key)) {
 			return 0;
 		}
 		return getObj(key);
@@ -280,42 +261,10 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	 * @return ""或其他字符串
 	 */
 	public String getString(K key) {
-		if (!containsKey(key)) {
+		if (!map.containsKey(key)) {
 			return "";
 		}
 		return (String) map.get(key);
-	}
-
-	/**
-	 * 是否为空
-	 * 
-	 * @return
-	 */
-	@Override
-	public boolean isEmpty() {
-		return map.isEmpty();
-	}
-
-	/**
-	 * 是否包含Key
-	 * 
-	 * @param key
-	 * @return
-	 */
-	@Override
-	public boolean containsKey(Object key) {
-		return map.containsKey(Objects.requireNonNull(key, "key"));
-	}
-
-	/**
-	 * 是否包含值
-	 * 
-	 * @param value
-	 * @return
-	 */
-	@Override
-	public boolean containsValue(Object value) {
-		return map.containsValue(Objects.requireNonNull(value, "value"));
 	}
 
 	@Override
@@ -331,15 +280,28 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	}
 
 	@Override
-	public ConstraintMap<K> remove(Test2<K, Object> filter) {
-		Iterator<Entry<K, Object>> iterator = map.entrySet().iterator();
-		for (; iterator.hasNext();) {
-			Entry<K, Object> next = iterator.next();
-			if (filter.test(next.getKey(), next.getValue())) {
-				iterator.remove();
-			}
-		}
-		return this;
+	public void clear() {
+		map.clear();
+	}
+
+	@Override
+	public int size() {
+		return map.size();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
+
+	@Override
+	public boolean containsKey(Object key) {
+		return map.containsKey(key);
+	}
+
+	@Override
+	public boolean containsValue(Object value) {
+		return map.containsValue(value);
 	}
 
 	@Override
@@ -353,13 +315,13 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	}
 
 	@Override
-	public Object remove(Object value) {
-		return map.remove(value);
+	public Object remove(Object key) {
+		return map.remove(key);
 	}
 
 	@Override
 	public void putAll(Map<? extends K, ? extends Object> m) {
-		this.map.putAll(m);
+		map.putAll(m);
 	}
 
 	@Override
@@ -368,13 +330,13 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	}
 
 	@Override
-	public Set<Entry<K, Object>> entrySet() {
-		return map.entrySet();
+	public Collection<Object> values() {
+		return map.values();
 	}
 
 	@Override
-	public Collection<Object> values() {
-		return map.values();
+	public Set<Entry<K, Object>> entrySet() {
+		return map.entrySet();
 	}
 
 	/**
@@ -405,22 +367,6 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	}
 
 	/**
-	 * 从一个Json中构造
-	 * 
-	 * @param jsonContent
-	 * @return
-	 */
-	public static <K> ConstraintHashMap<K> fromJSON(String jsonContent) {
-		ConstraintHashMap<K> map = ConstraintHashMap.empty();
-		if (!StringUtil.isEmptyOrNull(jsonContent)) {
-			@SuppressWarnings("unchecked")
-			Map<K, Object> object = StringUtil.toObject(jsonContent, HashMap.class);
-			map.putAll(object);
-		}
-		return map;
-	}
-
-	/**
 	 * 通过键值对数组构造
 	 * 
 	 * @param kvs
@@ -444,9 +390,25 @@ public class ConstraintHashMap<K> implements ConstraintMap<K> {
 	 * @param map
 	 * @return
 	 */
-	public static <K> ConstraintHashMap<K> from(Map<? extends K, ? extends Object> map) {
+	public static <K> ConstraintHashMap<K> from(Map<K, Object> map) {
 		ConstraintHashMap<K> empty = ConstraintHashMap.empty();
 		empty.putAll(map);
 		return empty;
+	}
+
+	/**
+	 * 从一个Json中构造
+	 * 
+	 * @param jsonContent
+	 * @return
+	 */
+	public static <K> ConstraintHashMap<K> fromJSON(String jsonContent) {
+		ConstraintHashMap<K> map = ConstraintHashMap.empty();
+		if (!StringUtil.isEmptyOrNull(jsonContent)) {
+			@SuppressWarnings("unchecked")
+			Map<K, Object> object = StringUtil.toObject(jsonContent, HashMap.class);
+			map.putAll(object);
+		}
+		return map;
 	}
 }
