@@ -23,8 +23,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.util.FileUtil;
 import org.slingerxv.limitart.util.SecurityUtil;
@@ -36,7 +36,7 @@ import org.slingerxv.limitart.util.SecurityUtil;
  * @author hank
  */
 public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
-    private static Logger log = LoggerFactory.getLogger(FileScriptLoader.class);
+    private static Logger log = Loggers.create(FileScriptLoader.class);
     private ScheduledExecutorService worker = Executors.newScheduledThreadPool(1);
     // 脚本地址根目录
     private String scriptRootPath;

@@ -28,8 +28,8 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.util.FileUtil;
 
 /**
@@ -39,7 +39,7 @@ import org.slingerxv.limitart.util.FileUtil;
  *
  */
 public class ByteCodeClassLoader extends ClassLoader {
-	private static Logger log = LoggerFactory.getLogger(ByteCodeClassLoader.class);
+	private static Logger log = Loggers.create(ByteCodeClassLoader.class);
 
 	public ByteCodeClassLoader() {
 		this(Thread.currentThread().getContextClassLoader());

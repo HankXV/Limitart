@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.net.Session;
 import org.slingerxv.limitart.net.binary.BinaryMessage;
 import org.slingerxv.limitart.net.binary.BinaryServerInterceptor;
@@ -34,7 +34,7 @@ import org.slingerxv.limitart.net.binary.BinaryServerInterceptor;
  *
  */
 public class BinaryServerWhiteListInterceptor implements BinaryServerInterceptor {
-	private static Logger log = LoggerFactory.getLogger(BinaryServerWhiteListInterceptor.class);
+	private static Logger log = Loggers.create(BinaryServerWhiteListInterceptor.class);
 	private Set<String> whiteList = new HashSet<>();
 
 	public BinaryServerWhiteListInterceptor(String... ips) {

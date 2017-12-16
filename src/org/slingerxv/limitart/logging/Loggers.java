@@ -13,16 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.script;
-
-import org.slingerxv.limitart.script.Script;
+package org.slingerxv.limitart.logging;
 
 
-/**
- * 脚本引用测试
- *
- * @author hank
- */
-public interface HelloScript extends Script<Integer> {
-    void sayHello();
+public abstract class Loggers {
+    private static Loggers DEFAULT = new Slf4JLoggers();
+
+
+    public static void setDefault(Loggers factory) {
+        DEFAULT = factory;
+    }
+
+    public static Logger create() {
+        return create(Thread.currentThread().getStackTrace()[2].getClassName());
+    }
+
+    public static Logger create(Class<?> clazz) {
+        return create(clazz.getName());
+    }
+
+    public static Logger create(String name) {
+        return DEFAULT.instance(name);
+    }
+
+    protected abstract Logger instance(String name);
 }

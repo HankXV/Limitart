@@ -18,12 +18,12 @@ package org.slingerxv.limitart.net.binary;
 import java.io.IOException;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.*;
 import org.slingerxv.limitart.base.Proc2;
 import org.slingerxv.limitart.base.Proc3;
 import org.slingerxv.limitart.base.Procs;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.net.Session;
 
 import io.netty.buffer.ByteBuf;
@@ -35,7 +35,7 @@ import io.netty.buffer.Unpooled;
  * @author hank
  */
 public class BinarySendMessageUtil {
-    private static Logger log = LoggerFactory.getLogger(BinarySendMessageUtil.class);
+    private static Logger log = Loggers.create(BinarySendMessageUtil.class);
 
     /**
      * 发送消息

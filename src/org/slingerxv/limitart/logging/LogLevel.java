@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.script;
-
-import org.slingerxv.limitart.script.Script;
+package org.slingerxv.limitart.logging;
 
 
-/**
- * 脚本引用测试
- *
- * @author hank
- */
-public interface HelloScript extends Script<Integer> {
-    void sayHello();
+public enum LogLevel {
+    TRACE,
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR
 }

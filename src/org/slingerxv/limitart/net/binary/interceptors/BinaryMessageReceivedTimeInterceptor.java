@@ -15,8 +15,8 @@
  */
 package org.slingerxv.limitart.net.binary.interceptors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.net.Session;
 import org.slingerxv.limitart.net.binary.BinaryMessage;
 import org.slingerxv.limitart.net.binary.BinaryServerInterceptor;
@@ -28,7 +28,7 @@ import org.slingerxv.limitart.net.binary.BinaryServerInterceptor;
  *
  */
 public class BinaryMessageReceivedTimeInterceptor implements BinaryServerInterceptor {
-	private static Logger log = LoggerFactory.getLogger(BinaryMessageReceivedTimeInterceptor.class);
+	private static Logger log = Loggers.create(BinaryMessageReceivedTimeInterceptor.class);
 	private static int LAST_RECEIVE_MSG_TIME = 1;
 	private int millsInterval;
 

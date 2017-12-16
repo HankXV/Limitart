@@ -17,9 +17,9 @@ package org.slingerxv.limitart.taskqueue;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.*;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 
 /**
  * 阻塞消息队列
@@ -29,7 +29,7 @@ import org.slingerxv.limitart.base.*;
  * @see DisruptorTaskQueue
  */
 public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> {
-    private static Logger log = LoggerFactory.getLogger(LinkedBlockingTaskQueue.class);
+    private static Logger log = Loggers.create(LinkedBlockingTaskQueue.class);
     private LinkedBlockingQueue<T> queue = new LinkedBlockingQueue<>();
     private boolean start = false;
     private Test1<T> intercept;
