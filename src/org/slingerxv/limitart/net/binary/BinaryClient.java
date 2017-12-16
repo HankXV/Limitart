@@ -16,9 +16,9 @@
 package org.slingerxv.limitart.net.binary;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.*;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.net.AbstractNettyClient;
 import org.slingerxv.limitart.net.AddressPair;
 import org.slingerxv.limitart.net.Client;
@@ -34,7 +34,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author hank
  */
 public class BinaryClient extends AbstractNettyClient implements Client {
-    private static Logger log = LoggerFactory.getLogger(BinaryClient.class);
+    private static Logger log = Loggers.create(BinaryClient.class);
     // ----config
     private AddressPair remoteAddress;
     private BinaryDecoder decoder;

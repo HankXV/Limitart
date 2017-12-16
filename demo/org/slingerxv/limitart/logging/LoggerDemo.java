@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.script;
+package org.slingerxv.limitart.logging;
 
-import org.slingerxv.limitart.script.Script;
+public class LoggerDemo {
+    private static Logger log = Loggers.create();
 
-
-/**
- * 脚本引用测试
- *
- * @author hank
- */
-public interface HelloScript extends Script<Integer> {
-    void sayHello();
+    public static void main(String[] args) {
+        log.info("xxxxx");
+    }
 }

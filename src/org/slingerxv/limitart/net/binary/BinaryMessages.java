@@ -26,12 +26,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.net.binary.BinaryMessageProtoFileInfo.BinaryMessageFieldProtoInfo;
 import org.slingerxv.limitart.net.binary.BinaryMessageProtoFileInfo.BinaryMessageMetaProtoInfo;
 import org.slingerxv.limitart.net.binary.BinaryMessageProtoFileInfo.BinaryMessageProtoInfo;
@@ -46,7 +45,7 @@ import org.xml.sax.SAXException;
  * @author hank
  */
 public final class BinaryMessages {
-    private static Logger log = LoggerFactory.getLogger(BinaryMessages.class);
+    private static Logger log = Loggers.create(BinaryMessages.class);
     private static Validator xmlValidator;
 
     private BinaryMessages() {

@@ -16,8 +16,6 @@ package org.slingerxv.limitart.net;
 
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -35,6 +33,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slingerxv.limitart.base.Conditions;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 
 /**
  * 抽象Netty客户端
@@ -42,7 +42,7 @@ import org.slingerxv.limitart.base.Conditions;
  * @author hank
  */
 public abstract class AbstractNettyClient {
-    private static Logger log = LoggerFactory.getLogger(AbstractNettyServer.class);
+    private static Logger log = Loggers.create(AbstractNettyServer.class);
     protected final static EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
     private String clientName;

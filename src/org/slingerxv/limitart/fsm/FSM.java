@@ -24,13 +24,13 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.NotNull;
 import org.slingerxv.limitart.base.Proc;
 import org.slingerxv.limitart.collections.ConstraintConcurrentMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 
 /**
  * 状态机代理
@@ -39,7 +39,7 @@ import org.slingerxv.limitart.collections.ConstraintMap;
  */
 @SuppressWarnings("rawtypes")
 public class FSM {
-    private static Logger log = LoggerFactory.getLogger(FSM.class);
+    private static Logger log = Loggers.create(FSM.class);
     private Map<Integer, State> stateMap = new HashMap<>();
     private Queue<Integer> stateQueue = new LinkedList<>();
     private State preState;

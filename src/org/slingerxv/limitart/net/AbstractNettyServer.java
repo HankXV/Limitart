@@ -18,8 +18,6 @@ package org.slingerxv.limitart.net;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -42,6 +40,8 @@ import io.netty.util.AttributeKey;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.Proc1;
 import org.slingerxv.limitart.base.Procs;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 
 /**
  * 抽象Netty服务器
@@ -49,7 +49,7 @@ import org.slingerxv.limitart.base.Procs;
  * @author hank
  */
 public abstract class AbstractNettyServer {
-    private static Logger log = LoggerFactory.getLogger(AbstractNettyServer.class);
+    private static Logger log = Loggers.create(AbstractNettyServer.class);
     private static final AttributeKey<Integer> SESSION_ID_KEY = AttributeKey.newInstance("SESSION_ID_KEY");
     private static AtomicInteger SESSION_ID_CREATOR = new AtomicInteger();
     protected final static EventLoopGroup bossGroup;

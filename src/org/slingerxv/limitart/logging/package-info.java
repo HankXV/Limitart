@@ -13,16 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.script;
-
-import org.slingerxv.limitart.script.Script;
-
-
 /**
- * 脚本引用测试
- *
- * @author hank
+ * 日志通用接口
  */
-public interface HelloScript extends Script<Integer> {
-    void sayHello();
-}
+package org.slingerxv.limitart.logging;

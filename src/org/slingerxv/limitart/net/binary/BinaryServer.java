@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.base.*;
 import org.slingerxv.limitart.net.AbstractNettyServer;
 import org.slingerxv.limitart.net.AddressPair;
@@ -37,7 +37,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author Hank
  */
 public class BinaryServer extends AbstractNettyServer implements Server {
-    private static Logger log = LoggerFactory.getLogger(BinaryServer.class);
+    private static Logger log = Loggers.create(BinaryServer.class);
     private AddressPair addressPair;
     private BinaryDecoder decoder;
     private BinaryEncoder encoder;

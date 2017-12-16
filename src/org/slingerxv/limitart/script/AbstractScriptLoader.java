@@ -21,9 +21,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 
 /**
  * 服务器脚本管理
@@ -32,7 +32,7 @@ import org.slingerxv.limitart.base.Conditions;
  * @author hank
  */
 public abstract class AbstractScriptLoader<KEY> {
-    private static Logger log = LoggerFactory.getLogger(AbstractScriptLoader.class);
+    private static Logger log = Loggers.create(AbstractScriptLoader.class);
     private Map<KEY, ScriptData<KEY>> scriptMap = new ConcurrentHashMap<>();
     private Map<String, KEY> pathMap = new ConcurrentHashMap<>();
 

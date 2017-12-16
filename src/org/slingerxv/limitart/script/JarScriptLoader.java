@@ -17,14 +17,13 @@ package org.slingerxv.limitart.script;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 
 /**
  * jar包加载器
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author hank
  */
 public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
-    private static Logger log = LoggerFactory.getLogger(JarScriptLoader.class);
+    private static Logger log = Loggers.create(JarScriptLoader.class);
 
     /**
      * 加载jar包

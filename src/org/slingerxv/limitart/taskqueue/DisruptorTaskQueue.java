@@ -15,8 +15,8 @@
  */
 package org.slingerxv.limitart.taskqueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.base.*;
 import org.slingerxv.limitart.util.NamedThreadFactory;
 
@@ -31,7 +31,7 @@ import com.lmax.disruptor.dsl.ProducerType;
  * @author Hank
  */
 public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
-    private static Logger log = LoggerFactory.getLogger(DisruptorTaskQueue.class);
+    private static Logger log = Loggers.create(DisruptorTaskQueue.class);
     private Disruptor<DisruptorTaskQueueEvent> disruptor;
     private NamedThreadFactory threadFactory;
     private Test1<T> intercept;
