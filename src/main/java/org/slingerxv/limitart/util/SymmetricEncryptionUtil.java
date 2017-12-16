@@ -19,7 +19,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -109,7 +108,7 @@ public final class SymmetricEncryptionUtil {
 		byte[] content = new byte[doFinal.length + this.iv.length];
 		System.arraycopy(this.iv, 0, content, 0, this.iv.length);
 		System.arraycopy(doFinal, 0, content, this.iv.length, doFinal.length);
-		byte[] base64Encode = Base64.getEncoder().encode(content);
+		byte[] base64Encode = SecurityUtil.base64Encode(content);
 		String b64Str = new String(base64Encode, CharsetUtil.UTF_8);
 		String result = b64Str.replace('+', '-').replace('/', '_').replace('=', '.');
 		if (zeroFlag > 0) {
@@ -130,7 +129,7 @@ public final class SymmetricEncryptionUtil {
 			tokenSource = tokenSource.substring(3);
 		}
 		String token = tokenSource.replace('-', '+').replace('_', '/').replace('.', '=');
-		byte[] base64Decode = Base64.getDecoder().decode(token.getBytes(CharsetUtil.UTF_8));
+		byte[] base64Decode = SecurityUtil.base64Decode(token.getBytes(CharsetUtil.UTF_8));
 		byte[] iv = new byte[0X10];
 		byte[] content = new byte[base64Decode.length - iv.length];
 		System.arraycopy(base64Decode, 0, iv, 0, iv.length);

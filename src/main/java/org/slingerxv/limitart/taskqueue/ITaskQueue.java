@@ -15,9 +15,9 @@
  */
 package org.slingerxv.limitart.taskqueue;
 
-import org.slingerxv.limitart.net.Server;
+import org.slingerxv.limitart.net.IServer;
 
-public interface ITaskQueue<T> extends Server {
+public interface ITaskQueue<T> extends IServer {
 
 	void addCommand(T t) throws TaskQueueException;
 

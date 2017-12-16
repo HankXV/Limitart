@@ -16,156 +16,197 @@
 package org.slingerxv.limitart.script;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import org.codehaus.groovy.control.CompilationFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.util.FileUtil;
+import org.slingerxv.limitart.util.SecurityUtil;
 
-import groovy.lang.GroovyClassLoader;
-
+/**
+ * 源码脚本加载器
+ * 
+ * @author hank
+ *
+ * @param <KEY>
+ */
 public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
+	private static Logger log = LoggerFactory.getLogger(FileScriptLoader.class);
+	private ScheduledExecutorService worker = Executors.newScheduledThreadPool(1);
+	// 脚本地址根目录
+	private String scriptRootPath;
+
+	/**
+	 * 初始化
+	 * 
+	 * @param scriptRootPath
+	 *            脚本地址根目录
+	 * @param autoReloadInterval
+	 *            自动重加载间隔(秒)
+	 * @throws IOException
+	 * @throws ScriptConstructException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 * @throws ScriptKeyDuplicatedException
+	 * @throws ScriptNotExistException
+	 * @throws NoSuchAlgorithmException
+	 */
+	public FileScriptLoader(String scriptRootPath, int autoReloadInterval)
+			throws IOException, InstantiationException, IllegalAccessException, ScriptConstructException,
+			NoSuchAlgorithmException, ScriptNotExistException, ScriptKeyDuplicatedException {
+		this.scriptRootPath = scriptRootPath;
+		if (autoReloadInterval > 0) {
+			worker.scheduleAtFixedRate(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						reloadAll0();
+					} catch (InstantiationException | IllegalAccessException | NoSuchAlgorithmException | IOException
+							| ScriptConstructException | ScriptNotExistException | ScriptKeyDuplicatedException e) {
+						log.error("load scripts error!", e);
+					}
+				}
+			}, 0, autoReloadInterval, TimeUnit.SECONDS);
+		} else {
+			reloadAll0();
+		}
+	}
+
+	/**
+	 * 初始化
+	 * 
+	 * @param scriptRootPath
+	 *            脚本地址根目录
+	 * @throws IOException
+	 * @throws ScriptConstructException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 * @throws ScriptKeyDuplicatedException
+	 * @throws ScriptNotExistException
+	 * @throws NoSuchAlgorithmException
+	 */
+	public FileScriptLoader(String scriptRootPath) throws IOException, InstantiationException, IllegalAccessException,
+			ScriptConstructException, NoSuchAlgorithmException, ScriptNotExistException, ScriptKeyDuplicatedException {
+		this(scriptRootPath, 0);
+	}
+
+	/**
+	 * 重载全部脚本
+	 */
+	public void reloadAll() {
+		worker.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					reloadAll0();
+				} catch (InstantiationException | IllegalAccessException | NoSuchAlgorithmException | IOException
+						| ScriptConstructException | ScriptNotExistException | ScriptKeyDuplicatedException e) {
+					log.error("reload all error", e);
+				}
+			}
+		});
+	}
+
+	/**
+	 * 重载全部脚本
+	 * 
+	 * @throws IOException
+	 * @throws ScriptConstructException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws NoSuchAlgorithmException
+	 * @throws ScriptNotExistException
+	 * @throws ScriptKeyDuplicatedException
+	 */
+	private void reloadAll0() throws IOException, ScriptConstructException, InstantiationException,
+			IllegalAccessException, NoSuchAlgorithmException, ScriptNotExistException, ScriptKeyDuplicatedException {
+		File dir_root = new File(scriptRootPath);
+		if (!dir_root.exists()) {
+			throw new IOException("scripts root dir does not exist:" + scriptRootPath);
+		}
+		if (!dir_root.isDirectory()) {
+			throw new IOException("file is not dir:" + scriptRootPath);
+		}
+		ByteCodeClassLoader loader = new ByteCodeClassLoader();
+		List<File> result = FileUtil.getFiles(dir_root, "java");
+		for (File file : result) {
+			// 是否是老文件
+			KEY scriptKey = getScriptKey(file);
+			// 新脚本
+			if (scriptKey == null) {
+				byte[] readFile1 = FileUtil.readFile1(file);
+				Class<?> parseClass = loader.parseClass(file.toURI(), readFile1);
+				Object newInstance = parseClass.newInstance();
+				if (!(newInstance instanceof IScript)) {
+					throw new ScriptConstructException(parseClass);
+				}
+				@SuppressWarnings("unchecked")
+				IScript<KEY> script = (IScript<KEY>) newInstance;
+				registerScriptData(script, SecurityUtil.md5Encode32(readFile1), getFilePath(file));
+			} else {
+				reloadScript0(loader, scriptKey);
+			}
+		}
+	}
+
+	/**
+	 * 重载指定脚本
+	 * 
+	 * @param scriptId
+	 */
+	public void reloadScript(KEY scriptId) {
+		worker.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					reloadScript0(new ByteCodeClassLoader(), scriptId);
+				} catch (InstantiationException | IllegalAccessException | NoSuchAlgorithmException | IOException
+						| ScriptNotExistException | ScriptConstructException | ScriptKeyDuplicatedException e) {
+					log.error("reload error:" + scriptId, e);
+				}
+			}
+		});
+	}
 
 	/**
 	 * 重载脚本
 	 * 
 	 * @param scriptId
 	 * @throws IOException
-	 * @throws CompilationFailedException
-	 * @throws IllegalAccessException
 	 * @throws InstantiationException
-	 * @throws ScriptException
-	 */
-	public AbstractScriptLoader<KEY> reloadScript(KEY scriptId) throws CompilationFailedException, IOException,
-			InstantiationException, IllegalAccessException, ScriptException {
-		File file = scriptPath.get(scriptId);
-		Objects.requireNonNull(file, "script id:" + scriptId + " does not exist!");
-		try (GroovyClassLoader loader = new GroovyClassLoader()) {
-			Class<?> parseClass = loader.parseClass(file);
-			Object newInstance = parseClass.newInstance();
-			if (!(newInstance instanceof IScript)) {
-				throw new ScriptException("script file must implement IScript:" + file.getName());
-			}
-			@SuppressWarnings("unchecked")
-			IScript<KEY> newScript = (IScript<KEY>) newInstance;
-			scriptMap.put(scriptId, newScript);
-			log.info("reload script success:" + file.getName());
-		}
-		return this;
-	}
-
-	/**
-	 * 加载单个文件
-	 * 
-	 * @param filePath
-	 * @return
-	 * @throws IOException
-	 * @throws ScriptException
 	 * @throws IllegalAccessException
-	 * @throws InstantiationException
+	 * @throws NoSuchAlgorithmException
+	 * @throws ScriptNotExistException
+	 * @throws ScriptConstructException
+	 * @throws ScriptKeyDuplicatedException
 	 */
-	public AbstractScriptLoader<KEY> loadScript(String filePath)
-			throws IOException, ScriptException, InstantiationException, IllegalAccessException {
+	private void reloadScript0(ByteCodeClassLoader loader, KEY scriptId)
+			throws IOException, InstantiationException, IllegalAccessException, NoSuchAlgorithmException,
+			ScriptNotExistException, ScriptConstructException, ScriptKeyDuplicatedException {
+		Objects.requireNonNull(scriptId, "scriptId");
+		String filePath = getFilePath(scriptId);
 		File file = new File(filePath);
-		if (!file.exists()) {
-			throw new FileNotFoundException("file not exist!");
+		byte[] readFile1 = FileUtil.readFile1(file);
+		String md5Encode32 = SecurityUtil.md5Encode32(readFile1);
+		if (isSameCode(scriptId, md5Encode32)) {
+			return;
 		}
-		if (file.isDirectory()) {
-			throw new ScriptException("script file is directory!");
+		Class<?> parseClass = loader.parseClass(file.toURI(), readFile1);
+		Object newInstance = parseClass.newInstance();
+		if (!(newInstance instanceof IScript)) {
+			throw new ScriptConstructException(parseClass);
 		}
-		String[] split = file.getName().split("[.]");
-		if (split.length < 2) {
-			throw new ScriptException("file name must has extension,like .java .groovy,yours:" + file.getName());
-		}
-		String type = split[1];
-		ScriptFileType typeByValue = ScriptFileType.getTypeByValue(type);
-		if (typeByValue == null) {
-			throw new ScriptException("script type not supported" + type);
-		}
-		try (GroovyClassLoader loader = new GroovyClassLoader()) {
-			@SuppressWarnings("rawtypes")
-			Class parseClass = loader.parseClass(file);
-			Object newInstance = parseClass.newInstance();
-			if (!(newInstance instanceof IScript)) {
-				throw new ScriptException("script file must implement IScript:" + file.getName());
-			}
-			if (newInstance instanceof IDynamicCode) {
-				throw new ScriptException("script file must not extend IDynamicCode:" + file.getName());
-			}
-			@SuppressWarnings("unchecked")
-			IScript<KEY> script = (IScript<KEY>) newInstance;
-			KEY scriptId = script.getScriptId();
-			if (scriptMap.containsKey(scriptId)) {
-				throw new ScriptException("script id(" + scriptId + ") duplicated,source:"
-						+ scriptPath.get(scriptId).getName() + ",yours:" + file.getName());
-			}
-			scriptMap.put(scriptId, script);
-			scriptPath.put(scriptId, file);
-			log.info("compile script success:" + file.getName());
-		}
-		return this;
-	}
-
-	/**
-	 * 加载一个目录下对应的全部脚本(不会加载IDynamicCode相关)
-	 * 
-	 * @param dir
-	 * @param scriptTypes
-	 * @return
-	 * @throws IOException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws ScriptException
-	 */
-	public AbstractScriptLoader<KEY> loadScriptsBySourceDir(String dir, ScriptFileType... scriptTypes)
-			throws IOException, InstantiationException, IllegalAccessException, ScriptException {
-		Map<KEY, IScript<KEY>> scriptMap_new = new ConcurrentHashMap<>();
-		Map<KEY, File> scriptPath_new = new ConcurrentHashMap<>();
-		try (GroovyClassLoader loader = new GroovyClassLoader();) {
-			File dir_root = new File(dir);
-			if (!dir_root.exists()) {
-				throw new IOException("scripts root dir does not exist:" + dir);
-			}
-			if (!dir_root.isDirectory()) {
-				throw new IOException("file is not dir:" + dir);
-			}
-			String[] types = null;
-			if (scriptTypes != null && scriptTypes.length > 0) {
-				types = new String[scriptTypes.length];
-				for (int i = 0; i < scriptTypes.length; ++i) {
-					types[i] = scriptTypes[i].getValue();
-				}
-			}
-			List<File> result = FileUtil.getFiles(dir_root, types);
-			for (File file : result) {
-				Class<?> parseClass = loader.parseClass(file);
-				Object newInstance = parseClass.newInstance();
-				if (newInstance instanceof IScript) {
-					if (newInstance instanceof IDynamicCode) {
-						continue;
-					}
-					@SuppressWarnings("unchecked")
-					IScript<KEY> script = (IScript<KEY>) newInstance;
-					KEY scriptId = script.getScriptId();
-					if (scriptMap_new.containsKey(scriptId)) {
-						log.error("script id duplicated,source:" + scriptPath.get(scriptId).getName() + ",yours:"
-								+ file.getName());
-					} else {
-						scriptMap_new.put(scriptId, script);
-						scriptPath_new.put(scriptId, file);
-						log.info("compile script success:" + file.getName());
-					}
-				} else {
-					throw new ScriptException("script file must implement IScript:" + file.getName());
-				}
-			}
-			this.scriptMap = scriptMap_new;
-			this.scriptPath = scriptPath_new;
-		}
-		return this;
+		@SuppressWarnings("unchecked")
+		IScript<KEY> newScript = (IScript<KEY>) newInstance;
+		registerScriptData(newScript, md5Encode32, getFilePath(file));
 	}
 }

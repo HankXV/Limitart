@@ -15,49 +15,16 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.BiConsumer;
-
-import org.slingerxv.limitart.funcs.Test2;
 
 /**
- * String键约束型Map
+ * 约束型Map
  * 
- * @author hank
+ * @author Hank
  *
+ * @param <K>
  */
-public class ConstraintMap<K> {
-	private Map<K, Object> map;
-
-	protected ConstraintMap(Map<K, Object> map) {
-		this.map = Objects.requireNonNull(map, "map");
-	}
-
-	protected ConstraintMap() {
-		map = new HashMap<>();
-	}
-
-	/**
-	 * 清除
-	 */
-	public void clear() {
-		map.clear();
-	}
-
-	/**
-	 * 大小
-	 * 
-	 * @return
-	 */
-	public int size() {
-		return map.size();
-	}
+public interface ConstraintMap<K> extends Map<K, Object> {
 
 	/**
 	 * 放入Byte
@@ -66,10 +33,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putByte(K key, byte value) {
-		putObj(key, value);
-		return this;
-	}
+	ConstraintMap<K> putByte(K key, byte value);
 
 	/**
 	 * 获取Byte
@@ -77,12 +41,7 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return 返回0或其他
 	 */
-	public byte getByte(K key) {
-		if (!containsKey(key)) {
-			return 0;
-		}
-		return Byte.valueOf(getObj(key).toString());
-	}
+	byte getByte(K key);
 
 	/**
 	 * 放入Short
@@ -91,10 +50,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putShort(K key, short value) {
-		putObj(key, value);
-		return this;
-	}
+	ConstraintMap<K> putShort(K key, short value);
 
 	/**
 	 * 获取Short
@@ -102,12 +58,7 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return 返回0或其他
 	 */
-	public short getShort(K key) {
-		if (!containsKey(key)) {
-			return 0;
-		}
-		return Short.valueOf(getObj(key).toString());
-	}
+	short getShort(K key);
 
 	/**
 	 * 放入int
@@ -116,10 +67,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putInt(K key, int value) {
-		putObj(key, value);
-		return this;
-	}
+	ConstraintMap<K> putInt(K key, int value);
 
 	/**
 	 * 获取int
@@ -127,12 +75,7 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return 0或其他int
 	 */
-	public int getInt(K key) {
-		if (!containsKey(key)) {
-			return 0;
-		}
-		return Integer.valueOf(getObj(key).toString());
-	}
+	int getInt(K key);
 
 	/**
 	 * 放入long
@@ -141,10 +84,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putLong(K key, long value) {
-		putObj(key, value);
-		return this;
-	}
+	ConstraintMap<K> putLong(K key, long value);
 
 	/**
 	 * 获取long
@@ -152,12 +92,7 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return 0L或者其他long
 	 */
-	public long getLong(K key) {
-		if (!containsKey(key)) {
-			return 0L;
-		}
-		return Long.valueOf(getObj(key).toString());
-	}
+	long getLong(K key);
 
 	/**
 	 * 放入浮点
@@ -166,10 +101,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putFloat(K key, float value) {
-		putObj(key, value);
-		return this;
-	}
+	ConstraintMap<K> putFloat(K key, float value);
 
 	/**
 	 * 获取浮点
@@ -177,12 +109,7 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return 0F或者其他浮点
 	 */
-	public float getFloat(K key) {
-		if (!containsKey(key)) {
-			return 0F;
-		}
-		return Float.valueOf(getObj(key).toString());
-	}
+	float getFloat(K key);
 
 	/**
 	 * 放入double
@@ -191,10 +118,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putDouble(K key, double value) {
-		putObj(key, value);
-		return this;
-	}
+	ConstraintMap<K> putDouble(K key, double value);
 
 	/**
 	 * 获取double
@@ -202,12 +126,7 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return 0D或者其他double
 	 */
-	public double getDouble(K key) {
-		if (!containsKey(key)) {
-			return 0D;
-		}
-		return Double.valueOf(getObj(key).toString());
-	}
+	double getDouble(K key);
 
 	/**
 	 * 放入char
@@ -216,10 +135,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putChar(K key, char value) {
-		putObj(key, value);
-		return this;
-	}
+	ConstraintMap<K> putChar(K key, char value);
 
 	/**
 	 * 获取char
@@ -227,12 +143,7 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return 0或其他char
 	 */
-	public char getChar(K key) {
-		if (!containsKey(key)) {
-			return 0;
-		}
-		return getObj(key);
-	}
+	char getChar(K key);
 
 	/**
 	 * 写入布尔
@@ -241,10 +152,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putBoolean(K key, boolean value) {
-		putInt(key, value ? 1 : 0);
-		return this;
-	}
+	ConstraintMap<K> putBoolean(K key, boolean value);
 
 	/**
 	 * 获取布尔
@@ -252,9 +160,7 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return
 	 */
-	public boolean getBoolean(K key) {
-		return getInt(key) == 1;
-	}
+	boolean getBoolean(K key);
 
 	/**
 	 * 放入字符串
@@ -263,14 +169,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putString(K key, String value) {
-		if (value == null) {
-			putObj(key, "");
-		} else {
-			putObj(key, value);
-		}
-		return this;
-	}
+	ConstraintMap<K> putString(K key, String value);
 
 	/**
 	 * 获取字符串
@@ -278,60 +177,7 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return ""或其他字符串
 	 */
-	public String getString(K key) {
-		if (!containsKey(key)) {
-			return "";
-		}
-		return (String) map.get(key);
-	}
-
-	/**
-	 * 遍历
-	 * 
-	 * @param action
-	 * @return
-	 */
-	public ConstraintMap<K> foreach(BiConsumer<? super K, ? super Object> action) {
-		map.forEach(action);
-		return this;
-	}
-
-	public Set<K> keys() {
-		return map.keySet();
-	}
-
-	public Collection<Object> values() {
-		return map.values();
-	}
-
-	/**
-	 * 是否为空
-	 * 
-	 * @return
-	 */
-	public boolean isEmpty() {
-		return map.isEmpty();
-	}
-
-	/**
-	 * 是否包含Key
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public boolean containsKey(Object key) {
-		return map.containsKey(Objects.requireNonNull(key, "key"));
-	}
-
-	/**
-	 * 是否包含值
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public boolean containsValue(Object value) {
-		return map.containsValue(Objects.requireNonNull(value, "value"));
-	}
+	String getString(K key);
 
 	/**
 	 * 放入原始对象
@@ -340,10 +186,7 @@ public class ConstraintMap<K> {
 	 * @param value
 	 * @return
 	 */
-	public ConstraintMap<K> putObj(K key, Object value) {
-		map.put(key, value);
-		return this;
-	}
+	ConstraintMap<K> putObj(K key, Object value);
 
 	/**
 	 * 获取原始对象
@@ -351,99 +194,5 @@ public class ConstraintMap<K> {
 	 * @param key
 	 * @return null或对象
 	 */
-	@SuppressWarnings("unchecked")
-	public <V> V getObj(K key) {
-		return (V) map.get(key);
-	}
-
-	/**
-	 * 指定Key移除
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public ConstraintMap<K> remove(K key) {
-		map.remove(Objects.requireNonNull(key, "key"));
-		return this;
-	}
-
-	/**
-	 * 通过条件移除
-	 * 
-	 * @param filter
-	 * @return
-	 */
-	public ConstraintMap<K> remove(Test2<K, Object> filter) {
-		Iterator<Entry<K, Object>> iterator = map.entrySet().iterator();
-		for (; iterator.hasNext();) {
-			Entry<K, Object> next = iterator.next();
-			if (filter.test(next.getKey(), next.getValue())) {
-				iterator.remove();
-			}
-		}
-		return this;
-	}
-
-	/**
-	 * 放入一个Map
-	 * 
-	 * @param map
-	 * @return
-	 */
-	public ConstraintMap<K> putAll(Map<? extends K, ? extends Object> map) {
-		this.map.putAll(Objects.requireNonNull(map, "map"));
-		return this;
-	}
-
-	/**
-	 * 放入一个同类型Map
-	 * 
-	 * @param map
-	 * @return
-	 */
-	public ConstraintMap<K> putAll(ConstraintMap<K> map) {
-		Objects.requireNonNull(map, "map");
-		this.map.putAll(map.map);
-		return this;
-	}
-
-	/**
-	 * 构造一个空的对象
-	 * 
-	 * @return
-	 */
-	public static <K> ConstraintMap<K> empty() {
-		return new ConstraintMap<K>();
-	}
-
-	/**
-	 * 通过键值对数组构造
-	 * 
-	 * @param kvs
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public static <K> ConstraintMap<K> just(Object... kvs) {
-		Objects.requireNonNull(kvs, "kvs");
-		ConstraintMap<K> empty = ConstraintMap.empty();
-		for (int i = 0; i < kvs.length; i += 2) {
-			Objects.requireNonNull(kvs[i], "key");
-			Objects.requireNonNull(kvs[i + 1], "value");
-			empty.putObj((K) kvs[i], kvs[i + 1]);
-		}
-		return empty;
-	}
-
-	/**
-	 * 从一个Map构造出此对象
-	 * 
-	 * @param map
-	 * @return
-	 */
-	public static <K> ConstraintMap<K> from(Map<? extends K, ? extends Object> map) {
-		ConstraintMap<K> empty = ConstraintMap.empty();
-		empty.putAll(map);
-		return empty;
-	}
-
+	<V> V getObj(K key);
 }

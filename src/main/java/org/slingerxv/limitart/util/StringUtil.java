@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+
 /**
  * 字符串工具类
  * 
@@ -27,6 +30,16 @@ import java.util.regex.Pattern;
  *
  */
 public final class StringUtil {
+	public static final String BUDDHA = "\n                   _ooOoo_" + "\n" + "                  o8888888o" + "\n"
+			+ "                  88\" . \"88" + "\n" + "                  (| -_- |)" + "\n"
+			+ "                  O\\  =  /O" + "\n" + "               ____/`---'\\____" + "\n"
+			+ "             .'  \\\\|     |//  `." + "\n" + "            /  \\\\|||  :  |||//  \\" + "\n"
+			+ "           /  _||||| -:- |||||-  \\" + "\n" + "           |   | \\\\\\  -  /// |   |" + "\n"
+			+ "           | \\_|  ''\\---/''  |   |" + "\n" + "           \\  .-\\__  `-`  ___/-. /" + "\n"
+			+ "         ___`. .'  /--.--\\  `. . __" + "\n" + "      .\"\" '<  `.___\\_<|>_/___.'  >'\"\"." + "\n"
+			+ "     | | :  `- \\`.;`\\ _ /`;.`/ - ` : | |" + "\n" + "     \\  \\ `-.   \\_ __\\ /__ _/   .-` /  /"
+			+ "\n" + "======`-.____`-.___\\_____/___.-`____.-'======" + "\n" + "                   `=---='" + "\n"
+			+ "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + "\n";
 	private final static Pattern PHONE_REG = Pattern.compile("^((1[0-9][0-9]))\\d{8}$");
 	private final static Pattern EMAIL_REG = Pattern
 			.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");
@@ -94,6 +107,36 @@ public final class StringUtil {
 		return m.matches();
 	}
 
+	public static String toJSONWithClassInfo(Object obj) {
+		if (obj == null) {
+			return null;
+		}
+		return JSON.toJSONString(obj, SerializerFeature.WriteClassName, SerializerFeature.WriteNullStringAsEmpty,
+				SerializerFeature.WriteNullListAsEmpty, SerializerFeature.WriteNullBooleanAsFalse,
+				SerializerFeature.WriteNullNumberAsZero);
+	}
+
+	public static String toJSON(Object obj) {
+		if (obj == null) {
+			return null;
+		}
+		return JSON.toJSONString(obj);
+	}
+
+	public static <T> T toObject(String text, Class<T> clazz) {
+		if (text == null) {
+			return null;
+		}
+		return JSON.parseObject(text, clazz);
+	}
+
+	public static <T> List<T> toArray(String text, Class<T> clazz) {
+		if (text == null) {
+			return new ArrayList<>();
+		}
+		return JSON.parseArray(text, clazz);
+	}
+
 	public static <T> String toCommaList(List<T> list) {
 		if (list == null) {
 			return null;
@@ -118,5 +161,20 @@ public final class StringUtil {
 			result.add(temp);
 		}
 		return result;
+	}
+
+	public static String toShortStr(double num) {
+		if (num < 100000L)// 十万
+			return String.format("%.2f", num) + "";
+		else if (num < 1000000L)
+			return String.format("%.2f", num / 1000L) + "K";
+		else if (num < 1000000000L)
+			return String.format("%.2f", num / 1000000L) + "M";
+		else if (num < 1000000000000L)
+			return String.format("%.2f", num / 1000000000L) + "B";
+		else if (num < 1000000000000000L)
+			return String.format("%.2f", num / 1000000000000L) + "T";
+		else
+			return String.format("%.2f", num / 1000000000000000L) + "P";
 	}
 }

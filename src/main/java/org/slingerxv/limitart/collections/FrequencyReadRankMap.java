@@ -34,7 +34,7 @@ import org.slingerxv.limitart.funcs.Func;
  * @param <K>
  * @param <V>
  */
-public class FrequencyReadRankMap<K, V extends Func<K>> implements IRankMap<K, V> {
+public class FrequencyReadRankMap<K, V extends Func<K>> implements RankMap<K, V> {
 	private List<V> list;
 	private Map<K, V> map;
 	private final Comparator<V> comparator;

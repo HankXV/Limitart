@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * 二进制自定义协议服务器
+ * 基于Netty的网络通信模块
  *
  */
 package org.slingerxv.limitart.net;

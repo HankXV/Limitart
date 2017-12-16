@@ -16,19 +16,14 @@
 package org.slingerxv.limitart.script;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import groovy.lang.GroovyClassLoader;
 
 /**
  * 服务器脚本管理
@@ -39,13 +34,14 @@ import groovy.lang.GroovyClassLoader;
  *            脚本Id
  */
 public abstract class AbstractScriptLoader<KEY> {
-	protected static final Logger log = LoggerFactory.getLogger(AbstractScriptLoader.class);
-	protected Map<KEY, IScript<KEY>> scriptMap = new ConcurrentHashMap<>();
-	protected Map<KEY, File> scriptPath = new ConcurrentHashMap<>();
-	private AtomicLong dynamicCodeCount = new AtomicLong(100000);
+	private static Logger log = LoggerFactory.getLogger(AbstractScriptLoader.class);
+	private Map<KEY, ScriptData<KEY>> scriptMap = new ConcurrentHashMap<>();
+	private Map<String, KEY> pathMap = new ConcurrentHashMap<>();
 
 	public void foreach(BiConsumer<? super KEY, ? super IScript<KEY>> action) {
-		scriptMap.forEach(action);
+		for (Entry<KEY, ScriptData<KEY>> entry : scriptMap.entrySet()) {
+			action.accept(entry.getKey(), entry.getValue().getScriptInstance());
+		}
 	}
 
 	/**
@@ -53,90 +49,94 @@ public abstract class AbstractScriptLoader<KEY> {
 	 * 
 	 * @param scriptId
 	 * @return
+	 * @throws ScriptNotExistException
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends IScript<KEY>> T getScript(KEY scriptId) {
-		return (T) scriptMap.get(scriptId);
+	public <T extends IScript<KEY>> T getScript(KEY scriptId) throws ScriptNotExistException {
+		ScriptData<KEY> scriptData = scriptMap.get(scriptId);
+		if (scriptData == null) {
+			throw new ScriptNotExistException(scriptId);
+		}
+		return (T) scriptData.getScriptInstance();
 	}
 
 	/**
-	 * 执行一段继承了IDynamicCode的代码
+	 * 注册脚本数据
 	 * 
-	 * @param path
-	 * @return
-	 * @throws ScriptException
-	 * @throws IOException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @see IDynamicCode
+	 * @param key
+	 * @param scriptInstance
+	 * @param codeMD5
+	 * @param filePath
+	 * @throws ScriptKeyDuplicatedException
 	 */
-	public AbstractScriptLoader<KEY> executeCommand(String path)
-			throws ScriptException, IOException, InstantiationException, IllegalAccessException {
-		File file = new File(path);
-		if (!file.exists()) {
-			throw new FileNotFoundException("file not exist!");
-		}
-		if (file.isDirectory()) {
-			throw new ScriptException("script file is directory!");
-		}
-		String[] split = file.getName().split("[.]");
-		if (split.length < 2) {
-			throw new ScriptException("file name must has extension,like .java .groovy,yours:" + file.getName());
-		}
-		String type = split[1];
-		ScriptFileType typeByValue = ScriptFileType.getTypeByValue(type);
-		if (typeByValue == null) {
-			throw new ScriptException("script type not supported:" + type);
-		}
-		try (GroovyClassLoader loader = new GroovyClassLoader()) {
-			@SuppressWarnings("rawtypes")
-			Class parseClass = loader.parseClass(file);
-			Object newInstance = parseClass.newInstance();
-			if (!(newInstance instanceof IDynamicCode)) {
-				throw new ScriptException("class must extends IDynamicCode");
+	protected void registerScriptData(IScript<KEY> scriptInstance, String codeMD5, String filePath)
+			throws ScriptKeyDuplicatedException {
+		KEY key = scriptInstance.getScriptId();
+		boolean replace = false;
+		if (scriptMap.containsKey(key)) {
+			replace = true;
+			ScriptData<KEY> scriptData = scriptMap.get(key);
+			// 这里 由于是不同加载器，所以比较类名就行了
+			if (!scriptData.getScriptInstance().getClass().getName().equals(scriptInstance.getClass().getName())) {
+				throw new ScriptKeyDuplicatedException(scriptData.getScriptInstance().getClass(),
+						scriptInstance.getClass(), scriptInstance.getScriptId());
 			}
-			IDynamicCode temp = (IDynamicCode) newInstance;
-			log.info("compile code success,start executing...");
-			temp.execute();
-			log.info("done!");
 		}
-		return this;
+		scriptMap.put(key, new ScriptData<>(scriptInstance, codeMD5, filePath));
+		if (filePath != null) {
+			pathMap.put(filePath, key);
+		}
+		if (replace) {
+			log.info("replace script data on script:" + scriptInstance.getClass().getName());
+		} else {
+			log.info("register new script data on script:" + scriptInstance.getClass().getName());
+		}
 	}
 
 	/**
-	 * 执行几串简单的命令
+	 * 对比MD5是否相同
 	 * 
-	 * @param importList
-	 * @param commandLines
+	 * @param key
+	 * @param codeMD5
 	 * @return
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws IOException
-	 * @throws ScriptException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
+	 * @throws ScriptNotExistException
 	 */
-	public AbstractScriptLoader<KEY> executeCommand(List<String> importList, String commandLines)
-			throws InstantiationException, IllegalAccessException, IOException, ScriptException,
-			IllegalArgumentException, InvocationTargetException {
-		StringBuilder importBuffer = new StringBuilder();
-		if (importList != null) {
-			for (String temp : importList) {
-				importBuffer.append("import " + temp + ";");
-			}
+	protected boolean isSameCode(KEY key, String codeMD5) throws ScriptNotExistException {
+		Objects.requireNonNull(key, "key");
+		Objects.requireNonNull(codeMD5, "codeMD5");
+		ScriptData<KEY> scriptData = scriptMap.get(key);
+		if (scriptData == null) {
+			throw new ScriptNotExistException(key);
 		}
-		String result = importBuffer.toString()
-				+ "import com.limitart.script.IDynamicCode; public class DynamicCodeProxy"
-				+ dynamicCodeCount.getAndIncrement() + " extends IDynamicCode {" + " public void execute() {"
-				+ commandLines + "}" + "}";
-		try (GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader())) {
-			@SuppressWarnings("rawtypes")
-			Class parseClass = loader.parseClass(result);
-			IDynamicCode newInstance = (IDynamicCode) parseClass.newInstance();
-			log.info("compile code success,start executing...");
-			newInstance.execute();
-			log.info("done!");
-		}
-		return this;
+		return codeMD5.equals(scriptData.getCodeMD5());
 	}
+
+	/**
+	 * 获取脚本文件所在位置
+	 * 
+	 * @param key
+	 * @return
+	 * @throws ScriptNotExistException
+	 */
+	protected String getFilePath(KEY key) throws ScriptNotExistException {
+		Objects.requireNonNull(key, "key");
+		ScriptData<KEY> scriptData = scriptMap.get(key);
+		if (scriptData == null) {
+			throw new ScriptNotExistException(key);
+		}
+		return scriptData.getFilePath();
+	}
+
+	protected KEY getScriptKey(File file) {
+		return pathMap.get(getFilePath(file));
+	}
+
+	protected KEY getScriptKey(String filePath) {
+		return pathMap.get(filePath);
+	}
+
+	protected String getFilePath(File file) {
+		return file.getAbsolutePath();
+	}
+
 }

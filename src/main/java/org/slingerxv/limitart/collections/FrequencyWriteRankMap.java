@@ -36,7 +36,7 @@ import org.slingerxv.limitart.funcs.Func;
  * @param <K>
  * @param <V>
  */
-public class FrequencyWriteRankMap<K, V extends Func<K>> implements IRankMap<K, V> {
+public class FrequencyWriteRankMap<K, V extends Func<K>> implements RankMap<K, V> {
 	private final TreeSet<V> treeSet;
 	private final Map<K, V> map;
 	private final Comparator<V> comparator;

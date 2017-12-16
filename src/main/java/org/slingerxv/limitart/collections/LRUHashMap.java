@@ -51,11 +51,23 @@ public class LRUHashMap<K, V> extends LinkedHashMap<K, V> {
 		return false;
 	}
 
+	/**
+	 * 当元素被删除时
+	 * 
+	 * @param func
+	 * @return
+	 */
 	public LRUHashMap<K, V> onRemove(Proc2<Object, V> func) {
 		this.onRemove = func;
 		return this;
 	}
 
+	/**
+	 * 在LRU规则外是否可以移除
+	 * 
+	 * @param func
+	 * @return
+	 */
 	public LRUHashMap<K, V> canRemoveWithoutLRU(Test2<Object, V> func) {
 		this.canRemoveWithoutLRU = func;
 		return this;
