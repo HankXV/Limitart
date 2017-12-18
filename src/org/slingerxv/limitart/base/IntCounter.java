@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.collections;
+package org.slingerxv.limitart.base;
 
-import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.base.ThreadUnsafe;
 import org.slingerxv.limitart.util.GameMathUtil;
 
 /**
