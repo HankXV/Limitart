@@ -18,6 +18,7 @@ package org.slingerxv.limitart.collections;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slingerxv.limitart.base.IntCounter;
 
 /**
  * @author hank
