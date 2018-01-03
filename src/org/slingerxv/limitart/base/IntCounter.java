@@ -33,7 +33,7 @@ public class IntCounter {
 
     public IntCounter(int initVal) {
         Conditions.checkArgs(initVal >= low() && initVal <= high(), "low<=initVal<=high");
-        set(initVal);
+        setCount(initVal);
     }
 
     /**
@@ -59,7 +59,7 @@ public class IntCounter {
      *
      * @return
      */
-    public int get() {
+    public int getCount() {
         return this.count;
     }
 
@@ -69,7 +69,7 @@ public class IntCounter {
      * @param value
      * @return
      */
-    protected int set(int value) {
+    protected int setCount(int value) {
         return this.count = GameMathUtil.fixedBetween(value, low(), high());
     }
 
@@ -98,7 +98,7 @@ public class IntCounter {
      * @return
      */
     public int addAndGet(int delta) {
-        return set(get() + delta);
+        return setCount(getCount() + delta);
     }
 
     /**
@@ -126,8 +126,8 @@ public class IntCounter {
      * @return
      */
     public int getAndAdd(int delta) {
-        int old = get();
-        set(old + delta);
+        int old = getCount();
+        setCount(old + delta);
         return old;
     }
 }

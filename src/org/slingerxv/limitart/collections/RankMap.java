@@ -45,6 +45,14 @@ public interface RankMap<K, V extends Func<K>> {
     V put(K key, V value);
 
     /**
+     * 删除值
+     *
+     * @param key
+     * @return
+     */
+    V remove(K key);
+
+    /**
      * 集合大小
      *
      * @return

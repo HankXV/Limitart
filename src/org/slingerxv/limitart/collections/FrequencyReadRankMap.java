@@ -21,10 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.base.Func;
-import org.slingerxv.limitart.base.NotNull;
-import org.slingerxv.limitart.base.ThreadSafe;
+import org.slingerxv.limitart.base.*;
 
 /**
  * 高频率读取排行结构 主要用于读取频率远远大于写入频率
@@ -33,7 +30,7 @@ import org.slingerxv.limitart.base.ThreadSafe;
  * @param <V>
  * @author hank
  */
-@ThreadSafe
+@ThreadUnsafe
 public class FrequencyReadRankMap<K, V extends Func<K>> implements RankMap<K, V> {
     private List<V> list;
     private Map<K, V> map;
@@ -57,7 +54,7 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements RankMap<K, V>
     }
 
     @Override
-    public synchronized V put(@NotNull K key, @NotNull V value) {
+    public V put(@NotNull K key, @NotNull V value) {
         Conditions.notNull(key, "key");
         Conditions.notNull(value, "value");
         if (map.containsKey(key)) {
@@ -85,7 +82,16 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements RankMap<K, V>
     }
 
     @Override
-    public synchronized void clear() {
+    public V remove(@NotNull K key) {
+        V remove = map.remove(key);
+        if (remove != null) {
+            list.remove(remove);
+        }
+        return remove;
+    }
+
+    @Override
+    public void clear() {
         list.clear();
         map.clear();
     }

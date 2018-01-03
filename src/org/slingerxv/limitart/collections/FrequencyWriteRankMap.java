@@ -34,7 +34,7 @@ import org.slingerxv.limitart.base.*;
  * @param <V>
  * @author hank
  */
-@ThreadSafe
+@ThreadUnsafe
 public class FrequencyWriteRankMap<K, V extends Func<K>> implements RankMap<K, V> {
     private final TreeSet<V> treeSet;
     private final Map<K, V> map;
@@ -59,7 +59,7 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements RankMap<K, V
     }
 
     @Override
-    public synchronized V put(@NotNull K key, @NotNull V value) {
+    public V put(@NotNull K key, @NotNull V value) {
         Conditions.notNull(key, "key");
         Conditions.notNull(value, "value");
         if (map.containsKey(key)) {
@@ -83,7 +83,16 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements RankMap<K, V
     }
 
     @Override
-    public synchronized void clear() {
+    public V remove(@NotNull K key) {
+        V remove = map.remove(key);
+        if (remove != null) {
+            treeSet.remove(remove);
+        }
+        return remove;
+    }
+
+    @Override
+    public void clear() {
         treeSet.clear();
         map.clear();
         indexList = null;
@@ -167,7 +176,7 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements RankMap<K, V
         return treeSet.toString();
     }
 
-    private synchronized void checkModified() {
+    private void checkModified() {
         if (modified) {
             modified = false;
             indexList = new ArrayList<>(treeSet);
