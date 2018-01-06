@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.base.Func;
 import org.slingerxv.limitart.base.*;
 
 /**
@@ -44,9 +42,7 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements RankMap<K, V
     private boolean modified = false;
 
     public FrequencyWriteRankMap(@NotNull Comparator<V> comparator, int capacity) {
-        if (capacity <= 0) {
-            throw new IllegalArgumentException("capacity > 0");
-        }
+        Conditions.args(capacity > 0);
         this.treeSet = new TreeSet<>(comparator);
         this.map = new HashMap<>(capacity);
         this.comparator = Conditions.notNull(comparator, "comparator");
@@ -77,7 +73,7 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements RankMap<K, V
         // 清理排行最后的数据
         while (map.size() > capacity) {
             V pollLast = treeSet.pollLast();
-            map.remove(pollLast.run());
+            map.remove(Conditions.notNull(pollLast.run()));
         }
         return value;
     }

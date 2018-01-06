@@ -15,7 +15,7 @@
  */
 package org.slingerxv.limitart.net.binary;
 
-import org.slingerxv.limitart.util.LimitartException;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 消息编码异常
@@ -23,7 +23,7 @@ import org.slingerxv.limitart.util.LimitartException;
  * @author hank
  *
  */
-public class BinaryMessageCodecException extends LimitartException {
+public class BinaryMessageCodecException extends LimitartNonRuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

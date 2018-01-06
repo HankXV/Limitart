@@ -13,30 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.util;
+package org.slingerxv.limitart.base;
 
 /**
- * Limitart异常基类
- * 
- * @author hank
+ * 非相同线程调用异常
  *
+ * @author hank
+ * @version 2018/1/27 0027 11:36
  */
-public class LimitartException extends Exception {
-	private static final long serialVersionUID = 1L;
+public class NotSameThreadException extends LimitartRuntimeException {
+    public NotSameThreadException() {
+        super();
+    }
 
-	public LimitartException() {
-		super();
-	}
-
-	public LimitartException(String info) {
-		super(info);
-	}
-
-	public LimitartException(Throwable throwable) {
-		super(throwable);
-	}
-
-	public LimitartException(String info, Throwable throwable) {
-		super(info, throwable);
-	}
+    public NotSameThreadException(String template, Object... params) {
+        super(template, params);
+    }
 }

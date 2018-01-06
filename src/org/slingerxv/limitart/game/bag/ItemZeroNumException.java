@@ -15,15 +15,14 @@
  */
 package org.slingerxv.limitart.game.bag;
 
-import org.slingerxv.limitart.util.LimitartException;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 物品数量为0异常
- * 
- * @author hank
  *
+ * @author hank
  */
-public class ItemZeroNumException extends LimitartException {
-	private static final long serialVersionUID = 1L;
+public class ItemZeroNumException extends LimitartNonRuntimeException {
+    private static final long serialVersionUID = 1L;
 
 }

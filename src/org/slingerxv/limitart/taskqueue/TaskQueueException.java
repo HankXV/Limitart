@@ -15,7 +15,7 @@
  */
 package org.slingerxv.limitart.taskqueue;
 
-import org.slingerxv.limitart.util.LimitartException;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 任务队列异常
@@ -23,7 +23,7 @@ import org.slingerxv.limitart.util.LimitartException;
  * @author hank
  *
  */
-public class TaskQueueException extends LimitartException {
+public class TaskQueueException extends LimitartNonRuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

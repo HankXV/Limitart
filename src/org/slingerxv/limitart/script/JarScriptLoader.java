@@ -32,7 +32,7 @@ import org.slingerxv.limitart.logging.Loggers;
  * @author hank
  */
 public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
-    private static Logger log = Loggers.create(JarScriptLoader.class);
+    private static Logger log = Loggers.create();
 
     /**
      * 加载jar包

@@ -1,5 +1,6 @@
 package org.slingerxv.limitart.collections;
 
+
 import java.util.*;
 
 /**
@@ -9,12 +10,16 @@ import java.util.*;
  * @version 2017/12/18 0018 19:34
  */
 public interface Table<R, C, V> {
+    static <R, C, V> Table<R, C, V> empty() {
+        return new HashedTable<>();
+    }
+
     /**
-     * 获取所有元素
+     * 获取所有Key
      *
      * @return
      */
-    Collection<V> values();
+    Set<R> keySet();
 
     /**
      * 放置元素

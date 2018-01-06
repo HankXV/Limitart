@@ -34,7 +34,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author hank
  */
 public class BinaryClient extends AbstractNettyClient implements Client {
-    private static Logger log = Loggers.create(BinaryClient.class);
+    private static Logger log = Loggers.create();
     // ----config
     private AddressPair remoteAddress;
     private BinaryDecoder decoder;
@@ -123,7 +123,7 @@ public class BinaryClient extends AbstractNettyClient implements Client {
     }
 
     @Override
-    protected void channelInactive0(ChannelHandlerContext ctx) throws Exception {
+    protected void channelInactive0(ChannelHandlerContext ctx) {
         Procs.invoke(onConnected, BinaryClient.this, false);
         if (getAutoReconnect() > 0) {
             tryReconnect(remoteAddress.getIp(), remoteAddress.getPort(), getAutoReconnect());
@@ -131,12 +131,12 @@ public class BinaryClient extends AbstractNettyClient implements Client {
     }
 
     @Override
-    protected void channelActive0(ChannelHandlerContext ctx) throws Exception {
+    protected void channelActive0(ChannelHandlerContext ctx) {
         Procs.invoke(onConnected, BinaryClient.this, true);
     }
 
     @Override
-    protected void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    protected void exceptionCaught0(ChannelHandlerContext ctx, Throwable cause) {
         Procs.invoke(onExceptionCaught, BinaryClient.this, cause);
     }
 
@@ -192,7 +192,7 @@ public class BinaryClient extends AbstractNettyClient implements Client {
          * @return
          * @throws Exception
          */
-        public BinaryClient build() throws Exception {
+        public BinaryClient build() {
             return new BinaryClient(this);
         }
 

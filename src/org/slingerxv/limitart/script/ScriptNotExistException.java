@@ -15,19 +15,18 @@
  */
 package org.slingerxv.limitart.script;
 
-import org.slingerxv.limitart.util.LimitartException;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 脚本不存在异常
- * 
- * @author hank
  *
+ * @author hank
  */
-public class ScriptNotExistException extends LimitartException {
+public class ScriptNotExistException extends LimitartNonRuntimeException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public ScriptNotExistException(Object key) {
-		super("script does not exist :" + key.toString());
-	}
+    public ScriptNotExistException(Object key) {
+        super("script does not exist :" + key.toString());
+    }
 }

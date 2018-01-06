@@ -28,7 +28,7 @@ import org.slingerxv.limitart.net.binary.BinaryServerInterceptor;
  *
  */
 public class BinaryMessageReceivedTimeInterceptor implements BinaryServerInterceptor {
-	private static Logger log = Loggers.create(BinaryMessageReceivedTimeInterceptor.class);
+	private static Logger log = Loggers.create();
 	private static int LAST_RECEIVE_MSG_TIME = 1;
 	private int millsInterval;
 

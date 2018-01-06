@@ -35,6 +35,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param value
      * @return
      */
+    @Override
     public ConstraintMap<K> putByte(K key, byte value) {
         putObj(key, value);
         return this;
@@ -46,6 +47,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param key
      * @return 返回0或其他
      */
+    @Override
     public byte getByte(K key) {
         if (!containsKey(key)) {
             return 0;
@@ -60,6 +62,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param value
      * @return
      */
+    @Override
     public ConstraintMap<K> putShort(K key, short value) {
         putObj(key, value);
         return this;
@@ -71,6 +74,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param key
      * @return 返回0或其他
      */
+    @Override
     public short getShort(K key) {
         if (!containsKey(key)) {
             return 0;
@@ -85,6 +89,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param value
      * @return
      */
+    @Override
     public ConstraintMap<K> putInt(K key, int value) {
         putObj(key, value);
         return this;
@@ -96,6 +101,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param key
      * @return 0或其他int
      */
+    @Override
     public int getInt(K key) {
         if (!containsKey(key)) {
             return 0;
@@ -110,6 +116,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param value
      * @return
      */
+    @Override
     public ConstraintMap<K> putLong(K key, long value) {
         putObj(key, value);
         return this;
@@ -121,6 +128,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param key
      * @return 0L或者其他long
      */
+    @Override
     public long getLong(K key) {
         if (!containsKey(key)) {
             return 0L;
@@ -135,6 +143,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param value
      * @return
      */
+    @Override
     public ConstraintMap<K> putFloat(K key, float value) {
         putObj(key, value);
         return this;
@@ -146,6 +155,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param key
      * @return 0F或者其他浮点
      */
+    @Override
     public float getFloat(K key) {
         if (!containsKey(key)) {
             return 0F;
@@ -160,6 +170,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param value
      * @return
      */
+    @Override
     public ConstraintMap<K> putDouble(K key, double value) {
         putObj(key, value);
         return this;
@@ -171,6 +182,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param key
      * @return 0D或者其他double
      */
+    @Override
     public double getDouble(K key) {
         if (!containsKey(key)) {
             return 0D;
@@ -185,6 +197,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param value
      * @return
      */
+    @Override
     public ConstraintMap<K> putChar(K key, char value) {
         putObj(key, value);
         return this;
@@ -196,6 +209,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param key
      * @return 0或其他char
      */
+    @Override
     public char getChar(K key) {
         if (!containsKey(key)) {
             return 0;
@@ -210,6 +224,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param value
      * @return
      */
+    @Override
     public ConstraintMap<K> putBoolean(K key, boolean value) {
         putInt(key, value ? 1 : 0);
         return this;
@@ -221,6 +236,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param key
      * @return
      */
+    @Override
     public boolean getBoolean(K key) {
         return getInt(key) == 1;
     }
@@ -232,6 +248,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param value
      * @return
      */
+    @Override
     public ConstraintMap<K> putString(K key, String value) {
         if (value == null) {
             putObj(key, "");
@@ -247,6 +264,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      * @param key
      * @return ""或其他字符串
      */
+    @Override
     public String getString(K key) {
         if (!containsKey(key)) {
             return "";

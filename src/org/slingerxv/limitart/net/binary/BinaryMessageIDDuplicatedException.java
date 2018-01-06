@@ -15,19 +15,18 @@
  */
 package org.slingerxv.limitart.net.binary;
 
-import org.slingerxv.limitart.util.LimitartException;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 消息ID重复异常
- * 
- * @author hank
  *
+ * @author hank
  */
-public class BinaryMessageIDDuplicatedException extends LimitartException {
+public class BinaryMessageIDDuplicatedException extends LimitartNonRuntimeException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public BinaryMessageIDDuplicatedException(short messageID) {
-		super("message ID duplicated:" + BinaryMessages.ID2String(messageID));
-	}
+    public BinaryMessageIDDuplicatedException(short messageID) {
+        super("message ID duplicated:" + BinaryMessages.ID2String(messageID));
+    }
 }

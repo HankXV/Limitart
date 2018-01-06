@@ -15,6 +15,8 @@
  */
 package org.slingerxv.limitart.util;
 
+import org.slingerxv.limitart.base.ThreadSafe;
+
 import java.util.UUID;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -23,6 +25,7 @@ import java.util.concurrent.atomic.LongAdder;
  *
  * @author hank
  */
+@ThreadSafe
 public final class UniqueIDUtil {
     private static LongAdder DEFAULT_ID_ADDER = new LongAdder();
     private static long DEFAULT_AREAD_ID = 1;

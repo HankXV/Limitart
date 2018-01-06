@@ -31,8 +31,8 @@ class Slf4JLogger extends AbstractLogger {
     }
 
     @Override
-    public void trace(String msg) {
-        logger.trace(msg);
+    public void trace(Object msg) {
+        logger.trace(msg.toString());
     }
 
     @Override
@@ -51,8 +51,8 @@ class Slf4JLogger extends AbstractLogger {
     }
 
     @Override
-    public void debug(String msg) {
-        logger.debug(msg);
+    public void debug(Object msg) {
+        logger.debug(msg.toString());
     }
 
     @Override
@@ -71,8 +71,8 @@ class Slf4JLogger extends AbstractLogger {
     }
 
     @Override
-    public void info(String msg) {
-        logger.info(msg);
+    public void info(Object msg) {
+        logger.info(msg.toString());
     }
 
     @Override
@@ -91,8 +91,8 @@ class Slf4JLogger extends AbstractLogger {
     }
 
     @Override
-    public void warn(String msg) {
-        logger.warn(msg);
+    public void warn(Object msg) {
+        logger.warn(msg.toString());
     }
 
     @Override
@@ -111,8 +111,8 @@ class Slf4JLogger extends AbstractLogger {
     }
 
     @Override
-    public void error(String msg) {
-        logger.error(msg);
+    public void error(Object msg) {
+        logger.error(msg.toString());
     }
 
     @Override

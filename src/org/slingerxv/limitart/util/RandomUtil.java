@@ -15,6 +15,7 @@
  */
 package org.slingerxv.limitart.util;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -23,78 +24,162 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author Hank
  */
 public final class RandomUtil {
-  private RandomUtil() {}
-
-  /**
-   * 随机整数（包含边界值）
-   *
-   * @param start
-   * @param end
-   * @return
-   */
-  public static int randomInt(int start, int end) {
-    if (start >= end) {
-      return start;
+    private RandomUtil() {
     }
-    return ThreadLocalRandom.current().nextInt(end - start + 1) + start;
-  }
 
-  /**
-   * 返回long型(包含边界)
-   *
-   * @param start
-   * @param end
-   * @return
-   */
-  public static long randomLong(long start, long end) {
-    if (start >= end) {
-      return start;
+    /**
+     * 随机整数（包含边界值）
+     *
+     * @param start
+     * @param end
+     * @return
+     */
+    public static int nextInt(int start, int end) {
+        if (start >= end) {
+            return start;
+        }
+        return ThreadLocalRandom.current().nextInt(end - start + 1) + start;
     }
-    return start + (long) (ThreadLocalRandom.current().nextDouble() * (end - start));
-  }
 
-  /**
-   * 随机浮点数(包含边界)
-   *
-   * @param start
-   * @param end
-   * @return
-   */
-  public static float randomFloat(float start, float end) {
-    if (start >= end) {
-      return start;
+    /**
+     * 是否命中1-10
+     *
+     * @param value
+     * @return
+     */
+    public static boolean h10(int value) {
+        if (value < 1) {
+            return false;
+        } else if (value > 10) {
+            return true;
+        }
+        return nextInt(1, 10) <= value;
     }
-    return start + ThreadLocalRandom.current().nextFloat() * (end - start);
-  }
 
-  /**
-   * 返回1或-1
-   *
-   * @return
-   */
-  public static int randomOne() {
-    return 1 | (ThreadLocalRandom.current().nextInt() >> 31);
-  }
+    /**
+     * 是否命中1-100
+     *
+     * @param value
+     * @return
+     */
+    public static boolean h100(int value) {
+        if (value < 1) {
+            return false;
+        } else if (value > 100) {
+            return true;
+        }
+        return nextInt(1, 100) <= value;
+    }
 
-  /**
-   * 通过数组值的权重分布来随机数组索引
-   *
-   * @param weight
-   * @return 数组索引
-   */
-  public static int randomWeight(int[] weight) {
-    int sumProb = 0;
-    for (int prob : weight) {
-      sumProb += prob;
+    /**
+     * 是否命中1-1000
+     *
+     * @param value
+     * @return
+     */
+    public static boolean h1000(int value) {
+        if (value < 1) {
+            return false;
+        } else if (value > 1000) {
+            return true;
+        }
+        return nextInt(1, 1000) <= value;
     }
-    int randomInt = randomInt(0, sumProb);
-    int step = 0;
-    for (int i = 0; i < weight.length; ++i) {
-      step += weight[i];
-      if (randomInt <= step) {
-        return i;
-      }
+
+    /**
+     * 是否命中1-10000
+     *
+     * @param value
+     * @return
+     */
+    public static boolean h10000(int value) {
+        if (value < 1) {
+            return false;
+        } else if (value > 10000) {
+            return true;
+        }
+        return nextInt(1, 10000) <= value;
     }
-    return 0;
-  }
+
+    /**
+     * 返回long型(包含边界)
+     *
+     * @param start
+     * @param end
+     * @return
+     */
+    public static long nextLong(long start, long end) {
+        if (start >= end) {
+            return start;
+        }
+        return start + (long) (ThreadLocalRandom.current().nextDouble() * (end - start));
+    }
+
+    /**
+     * 随机浮点数(包含边界)
+     *
+     * @param start
+     * @param end
+     * @return
+     */
+    public static float nextFloat(float start, float end) {
+        if (start >= end) {
+            return start;
+        }
+        return start + ThreadLocalRandom.current().nextFloat() * (end - start);
+    }
+
+    /**
+     * 返回1或-1
+     *
+     * @return
+     */
+    public static int nextOne() {
+        return 1 | (ThreadLocalRandom.current().nextInt() >> 31);
+    }
+
+    /**
+     * 随机一个布尔值
+     *
+     * @return
+     */
+    public static boolean nextBool() {
+        return ThreadLocalRandom.current().nextBoolean();
+    }
+
+    /**
+     * 随机一个元素
+     *
+     * @param list
+     * @param <T>
+     * @return
+     */
+    public static <T> T element(List<T> list) {
+        if (list == null) {
+            return null;
+        }
+        return list.get(nextInt(0, list.size() - 1));
+    }
+
+    /**
+     * 通过数组值的权重分布来随机数组索引
+     *
+     * @param weight
+     * @return 数组索引
+     */
+    public static int weight(int[] weight) {
+        int sumProb = 0;
+        for (int prob : weight) {
+            sumProb += prob;
+        }
+        int randomInt = nextInt(0, sumProb);
+        int step = 0;
+        for (int i = 0; i < weight.length; ++i) {
+            step += weight[i];
+            if (randomInt <= step) {
+                return i;
+            }
+        }
+        return 0;
+    }
 }

@@ -50,9 +50,7 @@ public final class SymmetricEncryptionUtil {
      * @throws InvalidKeyException
      * @throws InvalidAlgorithmParameterException
      */
-    public synchronized static SymmetricEncryptionUtil getEncodeInstance(String password, String ivStr)
-            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            InvalidAlgorithmParameterException {
+    public synchronized static SymmetricEncryptionUtil getEncodeInstance(String password, String ivStr) {
         return new SymmetricEncryptionUtil(password, ivStr);
     }
 
@@ -100,8 +98,7 @@ public final class SymmetricEncryptionUtil {
      * @throws InvalidAlgorithmParameterException
      * @throws InvalidKeyException
      */
-    private SymmetricEncryptionUtil(String password) throws NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, InvalidAlgorithmParameterException {
+    private SymmetricEncryptionUtil(String password) {
         this(password, null);
     }
 

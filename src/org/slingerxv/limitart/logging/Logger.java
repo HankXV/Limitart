@@ -22,7 +22,7 @@ public interface Logger {
 
     boolean isTraceEnabled();
 
-    void trace(String msg);
+    void trace(Object msg);
 
     void trace(String format, Object... args);
 
@@ -32,7 +32,7 @@ public interface Logger {
 
     boolean isDebugEnabled();
 
-    void debug(String msg);
+    void debug(Object msg);
 
     void debug(String format, Object... args);
 
@@ -42,7 +42,7 @@ public interface Logger {
 
     boolean isInfoEnabled();
 
-    void info(String msg);
+    void info(Object msg);
 
     void info(String format, Object... args);
 
@@ -52,7 +52,7 @@ public interface Logger {
 
     boolean isWarnEnabled();
 
-    void warn(String msg);
+    void warn(Object msg);
 
     void warn(String format, Object... args);
 
@@ -62,7 +62,7 @@ public interface Logger {
 
     boolean isErrorEnabled();
 
-    void error(String msg);
+    void error(Object msg);
 
     void error(String format, Object... args);
 
@@ -72,7 +72,7 @@ public interface Logger {
 
     boolean isEnabled(LogLevel level);
 
-    void log(LogLevel level, String msg);
+    void log(LogLevel level, Object msg);
 
     void log(LogLevel level, String format, Object... args);
 

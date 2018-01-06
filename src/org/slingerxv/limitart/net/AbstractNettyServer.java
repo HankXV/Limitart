@@ -49,7 +49,7 @@ import org.slingerxv.limitart.logging.Loggers;
  * @author hank
  */
 public abstract class AbstractNettyServer {
-    private static Logger log = Loggers.create(AbstractNettyServer.class);
+    private static Logger log = Loggers.create();
     private static final AttributeKey<Integer> SESSION_ID_KEY = AttributeKey.newInstance("SESSION_ID_KEY");
     private static AtomicInteger SESSION_ID_CREATOR = new AtomicInteger();
     protected final static EventLoopGroup bossGroup;
@@ -86,7 +86,7 @@ public abstract class AbstractNettyServer {
                 .childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializer<SocketChannel>() {
 
             @Override
-            protected void initChannel(SocketChannel ch) throws Exception {
+            protected void initChannel(SocketChannel ch) {
                 initPipeline(ch.pipeline());
                 ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                     @Override

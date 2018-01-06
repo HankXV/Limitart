@@ -15,7 +15,7 @@
  */
 package org.slingerxv.limitart.script;
 
-import org.slingerxv.limitart.util.LimitartException;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 脚本KEY重复异常
@@ -23,7 +23,7 @@ import org.slingerxv.limitart.util.LimitartException;
  * @author hank
  *
  */
-public class ScriptKeyDuplicatedException extends LimitartException {
+public class ScriptKeyDuplicatedException extends LimitartNonRuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

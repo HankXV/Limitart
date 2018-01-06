@@ -15,8 +15,6 @@
  */
 package org.slingerxv.limitart.taskqueue;
 
-import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.base.Func1;
 import org.slingerxv.limitart.base.*;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.logging.Logger;
@@ -33,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Hank
  */
 public class AutoGrowthTaskQueueGroup<T> {
-    private static Logger log = Loggers.create(AutoGrowthTaskQueueGroup.class);
+    private static Logger log = Loggers.create();
     private AtomicInteger threadId = new AtomicInteger(0);
     private Map<Integer, AutoGrowthSegment<T>> threads = new ConcurrentHashMap<>();
     private int entityCountPerThread;

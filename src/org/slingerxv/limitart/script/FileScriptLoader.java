@@ -36,7 +36,7 @@ import org.slingerxv.limitart.util.SecurityUtil;
  * @author hank
  */
 public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
-    private static Logger log = Loggers.create(FileScriptLoader.class);
+    private static Logger log = Loggers.create();
     private ScheduledExecutorService worker = Executors.newScheduledThreadPool(1);
     // 脚本地址根目录
     private String scriptRootPath;

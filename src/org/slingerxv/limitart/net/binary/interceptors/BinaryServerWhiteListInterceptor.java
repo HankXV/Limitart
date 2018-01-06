@@ -34,7 +34,7 @@ import org.slingerxv.limitart.net.binary.BinaryServerInterceptor;
  *
  */
 public class BinaryServerWhiteListInterceptor implements BinaryServerInterceptor {
-	private static Logger log = Loggers.create(BinaryServerWhiteListInterceptor.class);
+	private static Logger log = Loggers.create();
 	private Set<String> whiteList = new HashSet<>();
 
 	public BinaryServerWhiteListInterceptor(String... ips) {

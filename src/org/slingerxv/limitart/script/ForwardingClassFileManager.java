@@ -15,7 +15,6 @@
  */
 package org.slingerxv.limitart.script;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class ForwardingClassFileManager extends ForwardingJavaFileManager<Standa
 
 	@Override
 	public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind,
-			FileObject sibling) throws IOException {
+			FileObject sibling) {
 		JavaClassObject javaClassObject = new JavaClassObject(className, kind);
 		classNames.add(className);
 		javaClassObjects.add(javaClassObject);

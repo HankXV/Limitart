@@ -13,8 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.slingerxv.limitart.base;
+
 /**
- * 轻量依赖注入
- *
+ * 不可变的一对
  */
-package org.slingerxv.limitart.injection;
+public class ImmutableCouple<H, W> implements Couple {
+    private final H h;
+    private final W w;
+
+    public ImmutableCouple(H h, W w) {
+        this.h = h;
+        this.w = w;
+    }
+
+    @Override
+    public Object get1() {
+        return this.h;
+    }
+
+    @Override
+    public Object get2() {
+        return this.w;
+    }
+}

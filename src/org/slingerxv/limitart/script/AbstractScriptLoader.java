@@ -32,7 +32,7 @@ import org.slingerxv.limitart.logging.Loggers;
  * @author hank
  */
 public abstract class AbstractScriptLoader<KEY> {
-    private static Logger log = Loggers.create(AbstractScriptLoader.class);
+    private static Logger log = Loggers.create();
     private Map<KEY, ScriptData<KEY>> scriptMap = new ConcurrentHashMap<>();
     private Map<String, KEY> pathMap = new ConcurrentHashMap<>();
 

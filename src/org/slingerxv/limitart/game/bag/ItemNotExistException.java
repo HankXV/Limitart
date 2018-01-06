@@ -15,7 +15,7 @@
  */
 package org.slingerxv.limitart.game.bag;
 
-import org.slingerxv.limitart.util.LimitartException;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 物品不存在异常
@@ -23,7 +23,7 @@ import org.slingerxv.limitart.util.LimitartException;
  * @author hank
  *
  */
-public class ItemNotExistException extends LimitartException {
+public class ItemNotExistException extends LimitartNonRuntimeException {
 	private static final long serialVersionUID = 1L;
 
 }

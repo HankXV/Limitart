@@ -32,14 +32,14 @@ public class UniqueIDUtilTest {
     private static int THREAD_COUNT = 100;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         adder = new LongAdder();
         sets = new ConcurrentHashSet<>();
         count = new CountDownLatch(THREAD_COUNT);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
     }
 
     @Test

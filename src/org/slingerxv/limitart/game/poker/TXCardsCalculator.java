@@ -48,9 +48,9 @@ public class TXCardsCalculator {
     // 皇家同花顺
     private final static long ROYAL_FLUSH = TXCardRank.ROYAL_FLUSH.getValue() * 0x10000000000L;
     // 原始数据
-    private byte[] cards = null;
-    private byte[] numbers = null;
-    private byte[] colors = null;
+    private byte[] cards;
+    private byte[] numbers;
+    private byte[] colors;
     // 对子数量
     private byte pairCount = 0;
     // 最大三条点数

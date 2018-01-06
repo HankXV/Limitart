@@ -88,7 +88,7 @@ public abstract class AbstractLogger implements Logger {
     }
 
     @Override
-    public void log(LogLevel level, String msg) {
+    public void log(LogLevel level, Object msg) {
         log0(level, null, msg);
     }
 
@@ -98,17 +98,17 @@ public abstract class AbstractLogger implements Logger {
         log0(level, null, format, args);
     }
 
-    private void log0(LogLevel level, Throwable t, String msg, Object... args) {
+    private void log0(LogLevel level, Throwable t, Object msg, Object... args) {
         switch (level) {
             case TRACE:
                 if (t != null) {
                     if (msg == null) {
                         trace(t);
                     } else {
-                        trace(msg, t);
+                        trace(msg.toString(), t);
                     }
                 } else {
-                    trace(msg, args);
+                    trace(msg.toString(), args);
                 }
                 break;
             case DEBUG:
@@ -116,10 +116,10 @@ public abstract class AbstractLogger implements Logger {
                     if (msg == null) {
                         debug(t);
                     } else {
-                        debug(msg, t);
+                        debug(msg.toString(), t);
                     }
                 } else {
-                    debug(msg, args);
+                    debug(msg.toString(), args);
                 }
                 break;
             case INFO:
@@ -127,10 +127,10 @@ public abstract class AbstractLogger implements Logger {
                     if (msg == null) {
                         info(t);
                     } else {
-                        info(msg, t);
+                        info(msg.toString(), t);
                     }
                 } else {
-                    info(msg, args);
+                    info(msg.toString(), args);
                 }
                 break;
             case WARN:
@@ -138,10 +138,10 @@ public abstract class AbstractLogger implements Logger {
                     if (msg == null) {
                         warn(t);
                     } else {
-                        warn(msg, t);
+                        warn(msg.toString(), t);
                     }
                 } else {
-                    warn(msg, args);
+                    warn(msg.toString(), args);
                 }
                 break;
             case ERROR:
@@ -149,10 +149,10 @@ public abstract class AbstractLogger implements Logger {
                     if (msg == null) {
                         error(t);
                     } else {
-                        error(msg, t);
+                        error(msg.toString(), t);
                     }
                 } else {
-                    error(msg, args);
+                    error(msg.toString(), args);
                 }
                 break;
             default:

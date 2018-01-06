@@ -39,7 +39,7 @@ import org.slingerxv.limitart.util.FileUtil;
  *
  */
 public class ByteCodeClassLoader extends ClassLoader {
-	private static Logger log = Loggers.create(ByteCodeClassLoader.class);
+	private static Logger log = Loggers.create();
 
 	public ByteCodeClassLoader() {
 		this(Thread.currentThread().getContextClassLoader());

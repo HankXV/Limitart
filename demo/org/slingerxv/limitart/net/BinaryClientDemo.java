@@ -24,7 +24,7 @@ import org.slingerxv.limitart.net.binary.BinaryMessageFactory;
 public class BinaryClientDemo {
     public static void main(String[] args) throws Exception {
         new BinaryClient.BinaryClientBuilder().remoteAddress(new AddressPair("127.0.0.1", 8888))
-                .factory(BinaryMessageFactory.createEmpty()).onConnected((BinaryClient cl, Boolean state) -> {
+                .factory(BinaryMessageFactory.empty()).onConnected((BinaryClient cl, Boolean state) -> {
             if (state) {
                 try {
                     cl.sendMessage(new BinaryMessageDemo());

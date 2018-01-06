@@ -37,7 +37,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author Hank
  */
 public class BinaryServer extends AbstractNettyServer implements Server {
-    private static Logger log = Loggers.create(BinaryServer.class);
+    private static Logger log = Loggers.create();
     private AddressPair addressPair;
     private BinaryDecoder decoder;
     private BinaryEncoder encoder;
@@ -69,12 +69,12 @@ public class BinaryServer extends AbstractNettyServer implements Server {
     }
 
     @Override
-    protected void exceptionThrown(Session session, Throwable cause) throws Exception {
+    protected void exceptionThrown(Session session, Throwable cause) {
         Procs.invoke(onExceptionTrown, session, cause);
     }
 
     @Override
-    protected void sessionActive(Session session, boolean activeOrNot) throws Exception {
+    protected void sessionActive(Session session, boolean activeOrNot) {
         if (activeOrNot) {
             for (BinaryServerInterceptor interceptor : interceptors) {
                 if (interceptor.onConnected(session)) {
@@ -258,7 +258,7 @@ public class BinaryServer extends AbstractNettyServer implements Server {
          * @return
          * @throws Exception
          */
-        public BinaryServer build() throws Exception {
+        public BinaryServer build() {
             return new BinaryServer(this);
         }
 

@@ -16,7 +16,9 @@
 package org.slingerxv.limitart.collections;
 
 import org.slingerxv.limitart.base.Func;
+import org.slingerxv.limitart.base.NotNull;
 
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -27,6 +29,10 @@ import java.util.List;
  * @param <V>
  */
 public interface RankMap<K, V extends Func<K>> {
+    static <K, V extends Func<K>> RankMap<K, V> empty(@NotNull Comparator<V> comparator, int capacity) {
+        return new FrequencyReadRankMap(comparator, capacity);
+    }
+
     /**
      * 获取值
      *

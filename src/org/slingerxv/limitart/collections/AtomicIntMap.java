@@ -18,6 +18,7 @@ package org.slingerxv.limitart.collections;
 
 
 import org.slingerxv.limitart.base.ThreadSafe;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -193,10 +194,9 @@ public final class AtomicIntMap<K> implements Map<K, Integer>, Serializable {
      * @param key
      * @return
      */
-    @Deprecated
     @Override
     public Integer get(Object key) {
-        return map.get(key);
+        throw new NotImplementedException();
     }
 
     /**
@@ -206,10 +206,9 @@ public final class AtomicIntMap<K> implements Map<K, Integer>, Serializable {
      * @param value
      * @return
      */
-    @Deprecated
     @Override
     public Integer put(K key, Integer value) {
-        return map.put(key, value);
+        throw new NotImplementedException();
     }
 
     @Override

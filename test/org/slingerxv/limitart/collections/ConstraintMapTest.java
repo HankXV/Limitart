@@ -9,12 +9,12 @@ public class ConstraintMapTest {
 	private ConstraintMap<String> map;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		map = new ConstraintConcurrentMap<>();
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 	}
 
 	@Test

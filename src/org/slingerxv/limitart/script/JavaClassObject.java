@@ -16,7 +16,6 @@
 package org.slingerxv.limitart.script;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 
@@ -41,7 +40,7 @@ public class JavaClassObject extends SimpleJavaFileObject {
 	}
 
 	@Override
-	public OutputStream openOutputStream() throws IOException {
+	public OutputStream openOutputStream() {
 		return bos;
 	}
 

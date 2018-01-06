@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
  * @author hank
  */
 public final class BinaryMessages {
-    private static Logger log = Loggers.create(BinaryMessages.class);
+    private static Logger log = Loggers.create();
     private static Validator xmlValidator;
 
     private BinaryMessages() {

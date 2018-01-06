@@ -15,7 +15,9 @@
  */
 package org.slingerxv.limitart.util;
 
-public class InvalidBase64CharacterException extends LimitartException {
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
+
+public class InvalidBase64CharacterException extends LimitartNonRuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	public InvalidBase64CharacterException(String message) {
