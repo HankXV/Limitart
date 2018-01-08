@@ -331,7 +331,7 @@ public class BinaryClient extends AbstractNettyClient {
 		/**
 		 * 服务器IP
 		 * 
-		 * @param remoteIp
+		 * @param remoteAddress
 		 * @return
 		 */
 		public BinaryClientBuilder remoteAddress(AddressPair remoteAddress) {

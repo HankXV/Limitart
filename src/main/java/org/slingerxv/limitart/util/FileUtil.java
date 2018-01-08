@@ -43,9 +43,7 @@ public final class FileUtil {
 	 *
 	 * @param root
 	 *            根目录
-	 * @param result
-	 *            接收结果的列表
-	 * @param type
+	 * @param types
 	 *            文件筛选类型(java,class等)
 	 */
 	public static List<File> getFiles(File root, String... types) {

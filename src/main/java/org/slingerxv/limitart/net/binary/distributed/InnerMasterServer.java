@@ -326,7 +326,7 @@ public class InnerMasterServer implements IServer {
 		/**
 		 * 绑定端口
 		 * 
-		 * @param port
+		 * @param masterPort
 		 * @return
 		 */
 		public InnerMasterServerBuilder masterPort(int masterPort) {

@@ -20,37 +20,56 @@ import java.util.concurrent.atomic.LongAdder;
 
 /**
  * 唯一编号生成器
- * 
- * @author hank
  *
+ * @author hank
  */
 public final class UniqueIdUtil {
-	private UniqueIdUtil() {
-	}
+    private static LongAdder DEFAULT_ID_ADDER = new LongAdder();
+    private static long DEFAULT_AREAD_ID = 1;
 
-	/**
-	 * 生成唯一Id
-	 * 
-	 * @param areaId
-	 *            区域Id(最多支持16位区域数量)
-	 * @param adder
-	 *            自增长器(支持每秒16位数量的并发)
-	 * @return
-	 */
-	public static long createUUID(long areaId, LongAdder adder) {
-		// 服务器编号16位+ 时间32+自增16
-		adder.increment();
-		long serverIdBit = (areaId << 48) & (0xFFFF000000000000L);
-		long timeBit = ((System.currentTimeMillis() / 1000) << 32) & (0x0000FFFFFFFF0000L);
-		return serverIdBit | timeBit | adder.longValue();
-	}
+    private UniqueIdUtil() {
+    }
 
-	/**
-	 * 生成全球唯一Id
-	 * 
-	 * @return
-	 */
-	public static String createUUID() {
-		return UUID.randomUUID().toString().replace("-", "").toUpperCase();
-	}
+    /**
+     * 创建默认自增器和默认区域ID的唯一ID
+     *
+     * @return
+     */
+    public static long nextID() {
+        return nextID(DEFAULT_AREAD_ID);
+    }
+
+    /**
+     * 创建默认自增器产生的唯一ID
+     *
+     * @param areaID
+     * @return
+     */
+    public static long nextID(long areaID) {
+        return nextID(areaID, DEFAULT_ID_ADDER);
+    }
+
+    /**
+     * 生成唯一Id
+     *
+     * @param areaID 区域Id(最多支持16位区域数量)
+     * @param adder  自增长器(支持每秒16位数量的并发)
+     * @return
+     */
+    public static long nextID(long areaID, LongAdder adder) {
+        // 服务器编号16位+ 时间32+自增16
+        adder.increment();
+        long serverIdBit = (areaID << 48) & (0xFFFF000000000000L);
+        long timeBit = ((System.currentTimeMillis() / 1000) << 32) & (0x0000FFFFFFFF0000L);
+        return serverIdBit | timeBit | adder.longValue();
+    }
+
+    /**
+     * 生成全球唯一Id
+     *
+     * @return
+     */
+    public static String createUUID() {
+        return UUID.randomUUID().toString().replace("-", "").toUpperCase();
+    }
 }

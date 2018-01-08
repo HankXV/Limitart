@@ -109,8 +109,8 @@ public final class SendMessageUtil {
 	/**
 	 * 消息统计
 	 * 
-	 * @param class1
-	 * @param retainedSlice
+	 * @param clazz
+	 * @param buf
 	 */
 	private static void flow(Class<? extends Message> clazz, ByteBuf buf) {
 		if (!IS_FLOW) {
