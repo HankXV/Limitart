@@ -15,19 +15,39 @@
  */
 package org.slingerxv.limitart.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * 集合操作
- * 
- * @author hank
  *
+ * @author hank
  */
 public final class CollectionUtil {
-	private CollectionUtil() {
+	private CollectionUtil() {}
+
+	public static boolean contains(int[] value, int[] expect) {
+		if (expect.length == 0) {
+			return false;
+		}
+		for (int j : expect) {
+			for (int i = 0; i < value.length; ++i) {
+				if (value[i] == j) {
+					break;
+				}
+				if (i == value.length - 1) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	public static int contains(int[] value, int expect) {
+		if (value == null) {
+			return -1;
+		}
 		for (int i = 0; i < value.length; ++i) {
 			if (value[i] == expect) {
 				return i;
@@ -37,6 +57,9 @@ public final class CollectionUtil {
 	}
 
 	public static int contains(long[] value, long expect) {
+		if (value == null) {
+			return -1;
+		}
 		for (int i = 0; i < value.length; ++i) {
 			if (value[i] == expect) {
 				return i;
@@ -46,6 +69,9 @@ public final class CollectionUtil {
 	}
 
 	public static int contains(byte[] value, byte expect) {
+		if (value == null) {
+			return -1;
+		}
 		for (int i = 0; i < value.length; ++i) {
 			if (value[i] == expect) {
 				return i;
@@ -55,6 +81,9 @@ public final class CollectionUtil {
 	}
 
 	public static int contains(short[] value, short expect) {
+		if (value == null) {
+			return -1;
+		}
 		for (int i = 0; i < value.length; ++i) {
 			if (value[i] == expect) {
 				return i;
@@ -64,6 +93,9 @@ public final class CollectionUtil {
 	}
 
 	public static byte[] toByteArray(Collection<? extends Number> collection) {
+		if (collection == null) {
+			return new byte[0];
+		}
 		Object[] boxedArray = collection.toArray();
 		int len = boxedArray.length;
 		byte[] array = new byte[len];
@@ -73,7 +105,18 @@ public final class CollectionUtil {
 		return array;
 	}
 
+	public static List<Byte> toByteList(byte[] value) {
+		List<Byte> result = new ArrayList<>();
+		for (byte temp : value) {
+			result.add(temp);
+		}
+		return result;
+	}
+
 	public static int[] toIntArray(Collection<? extends Number> collection) {
+		if (collection == null) {
+			return new int[0];
+		}
 		Object[] boxedArray = collection.toArray();
 		int len = boxedArray.length;
 		int[] array = new int[len];
@@ -83,7 +126,18 @@ public final class CollectionUtil {
 		return array;
 	}
 
+	public static List<Integer> toIntList(int[] value) {
+		List<Integer> result = new ArrayList<>();
+		for (int temp : value) {
+			result.add(temp);
+		}
+		return result;
+	}
+
 	public static long[] toLongArray(Collection<? extends Number> collection) {
+		if (collection == null) {
+			return new long[0];
+		}
 		Object[] boxedArray = collection.toArray();
 		int len = boxedArray.length;
 		long[] array = new long[len];
@@ -93,7 +147,18 @@ public final class CollectionUtil {
 		return array;
 	}
 
+	public static List<Long> toLongList(long[] value) {
+		List<Long> result = new ArrayList<>();
+		for (long temp : value) {
+			result.add(temp);
+		}
+		return result;
+	}
+
 	public static short[] toShortArray(Collection<? extends Number> collection) {
+		if (collection == null) {
+			return new short[0];
+		}
 		Object[] boxedArray = collection.toArray();
 		int len = boxedArray.length;
 		short[] array = new short[len];
@@ -103,7 +168,18 @@ public final class CollectionUtil {
 		return array;
 	}
 
+	public static List<Short> toShortList(short[] value) {
+		List<Short> result = new ArrayList<>();
+		for (short temp : value) {
+			result.add(temp);
+		}
+		return result;
+	}
+
 	public static double[] toDoubleArray(Collection<? extends Number> collection) {
+		if (collection == null) {
+			return new double[0];
+		}
 		Object[] boxedArray = collection.toArray();
 		int len = boxedArray.length;
 		double[] array = new double[len];
@@ -113,7 +189,18 @@ public final class CollectionUtil {
 		return array;
 	}
 
+	public static List<Double> toDoubleList(double[] value) {
+		List<Double> result = new ArrayList<>();
+		for (double temp : value) {
+			result.add(temp);
+		}
+		return result;
+	}
+
 	public static float[] toFloatArray(Collection<? extends Number> collection) {
+		if (collection == null) {
+			return new float[0];
+		}
 		Object[] boxedArray = collection.toArray();
 		int len = boxedArray.length;
 		float[] array = new float[len];
@@ -121,5 +208,13 @@ public final class CollectionUtil {
 			array[i] = ((Number) boxedArray[i]).floatValue();
 		}
 		return array;
+	}
+
+	public static List<Float> toFloatList(float[] value) {
+		List<Float> result = new ArrayList<>();
+		for (float temp : value) {
+			result.add(temp);
+		}
+		return result;
 	}
 }

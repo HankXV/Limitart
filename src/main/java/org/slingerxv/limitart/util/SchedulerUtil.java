@@ -66,7 +66,7 @@ public final class SchedulerUtil {
 	 * 
 	 * @param name
 	 *            任务名称
-	 * @param job
+	 * @param task
 	 *            执行内容
 	 * @param cronExpression
 	 *            cron表达式
@@ -93,7 +93,7 @@ public final class SchedulerUtil {
 	 * 
 	 * @param name
 	 *            任务名称
-	 * @param job
+	 * @param task
 	 *            执行内容
 	 * @param intervalInHours
 	 *            间隔小时
@@ -146,7 +146,7 @@ public final class SchedulerUtil {
 	 * 
 	 * @param name
 	 *            任务名称
-	 * @param job
+	 * @param task
 	 *            执行内容
 	 * @param intervalInSeconds
 	 *            间隔秒

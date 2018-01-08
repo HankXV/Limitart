@@ -44,7 +44,7 @@ public class UniqueIdUtilTest {
 
 	private void insert() {
 		for (int i = 0; i < 1000000; ++i) {
-			long createUUID = UniqueIdUtil.createUUID(24, adder);
+			long createUUID = UniqueIdUtil.nextID(24, adder);
 			if (sets.contains(createUUID)) {
 				Assert.fail();
 			}

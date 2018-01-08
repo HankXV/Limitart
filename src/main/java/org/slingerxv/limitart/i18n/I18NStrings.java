@@ -132,7 +132,7 @@ public class I18NStrings {
 	/**
 	 * 获取指定语言的翻译
 	 * 
-	 * @param lan
+	 * @param lang
 	 * @param key
 	 * @return
 	 * @throws IOException
