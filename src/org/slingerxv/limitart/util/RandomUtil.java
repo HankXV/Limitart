@@ -15,7 +15,7 @@
  */
 package org.slingerxv.limitart.util;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 随机工具
@@ -23,129 +23,78 @@ import java.util.Random;
  * @author Hank
  */
 public final class RandomUtil {
-    public final static Random DEFAULT = new Random();
+  private RandomUtil() {}
 
-    private RandomUtil() {
+  /**
+   * 随机整数（包含边界值）
+   *
+   * @param start
+   * @param end
+   * @return
+   */
+  public static int randomInt(int start, int end) {
+    if (start >= end) {
+      return start;
     }
+    return ThreadLocalRandom.current().nextInt(end - start + 1) + start;
+  }
 
-    /**
-     * 随机整数（包含边界值）
-     *
-     * @param min
-     * @param max
-     * @return
-     */
-    public static int randomInt(int min, int max) {
-        return randomInt(DEFAULT, min, max);
+  /**
+   * 返回long型(包含边界)
+   *
+   * @param start
+   * @param end
+   * @return
+   */
+  public static long randomLong(long start, long end) {
+    if (start >= end) {
+      return start;
     }
+    return start + (long) (ThreadLocalRandom.current().nextDouble() * (end - start));
+  }
 
-
-    /**
-     * 随机整数（包含边界值）
-     *
-     * @param start
-     * @param end
-     * @return
-     */
-    public static int randomInt(Random random, int start, int end) {
-        if (start >= end) {
-            return start;
-        }
-        return random.nextInt(end - start + 1) + start;
+  /**
+   * 随机浮点数(包含边界)
+   *
+   * @param start
+   * @param end
+   * @return
+   */
+  public static float randomFloat(float start, float end) {
+    if (start >= end) {
+      return start;
     }
+    return start + ThreadLocalRandom.current().nextFloat() * (end - start);
+  }
 
-    /**
-     * 返回long型(包含边界)
-     *
-     * @param start
-     * @param end
-     * @return
-     */
-    public static long randomLong(long start, long end) {
-        return randomLong(DEFAULT, start, end);
+  /**
+   * 返回1或-1
+   *
+   * @return
+   */
+  public static int randomOne() {
+    return 1 | (ThreadLocalRandom.current().nextInt() >> 31);
+  }
+
+  /**
+   * 通过数组值的权重分布来随机数组索引
+   *
+   * @param weight
+   * @return 数组索引
+   */
+  public static int randomWeight(int[] weight) {
+    int sumProb = 0;
+    for (int prob : weight) {
+      sumProb += prob;
     }
-
-
-    /**
-     * 返回long型(包含边界)
-     *
-     * @param random
-     * @param start
-     * @param end
-     * @return
-     */
-    public static long randomLong(Random random, long start, long end) {
-        if (start >= end) {
-            return start;
-        }
-        return start + (long) (random.nextDouble() * (end - start));
+    int randomInt = randomInt(0, sumProb);
+    int step = 0;
+    for (int i = 0; i < weight.length; ++i) {
+      step += weight[i];
+      if (randomInt <= step) {
+        return i;
+      }
     }
-
-    /**
-     * 随机浮点数(包含边界)
-     *
-     * @param start
-     * @param end
-     * @return
-     */
-    public static float randomFloat(float start, float end) {
-        return randomFloat(DEFAULT, start, end);
-    }
-
-
-    /**
-     * 随机浮点数(包含边界)
-     *
-     * @param random
-     * @param start
-     * @param end
-     * @return
-     */
-    public static float randomFloat(Random random, float start, float end) {
-        if (start >= end) {
-            return start;
-        }
-        return start + random.nextFloat() * (end - start);
-    }
-
-    /**
-     * 返回1或-1
-     *
-     * @return
-     */
-    public static int randomOne() {
-        return randomOne(DEFAULT);
-    }
-
-
-    /**
-     * 返回1或-1
-     *
-     * @return
-     */
-    public static int randomOne(Random random) {
-        return 1 | (random.nextInt() >> 31);
-    }
-
-    /**
-     * 通过数组值的权重分布来随机数组索引
-     *
-     * @param weight
-     * @return 数组索引
-     */
-    public static int randomWeight(int[] weight) {
-        int sumProb = 0;
-        for (int prob : weight) {
-            sumProb += prob;
-        }
-        int randomInt = randomInt(0, sumProb);
-        int step = 0;
-        for (int i = 0; i < weight.length; ++i) {
-            step += weight[i];
-            if (randomInt <= step) {
-                return i;
-            }
-        }
-        return 0;
-    }
+    return 0;
+  }
 }
