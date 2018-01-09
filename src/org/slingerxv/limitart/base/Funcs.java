@@ -16,10 +16,17 @@
 package org.slingerxv.limitart.base;
 
 
+import java.util.function.Supplier;
+
 /**
- * 返回接口执行集合
+ * 函数帮助类
+ *
+ * @author hank
  */
 public class Funcs {
+    public static <R> R invoke(@Nullable Supplier<R> func) {
+        return func == null ? null : func.get();
+    }
 
     public static <R> R invoke(@Nullable Func<R> func) {
         return func == null ? null : func.run();

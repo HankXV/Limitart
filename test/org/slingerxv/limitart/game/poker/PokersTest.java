@@ -161,7 +161,7 @@ public class PokersTest {
     public void testToStringByte() {
         for (byte card : cards) {
             String str = Pokers.toString(card);
-            Assert.assertFalse(StringUtil.isEmptyOrNull(str));
+            Assert.assertFalse(StringUtil.empty(str));
         }
     }
 

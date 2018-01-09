@@ -32,7 +32,7 @@ public class IntCounter {
     }
 
     public IntCounter(int initVal) {
-        Conditions.checkArgs(initVal >= low() && initVal <= high(), "low<=initVal<=high");
+        Conditions.args(initVal >= low() && initVal <= high(), "low<=initVal<=high");
         setCount(initVal);
     }
 

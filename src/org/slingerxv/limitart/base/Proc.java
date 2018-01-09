@@ -18,6 +18,7 @@ package org.slingerxv.limitart.base;
 /**
  * 无参过程函数接口
  */
+@FunctionalInterface
 public interface Proc {
     void run();
 }

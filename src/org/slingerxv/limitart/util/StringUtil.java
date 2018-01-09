@@ -15,138 +15,108 @@
  */
 package org.slingerxv.limitart.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * 字符串工具类
- * 
- * @author hank
  *
+ * @author hank
  */
 public final class StringUtil {
-	private final static Pattern PHONE_REG = Pattern.compile("^((1[0-9][0-9]))\\d{8}$");
-	private final static Pattern EMAIL_REG = Pattern
-			.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");
-	private final static Pattern IP_REG = Pattern
-			.compile("^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\." + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
-					+ "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\." + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$");
-	private final static Pattern IP_INNER_REG = Pattern.compile(
-			"^((192\\.168|172\\.([1][6-9]|[2]\\d|3[01]))(\\.([2][0-4]\\d|[2][5][0-5]|[01]?\\d?\\d)){2}|10(\\.([2][0-4]\\d|[2][5][0-5]|[01]?\\d?\\d)){3})$");
+    private final static Pattern PHONE_REG = Pattern.compile("^((1[0-9][0-9]))\\d{8}$");
+    private final static Pattern EMAIL_REG = Pattern
+            .compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");
+    private final static Pattern IP_REG = Pattern
+            .compile("^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\." + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+                    + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\." + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$");
+    private final static Pattern IP_INNER_REG = Pattern.compile(
+            "^((192\\.168|172\\.([1][6-9]|[2]\\d|3[01]))(\\.([2][0-4]\\d|[2][5][0-5]|[01]?\\d?\\d)){2}|10(\\.([2][0-4]\\d|[2][5][0-5]|[01]?\\d?\\d)){3})$");
 
-	private StringUtil() {
-	}
+    private StringUtil() {
+    }
 
-	/**
-	 * 字符串是否为""或null
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public static boolean isEmptyOrNull(String value) {
-		return value == null || value.trim().length() == 0;
-	}
+    /**
+     * 字符串是否为""或null
+     *
+     * @param value
+     * @return
+     */
+    public static boolean empty(String value) {
+        return value == null || value.trim().length() == 0;
+    }
 
-	/**
-	 * 是否是手机号码
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public static boolean isPhoneNumber(String value) {
-		return matchReg(PHONE_REG, value);
-	}
+    /**
+     * 字符串不为""或null
+     *
+     * @param value
+     * @return
+     */
+    public static boolean notEmpty(String value) {
+        return !empty(value);
+    }
 
-	/**
-	 * 是否是邮箱
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public static boolean isMail(String value) {
-		return matchReg(EMAIL_REG, value);
-	}
+    /**
+     * 是否是手机号码
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isPhoneNumber(String value) {
+        return matchReg(PHONE_REG, value);
+    }
 
-	/**
-	 * 是否是IP地址
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public static boolean isIp4(String value) {
-		return matchReg(IP_REG, value);
-	}
+    /**
+     * 是否是邮箱
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isMail(String value) {
+        return matchReg(EMAIL_REG, value);
+    }
 
-	/**
-	 * 是否是内网IP
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public static boolean isInnerIp4(String value) {
-		return matchReg(IP_INNER_REG, value);
-	}
+    /**
+     * 是否是IP地址
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isIp4(String value) {
+        return matchReg(IP_REG, value);
+    }
 
-	/**
-	 * 是否匹配正则表达式
-	 * 
-	 * @param value
-	 * @param reg
-	 * @return
-	 */
-	public static boolean matchReg(String value, String reg) {
-		Pattern p = Pattern.compile(reg);
-		return matchReg(p, value);
-	}
+    /**
+     * 是否是内网IP
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isInnerIp4(String value) {
+        return matchReg(IP_INNER_REG, value);
+    }
 
-	/**
-	 * 是否匹配正则表达式
-	 * 
-	 * @param p
-	 * @param target
-	 * @return
-	 */
-	public static boolean matchReg(Pattern p, String target) {
-		Matcher m = p.matcher(target);
-		return m.matches();
-	}
+    /**
+     * 是否匹配正则表达式
+     *
+     * @param value
+     * @param reg
+     * @return
+     */
+    public static boolean matchReg(String value, String reg) {
+        Pattern p = Pattern.compile(reg);
+        return matchReg(p, value);
+    }
 
-	/**
-	 * 列表转化为又逗号分割的字符串
-	 * 
-	 * @param list
-	 * @return
-	 */
-	public static <T> String toCommaList(List<T> list) {
-		if (list == null) {
-			return null;
-		}
-		StringBuilder buffer = new StringBuilder();
-		for (T obj : list) {
-			buffer.append(obj.toString()).append(',');
-		}
-		if (buffer.length() > 0) {
-			buffer.deleteCharAt(buffer.length() - 1);
-		}
-		return buffer.toString();
-	}
-
-	/**
-	 * 逗号分割的字符串转换为列表
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public static List<String> fromCommaString(String value) {
-		List<String> result = new ArrayList<>();
-		if (value == null) {
-			return result;
-		}
-		String[] split = value.split(",");
-		Collections.addAll(result, split);
-		return result;
-	}
+    /**
+     * 是否匹配正则表达式
+     *
+     * @param p
+     * @param target
+     * @return
+     */
+    public static boolean matchReg(Pattern p, String target) {
+        Matcher m = p.matcher(target);
+        return m.matches();
+    }
 }

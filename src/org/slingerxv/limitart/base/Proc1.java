@@ -20,6 +20,7 @@ package org.slingerxv.limitart.base;
  *
  * @param <T>
  */
+@FunctionalInterface
 public interface Proc1<T> {
     void run(T t);
 }
