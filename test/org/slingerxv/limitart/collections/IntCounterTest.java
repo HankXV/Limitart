@@ -46,7 +46,7 @@ public class IntCounterTest {
     @Test
     public void proc() {
         // 0
-        Assert.assertEquals(counter.get(), 0);
+        Assert.assertEquals(counter.getCount(), 0);
         // 0
         Assert.assertEquals(counter.decrementAndGet(), 0);
         // 1

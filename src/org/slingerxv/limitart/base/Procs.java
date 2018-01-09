@@ -16,10 +16,27 @@
 package org.slingerxv.limitart.base;
 
 
+import java.util.function.Consumer;
+
+/**
+ * 过程函数帮助类
+ *
+ * @author hank
+ */
 public class Procs {
+    public static void invoke(@Nullable Runnable runnable) {
+        if (runnable != null)
+            runnable.run();
+    }
+
     public static void invoke(@Nullable Proc proc) {
         if (proc != null)
             proc.run();
+    }
+
+    public static <T1> void invoke(@Nullable Consumer<T1> consumer, T1 t1) {
+        if (consumer != null)
+            consumer.accept(t1);
     }
 
     public static <T1> void invoke(@Nullable Proc1<T1> proc, T1 t1) {

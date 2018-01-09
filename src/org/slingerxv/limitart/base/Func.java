@@ -20,6 +20,7 @@ package org.slingerxv.limitart.base;
  *
  * @param <R>
  */
+@FunctionalInterface
 public interface Func<R> {
     R run();
 }

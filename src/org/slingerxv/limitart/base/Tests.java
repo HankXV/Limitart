@@ -16,7 +16,18 @@
 package org.slingerxv.limitart.base;
 
 
+import java.util.function.Predicate;
+
+/**
+ * 判断函数帮助类
+ *
+ * @author hank
+ */
 public class Tests {
+    public static <T> boolean invoke(@Nullable Predicate<T> predicate, T t) {
+        return predicate != null && predicate.test(t);
+    }
+
     public static <T> boolean invoke(@Nullable Test1<T> test, T t) {
         return test != null && test.test(t);
     }

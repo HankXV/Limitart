@@ -20,6 +20,7 @@ package org.slingerxv.limitart.base;
  *
  * @param <T>
  */
+@FunctionalInterface
 public interface Test1<T> {
     boolean test(T t);
 }

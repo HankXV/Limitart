@@ -27,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.NotNull;
 import org.slingerxv.limitart.base.Proc;
+import org.slingerxv.limitart.base.ThreadSafe;
 import org.slingerxv.limitart.collections.ConstraintConcurrentMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.logging.Logger;
@@ -38,6 +39,7 @@ import org.slingerxv.limitart.logging.Loggers;
  * @author hank
  */
 @SuppressWarnings("rawtypes")
+@ThreadSafe
 public class FSM {
     private static Logger log = Loggers.create(FSM.class);
     private Map<Integer, State> stateMap = new HashMap<>();

@@ -17,7 +17,6 @@
 package org.slingerxv.limitart.collections;
 
 
-
 import org.slingerxv.limitart.base.ThreadSafe;
 
 import java.io.Serializable;
@@ -40,46 +39,116 @@ public final class AtomicIntMap<K> implements Map<K, Integer>, Serializable {
     private static final long serialVersionUID = 1L;
     private final ConcurrentHashMap<K, Integer> map = new ConcurrentHashMap<>();
 
+    /**
+     * 获取计数
+     *
+     * @param key
+     * @return
+     */
     public int getCount(K key) {
         return map.getOrDefault(key, 0);
     }
 
+    /**
+     * 放置计数
+     *
+     * @param key
+     * @param newValue
+     * @return
+     */
     public int putCount(K key, int newValue) {
         return getAndUpdate(key, x -> newValue);
     }
 
+    /**
+     * 计数总和
+     *
+     * @return
+     */
     public int sum() {
         return map.values().stream().mapToInt(Integer::intValue).sum();
     }
 
+    /**
+     * 加1并获取
+     *
+     * @param key
+     * @return
+     */
     public int incrementAndGet(K key) {
         return addAndGet(key, 1);
     }
 
+    /**
+     * 减1并获取
+     *
+     * @param key
+     * @return
+     */
     public int decrementAndGet(K key) {
         return addAndGet(key, -1);
     }
 
+    /**
+     * 增加并获取
+     *
+     * @param key
+     * @param delta
+     * @return
+     */
     public int addAndGet(K key, int delta) {
         return accumulateAndGet(key, delta, Integer::sum);
     }
 
+    /**
+     * 获取并加1
+     *
+     * @param key
+     * @return
+     */
     public int getAndIncrement(K key) {
         return getAndAdd(key, 1);
     }
 
+    /**
+     * 获取并减1
+     *
+     * @param key
+     * @return
+     */
     public int getAndDecrement(K key) {
         return getAndAdd(key, -1);
     }
 
+    /**
+     * 获取并增加
+     *
+     * @param key
+     * @param delta
+     * @return
+     */
     public int getAndAdd(K key, int delta) {
         return getAndAccumulate(key, delta, Integer::sum);
     }
 
+    /**
+     * 更新并获取
+     *
+     * @param key
+     * @param updaterFunction
+     * @return
+     */
     public int updateAndGet(K key, IntUnaryOperator updaterFunction) {
         return map.compute(key, (k, value) -> updaterFunction.applyAsInt((value == null) ? 0 : value));
     }
 
+    /**
+     * 获取并更新
+     *
+     * @param key
+     * @param updaterFunction
+     * @return
+     */
     private int getAndUpdate(K key, IntUnaryOperator updaterFunction) {
         AtomicInteger holder = new AtomicInteger();
         map.compute(key, (k, value) -> {
@@ -118,11 +187,26 @@ public final class AtomicIntMap<K> implements Map<K, Integer>, Serializable {
         return map.containsValue(value);
     }
 
+    /**
+     * 使用getCount代替
+     *
+     * @param key
+     * @return
+     */
+    @Deprecated
     @Override
     public Integer get(Object key) {
         return map.get(key);
     }
 
+    /**
+     * 使用putCount代替
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    @Deprecated
     @Override
     public Integer put(K key, Integer value) {
         return map.put(key, value);

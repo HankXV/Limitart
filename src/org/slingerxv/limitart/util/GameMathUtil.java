@@ -31,18 +31,46 @@ public final class GameMathUtil {
     private GameMathUtil() {
     }
 
+    /**
+     * 安全相加
+     *
+     * @param x
+     * @param y
+     * @return
+     */
     public static int safelyAdd(int x, int y) {
         return Math.addExact(x, y);
     }
 
+    /**
+     * 安全相加
+     *
+     * @param x
+     * @param y
+     * @return
+     */
     public static long safelyAdd(long x, long y) {
         return Math.addExact(x, y);
     }
 
+    /**
+     * 安全相乘
+     *
+     * @param x
+     * @param y
+     * @return
+     */
     public static int safelyMultiply(int x, int y) {
         return Math.multiplyExact(x, y);
     }
 
+    /**
+     * 安全相乘
+     *
+     * @param x
+     * @param y
+     * @return
+     */
     public static long safelyMultiply(long x, long y) {
         return Math.multiplyExact(x, y);
     }
