@@ -31,7 +31,7 @@ import com.lmax.disruptor.dsl.ProducerType;
  * @author Hank
  */
 public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
-    private static Logger log = Loggers.create(DisruptorTaskQueue.class);
+    private static Logger log = Loggers.create();
     private Disruptor<DisruptorTaskQueueEvent> disruptor;
     private NamedThreadFactory threadFactory;
     private Test1<T> intercept;

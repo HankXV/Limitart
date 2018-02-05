@@ -15,7 +15,6 @@
  */
 package org.slingerxv.limitart.script;
 
-import org.slingerxv.limitart.script.Script;
 
 
 /**

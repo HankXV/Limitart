@@ -29,12 +29,8 @@ public class HashedTable<R, C, V> implements Table<R, C, V> {
     private final Map<R, Map<C, V>> maps = new HashMap<>();
 
     @Override
-    public Collection<V> values() {
-        List<V> list = new LinkedList<>();
-        for (Map<C, V> map : maps.values()) {
-            list.addAll(map.values());
-        }
-        return list;
+    public Set<R> keySet() {
+        return maps.keySet();
     }
 
     @Override

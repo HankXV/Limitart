@@ -41,7 +41,7 @@ import org.slingerxv.limitart.logging.Loggers;
 @SuppressWarnings("rawtypes")
 @ThreadSafe
 public class FSM {
-    private static Logger log = Loggers.create(FSM.class);
+    private static Logger log = Loggers.create();
     private Map<Integer, State> stateMap = new HashMap<>();
     private Queue<Integer> stateQueue = new LinkedList<>();
     private State preState;
@@ -157,12 +157,10 @@ public class FSM {
      */
     @SuppressWarnings("unchecked")
     public void loop() throws StateException {
-        Thread nowThread = Thread.currentThread();
-        if (lastThread != null && !lastThread.equals(nowThread)) {
-            throw new StateException("not allowed to run on a deferent thread,last:" + lastThread.getName() + ",now:"
-                    + nowThread.getName());
+        if (lastThread != null) {
+            Conditions.sameThread(lastThread);
         }
-        lastThread = nowThread;
+        lastThread = Thread.currentThread();
         long now = System.currentTimeMillis();
         long deltaTimeInMills = this.lastLoopTime == 0 ? 0 : now - this.lastLoopTime;
         lastLoopTime = now;

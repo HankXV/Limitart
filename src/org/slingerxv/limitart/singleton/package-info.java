@@ -13,16 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.injection;
-
 /**
- * 注册器
- *
- * @author Hank
- * @version 2017/11/11 21:47
+ * 轻量单例依赖注入
  */
-public class Register<T> {
-    public Register as(Class<? extends T> impl) {
-        return this;
-    }
-}
+package org.slingerxv.limitart.singleton;

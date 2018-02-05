@@ -15,7 +15,7 @@
  */
 package org.slingerxv.limitart.net.binary;
 
-import org.slingerxv.limitart.util.LimitartException;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 消息IO异常
@@ -23,7 +23,7 @@ import org.slingerxv.limitart.util.LimitartException;
  * @author hank
  *
  */
-public class BinaryMessageIOException extends LimitartException {
+public class BinaryMessageIOException extends LimitartNonRuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	public BinaryMessageIOException(String info) {

@@ -13,24 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.injection;
-
-import java.lang.annotation.*;
-
 /**
- * 需要被绑定的类
- *
- * @author hank
+ * 轻量对象池的实现
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.TYPE})
-public @interface Bean {
-    /**
-     * 是否为单例
-     *
-     * @return
-     */
-    boolean singleton() default false;
-}
-
+package org.slingerxv.limitart.pool;

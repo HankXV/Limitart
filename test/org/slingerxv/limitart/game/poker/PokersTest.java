@@ -17,7 +17,7 @@ public class PokersTest {
     private List<List<Byte>> fiveCards;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         pokers = new ArrayList<>();
         cards = Pokers.createPokerWithJoker();
         byte[] pokers = Pokers.createPoker();
@@ -32,7 +32,7 @@ public class PokersTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
     }
 

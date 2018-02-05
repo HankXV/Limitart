@@ -42,7 +42,7 @@ import org.slingerxv.limitart.logging.Loggers;
  * @author hank
  */
 public abstract class AbstractNettyClient {
-    private static Logger log = Loggers.create(AbstractNettyServer.class);
+    private static Logger log = Loggers.create();
     protected final static EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
     private String clientName;
@@ -69,7 +69,7 @@ public abstract class AbstractNettyClient {
                 .handler(new ChannelInitializer<SocketChannel>() {
 
                     @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
+                    protected void initChannel(SocketChannel ch) {
                         initPipeline(ch.pipeline());
                         ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                             @Override

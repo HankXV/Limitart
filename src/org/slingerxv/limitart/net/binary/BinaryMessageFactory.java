@@ -37,7 +37,7 @@ import org.slingerxv.limitart.util.ReflectionUtil;
  * @author hank
  */
 public class BinaryMessageFactory {
-    private static Logger log = Loggers.create(BinaryMessageFactory.class);
+    private static Logger log = Loggers.create();
     // !!这里的asm应用经测试在JAVA8下最优
     private final Map<Short, MessageContext> msgs = new HashMap<>();
     private final Map<Class<?>, Object> managerInstances = new HashMap<>();
@@ -51,7 +51,7 @@ public class BinaryMessageFactory {
      *
      * @return
      */
-    public static BinaryMessageFactory createEmpty() {
+    public static BinaryMessageFactory empty() {
         return new BinaryMessageFactory();
     }
 
@@ -68,7 +68,7 @@ public class BinaryMessageFactory {
             throws IOException, ReflectiveOperationException, BinaryMessageIDDuplicatedException {
         Conditions.notNull(scanPackage, "scanPackage");
         BinaryMessageFactory factory = new BinaryMessageFactory();
-        List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(scanPackage, Object.class);
+        List<Class<?>> classesByPackage = ReflectionUtil.getClassesBySuperClass(scanPackage, Object.class);
         for (Class<?> clazz : classesByPackage) {
             factory.registerManager(clazz, null);
         }
@@ -89,7 +89,7 @@ public class BinaryMessageFactory {
             throws IOException, ReflectiveOperationException, BinaryMessageIDDuplicatedException {
         Conditions.notNull(scanPackage, "scanPackage");
         BinaryMessageFactory factory = new BinaryMessageFactory();
-        List<Class<?>> classesByPackage = ReflectionUtil.getClassesByPackage(scanPackage, Object.class);
+        List<Class<?>> classesByPackage = ReflectionUtil.getClassesBySuperClass(scanPackage, Object.class);
         for (Class<?> clazz : classesByPackage) {
             factory.registerManager(clazz, confirmInstance);
         }

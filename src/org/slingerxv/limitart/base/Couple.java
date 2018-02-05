@@ -13,31 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.injection;
+package org.slingerxv.limitart.base;
 
 /**
- * 注射器
+ * 一对(男左女右)
  *
- * @author Hank
- * @version 2017/11/11 21:37
+ * @param <H>
+ * @param <W>
  */
-public class Injector {
-    private Injector() {
+public interface Couple<H, W> {
+    static <H, W> Couple<H, W> ofImmutable(H husband, W wife) {
+        return new ImmutableCouple(husband, wife);
     }
 
-    public static Injector create() {
-        return new Injector();
-    }
+    H get1();
 
-    public <T> Register<T> reg(Class<T> clazz) {
-        return null;
-    }
-
-    public <T> T get(Class<?> mod) {
-        return null;
-    }
-
-    public <T> T get(Class<?> mod, Class<?> as) {
-        return null;
-    }
+    W get2();
 }

@@ -116,7 +116,7 @@ public class Pokers {
      */
     public static void shuffle(byte[] cards) {
         for (int oldIndex = 0; oldIndex < cards.length; ++oldIndex) {
-            int newIndex = RandomUtil.randomInt(0, cards.length - 1);
+            int newIndex = RandomUtil.nextInt(0, cards.length - 1);
             if (newIndex == oldIndex) {
                 continue;
             }

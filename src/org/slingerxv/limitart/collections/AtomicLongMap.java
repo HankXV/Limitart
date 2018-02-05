@@ -18,6 +18,7 @@ package org.slingerxv.limitart.collections;
 
 
 import org.slingerxv.limitart.base.*;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -118,13 +119,15 @@ public final class AtomicLongMap<K> implements Map<K, Long>, Serializable {
     }
 
     @Override
+    @Deprecated
     public Long get(@NotNull Object key) {
-        return map.get(key);
+        throw new NotImplementedException();
     }
 
     @Override
+    @Deprecated
     public Long put(@NotNull K key, @NotNull Long value) {
-        return map.put(key, value);
+        throw new NotImplementedException();
     }
 
     @Override

@@ -32,47 +32,100 @@ public final class GameMathUtil {
     }
 
     /**
-     * 安全相加
+     * 安全相加,如果越界返回int最大值
      *
      * @param x
      * @param y
      * @return
      */
-    public static int safelyAdd(int x, int y) {
-        return Math.addExact(x, y);
+    public static int safeAdd(int x, int y) {
+        int r = x + y;
+        if (((x ^ r) & (y ^ r)) < 0) {
+            return Integer.MAX_VALUE;
+        }
+        return r;
     }
 
     /**
-     * 安全相加
+     * 安全相减,如果越界返回int最小值
      *
      * @param x
      * @param y
      * @return
      */
-    public static long safelyAdd(long x, long y) {
-        return Math.addExact(x, y);
+    public static int safeSub(int x, int y) {
+        int r = x - y;
+        if (((x ^ y) & (x ^ r)) < 0) {
+            return Integer.MIN_VALUE;
+        }
+        return r;
     }
 
     /**
-     * 安全相乘
+     * 安全相加,如果越界返回long最大值
      *
      * @param x
      * @param y
      * @return
      */
-    public static int safelyMultiply(int x, int y) {
-        return Math.multiplyExact(x, y);
+    public static long safeAdd(long x, long y) {
+        long r = x + y;
+        if (((x ^ r) & (y ^ r)) < 0) {
+            return Long.MAX_VALUE;
+        }
+        return r;
     }
 
     /**
-     * 安全相乘
+     * 安全相减,如果越界返回long最小值
      *
      * @param x
      * @param y
      * @return
      */
-    public static long safelyMultiply(long x, long y) {
-        return Math.multiplyExact(x, y);
+    public static long safeSub(long x, long y) {
+        long r = x - y;
+        if (((x ^ y) & (x ^ r)) < 0) {
+            return Long.MIN_VALUE;
+        }
+        return r;
+    }
+
+
+    /**
+     * 安全相乘,越界返回int最大值
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    public static int safelyMulti(int x, int y) {
+        long r = (long) x * (long) y;
+        if ((int) r != r) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) r;
+    }
+
+
+    /**
+     * 安全相乘,越界返回long最大值
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    public static long safelyMulti(long x, long y) {
+        long r = x * y;
+        long ax = Math.abs(x);
+        long ay = Math.abs(y);
+        if (((ax | ay) >>> 31 != 0)) {
+            if (((y != 0) && (r / y != x)) ||
+                    (x == Long.MIN_VALUE && y == -1)) {
+                return Long.MAX_VALUE;
+            }
+        }
+        return r;
     }
 
     /**

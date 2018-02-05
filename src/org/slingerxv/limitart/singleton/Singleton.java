@@ -13,25 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.injection;
+package org.slingerxv.limitart.singleton;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * 针孔
+ * 需要指定为单例的类
  *
- * @author Hank
- * @version 2017/11/11 21:06
+ * @author hank
  */
-@Target({METHOD, CONSTRUCTOR, FIELD})
+@Target({ElementType.TYPE})
 @Retention(RUNTIME)
 @Documented
-public @interface Hole {
+public @interface Singleton {
 }
+

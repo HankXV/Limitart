@@ -18,7 +18,6 @@ package org.slingerxv.limitart.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -99,7 +98,7 @@ public final class SecurityUtil {
         return new String(base64Decode(b64string.getBytes(CharsetUtil.UTF_8)));
     }
 
-    public static String base64Encode2(String stringsrc) throws UnsupportedEncodingException {
+    public static String base64Encode2(String stringsrc) {
         return new String(base64Encode(stringsrc.getBytes(CharsetUtil.UTF_8)), CharsetUtil.UTF_8);
     }
 
@@ -332,7 +331,7 @@ public final class SecurityUtil {
         if (off + len > source.length) {
             throw new IllegalArgumentException(
                     String.format("Cannot have offset of %d and length of %d with array of length %d",
-                            new Object[]{off, len, source.length}));
+                            off, len, source.length));
         }
 
         boolean breakLines = (options & 0x8) > 0;
@@ -381,12 +380,12 @@ public final class SecurityUtil {
         if ((srcOffset < 0) || (srcOffset + 3 >= source.length)) {
             throw new IllegalArgumentException(
                     String.format("Source array with length %d cannot have offset of %d and still process four bytes.",
-                            new Object[]{source.length, srcOffset}));
+                            source.length, srcOffset));
         }
         if ((destOffset < 0) || (destOffset + 2 >= destination.length)) {
             throw new IllegalArgumentException(String.format(
                     "Destination array with length %d cannot have offset of %d and still store three bytes.",
-                    new Object[]{destination.length, destOffset}));
+                    destination.length, destOffset));
         }
 
         byte[] DECODABET = getDecodabet(options);
@@ -424,7 +423,7 @@ public final class SecurityUtil {
         if ((off < 0) || (off + len > source.length)) {
             throw new IllegalArgumentException(
                     String.format("Source array with length %d cannot have offset of %d and process %d bytes.",
-                            new Object[]{source.length, off, len}));
+                            source.length, off, len));
         }
 
         if (len == 0) {

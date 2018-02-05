@@ -15,7 +15,8 @@
  */
 package org.slingerxv.limitart.fsm;
 
-import org.slingerxv.limitart.util.LimitartException;
+
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 状态机异常
@@ -23,7 +24,7 @@ import org.slingerxv.limitart.util.LimitartException;
  * @author hank
  *
  */
-public class StateException extends LimitartException {
+public class StateException extends LimitartNonRuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	public StateException(String info) {

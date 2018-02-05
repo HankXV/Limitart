@@ -16,6 +16,7 @@
 package org.slingerxv.limitart.net;
 
 import org.slingerxv.limitart.net.binary.BinaryMessageFactory;
+import org.slingerxv.limitart.net.binary.BinaryMessageIDDuplicatedException;
 import org.slingerxv.limitart.net.binary.BinaryServer;
 
 /**
@@ -23,8 +24,8 @@ import org.slingerxv.limitart.net.binary.BinaryServer;
  */
 public class BinaryServerDemo {
     public static void main(String[] args)
-            throws Exception {
+            throws BinaryMessageIDDuplicatedException, InstantiationException, IllegalAccessException {
         new BinaryServer.BinaryServerBuilder()
-                .factory(BinaryMessageFactory.createEmpty().registerManager(BinaryManagerDemo.class)).build().startServer();
+                .factory(BinaryMessageFactory.empty().registerManager(BinaryManagerDemo.class)).build().startServer();
     }
 }

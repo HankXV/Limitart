@@ -15,7 +15,7 @@
  */
 package org.slingerxv.limitart.game.bag;
 
-import org.slingerxv.limitart.util.LimitartException;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
  * 拆分数量不足异常
@@ -23,7 +23,7 @@ import org.slingerxv.limitart.util.LimitartException;
  * @author hank
  *
  */
-public class ItemSliptNotEnoughNumException extends LimitartException {
+public class ItemSliptNotEnoughNumException extends LimitartNonRuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	public ItemSliptNotEnoughNumException(int haveNum, int yourNum) {

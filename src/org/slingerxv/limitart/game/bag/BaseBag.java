@@ -20,7 +20,6 @@ import org.slingerxv.limitart.base.Test1;
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 包裹
@@ -110,7 +109,7 @@ public abstract class BaseBag {
      * @throws ItemNotExistException
      */
     public void addItem(BaseBagItem item)
-            throws BagFullException, BagGridOccupiedException, ItemZeroNumException, ItemNotExistException {
+            throws BagFullException, ItemZeroNumException, ItemNotExistException {
         addItem(Integer.MIN_VALUE, item);
     }
 
@@ -220,7 +219,7 @@ public abstract class BaseBag {
      * @return
      */
     public void makeUp() {
-        Map<Integer, BaseBagItem> tempGrids = new ConcurrentHashMap<>();
+        Map<Integer, BaseBagItem> tempGrids = new HashMap<>();
         // 全部尝试合并
         for (int i = START_GRID; i < capacity(); ++i) {
             for (int j = i + 1; j < capacity(); ++j) {
@@ -266,7 +265,7 @@ public abstract class BaseBag {
      * @throws ItemZeroNumException
      */
     private void split(BaseBagItem item, int num) throws ItemNotExistException, ItemSliptNotEnoughNumException,
-            BagFullException, BagGridOccupiedException, ItemZeroNumException {
+            BagFullException, ItemZeroNumException {
         if (item == null) {
             throw new ItemNotExistException();
         }
