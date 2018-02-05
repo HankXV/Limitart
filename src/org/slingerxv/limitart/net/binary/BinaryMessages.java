@@ -15,20 +15,6 @@
  */
 package org.slingerxv.limitart.net.binary;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Objects;
-import java.util.stream.IntStream;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-
 import org.slingerxv.limitart.logging.Logger;
 import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.net.binary.BinaryMessageProtoFileInfo.BinaryMessageFieldProtoInfo;
@@ -38,6 +24,19 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
 /**
  * 消息相关方法

@@ -16,7 +16,8 @@
 package org.slingerxv.limitart.net.binary;
 
 
-import org.slingerxv.limitart.base.*;
+import org.slingerxv.limitart.base.Conditions;
+import org.slingerxv.limitart.base.NotNull;
 import org.slingerxv.limitart.net.Session;
 
 /**

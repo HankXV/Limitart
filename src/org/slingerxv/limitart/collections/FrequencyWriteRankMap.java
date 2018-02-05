@@ -15,15 +15,12 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import org.slingerxv.limitart.base.Conditions;
+import org.slingerxv.limitart.base.Func;
+import org.slingerxv.limitart.base.NotNull;
+import org.slingerxv.limitart.base.ThreadUnsafe;
 
-import org.slingerxv.limitart.base.*;
+import java.util.*;
 
 /**
  * 高频率写入排行结构 主要用于写入频率远远大于读取频率

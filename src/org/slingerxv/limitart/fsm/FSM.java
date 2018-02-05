@@ -15,15 +15,6 @@
  */
 package org.slingerxv.limitart.fsm;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.NotNull;
 import org.slingerxv.limitart.base.Proc;
@@ -32,6 +23,10 @@ import org.slingerxv.limitart.collections.ConstraintConcurrentMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.logging.Logger;
 import org.slingerxv.limitart.logging.Loggers;
+
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 状态机代理

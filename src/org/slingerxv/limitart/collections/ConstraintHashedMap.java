@@ -17,16 +17,16 @@ package org.slingerxv.limitart.collections;
 
 
 import org.slingerxv.limitart.base.ThreadSafe;
+import org.slingerxv.limitart.base.ThreadUnsafe;
 
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 约束型Map
  *
  * @author hank
  */
-@ThreadSafe
+@ThreadUnsafe
 public class ConstraintHashedMap<K> extends HashMap<K, Object> implements ConstraintMap<K> {
 
     /**

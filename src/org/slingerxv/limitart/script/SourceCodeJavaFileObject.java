@@ -15,16 +15,14 @@
  */
 package org.slingerxv.limitart.script;
 
+import io.netty.util.CharsetUtil;
+import org.slingerxv.limitart.util.FileUtil;
+
+import javax.tools.SimpleJavaFileObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-
-import javax.tools.SimpleJavaFileObject;
-
-import org.slingerxv.limitart.util.FileUtil;
-
-import io.netty.util.CharsetUtil;
 
 /**
  * 源码型JavaFileObject

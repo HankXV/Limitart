@@ -13,36 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.pool;
+package org.slingerxv.limitart.util;
 
-import org.slingerxv.limitart.base.Func;
+import org.slingerxv.limitart.base.Nullable;
 
 /**
- * 对象池
+ * 枚举工具
  *
  * @author hank
- * @version 2018/2/6 0006 0:03
+ * @version 2018/2/12 0012 20:22
  */
-public interface Pool<T extends Poolable> extends AutoCloseable {
+public final class EnumUtil {
     /**
-     * 创建一个默认的对象池
+     * 获取序号对应的枚举类型
      *
-     * @param <T>
+     * @param c
+     * @param ordinal
+     * @param <E>
      * @return
      */
-    static <T extends Poolable> Pool<T> create(Func<T> factory, int initialSize) {
-        return new SimplePool<>(factory, initialSize);
+    @Nullable
+    public static <E extends Enum<E>> E byOrdinal(Class<E> c, int ordinal) {
+        E[] enumConstants = c.getEnumConstants();
+        return ordinal > enumConstants.length - 1 ? null : enumConstants[ordinal];
     }
-
-    /**
-     * 取出对象
-     *
-     * @return
-     */
-    T get();
-
-    /**
-     * 归还对象
-     */
-    void back(T t);
 }

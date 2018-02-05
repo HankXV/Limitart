@@ -15,15 +15,15 @@
  */
 package org.slingerxv.limitart.util;
 
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.LongAdder;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
+
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.LongAdder;
 
 public class UniqueIDUtilTest {
     private Set<Long> sets;

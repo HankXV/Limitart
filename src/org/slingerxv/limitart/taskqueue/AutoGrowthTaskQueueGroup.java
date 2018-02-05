@@ -15,7 +15,10 @@
  */
 package org.slingerxv.limitart.taskqueue;
 
-import org.slingerxv.limitart.base.*;
+import org.slingerxv.limitart.base.Conditions;
+import org.slingerxv.limitart.base.Func1;
+import org.slingerxv.limitart.base.NotNull;
+import org.slingerxv.limitart.base.ThreadSafe;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
 import org.slingerxv.limitart.logging.Logger;
 import org.slingerxv.limitart.logging.Loggers;
@@ -30,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Hank
  */
+@ThreadSafe
 public class AutoGrowthTaskQueueGroup<T> {
     private static Logger log = Loggers.create();
     private AtomicInteger threadId = new AtomicInteger(0);
@@ -37,10 +41,10 @@ public class AutoGrowthTaskQueueGroup<T> {
     private int entityCountPerThread;
     private int coreThreadCount;
     private int maxThreadCount;
-    private Func1<Integer, ITaskQueue<T>> newTaskQueue;
+    private Func1<Integer, TaskQueue<T>> newTaskQueue;
 
     public AutoGrowthTaskQueueGroup(int entityCountPerThread, int coreThreadCount, int initThreadCount,
-                                    int maxThreadCount, @NotNull Func1<Integer, ITaskQueue<T>> newTaskQueue) {
+                                    int maxThreadCount, @NotNull Func1<Integer, TaskQueue<T>> newTaskQueue) {
         Conditions.notNull(newTaskQueue, "taskQueueFactory");
         this.newTaskQueue = newTaskQueue;
         this.maxThreadCount = maxThreadCount;
@@ -69,7 +73,7 @@ public class AutoGrowthTaskQueueGroup<T> {
      * @throws TaskQueueException
      */
     @ThreadSafe
-    public synchronized void registerEntity(@NotNull AutoGrowthEntity entity) throws TaskQueueException {
+    public synchronized AutoGrowthTaskQueueGroup registerEntity(@NotNull AutoGrowthEntity entity) throws TaskQueueException {
         if (entity.getThreadIndex() > 0) {
             throw new TaskQueueException("entity has already registered!");
         }
@@ -96,6 +100,7 @@ public class AutoGrowthTaskQueueGroup<T> {
         }
         thread.entities.add(entity);
         entity.setThreadIndex(thread.threadIndex);
+        return this;
     }
 
     /**
@@ -106,8 +111,9 @@ public class AutoGrowthTaskQueueGroup<T> {
      * @throws TaskQueueException
      */
     @ThreadSafe
-    public void addCommand(@NotNull AutoGrowthEntity entity, @NotNull T t) throws TaskQueueException {
+    public AutoGrowthTaskQueueGroup addCommand(@NotNull AutoGrowthEntity entity, @NotNull T t) throws TaskQueueException {
         findTaskQueue(entity).addCommand(t);
+        return this;
     }
 
     /**
@@ -117,7 +123,7 @@ public class AutoGrowthTaskQueueGroup<T> {
      * @return
      * @throws TaskQueueException
      */
-    public ITaskQueue<T> findTaskQueue(@NotNull AutoGrowthEntity entity) throws TaskQueueException {
+    public TaskQueue<T> findTaskQueue(@NotNull AutoGrowthEntity entity) throws TaskQueueException {
         if (entity.getThreadIndex() == 0) {
             throw new TaskQueueException("entity does not register!");
         }
@@ -131,10 +137,10 @@ public class AutoGrowthTaskQueueGroup<T> {
      * @throws TaskQueueException
      */
     @ThreadSafe
-    public synchronized void unregisterEntity(@NotNull AutoGrowthEntity entity) throws TaskQueueException {
+    public synchronized AutoGrowthTaskQueueGroup unregisterEntity(@NotNull AutoGrowthEntity entity) throws TaskQueueException {
         int threadIndex = entity.getThreadIndex();
         if (threadIndex == 0) {
-            return;
+            return this;
         }
         if (!threads.containsKey(threadIndex)) {
             throw new TaskQueueException("thread " + threadIndex + " already destroyed！");
@@ -155,6 +161,7 @@ public class AutoGrowthTaskQueueGroup<T> {
                 remove.thread.stopServer();
             }
         }
+        return this;
     }
 
     private AutoGrowthSegment<T> newGrowthThread() {
@@ -174,7 +181,7 @@ public class AutoGrowthTaskQueueGroup<T> {
      */
     private static class AutoGrowthSegment<T> {
         private int threadIndex;
-        private ITaskQueue<T> thread;
+        private TaskQueue<T> thread;
         private Set<AutoGrowthEntity> entities = new ConcurrentHashSet<>();
     }
 }

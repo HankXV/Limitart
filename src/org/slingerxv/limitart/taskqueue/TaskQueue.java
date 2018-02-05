@@ -13,36 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.pool;
+package org.slingerxv.limitart.taskqueue;
 
-import org.slingerxv.limitart.base.Func;
+import org.slingerxv.limitart.net.Server;
 
 /**
- * 对象池
+ * 任务队列接口
  *
+ * @param <T>
  * @author hank
- * @version 2018/2/6 0006 0:03
  */
-public interface Pool<T extends Poolable> extends AutoCloseable {
-    /**
-     * 创建一个默认的对象池
-     *
-     * @param <T>
-     * @return
-     */
-    static <T extends Poolable> Pool<T> create(Func<T> factory, int initialSize) {
-        return new SimplePool<>(factory, initialSize);
+public interface TaskQueue<T> extends Server {
+    static <T> DisruptorTaskQueue<T> create(String threadName) {
+        return DisruptorTaskQueue.create(threadName);
     }
 
     /**
-     * 取出对象
+     * 添加命令
      *
-     * @return
+     * @param t
+     * @throws TaskQueueException
      */
-    T get();
-
-    /**
-     * 归还对象
-     */
-    void back(T t);
+    void addCommand(T t) throws TaskQueueException;
 }

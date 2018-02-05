@@ -17,6 +17,7 @@ package org.slingerxv.limitart.base;
 
 import org.slingerxv.limitart.util.GameMathUtil;
 
+
 /**
  * int计数器
  *
@@ -129,5 +130,23 @@ public class IntCounter {
         int old = getCount();
         setCount(old + delta);
         return old;
+    }
+
+    /**
+     * 是否到达下边界
+     *
+     * @return
+     */
+    public boolean reachLow() {
+        return count == low();
+    }
+
+    /**
+     * 是否到达上边界
+     *
+     * @return
+     */
+    public boolean reachHigh() {
+        return count == high();
     }
 }

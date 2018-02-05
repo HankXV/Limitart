@@ -17,7 +17,8 @@
 package org.slingerxv.limitart.collections;
 
 
-import org.slingerxv.limitart.base.*;
+import org.slingerxv.limitart.base.NotNull;
+import org.slingerxv.limitart.base.ThreadSafe;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;

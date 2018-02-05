@@ -18,22 +18,25 @@ package org.slingerxv.limitart.base;
 /**
  * 不可变的一对
  */
+@ThreadUnsafe
 public class ImmutableCouple<H, W> implements Couple {
     private final H h;
     private final W w;
 
-    public ImmutableCouple(H h, W w) {
+    public ImmutableCouple(@Nullable H h, @Nullable W w) {
         this.h = h;
         this.w = w;
     }
 
     @Override
-    public Object get1() {
+    public @Nullable
+    Object get1() {
         return this.h;
     }
 
     @Override
-    public Object get2() {
+    public @Nullable
+    Object get2() {
         return this.w;
     }
 }

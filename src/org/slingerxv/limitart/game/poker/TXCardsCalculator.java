@@ -15,11 +15,12 @@
  */
 package org.slingerxv.limitart.game.poker;
 
+import org.slingerxv.limitart.util.CollectionUtil;
+import org.slingerxv.limitart.util.EnumUtil;
+import org.slingerxv.limitart.util.GameMathUtil;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slingerxv.limitart.util.CollectionUtil;
-import org.slingerxv.limitart.util.GameMathUtil;
 
 /**
  * 德州扑克牌型判定
@@ -28,25 +29,25 @@ import org.slingerxv.limitart.util.GameMathUtil;
  */
 public class TXCardsCalculator {
     // 高牌
-    private final static long HIGH_CARD = TXCardRank.HIGH_CARD.getValue() * 0x10000000000L;
+    private final static long HIGH_CARD = TXCardRank.HIGH_CARD.ordinal() * 0x10000000000L;
     // 一对
-    private final static long ONE_PAIR = TXCardRank.ONE_PAIR.getValue() * 0x10000000000L;
+    private final static long ONE_PAIR = TXCardRank.ONE_PAIR.ordinal() * 0x10000000000L;
     // 两对
-    private final static long TWO_PAIR = TXCardRank.TWO_PAIR.getValue() * 0x10000000000L;
+    private final static long TWO_PAIR = TXCardRank.TWO_PAIR.ordinal() * 0x10000000000L;
     // 三条
-    private final static long THREE_OF_A_KIND = TXCardRank.THREE_OF_A_KIND.getValue() * 0x10000000000L;
+    private final static long THREE_OF_A_KIND = TXCardRank.THREE_OF_A_KIND.ordinal() * 0x10000000000L;
     // 顺子
-    private final static long STRAIGHT = TXCardRank.STRAIGHT.getValue() * 0x10000000000L;
+    private final static long STRAIGHT = TXCardRank.STRAIGHT.ordinal() * 0x10000000000L;
     // 同花
-    private final static long FLUSH = TXCardRank.FLUSH.getValue() * 0x10000000000L;
+    private final static long FLUSH = TXCardRank.FLUSH.ordinal() * 0x10000000000L;
     // 葫芦
-    private final static long FULL_HOUSE = TXCardRank.FULL_HOUSE.getValue() * 0x10000000000L;
+    private final static long FULL_HOUSE = TXCardRank.FULL_HOUSE.ordinal() * 0x10000000000L;
     // 四条
-    private final static long FOUR_OF_A_KIND = TXCardRank.FOUR_OF_A_KIND.getValue() * 0x10000000000L;
+    private final static long FOUR_OF_A_KIND = TXCardRank.FOUR_OF_A_KIND.ordinal() * 0x10000000000L;
     // 同花顺
-    private final static long STRAIGHT_FLUSH = TXCardRank.STRAIGHT_FLUSH.getValue() * 0x10000000000L;
+    private final static long STRAIGHT_FLUSH = TXCardRank.STRAIGHT_FLUSH.ordinal() * 0x10000000000L;
     // 皇家同花顺
-    private final static long ROYAL_FLUSH = TXCardRank.ROYAL_FLUSH.getValue() * 0x10000000000L;
+    private final static long ROYAL_FLUSH = TXCardRank.ROYAL_FLUSH.ordinal() * 0x10000000000L;
     // 原始数据
     private byte[] cards;
     private byte[] numbers;
@@ -162,7 +163,7 @@ public class TXCardsCalculator {
      * @return
      */
     public static TXCardRank getCardRank(long evaluator, int cardCount) {
-        return TXCardRank.getTXCardRank((int) (evaluator >> (cardCount << 3)));
+        return EnumUtil.byOrdinal(TXCardRank.class, (int) (evaluator >> (cardCount << 3)));
     }
 
     // 评估数值
@@ -180,7 +181,7 @@ public class TXCardsCalculator {
      * @return
      */
     public TXCardRank getRank() {
-        return TXCardRank.getTXCardRank((int) (this.rank / 0x10000000000L));
+        return EnumUtil.byOrdinal(TXCardRank.class, (int) (this.rank / 0x10000000000L));
     }
 
     /**

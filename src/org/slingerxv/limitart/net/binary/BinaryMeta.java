@@ -15,6 +15,13 @@
  */
 package org.slingerxv.limitart.net.binary;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.CorruptedFrameException;
+import io.netty.util.CharsetUtil;
+import org.slingerxv.limitart.reflectasm.ConstructorAccess;
+import org.slingerxv.limitart.reflectasm.FieldAccess;
+import org.slingerxv.limitart.util.ReflectionUtil;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -22,14 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.slingerxv.limitart.reflectasm.ConstructorAccess;
-import org.slingerxv.limitart.reflectasm.FieldAccess;
-import org.slingerxv.limitart.util.ReflectionUtil;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.CorruptedFrameException;
-import io.netty.util.CharsetUtil;
 
 /**
  * 二进制元数据

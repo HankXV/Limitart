@@ -33,7 +33,7 @@ public class CoupleTest {
 
     @Test
     public void proc() {
-        Assert.assertTrue(couple.getHusband() == 10);
-        Assert.assertTrue(couple.getWife().equals("wife"));
+        Assert.assertTrue(couple.get1() == 10);
+        Assert.assertTrue(couple.get2().equals("wife"));
     }
 }

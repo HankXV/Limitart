@@ -15,8 +15,9 @@
  */
 package org.slingerxv.limitart.net;
 
-import java.net.SocketAddress;
-
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.Proc2;
 import org.slingerxv.limitart.base.Procs;
@@ -24,9 +25,7 @@ import org.slingerxv.limitart.collections.ConstraintConcurrentMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.net.binary.BinaryMessageIOException;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
+import java.net.SocketAddress;
 
 /**
  * 长链接会话

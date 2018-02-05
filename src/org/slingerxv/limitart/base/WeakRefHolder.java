@@ -22,27 +22,36 @@ import java.lang.ref.WeakReference;
  *
  * @author hank
  * @version 2018/2/5 0005 21:16
+ * @see WeakReference
  */
+@ThreadUnsafe
 public class WeakRefHolder<T> {
     private WeakReference<T> ref;
 
     public static <T> WeakRefHolder<T> of(T t) {
         Conditions.notNull(t);
-        return empty().set(t);
+        return new WeakRefHolder(t);
     }
 
     public static <T> WeakRefHolder<T> empty() {
-        return new WeakRefHolder<>();
+        return new WeakRefHolder();
     }
 
-    public T get() {
+    private WeakRefHolder(T t) {
+        ref = new WeakReference<>(t);
+    }
+
+    private WeakRefHolder() {}
+
+    public @Nullable
+    T get() {
         if (ref == null) {
             return null;
         }
         return ref.get();
     }
 
-    public WeakRefHolder set(T t) {
+    public WeakRefHolder set(@Nullable T t) {
         T tmp = get();
         if (tmp != null && tmp == t) {
             return this;

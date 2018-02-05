@@ -21,10 +21,11 @@ package org.slingerxv.limitart.base;
  * @author hank
  * @version 2017/12/18 0018 19:38
  */
+@ThreadUnsafe
 public class Holder<T> {
     private T t;
 
-    public static <T> Holder of(T t) {
+    public static <T> Holder of(@Nullable T t) {
         return empty().set(t);
     }
 
@@ -35,11 +36,12 @@ public class Holder<T> {
     private Holder() {
     }
 
-    public T get() {
+    public @Nullable
+    T get() {
         return this.t;
     }
 
-    public Holder set(T t) {
+    public Holder set(@Nullable T t) {
         this.t = t;
         return this;
     }

@@ -19,11 +19,7 @@ import org.slingerxv.limitart.base.Test1;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;

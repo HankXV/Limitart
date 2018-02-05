@@ -16,17 +16,16 @@
 package org.slingerxv.limitart.net.binary;
 
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.slingerxv.limitart.base.*;
 import org.slingerxv.limitart.logging.Logger;
 import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.net.AbstractNettyClient;
 import org.slingerxv.limitart.net.AddressPair;
 import org.slingerxv.limitart.net.Client;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
  * 二进制通信客户端
