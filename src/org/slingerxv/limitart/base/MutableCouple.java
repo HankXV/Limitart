@@ -18,12 +18,13 @@ package org.slingerxv.limitart.base;
 /**
  * 可变的一对
  */
+@ThreadUnsafe
 public class MutableCouple<H, W> implements Couple {
     private H h;
     private W w;
 
 
-    public MutableCouple(H h, W w) {
+    public MutableCouple(@Nullable H h, @Nullable W w) {
         this.h = h;
         this.w = w;
     }
@@ -32,22 +33,24 @@ public class MutableCouple<H, W> implements Couple {
     }
 
     @Override
-    public Object get1() {
+    public @Nullable
+    Object get1() {
         return this.h;
     }
 
     @Override
-    public Object get2() {
+    public @Nullable
+    Object get2() {
         return this.w;
     }
 
 
-    public MutableCouple set1(H h) {
+    public MutableCouple set1(@Nullable H h) {
         this.h = h;
         return this;
     }
 
-    public MutableCouple set2(W w) {
+    public MutableCouple set2(@Nullable W w) {
         this.w = w;
         return this;
     }

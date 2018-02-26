@@ -15,9 +15,8 @@
  */
 package org.slingerxv.limitart.net.binary;
 
-import org.slingerxv.limitart.net.Session;
-
 import io.netty.buffer.ByteBuf;
+import org.slingerxv.limitart.net.Session;
 
 /**
  * 默认解码器

@@ -21,6 +21,7 @@ package org.slingerxv.limitart.base;
  * @author hank
  * @version 2017/12/18 0018 19:39
  */
+@ThreadUnsafe
 public class LongHolder {
     private long value;
 

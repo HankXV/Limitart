@@ -13,36 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.pool;
-
-import org.slingerxv.limitart.base.Func;
+package org.slingerxv.limitart.net.binary;
 
 /**
- * 对象池
+ * int值消息
  *
  * @author hank
- * @version 2018/2/6 0006 0:03
+ * @version 2018/2/12 0012 20:38
  */
-public interface Pool<T extends Poolable> extends AutoCloseable {
-    /**
-     * 创建一个默认的对象池
-     *
-     * @param <T>
-     * @return
-     */
-    static <T extends Poolable> Pool<T> create(Func<T> factory, int initialSize) {
-        return new SimplePool<>(factory, initialSize);
+public abstract class BinaryByteMessage extends BinaryMessage {
+    private byte code;
+
+    public BinaryByteMessage(int code) {
+        this.code = (byte) code;
     }
 
-    /**
-     * 取出对象
-     *
-     * @return
-     */
-    T get();
+    public byte getCode() {
+        return code;
+    }
 
-    /**
-     * 归还对象
-     */
-    void back(T t);
+    @Override
+    public final void encode() throws IllegalArgumentException, IllegalAccessException, BinaryMessageCodecException {
+        putByte(this.code);
+    }
+
+    @Override
+    public final void decode() throws IllegalArgumentException, IllegalAccessException, BinaryMessageCodecException {
+        this.code = getByte();
+    }
 }

@@ -21,11 +21,13 @@ package org.slingerxv.limitart.base;
  *
  * @author hank
  * @version 2018/2/5 0005 21:16
+ * @see ThreadLocal
  */
+@ThreadSafe
 public class ThreadLocalHolder<T> {
     private ThreadLocal<T> ref = new ThreadLocal<>();
 
-    public static <T> ThreadLocalHolder<T> of(T t) {
+    public static <T> ThreadLocalHolder<T> of(@NotNull T t) {
         Conditions.notNull(t);
         return empty().set(t);
     }
@@ -34,11 +36,12 @@ public class ThreadLocalHolder<T> {
         return new ThreadLocalHolder<>();
     }
 
-    public T get() {
+    public @Nullable
+    T get() {
         return ref.get();
     }
 
-    public ThreadLocalHolder set(T t) {
+    public ThreadLocalHolder set(@Nullable T t) {
         if (t == null) {
             ref.remove();
         } else {

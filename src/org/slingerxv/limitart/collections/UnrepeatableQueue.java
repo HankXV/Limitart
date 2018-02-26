@@ -47,7 +47,7 @@ public class UnrepeatableQueue<V> {
      * @return
      */
     public boolean isEmpty() {
-        return size() <= 0;
+        return set.isEmpty();
     }
 
     /**

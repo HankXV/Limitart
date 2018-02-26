@@ -29,10 +29,12 @@ public class Conditions {
      * @param thread
      * @param <T>
      */
-    public static <T extends Thread> void sameThread(T thread) {
+    public static <T extends Thread> T sameThread(T thread) {
+        notNull(thread, "thread");
         if (thread != Thread.currentThread()) {
             throw new NotSameThreadException("caller must be only one,yours:%s,this:%s", thread, Thread.currentThread());
         }
+        return thread;
     }
 
     /**
@@ -43,10 +45,12 @@ public class Conditions {
      * @param params
      * @param <T>
      */
-    public static <T extends Thread> void sameThread(T thread, String template, Object... params) {
+    public static <T extends Thread> T sameThread(T thread, String template, Object... params) {
+        notNull(thread, "thread");
         if (thread != Thread.currentThread()) {
             throw new NotSameThreadException(template, params);
         }
+        return thread;
     }
 
     /**
@@ -84,7 +88,7 @@ public class Conditions {
      */
     public static void args(boolean isRight) {
         if (!isRight) {
-            throw new NotSameThreadException();
+            throw new IllegalArgumentException();
         }
     }
 

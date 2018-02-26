@@ -15,34 +15,13 @@
  */
 package org.slingerxv.limitart.pool;
 
-import org.slingerxv.limitart.base.Func;
-
 /**
- * 对象池
- *
  * @author hank
- * @version 2018/2/6 0006 0:03
+ * @version 2018/2/8 0008 16:13
  */
-public interface Pool<T extends Poolable> extends AutoCloseable {
-    /**
-     * 创建一个默认的对象池
-     *
-     * @param <T>
-     * @return
-     */
-    static <T extends Poolable> Pool<T> create(Func<T> factory, int initialSize) {
-        return new SimplePool<>(factory, initialSize);
+public class SimpleObj implements Poolable {
+    @Override
+    public void release() {
+        //DO NOTHING
     }
-
-    /**
-     * 取出对象
-     *
-     * @return
-     */
-    T get();
-
-    /**
-     * 归还对象
-     */
-    void back(T t);
 }

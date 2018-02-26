@@ -15,6 +15,9 @@
  */
 package org.slingerxv.limitart.util;
 
+import io.netty.util.CharsetUtil;
+import org.slingerxv.limitart.base.Conditions;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,9 +28,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import io.netty.util.CharsetUtil;
-import org.slingerxv.limitart.base.Conditions;
 
 public final class SecurityUtil {
     private static final String ALGORITHM_MD5 = "MD5";

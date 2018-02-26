@@ -15,10 +15,10 @@
  */
 package org.slingerxv.limitart.collections;
 
+import org.slingerxv.limitart.base.*;
+
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-
-import org.slingerxv.limitart.base.*;
 
 /**
  * LRU非线程安全型Map

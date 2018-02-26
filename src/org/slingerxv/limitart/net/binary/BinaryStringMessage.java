@@ -13,35 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.base;
+package org.slingerxv.limitart.net.binary;
 
 /**
- * Int持有器
+ * String值消息
  *
  * @author hank
- * @version 2017/12/18 0018 19:39
+ * @version 2018/2/12 0012 20:38
  */
-@ThreadUnsafe
-public class IntHolder {
-    private int value;
+public abstract class BinaryStringMessage extends BinaryMessage {
+    private String code;
 
-    public static IntHolder of(int value) {
-        return empty().set(value);
+    public BinaryStringMessage(String code) {
+        this.code = code;
     }
 
-    public static IntHolder empty() {
-        return new IntHolder();
+    public String getCode() {
+        return code;
     }
 
-    private IntHolder() {
+    @Override
+    public final void encode() throws IllegalArgumentException, IllegalAccessException, BinaryMessageCodecException {
+        putString(this.code);
     }
 
-    public int get() {
-        return this.value;
-    }
-
-    public IntHolder set(int value) {
-        this.value = value;
-        return this;
+    @Override
+    public final void decode() throws IllegalArgumentException, IllegalAccessException, BinaryMessageCodecException {
+        this.code = getString();
     }
 }

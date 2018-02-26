@@ -15,12 +15,12 @@
  */
 package org.slingerxv.limitart.taskqueue;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.slingerxv.limitart.base.*;
 import org.slingerxv.limitart.logging.Logger;
 import org.slingerxv.limitart.logging.Loggers;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 阻塞消息队列
@@ -29,7 +29,7 @@ import org.slingerxv.limitart.logging.Loggers;
  * @author hank
  * @see DisruptorTaskQueue
  */
-public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> {
+public class LinkedBlockingTaskQueue<T> extends Thread implements TaskQueue<T> {
     private static Logger log = Loggers.create();
     private BlockingQueue<T> queue = new LinkedBlockingQueue<>();
     private boolean start = false;
@@ -37,21 +37,25 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements ITaskQueue<T> 
     private Proc1<T> handle;
     private Proc2<T, Throwable> exception;
 
-    public LinkedBlockingTaskQueue(String threadName) {
+    public static <T> LinkedBlockingTaskQueue<T> create(String threadName) {
+        return new LinkedBlockingTaskQueue<>(threadName);
+    }
+
+    private LinkedBlockingTaskQueue(String threadName) {
         setName(threadName);
     }
 
-    public ITaskQueue<T> intercept(Test1<T> intercept) {
+    public LinkedBlockingTaskQueue<T> intercept(Test1<T> intercept) {
         this.intercept = intercept;
         return this;
     }
 
-    public ITaskQueue<T> handle(Proc1<T> handle) {
+    public LinkedBlockingTaskQueue<T> handle(Proc1<T> handle) {
         this.handle = handle;
         return this;
     }
 
-    public ITaskQueue<T> exception(Proc2<T, Throwable> exception) {
+    public LinkedBlockingTaskQueue<T> exception(Proc2<T, Throwable> exception) {
         this.exception = exception;
         return this;
     }

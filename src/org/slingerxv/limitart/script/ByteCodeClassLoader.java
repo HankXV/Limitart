@@ -15,6 +15,14 @@
  */
 package org.slingerxv.limitart.script;
 
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
+import org.slingerxv.limitart.util.FileUtil;
+
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.ToolProvider;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,15 +30,6 @@ import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.ToolProvider;
-
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
-import org.slingerxv.limitart.util.FileUtil;
 
 /**
  * 二进制方式加载类

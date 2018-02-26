@@ -13,23 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.taskqueue;
+package org.slingerxv.limitart.base;
 
-import org.slingerxv.limitart.net.Server;
+import org.slingerxv.limitart.util.GameMathUtil;
 
 /**
- * 任务队列接口
- * 
- * @author hank
+ * 进度条
  *
- * @param <T>
+ * @author hank
+ * @version 2018-02-26
  */
-public interface ITaskQueue<T> extends Server {
-	/**
-	 * 添加命令
-	 * 
-	 * @param t
-	 * @throws TaskQueueException
-	 */
-	void addCommand(T t) throws TaskQueueException;
+@ThreadUnsafe
+public class ProgressBar extends IntCounter {
+    private int high;
+
+    public ProgressBar(int high) {
+        this.high = GameMathUtil.fixedBetween(high, low(), super.high());
+    }
+
+    @Override
+    protected int high() {
+        return this.high;
+    }
 }

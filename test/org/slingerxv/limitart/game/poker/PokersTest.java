@@ -1,8 +1,5 @@
 package org.slingerxv.limitart.game.poker;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,6 +7,9 @@ import org.junit.Test;
 import org.slingerxv.limitart.util.CollectionUtil;
 import org.slingerxv.limitart.util.GameMathUtil;
 import org.slingerxv.limitart.util.StringUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PokersTest {
     private List<Byte> pokers;

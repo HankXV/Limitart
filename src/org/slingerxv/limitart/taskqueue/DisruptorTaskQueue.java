@@ -15,22 +15,21 @@
  */
 package org.slingerxv.limitart.taskqueue;
 
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
-import org.slingerxv.limitart.base.*;
-import org.slingerxv.limitart.util.NamedThreadFactory;
-
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.ExceptionHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+import org.slingerxv.limitart.base.*;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
+import org.slingerxv.limitart.util.NamedThreadFactory;
 
 /**
  * 消息队列线程
  *
  * @author Hank
  */
-public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
+public class DisruptorTaskQueue<T> implements TaskQueue<T> {
     private static Logger log = Loggers.create();
     private Disruptor<DisruptorTaskQueueEvent> disruptor;
     private NamedThreadFactory threadFactory;
@@ -38,7 +37,15 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
     private Proc1<T> handle;
     private Proc3<DisruptorTaskQueueEvent, Throwable, Long> exception;
 
-    public DisruptorTaskQueue(String threadName) {
+    public static <T> DisruptorTaskQueue<T> create(String threadName) {
+        return new DisruptorTaskQueue(threadName);
+    }
+
+    public static <T> DisruptorTaskQueue<T> create(String threadName, int bufferSize) {
+        return new DisruptorTaskQueue<>(threadName, bufferSize);
+    }
+
+    private DisruptorTaskQueue(String threadName) {
         this(threadName, 2 << 12);// 4096
     }
 
@@ -49,7 +56,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
      * @param bufferSize 指定RingBuffer的大小
      */
     @SuppressWarnings("unchecked")
-    public DisruptorTaskQueue(String threadName, int bufferSize) {
+    private DisruptorTaskQueue(String threadName, int bufferSize) {
         this.threadFactory = new NamedThreadFactory() {
 
             @Override
@@ -98,7 +105,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
      * @param intercept
      * @return
      */
-    public ITaskQueue<T> intercept(Test1<T> intercept) {
+    public DisruptorTaskQueue<T> intercept(Test1<T> intercept) {
         this.intercept = intercept;
         return this;
     }
@@ -109,7 +116,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
      * @param handle
      * @return
      */
-    public ITaskQueue<T> handle(Proc1<T> handle) {
+    public DisruptorTaskQueue<T> handle(Proc1<T> handle) {
         this.handle = handle;
         return this;
     }
@@ -120,7 +127,7 @@ public class DisruptorTaskQueue<T> implements ITaskQueue<T> {
      * @param exception
      * @return
      */
-    public ITaskQueue<T> exception(Proc3<DisruptorTaskQueueEvent, Throwable, Long> exception) {
+    public DisruptorTaskQueue<T> exception(Proc3<DisruptorTaskQueueEvent, Throwable, Long> exception) {
         this.exception = exception;
         return this;
     }
