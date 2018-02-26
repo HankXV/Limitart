@@ -15,16 +15,18 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.lang.annotation.*;
-
 /**
- * 标记某参数或返回值可能为空
+ * 一对(男左女右)
  *
- * @author hank
+ * @param <H>
+ * @param <W>
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
-}
+public interface Couple<H, W> {
+    static <H, W> Couple<H, W> ofImmutable(H husband, W wife) {
+        return new ImmutableCouple(husband, wife);
+    }
 
+    H get1();
+
+    W get2();
+}

@@ -15,16 +15,24 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.lang.annotation.*;
+import org.slingerxv.limitart.util.MathUtil;
 
 /**
- * 标记某参数或返回值可能为空
+ * 进度条
  *
  * @author hank
+ * @version 2018-02-26
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
-}
+@ThreadUnsafe
+public class ProgressBar extends IntCounter {
+    private int high;
 
+    public ProgressBar(int high) {
+        this.high = MathUtil.fixedBetween(high, low(), super.high());
+    }
+
+    @Override
+    protected int high() {
+        return this.high;
+    }
+}

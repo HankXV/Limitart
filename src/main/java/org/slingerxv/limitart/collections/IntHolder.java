@@ -15,16 +15,33 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.lang.annotation.*;
-
 /**
- * 标记某参数或返回值可能为空
+ * Int持有器
  *
  * @author hank
+ * @version 2017/12/18 0018 19:39
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
-}
+@ThreadUnsafe
+public class IntHolder {
+    private int value;
 
+    public static IntHolder of(int value) {
+        return empty().set(value);
+    }
+
+    public static IntHolder empty() {
+        return new IntHolder();
+    }
+
+    private IntHolder() {
+    }
+
+    public int get() {
+        return this.value;
+    }
+
+    public IntHolder set(int value) {
+        this.value = value;
+        return this;
+    }
+}

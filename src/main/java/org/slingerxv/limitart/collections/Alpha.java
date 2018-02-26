@@ -18,13 +18,18 @@ package org.slingerxv.limitart.collections;
 import java.lang.annotation.*;
 
 /**
- * 标记某参数或返回值可能为空
+ * 被标记的代表为测试接口
  *
  * @author hank
  */
-@Documented
 @Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
+@Target({
+        ElementType.ANNOTATION_TYPE,
+        ElementType.CONSTRUCTOR,
+        ElementType.FIELD,
+        ElementType.METHOD,
+        ElementType.TYPE
+})
+@Documented
+public @interface Alpha {
 }
-

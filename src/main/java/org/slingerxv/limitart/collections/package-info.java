@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 /**
- * 主要是一些游戏中常用的数据结构
- *
+ * 基础包
  */
 package org.slingerxv.limitart.collections;
