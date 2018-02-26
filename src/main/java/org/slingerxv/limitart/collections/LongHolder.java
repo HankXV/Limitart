@@ -15,16 +15,33 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.lang.annotation.*;
-
 /**
- * 标记某参数或返回值可能为空
+ * Long持有器
  *
  * @author hank
+ * @version 2017/12/18 0018 19:39
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
-}
+@ThreadUnsafe
+public class LongHolder {
+    private long value;
 
+    public static LongHolder of(long value) {
+        return empty().set(value);
+    }
+
+    public static LongHolder empty() {
+        return new LongHolder();
+    }
+
+    private LongHolder() {
+    }
+
+    public long get() {
+        return this.value;
+    }
+
+    public LongHolder set(long value) {
+        this.value = value;
+        return this;
+    }
+}

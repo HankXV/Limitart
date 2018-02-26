@@ -15,16 +15,28 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.lang.annotation.*;
-
 /**
- * 标记某参数或返回值可能为空
- *
- * @author hank
+ * 不可变的一对
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
-}
+@ThreadUnsafe
+public class ImmutableCouple<H, W> implements Couple {
+    private final H h;
+    private final W w;
 
+    public ImmutableCouple(@Nullable H h, @Nullable W w) {
+        this.h = h;
+        this.w = w;
+    }
+
+    @Override
+    public @Nullable
+    Object get1() {
+        return this.h;
+    }
+
+    @Override
+    public @Nullable
+    Object get2() {
+        return this.w;
+    }
+}

@@ -15,16 +15,38 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.lang.annotation.*;
 
 /**
- * 标记某参数或返回值可能为空
+ * 线程变量
  *
  * @author hank
+ * @version 2018/2/5 0005 21:16
+ * @see ThreadLocal
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
-}
+@ThreadSafe
+public class ThreadLocalHolder<T> {
+    private ThreadLocal<T> ref = new ThreadLocal<>();
 
+    public static <T> ThreadLocalHolder<T> of(@NotNull T t) {
+        Conditions.notNull(t);
+        return empty().set(t);
+    }
+
+    public static <T> ThreadLocalHolder<T> empty() {
+        return new ThreadLocalHolder<>();
+    }
+
+    public @Nullable
+    T get() {
+        return ref.get();
+    }
+
+    public ThreadLocalHolder set(@Nullable T t) {
+        if (t == null) {
+            ref.remove();
+        } else {
+            ref.set(t);
+        }
+        return this;
+    }
+}

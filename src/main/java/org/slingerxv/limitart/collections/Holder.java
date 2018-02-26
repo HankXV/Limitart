@@ -15,16 +15,34 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.lang.annotation.*;
-
 /**
- * 标记某参数或返回值可能为空
+ * 持有器
  *
  * @author hank
+ * @version 2017/12/18 0018 19:38
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
-}
+@ThreadUnsafe
+public class Holder<T> {
+    private T t;
 
+    public static <T> Holder of(@Nullable T t) {
+        return empty().set(t);
+    }
+
+    public static Holder empty() {
+        return new Holder();
+    }
+
+    private Holder() {
+    }
+
+    public @Nullable
+    T get() {
+        return this.t;
+    }
+
+    public Holder set(@Nullable T t) {
+        this.t = t;
+        return this;
+    }
+}

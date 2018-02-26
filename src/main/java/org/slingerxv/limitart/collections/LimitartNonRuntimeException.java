@@ -15,16 +15,26 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.lang.annotation.*;
-
 /**
- * 标记某参数或返回值可能为空
+ * Limitart编译期异常
  *
  * @author hank
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
-}
+public class LimitartNonRuntimeException extends Exception {
 
+    public LimitartNonRuntimeException() {
+        super();
+    }
+
+    public LimitartNonRuntimeException(String template, Object... params) {
+        super(String.format(template, params));
+    }
+
+    public LimitartNonRuntimeException(Throwable throwable) {
+        super(throwable);
+    }
+
+    public LimitartNonRuntimeException(String info, Throwable throwable) {
+        super(info, throwable);
+    }
+}

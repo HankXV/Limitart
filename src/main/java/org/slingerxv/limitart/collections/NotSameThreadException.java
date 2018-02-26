@@ -15,16 +15,18 @@
  */
 package org.slingerxv.limitart.collections;
 
-import java.lang.annotation.*;
-
 /**
- * 标记某参数或返回值可能为空
+ * 非相同线程调用异常
  *
  * @author hank
+ * @version 2018/1/27 0027 11:36
  */
-@Documented
-@Retention(RetentionPolicy.CLASS)
-@Target({ElementType.PARAMETER, ElementType.METHOD})
-public @interface Nullable {
-}
+public class NotSameThreadException extends LimitartRuntimeException {
+    public NotSameThreadException() {
+        super();
+    }
 
+    public NotSameThreadException(String template, Object... params) {
+        super(template, params);
+    }
+}
