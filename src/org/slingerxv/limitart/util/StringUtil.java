@@ -32,6 +32,11 @@ public final class StringUtil {
                     + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\." + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$");
     private final static Pattern IP_INNER_REG = Pattern.compile(
             "^((192\\.168|172\\.([1][6-9]|[2]\\d|3[01]))(\\.([2][0-4]\\d|[2][5][0-5]|[01]?\\d?\\d)){2}|10(\\.([2][0-4]\\d|[2][5][0-5]|[01]?\\d?\\d)){3})$");
+    private final static Pattern SQL_KEY_WORD =
+            Pattern.compile(
+                    "(?:')|(?:--)|(/\\*(?:.|[\\n\\r])*?\\*/)|"
+                            + "(\\b(select|update|and|or|delete|insert|trancate|char|into|substr|ascii|declare|exec|count|master|into|drop|execute)\\b)",
+                    Pattern.CASE_INSENSITIVE);
 
     private StringUtil() {
     }
@@ -63,6 +68,9 @@ public final class StringUtil {
      * @return
      */
     public static boolean isPhoneNumber(String value) {
+        if (empty(value)) {
+            return false;
+        }
         return matchReg(PHONE_REG, value);
     }
 
@@ -73,6 +81,9 @@ public final class StringUtil {
      * @return
      */
     public static boolean isMail(String value) {
+        if (empty(value)) {
+            return false;
+        }
         return matchReg(EMAIL_REG, value);
     }
 
@@ -83,6 +94,9 @@ public final class StringUtil {
      * @return
      */
     public static boolean isIp4(String value) {
+        if (empty(value)) {
+            return false;
+        }
         return matchReg(IP_REG, value);
     }
 
@@ -93,7 +107,23 @@ public final class StringUtil {
      * @return
      */
     public static boolean isInnerIp4(String value) {
+        if (empty(value)) {
+            return false;
+        }
         return matchReg(IP_INNER_REG, value);
+    }
+
+    /**
+     * 是否与SQL相关
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isSQLRelative(String value) {
+        if (empty(value)) {
+            return false;
+        }
+        return SQL_KEY_WORD.matcher(value).find();
     }
 
     /**

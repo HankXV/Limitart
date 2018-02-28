@@ -17,20 +17,20 @@
 package org.slingerxv.limitart.collections;
 
 
-import org.slingerxv.limitart.base.ThreadSafe;
+import org.slingerxv.limitart.base.ThreadUnsafe;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 线程安全计数Map
+ * 非线程安全计数Map
  *
  * @param <K>
  * @author hank
  */
-@ThreadSafe
-public final class AtomicIntMap<K> extends AbstractIntMap<K> {
+@ThreadUnsafe
+public final class HashedLongMap<K> extends AbstractLongMap<K> {
 
-    private AtomicIntMap() {
-        super(new ConcurrentHashMap());
+    public HashedLongMap() {
+        super(new ConcurrentHashMap<>());
     }
 }

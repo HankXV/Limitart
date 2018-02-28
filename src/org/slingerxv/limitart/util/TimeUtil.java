@@ -16,6 +16,10 @@
 package org.slingerxv.limitart.util;
 
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.Calendar;
+
 /**
  * 时间工具
  *
@@ -36,13 +40,25 @@ public final class TimeUtil {
      */
     public static final int HOUR_IN_MILLIS = 60 * MINUTE_IN_MILLIS;
 
+    private TimeUtil() {
+    }
+
     /**
      * 获取当前时间戳：毫秒
      *
      * @return
      */
-    public long millis() {
+    public static long millis() {
         return System.currentTimeMillis();
+    }
+
+    /**
+     * 获取当前时间戳：毫秒
+     *
+     * @return
+     */
+    public static long now() {
+        return millis();
     }
 
     /**
@@ -50,7 +66,7 @@ public final class TimeUtil {
      *
      * @return
      */
-    public int seconds() {
+    public static int seconds() {
         return (int) (millis() / SECOND_IN_MILLIS);
     }
 
@@ -62,7 +78,7 @@ public final class TimeUtil {
      * @param seconds
      * @return
      */
-    public int buildMillis(int hours, int minutes, int seconds) {
+    public static int buildMillis(int hours, int minutes, int seconds) {
         return hours * HOUR_IN_MILLIS + minutes * MINUTE_IN_MILLIS + seconds * SECOND_IN_MILLIS;
     }
 
@@ -71,7 +87,7 @@ public final class TimeUtil {
      * @param seconds
      * @return
      */
-    public int buildMillis(int minutes, int seconds) {
+    public static int buildMillis(int minutes, int seconds) {
         return buildMillis(0, minutes, seconds);
     }
 
@@ -79,7 +95,61 @@ public final class TimeUtil {
      * @param seconds
      * @return
      */
-    public int buildMillis(int seconds) {
+    public static int buildMillis(int seconds) {
         return buildMillis(0, 0, seconds);
+    }
+
+    /**
+     * 是否为今天
+     *
+     * @param time
+     * @return
+     */
+    public static boolean today(long time) {
+        return sameDay(time, millis());
+    }
+
+    /**
+     * 是否为同一天
+     *
+     * @param time1
+     * @param time2
+     * @return
+     */
+    public static boolean sameDay(long time1, long time2) {
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTimeInMillis(time1);
+        Calendar cal2 = Calendar.getInstance();
+        cal2.setTimeInMillis(time2);
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    }
+
+    /**
+     * 获取所在天的凌晨时间
+     *
+     * @param time
+     * @return
+     */
+    public long zeroStamp(long time) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(time);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
+
+    /**
+     * 获取UTC(世界标准时间)时间戳
+     *
+     * @return
+     */
+    public static long utc() {
+        Calendar cal = Calendar.getInstance();
+        int zoneOffset = cal.get(Calendar.ZONE_OFFSET);
+        int dstOffset = cal.get(Calendar.DST_OFFSET);
+        cal.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset));
+        return cal.getTimeInMillis();
     }
 }
