@@ -29,12 +29,33 @@ public class IntCounter {
     private int count;
 
     public IntCounter() {
-        this(0);
+        //DO NOTHING 为了正常序列化
     }
 
     public IntCounter(int initVal) {
         Conditions.args(initVal >= low() && initVal <= high(), "low<=initVal<=high");
         setCount(initVal);
+    }
+
+    /**
+     * 归零
+     */
+    public void zero() {
+        setCount(0);
+    }
+
+    /**
+     * 设置为最大值
+     */
+    public void setHigh() {
+        setCount(high());
+    }
+
+    /**
+     * 设置为最小值
+     */
+    public void setLow() {
+        setCount(low());
     }
 
     /**
