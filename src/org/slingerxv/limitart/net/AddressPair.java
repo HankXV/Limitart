@@ -15,6 +15,7 @@
  */
 package org.slingerxv.limitart.net;
 
+import org.slingerxv.limitart.base.ImmutableCouple;
 import org.slingerxv.limitart.base.Nullable;
 import org.slingerxv.limitart.util.StringUtil;
 
@@ -23,9 +24,7 @@ import org.slingerxv.limitart.util.StringUtil;
  *
  * @author Hank
  */
-public class AddressPair {
-    private String ip;
-    private int port;
+public class AddressPair extends ImmutableCouple<String,Integer>{
 
     /**
      * 用端口初始化(一般用于服务器)
@@ -43,11 +42,10 @@ public class AddressPair {
      * @param port 端口
      */
     public AddressPair(@Nullable String ip, int port) {
+        super(ip,port);
         if (ip != null && !StringUtil.isIp4(ip)) {
             throw new IllegalArgumentException("ip format error");
         }
-        this.ip = ip;
-        this.port = port;
     }
 
     /**
@@ -57,7 +55,7 @@ public class AddressPair {
      */
     public @Nullable
     String getIp() {
-        return ip;
+        return get1();
     }
 
     /**
@@ -66,7 +64,7 @@ public class AddressPair {
      * @return 端口地址
      */
     public int getPort() {
-        return port;
+        return get2();
     }
 
 }

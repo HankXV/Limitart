@@ -57,10 +57,6 @@ public abstract class FieldAccess {
         return fields;
     }
 
-    public void setFields(Field[] fields) {
-        this.fields = fields;
-    }
-
     abstract public void set(Object instance, int fieldIndex, Object value);
 
     abstract public void setBoolean(Object instance, int fieldIndex, boolean value);

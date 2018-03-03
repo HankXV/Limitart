@@ -27,6 +27,7 @@ import java.util.Map.Entry;
  * @author hank
  */
 @Alpha
+@Deprecated
 public abstract class BaseBag {
     private static final int START_GRID = 0;
 

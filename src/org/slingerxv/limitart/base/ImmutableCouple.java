@@ -30,13 +30,13 @@ public class ImmutableCouple<H, W> implements Couple {
 
     @Override
     public @Nullable
-    Object get1() {
+    H get1() {
         return this.h;
     }
 
     @Override
     public @Nullable
-    Object get2() {
+    W get2() {
         return this.w;
     }
 }

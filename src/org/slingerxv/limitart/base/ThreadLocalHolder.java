@@ -36,6 +36,9 @@ public class ThreadLocalHolder<T> {
         return new ThreadLocalHolder<>();
     }
 
+    private ThreadLocalHolder() {
+    }
+
     public @Nullable
     T get() {
         return ref.get();

@@ -23,6 +23,7 @@ import org.slingerxv.limitart.base.LimitartNonRuntimeException;
  * @author hank
  *
  */
+@Deprecated
 public class ItemOverStackException extends LimitartNonRuntimeException {
 	private static final long serialVersionUID = 1L;
 
