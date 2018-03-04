@@ -1,6 +1,7 @@
 package org.slingerxv.limitart.collections;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * 数组迭代器
@@ -23,6 +24,9 @@ public class ArrayIterator<E> implements Iterator<E> {
 
     @Override
     public E next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException("no more element,please call hasNext() to check");
+        }
         return (E) array[this.curIndex++];
     }
 }

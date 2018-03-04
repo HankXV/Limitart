@@ -21,6 +21,7 @@ package org.slingerxv.limitart.game.bag;
  * @author hank
  *
  */
+@Deprecated
 public class BagGridOccupiedException extends Exception {
 
 	private static final long serialVersionUID = 1L;

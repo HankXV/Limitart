@@ -20,6 +20,7 @@ package org.slingerxv.limitart.game.bag;
  *
  * @author hank
  */
+@Deprecated
 public abstract class BaseBagItem implements Comparable<BaseBagItem> {
     // 堆叠数量
     private int num;

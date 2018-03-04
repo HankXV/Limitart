@@ -35,6 +35,16 @@ public final class EnumUtil {
     @Nullable
     public static <E extends Enum<E>> E byOrdinal(Class<E> c, int ordinal) {
         E[] enumConstants = c.getEnumConstants();
-        return ordinal > enumConstants.length - 1 ? null : enumConstants[ordinal];
+        return (ordinal > (enumConstants.length - 1) || ordinal < 0) ? null : enumConstants[ordinal];
+    }
+
+    /**
+     * 获取枚举个数
+     *
+     * @param <E>
+     * @return
+     */
+    public static <E extends Enum<E>> int length(Class<E> c) {
+        return c.getEnumConstants().length;
     }
 }

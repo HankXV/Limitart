@@ -82,7 +82,7 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements TaskQueue<T> {
     @Override
     public void addCommand(T command) {
         Conditions.notNull(command, "command");
-        queue.offer(command);
+        Conditions.args(queue.offer(command), "add command failed, command:%s", command.getClass());
     }
 
     @Override
