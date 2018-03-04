@@ -22,7 +22,7 @@ import org.slingerxv.limitart.util.RandomUtil;
  *
  * @author hank
  */
-public class Pokers {
+public final class Pokers {
     private final static byte CARD_COUNT = 52;
     private final static byte CARD_NUM_COUNT = 13;
     private final static byte CARD_SUIT_COUNT = 4;

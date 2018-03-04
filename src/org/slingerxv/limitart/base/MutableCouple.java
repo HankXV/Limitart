@@ -17,6 +17,8 @@ package org.slingerxv.limitart.base;
 
 /**
  * 可变的一对
+ *
+ * @author hank
  */
 @ThreadUnsafe
 public class MutableCouple<H, W> implements Couple {

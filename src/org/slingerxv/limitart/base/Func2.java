@@ -21,6 +21,7 @@ package org.slingerxv.limitart.base;
  * @param <T1>
  * @param <T2>
  * @param <R>
+ * @author hank
  */
 @FunctionalInterface
 public interface Func2<T1, T2, R> {

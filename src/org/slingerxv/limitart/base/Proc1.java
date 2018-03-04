@@ -19,6 +19,7 @@ package org.slingerxv.limitart.base;
  * 一参过程函数接口
  *
  * @param <T>
+ * @author hank
  */
 @FunctionalInterface
 public interface Proc1<T> {

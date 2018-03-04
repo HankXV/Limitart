@@ -19,6 +19,7 @@ package org.slingerxv.limitart.base;
  * 一参测试返回接口
  *
  * @param <T>
+ * @author hank
  */
 @FunctionalInterface
 public interface Test1<T> {

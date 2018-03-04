@@ -13,7 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.slingerxv.limitart.json;
+
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
+
+
 /**
- * 轻量对象池的实现
+ * JSON操作异常
+ *
+ * @author hank
+ * @version 2018/3/6 0006 21:48
  */
-package org.slingerxv.limitart.pool;
+public class JSONException extends LimitartNonRuntimeException {
+    public JSONException() {
+    }
+
+    public JSONException(String template, Object... params) {
+        super(template, params);
+    }
+
+    public JSONException(Throwable throwable) {
+        super(throwable);
+    }
+
+    public JSONException(String info, Throwable throwable) {
+        super(info, throwable);
+    }
+}

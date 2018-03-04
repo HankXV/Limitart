@@ -13,8 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * 消息队列
- *
- */
-package org.slingerxv.limitart.taskqueue;
+package org.slingerxv.limitart.base;
+
+import java.util.concurrent.ThreadFactory;
+
+public abstract class SingletonThreadFactory implements ThreadFactory {
+
+    public abstract String name();
+
+    private volatile Thread t;
+
+    @Override
+    public Thread newThread(Runnable r) {
+        if (t == null) {
+            synchronized (this) {
+                if (t == null) {
+                    t = new Thread(r, name());
+                }
+            }
+        }
+        return t;
+    }
+
+    public Thread thread() {
+        return t;
+    }
+}

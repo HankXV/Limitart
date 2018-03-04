@@ -19,6 +19,7 @@ package org.slingerxv.limitart.base;
  * 无参返回函数接口
  *
  * @param <R>
+ * @author hank
  */
 @FunctionalInterface
 public interface Func<R> {

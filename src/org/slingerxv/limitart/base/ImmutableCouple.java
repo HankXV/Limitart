@@ -17,6 +17,8 @@ package org.slingerxv.limitart.base;
 
 /**
  * 不可变的一对
+ *
+ * @author hank
  */
 @ThreadUnsafe
 public class ImmutableCouple<H, W> implements Couple {

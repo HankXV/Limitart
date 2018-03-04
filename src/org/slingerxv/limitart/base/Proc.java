@@ -17,6 +17,8 @@ package org.slingerxv.limitart.base;
 
 /**
  * 无参过程函数接口
+ *
+ * @author hank
  */
 @FunctionalInterface
 public interface Proc {

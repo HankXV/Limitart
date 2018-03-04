@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.taskqueue;
+package org.slingerxv.limitart.concurrent;
 
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.Func1;
@@ -32,19 +32,22 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 自动增长消息线程组
  *
  * @author Hank
+ * @see TaskQueueGroup
+ * @deprecated 在游戏中实际上不需要很频繁的创建销毁线程，所以这个东西并不适用，而且不优雅
  */
 @ThreadSafe
-public class AutoGrowthTaskQueueGroup<T> {
+@Deprecated
+public class AutoGrowthTaskQueueGroup {
     private static Logger log = Loggers.create();
     private AtomicInteger threadId = new AtomicInteger(0);
-    private Map<Integer, AutoGrowthSegment<T>> threads = new ConcurrentHashMap<>();
+    private Map<Integer, AutoGrowthSegment> threads = new ConcurrentHashMap<>();
     private int entityCountPerThread;
     private int coreThreadCount;
     private int maxThreadCount;
-    private Func1<Integer, TaskQueue<T>> newTaskQueue;
+    private Func1<Integer, TaskQueue> newTaskQueue;
 
     public AutoGrowthTaskQueueGroup(int entityCountPerThread, int coreThreadCount, int initThreadCount,
-                                    int maxThreadCount, @NotNull Func1<Integer, TaskQueue<T>> newTaskQueue) {
+                                    int maxThreadCount, @NotNull Func1<Integer, TaskQueue> newTaskQueue) {
         Conditions.notNull(newTaskQueue, "taskQueueFactory");
         this.newTaskQueue = newTaskQueue;
         this.maxThreadCount = maxThreadCount;
@@ -77,10 +80,10 @@ public class AutoGrowthTaskQueueGroup<T> {
         if (entity.getThreadIndex() > 0) {
             throw new TaskQueueException("entity has already registered!");
         }
-        AutoGrowthSegment<T> thread = null;
+        AutoGrowthSegment thread = null;
         if (threads.size() >= maxThreadCount && maxThreadCount > 0) {
             int min = Integer.MAX_VALUE;
-            for (AutoGrowthSegment<T> temp : threads.values()) {
+            for (AutoGrowthSegment temp : threads.values()) {
                 int size = temp.entities.size();
                 if (size < min) {
                     min = size;
@@ -88,7 +91,7 @@ public class AutoGrowthTaskQueueGroup<T> {
                 }
             }
         } else {
-            for (AutoGrowthSegment<T> temp : threads.values()) {
+            for (AutoGrowthSegment temp : threads.values()) {
                 if (temp.entities.size() < entityCountPerThread) {
                     thread = temp;
                     break;
@@ -111,8 +114,8 @@ public class AutoGrowthTaskQueueGroup<T> {
      * @throws TaskQueueException
      */
     @ThreadSafe
-    public AutoGrowthTaskQueueGroup addCommand(@NotNull AutoGrowthEntity entity, @NotNull T t) throws TaskQueueException {
-        findTaskQueue(entity).addCommand(t);
+    public AutoGrowthTaskQueueGroup addCommand(@NotNull AutoGrowthEntity entity, @NotNull Runnable t) throws TaskQueueException {
+        findTaskQueue(entity).execute(t);
         return this;
     }
 
@@ -123,7 +126,7 @@ public class AutoGrowthTaskQueueGroup<T> {
      * @return
      * @throws TaskQueueException
      */
-    public TaskQueue<T> findTaskQueue(@NotNull AutoGrowthEntity entity) throws TaskQueueException {
+    public TaskQueue findTaskQueue(@NotNull AutoGrowthEntity entity) throws TaskQueueException {
         if (entity.getThreadIndex() == 0) {
             throw new TaskQueueException("entity does not register!");
         }
@@ -145,7 +148,7 @@ public class AutoGrowthTaskQueueGroup<T> {
         if (!threads.containsKey(threadIndex)) {
             throw new TaskQueueException("thread " + threadIndex + " already destroyed！");
         }
-        AutoGrowthSegment<T> thread = threads.get(threadIndex);
+        AutoGrowthSegment thread = threads.get(threadIndex);
         if (!thread.entities.contains(entity)) {
             throw new TaskQueueException("entity in thread " + threadIndex + " already destroyed！");
         }
@@ -154,22 +157,21 @@ public class AutoGrowthTaskQueueGroup<T> {
             throw new TaskQueueException("entity in thread " + threadIndex + " destroy failed！");
         }
         entity.setThreadIndex(0);
-        log.info(thread.thread.serverName() + " unregistered entity:" + entity);
+        log.info(thread.thread.thread().getName() + " unregistered entity:" + entity);
         if (thread.entities.size() <= 0 && threads.size() > this.coreThreadCount) {
-            AutoGrowthSegment<T> remove = threads.remove(threadIndex);
+            AutoGrowthSegment remove = threads.remove(threadIndex);
             if (remove != null) {
-                remove.thread.stopServer();
+                remove.thread.shutdown();
             }
         }
         return this;
     }
 
-    private AutoGrowthSegment<T> newGrowthThread() {
+    private AutoGrowthSegment newGrowthThread() {
         int id = threadId.incrementAndGet();
-        AutoGrowthSegment<T> data = new AutoGrowthSegment<>();
+        AutoGrowthSegment data = new AutoGrowthSegment();
         data.thread = this.newTaskQueue.run(id);
         data.threadIndex = id;
-        data.thread.startServer();
         this.threads.put(data.threadIndex, data);
         return data;
     }
@@ -179,9 +181,10 @@ public class AutoGrowthTaskQueueGroup<T> {
      *
      * @author Hank
      */
-    private static class AutoGrowthSegment<T> {
+    @Deprecated
+    private static class AutoGrowthSegment {
         private int threadIndex;
-        private TaskQueue<T> thread;
+        private TaskQueue thread;
         private Set<AutoGrowthEntity> entities = new ConcurrentHashSet<>();
     }
 }

@@ -26,6 +26,7 @@ import org.slingerxv.limitart.collections.ConstraintMap;
 import org.slingerxv.limitart.net.binary.BinaryMessageIOException;
 
 import java.net.SocketAddress;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * 长链接会话
@@ -51,7 +52,7 @@ public class Session {
      */
     public void writeNow(ByteBuf buf, Proc2<Boolean, Throwable> resultCallback) {
         Conditions.notNull(buf, "buf");
-        if (!this.channel.isWritable()) {
+        if (!writable()) {
             Procs.invoke(resultCallback, false, new BinaryMessageIOException("unwritable"));
             return;
         }
@@ -131,5 +132,9 @@ public class Session {
     @Override
     public String toString() {
         return channel.toString();
+    }
+
+    public ScheduledExecutorService executor() {
+        return channel.eventLoop();
     }
 }

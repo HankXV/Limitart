@@ -13,21 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.taskqueue;
-
-import org.slingerxv.limitart.base.LimitartNonRuntimeException;
-
 /**
- * 任务队列异常
- * 
- * @author hank
- *
+ * JSON通用接口
  */
-public class TaskQueueException extends LimitartNonRuntimeException {
-
-	private static final long serialVersionUID = 1L;
-
-	public TaskQueueException(String info) {
-		super(info);
-	}
-}
+package org.slingerxv.limitart.json;

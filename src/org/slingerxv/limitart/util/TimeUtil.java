@@ -16,9 +16,10 @@
 package org.slingerxv.limitart.util;
 
 
-import java.time.Clock;
-import java.time.LocalDate;
+import org.slingerxv.limitart.base.Proc;
+
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 时间工具
@@ -30,15 +31,15 @@ public final class TimeUtil {
     /**
      * 秒
      */
-    public static final int SECOND_IN_MILLIS = 1000;
+    public static final long SECOND_IN_MILLIS = TimeUnit.SECONDS.toMillis(1);
     /**
      * 分
      */
-    public static final int MINUTE_IN_MILLIS = 60 * SECOND_IN_MILLIS;
+    public static final long MINUTE_IN_MILLIS = TimeUnit.MINUTES.toMillis(1);
     /**
      * 时
      */
-    public static final int HOUR_IN_MILLIS = 60 * MINUTE_IN_MILLIS;
+    public static final long HOUR_IN_MILLIS = TimeUnit.HOURS.toMillis(1);
 
     private TimeUtil() {
     }
@@ -78,7 +79,7 @@ public final class TimeUtil {
      * @param seconds
      * @return
      */
-    public static int buildMillis(int hours, int minutes, int seconds) {
+    public static long buildMillis(int hours, int minutes, int seconds) {
         return hours * HOUR_IN_MILLIS + minutes * MINUTE_IN_MILLIS + seconds * SECOND_IN_MILLIS;
     }
 
@@ -87,7 +88,7 @@ public final class TimeUtil {
      * @param seconds
      * @return
      */
-    public static int buildMillis(int minutes, int seconds) {
+    public static long buildMillis(int minutes, int seconds) {
         return buildMillis(0, minutes, seconds);
     }
 
@@ -95,7 +96,7 @@ public final class TimeUtil {
      * @param seconds
      * @return
      */
-    public static int buildMillis(int seconds) {
+    public static long buildMillis(int seconds) {
         return buildMillis(0, 0, seconds);
     }
 
@@ -151,5 +152,18 @@ public final class TimeUtil {
         int dstOffset = cal.get(Calendar.DST_OFFSET);
         cal.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset));
         return cal.getTimeInMillis();
+    }
+
+    public static void performanceTest(Proc proc1, Proc proc2, int count) {
+        long now = now();
+        for (int i = 0; i < count; ++i) {
+            proc1.run();
+        }
+        System.out.println((now() - now) + "/ms");
+        now = now();
+        for (int i = 0; i < count; ++i) {
+            proc2.run();
+        }
+        System.out.println((now() - now) + "/ms");
     }
 }

@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.taskqueue;
+package org.slingerxv.limitart.logging.impl;
 
-import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * 自动增长触发单位
- *
- * @author Hank
- */
-public class AutoGrowthEntity {
-    private transient AtomicInteger threadIndex = new AtomicInteger(0);
+import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.logging.Logger;
+import org.slingerxv.limitart.logging.Loggers;
 
-    public void setThreadIndex(int threadIndex) {
-        this.threadIndex.set(threadIndex);
+public class Slf4JLoggers extends Loggers {
+
+
+    public Slf4JLoggers() {
     }
 
-    public int getThreadIndex() {
-        return threadIndex.get();
+    @Override
+    public Logger instance(String name) {
+        return new Slf4JLogger(LoggerFactory.getLogger(name));
     }
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.taskqueue;
+package org.slingerxv.limitart.concurrent;
 
 import org.slingerxv.limitart.base.*;
 import org.slingerxv.limitart.logging.Logger;
@@ -25,37 +25,34 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * 阻塞消息队列
  *
- * @param <T>
  * @author hank
  * @see DisruptorTaskQueue
  */
-public class LinkedBlockingTaskQueue<T> extends Thread implements TaskQueue<T> {
+public class LinkedBlockingTaskQueue extends AbstractTaskQueue implements Runnable {
     private static Logger log = Loggers.create();
-    private BlockingQueue<T> queue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+    private SingletonThreadFactory threadFactory;
     private boolean start = false;
-    private Test1<T> intercept;
-    private Proc1<T> handle;
-    private Proc2<T, Throwable> exception;
+    private Proc2<Runnable, Throwable> exception;
 
-    public static <T> LinkedBlockingTaskQueue<T> create(String threadName) {
-        return new LinkedBlockingTaskQueue<>(threadName);
+    public static LinkedBlockingTaskQueue create(String threadName) {
+        return new LinkedBlockingTaskQueue(threadName);
     }
+
 
     private LinkedBlockingTaskQueue(String threadName) {
-        setName(threadName);
+        threadFactory = new SingletonThreadFactory() {
+            @Override
+            public String name() {
+                return threadName;
+            }
+        };
+        threadFactory.newThread(this);
+        threadFactory.thread().start();
     }
 
-    public LinkedBlockingTaskQueue<T> intercept(Test1<T> intercept) {
-        this.intercept = intercept;
-        return this;
-    }
 
-    public LinkedBlockingTaskQueue<T> handle(Proc1<T> handle) {
-        this.handle = handle;
-        return this;
-    }
-
-    public LinkedBlockingTaskQueue<T> exception(Proc2<T, Throwable> exception) {
+    public LinkedBlockingTaskQueue exception(Proc2<Runnable, Throwable> exception) {
         this.exception = exception;
         return this;
     }
@@ -64,13 +61,10 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements TaskQueue<T> {
     public void run() {
         start = true;
         while (start || !queue.isEmpty()) {
-            T take = null;
+            Runnable take = null;
             try {
                 take = queue.take();
-                if (Tests.invoke(intercept, take)) {
-                    continue;
-                }
-                Procs.invoke(handle, take);
+                take.run();
             } catch (Exception e) {
                 log.error("invoke error", e);
                 Procs.invoke(exception, take, e);
@@ -78,25 +72,23 @@ public class LinkedBlockingTaskQueue<T> extends Thread implements TaskQueue<T> {
         }
     }
 
-    @ThreadSafe
-    @Override
-    public void addCommand(T command) {
-        Conditions.notNull(command, "command");
-        Conditions.args(queue.offer(command), "add command failed, command:%s", command.getClass());
-    }
 
     @Override
-    public void stopServer() {
+    public void shutdown() {
         start = false;
     }
 
     @Override
-    public void startServer() {
-        start();
+    public Thread thread() {
+        return threadFactory.thread();
     }
 
     @Override
-    public String serverName() {
-        return getName();
+    public void execute(Runnable command) {
+        Conditions.notNull(command, "command");
+        if (thread() == Thread.currentThread()) {
+            command.run();
+        }
+        Conditions.args(queue.offer(command), "add command failed, command:%s", command.getClass().getName());
     }
 }

@@ -32,6 +32,7 @@ import org.slingerxv.limitart.base.Procs;
 import org.slingerxv.limitart.logging.Logger;
 import org.slingerxv.limitart.logging.Loggers;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,7 +50,7 @@ public abstract class AbstractNettyServer {
     private ServerBootstrap bootstrap;
     private Session serverSession;
     private String serverName;
-    private ConcurrentHashMap<Integer, Session> sessions = new ConcurrentHashMap<>();
+    private Map<Integer, Session> sessions = new ConcurrentHashMap<>();
 
     static {
         if (Epoll.isAvailable()) {

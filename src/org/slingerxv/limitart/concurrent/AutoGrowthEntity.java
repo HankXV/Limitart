@@ -13,36 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.pool;
+package org.slingerxv.limitart.concurrent;
 
-import org.slingerxv.limitart.base.Func;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 对象池
+ * 自动增长触发单位
  *
- * @author hank
- * @version 2018/2/6 0006 0:03
+ * @author Hank
  */
-public interface Pool<T extends Poolable> extends AutoCloseable {
-    /**
-     * 创建一个默认的对象池
-     *
-     * @param <T>
-     * @return
-     */
-    static <T extends Poolable> Pool<T> create(Func<T> factory, int initialSize) {
-        return new SimplePool<>(factory, initialSize);
+@Deprecated
+public class AutoGrowthEntity {
+    private transient AtomicInteger threadIndex = new AtomicInteger(0);
+
+    public void setThreadIndex(int threadIndex) {
+        this.threadIndex.set(threadIndex);
     }
 
-    /**
-     * 取出对象
-     *
-     * @return
-     */
-    T get();
-
-    /**
-     * 归还对象
-     */
-    void back(T t);
+    public int getThreadIndex() {
+        return threadIndex.get();
+    }
 }
