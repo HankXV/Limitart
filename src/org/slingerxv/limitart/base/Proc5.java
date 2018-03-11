@@ -23,6 +23,7 @@ package org.slingerxv.limitart.base;
  * @param <T3>
  * @param <T4>
  * @param <T5>
+ * @author hank
  */
 @FunctionalInterface
 public interface Proc5<T1, T2, T3, T4, T5> {

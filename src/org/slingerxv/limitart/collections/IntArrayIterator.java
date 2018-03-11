@@ -9,11 +9,11 @@ import java.util.NoSuchElementException;
  * @author hank
  * @version 2018/2/12 0012 13:45
  */
-public class ArrayIterator<E> implements Iterator<E> {
-    private final E[] array;
+public class IntArrayIterator implements Iterator<Integer> {
+    private final int[] array;
     private int curIndex = 0;
 
-    public ArrayIterator(E[] array) {
+    public IntArrayIterator(int[] array) {
         this.array = array;
     }
 
@@ -23,7 +23,7 @@ public class ArrayIterator<E> implements Iterator<E> {
     }
 
     @Override
-    public E next() {
+    public Integer next() {
         if (!hasNext()) {
             throw new NoSuchElementException("no more element,please call hasNext() to check");
         }

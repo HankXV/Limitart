@@ -13,26 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.taskqueue;
+package org.slingerxv.limitart.concurrent;
 
-import org.slingerxv.limitart.net.Server;
+import org.slingerxv.limitart.base.LimitartNonRuntimeException;
 
 /**
- * 任务队列接口
+ * 任务队列异常
  *
- * @param <T>
  * @author hank
  */
-public interface TaskQueue<T> extends Server {
-    static <T> DisruptorTaskQueue<T> create(String threadName) {
-        return DisruptorTaskQueue.create(threadName);
-    }
+@Deprecated
+public class TaskQueueException extends LimitartNonRuntimeException {
 
-    /**
-     * 添加命令
-     *
-     * @param t
-     * @throws TaskQueueException
-     */
-    void addCommand(T t) throws TaskQueueException;
+    private static final long serialVersionUID = 1L;
+
+    public TaskQueueException(String info) {
+        super(info);
+    }
 }

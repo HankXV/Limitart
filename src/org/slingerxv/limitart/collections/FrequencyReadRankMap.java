@@ -31,10 +31,10 @@ import java.util.*;
  */
 @ThreadUnsafe
 public class FrequencyReadRankMap<K, V extends Func<K>> implements RankMap<K, V> {
-    private List<V> list;
-    private Map<K, V> map;
+    private final List<V> list;
+    private final Map<K, V> map;
     private final Comparator<V> comparator;
-    private int capacity;
+    private final int capacity;
 
 
     public FrequencyReadRankMap(@NotNull Comparator<V> comparator, int capacity) {

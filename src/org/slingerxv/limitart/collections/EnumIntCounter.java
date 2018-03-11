@@ -18,13 +18,15 @@ package org.slingerxv.limitart.collections;
 import org.slingerxv.limitart.base.ThreadUnsafe;
 import org.slingerxv.limitart.util.EnumUtil;
 
+import java.util.Iterator;
+
 /**
  * 通过枚举的序列(ordinal)来计数
  *
- * @author Hank
+ * @author hank
  */
 @ThreadUnsafe
-public class EnumIntCounter<E extends Enum<E>> {
+public class EnumIntCounter<E extends Enum<E>> implements Iterable<Integer> {
     private int[] counts;
 
     public static <E extends Enum<E>> EnumIntCounter<E> create(Class<E> enumClass) {
@@ -67,13 +69,7 @@ public class EnumIntCounter<E extends Enum<E>> {
         return getCount(e.ordinal());
     }
 
-    /**
-     * 获取计数
-     *
-     * @param ordinal
-     * @return
-     */
-    public int getCount(int ordinal) {
+    private int getCount(int ordinal) {
         return counts[ordinal];
     }
 
@@ -181,5 +177,10 @@ public class EnumIntCounter<E extends Enum<E>> {
         int old = getCount(key);
         putCount(key, old + delta);
         return old;
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        return new IntArrayIterator(this.counts);
     }
 }

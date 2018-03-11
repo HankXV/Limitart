@@ -22,7 +22,7 @@ import java.util.Map;
  * 约束型Map
  *
  * @param <K>
- * @author Hank
+ * @author hank
  */
 public interface ConstraintMap<K> extends Map<K, Object> {
     static <K> ConstraintMap<K> empty() {

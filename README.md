@@ -78,11 +78,10 @@ Limitart是以Netty为基础开发的一套可快速实现游戏服务器的轻�
     game 游戏相关逻辑整理
     logging 日志通用接口
     net 网络通信
-    pool 轻量对象池的实现
     reflectasm modified from https://github.com/EsotericSoftware/reflectasm
     script 脚本热更新
     singleton 轻量单例依赖注入
-    taskqueue 消息队列
+    concurrent 并发相关
     util 常用的工具包
     
 #### 2.X快速开始

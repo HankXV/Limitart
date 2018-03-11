@@ -27,6 +27,7 @@ import java.util.List;
  *
  * @param <K>
  * @param <V>
+ * @author hank
  */
 public interface RankMap<K, V extends Func<K>> {
     static <K, V extends Func<K>> RankMap<K, V> empty(@NotNull Comparator<V> comparator, int capacity) {

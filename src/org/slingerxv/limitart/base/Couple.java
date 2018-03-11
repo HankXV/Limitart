@@ -20,6 +20,7 @@ package org.slingerxv.limitart.base;
  *
  * @param <H>
  * @param <W>
+ * @author hank
  */
 public interface Couple<H, W> {
     static <H, W> Couple<H, W> ofImmutable(H husband, W wife) {

@@ -26,11 +26,11 @@ import java.util.Iterator;
 /**
  * 通过枚举的序列(ordinal)来映射数组元素
  *
- * @author Hank
+ * @author hank
  */
 @ThreadUnsafe
-public class EnumList<E extends Enum<E>, V> implements Iterable<E> {
-    private Object[] objects;
+public class EnumList<E extends Enum<E>, V> implements Iterable<V> {
+    private V[] objects;
 
     /**
      * 创建一个空的枚举列表
@@ -56,23 +56,13 @@ public class EnumList<E extends Enum<E>, V> implements Iterable<E> {
     }
 
     public EnumList(Class<E> enumClass) {
-        objects = new Object[EnumUtil.length(enumClass)];
+        objects = (V[]) new Object[EnumUtil.length(enumClass)];
     }
 
     public EnumList(Class<E> enumClass, Func1<E, V> initializer) {
         this(enumClass);
-        reset(initializer);
-    }
-
-    /**
-     * 重置
-     *
-     * @param initializer
-     */
-    public void reset(Func1<E, V> initializer) {
-        Class<E> entityClass = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         for (int i = 0; i < objects.length; i++) {
-            put(i, initializer.run(EnumUtil.byOrdinal(entityClass, i)));
+            put(i, initializer.run(EnumUtil.byOrdinal(enumClass, i)));
         }
     }
 
@@ -80,7 +70,7 @@ public class EnumList<E extends Enum<E>, V> implements Iterable<E> {
      * 清空
      */
     public void clear() {
-        objects = new Object[objects.length];
+        objects = (V[]) new Object[objects.length];
     }
 
 
@@ -125,13 +115,13 @@ public class EnumList<E extends Enum<E>, V> implements Iterable<E> {
     }
 
     private V put(int ordinal, V v) {
-        Object object = objects[ordinal];
+        V object = objects[ordinal];
         objects[ordinal] = v;
-        return (V) object;
+        return object;
     }
 
     @Override
-    public Iterator<E> iterator() {
+    public Iterator<V> iterator() {
         return new ArrayIterator<>(objects);
     }
 

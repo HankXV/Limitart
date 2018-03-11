@@ -33,12 +33,12 @@ public abstract class BinaryByteMessage extends BinaryMessage {
     }
 
     @Override
-    public final void encode() throws IllegalArgumentException, IllegalAccessException, BinaryMessageCodecException {
+    public final void encode() throws IllegalArgumentException {
         putByte(this.code);
     }
 
     @Override
-    public final void decode() throws IllegalArgumentException, IllegalAccessException, BinaryMessageCodecException {
+    public final void decode() throws IllegalArgumentException {
         this.code = getByte();
     }
 }

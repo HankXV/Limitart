@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.logging;
+package org.slingerxv.limitart.logging.impl;
 
+
+import org.slingerxv.limitart.logging.AbstractLogger;
 
 class Slf4JLogger extends AbstractLogger {
 

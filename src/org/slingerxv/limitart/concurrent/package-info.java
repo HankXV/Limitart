@@ -13,14 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.pool;
-
 /**
- * 可池化的
+ * 多线程相关
  *
- * @author hank
- * @version 2018/2/5 0005 23:59
  */
-public interface Poolable {
-    void release();
-}
+package org.slingerxv.limitart.concurrent;

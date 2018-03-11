@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.util;
+package org.slingerxv.limitart.base;
 
 import java.util.concurrent.ThreadFactory;
 
 public abstract class NamedThreadFactory implements ThreadFactory {
 
-	public abstract String getThreadName();
+	public abstract String name();
 
 	@Override
 	public Thread newThread(Runnable r) {
-		return new Thread(r, this.getThreadName());
+		return new Thread(r, name());
 	}
 
 }
