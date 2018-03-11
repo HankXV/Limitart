@@ -18,14 +18,17 @@ package org.slingerxv.limitart.net;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.EventLoop;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.Proc2;
 import org.slingerxv.limitart.base.Procs;
 import org.slingerxv.limitart.collections.ConstraintConcurrentMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
+import org.slingerxv.limitart.concurrent.Place;
 import org.slingerxv.limitart.net.binary.BinaryMessageIOException;
 
 import java.net.SocketAddress;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -33,7 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
  *
  * @author Hank
  */
-public class Session {
+public class Session implements Place<EventLoop> {
     private Channel channel;
     private int ID;
     private ConstraintMap<Integer> params = new ConstraintConcurrentMap<>();
@@ -134,7 +137,9 @@ public class Session {
         return channel.toString();
     }
 
-    public ScheduledExecutorService executor() {
+
+    @Override
+    public EventLoop res() {
         return channel.eventLoop();
     }
 }

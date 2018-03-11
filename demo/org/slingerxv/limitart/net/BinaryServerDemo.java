@@ -23,9 +23,18 @@ import org.slingerxv.limitart.net.binary.BinaryServer;
  * @author hank
  */
 public class BinaryServerDemo {
+    static SessionRole role = new SessionRole();
+
     public static void main(String[] args)
             throws BinaryMessageIDDuplicatedException, InstantiationException, IllegalAccessException {
         new BinaryServer.BinaryServerBuilder()
-                .factory(BinaryMessageFactory.empty().registerManager(BinaryManagerDemo.class)).build().startServer();
+                .factory(BinaryMessageFactory.empty().registerManager(BinaryManagerDemo.class)).onConnected((s, b) -> {
+            if (b) {
+                role.join(s, () -> System.out.println("join session success!"), (e) -> e.printStackTrace());
+            } else {
+                role.leave(s);
+                System.out.println("leave session success");
+            }
+        }).build().startServer();
     }
 }

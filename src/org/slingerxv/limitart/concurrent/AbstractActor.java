@@ -33,7 +33,7 @@ public abstract class AbstractActor<T, R extends Place<T>> implements Actor<T, R
         Conditions.notNull(oldPlace, "no old place!");
         R where = where();
         Conditions.notNull(where, "no place to hold in current state,so can not leave!");
-        Conditions.args(oldPlace != where, "incorrect place to give!old:%s,yours:%s", oldPlace, where);
+        Conditions.args(oldPlace == where, "incorrect place to give!old:%s,yours:%s", oldPlace, where);
         weakRefHolder.set(null);
     }
 

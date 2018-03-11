@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.concurrent;
+package org.slingerxv.limitart.net;
 
+import io.netty.channel.EventLoop;
+import org.slingerxv.limitart.concurrent.AbstractThreadActor;
 
 /**
- * 消息队列占用者
+ * Sesson资源占用者，可以用其他对象来持有Netty的网络线程资源
  *
- * @param <R> 消息队列资源域
+ * @author hank
  */
-public class TaskQueueActor<R extends Place<TaskQueue>> extends AbstractThreadActor<TaskQueue, R> {
+public class SessionActor extends AbstractThreadActor<EventLoop, Session> {
     @Override
-    public boolean sameThread(TaskQueue taskQueue) {
-        return taskQueue.thread() == Thread.currentThread();
+    protected boolean sameThread(EventLoop eventExecutors) {
+        return eventExecutors.inEventLoop();
     }
 }
