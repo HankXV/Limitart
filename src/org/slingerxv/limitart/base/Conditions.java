@@ -24,6 +24,24 @@ package org.slingerxv.limitart.base;
  */
 public class Conditions {
     /**
+     * 检测是否为正数
+     *
+     * @param value
+     */
+    public static void positive(int value) {
+        Conditions.args(value > 0, "value must > 0");
+    }
+
+    /**
+     * 检测是否为自然数
+     *
+     * @param value
+     */
+    public static void natural(int value) {
+        Conditions.args(value >= 0, "value must >= 0");
+    }
+
+    /**
      * 判断是否为相同线程
      *
      * @param thread

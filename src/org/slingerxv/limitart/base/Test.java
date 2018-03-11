@@ -15,28 +15,12 @@
  */
 package org.slingerxv.limitart.base;
 
-import java.util.concurrent.ThreadFactory;
-
-public abstract class SingletonThreadFactory implements ThreadFactory {
-
-    public abstract String name();
-
-    private volatile Thread t;
-
-    @Override
-    public Thread newThread(Runnable r) {
-        if (t == null) {
-            synchronized (this) {
-                if (t == null) {
-                    t = new Thread(r, name());
-                }
-            }
-        }
-        return t;
-    }
-
-    public Thread thread() {
-        Conditions.notNull(t, "thread not initialized!");
-        return t;
-    }
+/**
+ * 无参测试返回接口
+ *
+ * @author hank
+ */
+@FunctionalInterface
+public interface Test {
+    boolean test();
 }
