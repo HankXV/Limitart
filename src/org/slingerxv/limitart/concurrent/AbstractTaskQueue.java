@@ -37,14 +37,14 @@ public abstract class AbstractTaskQueue implements TaskQueue {
     @Override
     public void scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
         scheduledExecutorService.scheduleAtFixedRate(() -> {
-            command.run();
+            execute(command);
         }, initialDelay, period, unit);
     }
 
     @Override
     public void scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
-            command.run();
+            execute(command);
         }, initialDelay, delay, unit);
     }
 }

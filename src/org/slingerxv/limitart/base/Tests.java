@@ -28,6 +28,10 @@ public class Tests {
         return predicate != null && predicate.test(t);
     }
 
+    public static boolean invoke(@Nullable Test test) {
+        return test != null && test.test();
+    }
+
     public static <T> boolean invoke(@Nullable Test1<T> test, T t) {
         return test != null && test.test(t);
     }
