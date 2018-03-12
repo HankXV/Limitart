@@ -149,7 +149,7 @@ public class IntCounter {
      */
     public int getAndAdd(int delta) {
         int old = getCount();
-        setCount(old + delta);
+        setCount(GameMathUtil.safeAdd(old, delta));
         return old;
     }
 

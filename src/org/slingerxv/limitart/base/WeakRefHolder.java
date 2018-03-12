@@ -26,7 +26,7 @@ import java.lang.ref.WeakReference;
  */
 @ThreadUnsafe
 public class WeakRefHolder<T> {
-    private WeakReference<T> ref;
+    private transient volatile WeakReference<T> ref;
 
     public static <T> WeakRefHolder<T> of(T t) {
         Conditions.notNull(t);
@@ -41,7 +41,8 @@ public class WeakRefHolder<T> {
         ref = new WeakReference<>(t);
     }
 
-    private WeakRefHolder() {}
+    private WeakRefHolder() {
+    }
 
     public @Nullable
     T get() {
