@@ -15,6 +15,7 @@
  */
 package org.slingerxv.limitart.collections;
 
+import org.slingerxv.limitart.util.GameMathUtil;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Collection;
@@ -101,7 +102,7 @@ public abstract class AbstractIntMap<K> implements IntMap<K> {
      */
     @Override
     public int addAndGet(K key, int delta) {
-        return accumulateAndGet(key, delta, Integer::sum);
+        return accumulateAndGet(key, delta, GameMathUtil::safeAdd);
     }
 
     /**
@@ -135,7 +136,7 @@ public abstract class AbstractIntMap<K> implements IntMap<K> {
      */
     @Override
     public int getAndAdd(K key, int delta) {
-        return getAndAccumulate(key, delta, Integer::sum);
+        return getAndAccumulate(key, delta, GameMathUtil::safeAdd);
     }
 
     /**

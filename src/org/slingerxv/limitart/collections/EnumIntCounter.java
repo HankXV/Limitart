@@ -17,6 +17,7 @@ package org.slingerxv.limitart.collections;
 
 import org.slingerxv.limitart.base.ThreadUnsafe;
 import org.slingerxv.limitart.util.EnumUtil;
+import org.slingerxv.limitart.util.GameMathUtil;
 
 import java.util.Iterator;
 
@@ -141,7 +142,7 @@ public class EnumIntCounter<E extends Enum<E>> implements Iterable<Integer> {
      * @return
      */
     public int addAndGet(E key, int delta) {
-        int result = getCount(key) + delta;
+        int result = GameMathUtil.safeAdd(getCount(key), delta);
         putCount(key, result);
         return result;
     }
@@ -175,7 +176,7 @@ public class EnumIntCounter<E extends Enum<E>> implements Iterable<Integer> {
      */
     public int getAndAdd(E key, int delta) {
         int old = getCount(key);
-        putCount(key, old + delta);
+        putCount(key, GameMathUtil.safeAdd(old, delta));
         return old;
     }
 
