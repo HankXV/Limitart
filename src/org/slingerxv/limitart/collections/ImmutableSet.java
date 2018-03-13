@@ -63,7 +63,7 @@ public class ImmutableSet<E> implements Iterable<E> {
     }
 
 
-    public void foreach(Test1<E> test) {
+    public void forEach(Test1<E> test) {
         for (E e : set) {
             if (!test.test(e)) {
                 break;

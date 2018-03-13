@@ -15,8 +15,6 @@
  */
 package org.slingerxv.limitart.concurrent;
 
-import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.base.Func;
 import org.slingerxv.limitart.base.Proc;
 import org.slingerxv.limitart.base.Proc1;
 
@@ -28,6 +26,7 @@ import java.util.concurrent.Executor;
  * @author hank
  */
 public abstract class AbstractThreadActor<T extends Executor, R extends Place<T>> extends AbstractActor<T, R> {
+
     /**
      * 调用线程是否为当前线程
      *
@@ -42,8 +41,7 @@ public abstract class AbstractThreadActor<T extends Executor, R extends Place<T>
      * @param oldPlace 旧资源
      */
     @Override
-    public void leave(R oldPlace) {
-        Conditions.args(sameThread(oldPlace.res()), "must leave when you are there!");
+    public synchronized void leave(R oldPlace) {
         super.leave(oldPlace);
     }
 
@@ -55,32 +53,8 @@ public abstract class AbstractThreadActor<T extends Executor, R extends Place<T>
      * @param onFail    失败回调，原有线程为空则当前线程触发，否则在原有线程触发
      */
     @Override
-    public void join(R newPlace, Proc onSuccess, Proc1<Exception> onFail) {
+    public synchronized void join(R newPlace, Proc onSuccess, Proc1<Exception> onFail) {
         R where = where();
         super.join(newPlace, () -> newPlace.res().execute(() -> onSuccess.run()), where != null ? (e) -> where.res().execute(() -> onFail.run(e)) : onFail);
-    }
-
-    /**
-     * 与其他消息队列协作任务
-     *
-     * @param another   其他消息队列
-     * @param proccess  其他消息队里执行的任务
-     * @param onSuccess 在本队列执行的成功回调
-     * @param onFail    在本队列执行的失败回调
-     */
-    public void onAnother(R another, Func<Boolean> proccess, Proc onSuccess, Proc onFail) {
-        Conditions.notNull(another, "another");
-        Conditions.notNull(proccess, "proccess");
-        Conditions.notNull(onSuccess, "onSuccess");
-        Conditions.notNull(onFail, "onFail");
-        R where = where();
-        Conditions.notNull(where, "no place to hold!");
-        another.res().execute(() -> {
-            if (proccess.run()) {
-                where.res().execute(() -> onSuccess.run());
-            } else {
-                where.res().execute(() -> onFail.run());
-            }
-        });
     }
 }

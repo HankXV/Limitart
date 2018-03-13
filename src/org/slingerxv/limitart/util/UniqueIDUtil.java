@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.LongAdder;
 @ThreadSafe
 public final class UniqueIDUtil {
     private static LongAdder DEFAULT_ID_ADDER = new LongAdder();
-    private static long DEFAULT_AREAD_ID = 1;
+    private static long DEFAULT_AREA_ID = 1;
 
     private UniqueIDUtil() {
     }
@@ -39,7 +39,7 @@ public final class UniqueIDUtil {
      * @return
      */
     public static long nextID() {
-        return nextID(DEFAULT_AREAD_ID);
+        return nextID(DEFAULT_AREA_ID);
     }
 
     /**

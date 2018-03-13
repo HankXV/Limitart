@@ -15,9 +15,7 @@
  */
 package org.slingerxv.limitart.concurrent;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * 抽象任务队列
@@ -27,24 +25,40 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractTaskQueue implements TaskQueue {
     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
+
     @Override
-    public void schedule(Runnable command, long delay, TimeUnit unit) {
-        scheduledExecutorService.schedule(() -> {
-            execute(command);
-        }, delay, unit);
+    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+        return scheduledExecutorService.schedule(() -> execute(command), delay, unit);
     }
 
     @Override
-    public void scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
-            execute(command);
-        }, initialDelay, period, unit);
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+        return scheduledExecutorService.scheduleAtFixedRate(() -> execute(command), initialDelay, period, unit);
     }
 
     @Override
-    public void scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-        scheduledExecutorService.scheduleWithFixedDelay(() -> {
-            execute(command);
-        }, initialDelay, delay, unit);
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+        return scheduledExecutorService.scheduleWithFixedDelay(() -> execute(command), initialDelay, delay, unit);
+    }
+
+    @Override
+    public <T> Future<T> submit(Callable<T> task) {
+        FutureTask<T> futureTask = new FutureTask<>(task);
+        execute(futureTask);
+        return futureTask;
+    }
+
+    @Override
+    public <T> Future<T> submit(Runnable task, T result) {
+        FutureTask<T> futureTask = new FutureTask<>(task, result);
+        execute(futureTask);
+        return futureTask;
+    }
+
+    @Override
+    public Future<?> submit(Runnable task) {
+        FutureTask<?> futureTask = new FutureTask<>(task, null);
+        execute(futureTask);
+        return futureTask;
     }
 }

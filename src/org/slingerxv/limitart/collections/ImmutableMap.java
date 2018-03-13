@@ -65,7 +65,7 @@ public class ImmutableMap<K, V> {
         return map.containsValue(v);
     }
 
-    public void foreach(Test2<K, V> test) {
+    public void forEach(Test2<K, V> test) {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             if (!test.test(entry.getKey(), entry.getValue())) {
                 break;

@@ -16,7 +16,6 @@
 package org.slingerxv.limitart.concurrent;
 
 
-
 import java.util.concurrent.*;
 
 /**
@@ -29,18 +28,24 @@ public interface TaskQueue extends Executor {
         return DisruptorTaskQueue.create(threadName);
     }
 
-    void schedule(Runnable command,
-                  long delay, TimeUnit unit);
+    ScheduledFuture<?> schedule(Runnable command,
+                                long delay, TimeUnit unit);
 
-    void scheduleAtFixedRate(Runnable command,
-                             long initialDelay,
-                             long period,
-                             TimeUnit unit);
+    ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
+                                           long initialDelay,
+                                           long period,
+                                           TimeUnit unit);
 
-    void scheduleWithFixedDelay(Runnable command,
-                                long initialDelay,
-                                long delay,
-                                TimeUnit unit);
+    ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
+                                              long initialDelay,
+                                              long delay,
+                                              TimeUnit unit);
+
+    <T> Future<T> submit(Callable<T> task);
+
+    <T> Future<T> submit(Runnable task, T result);
+
+    Future<?> submit(Runnable task);
 
     /**
      * 关闭

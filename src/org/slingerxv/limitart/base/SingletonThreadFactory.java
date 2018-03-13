@@ -17,6 +17,11 @@ package org.slingerxv.limitart.base;
 
 import java.util.concurrent.ThreadFactory;
 
+/**
+ * 单例线程工厂
+ *
+ * @author Hank
+ */
 public abstract class SingletonThreadFactory implements ThreadFactory {
 
     public abstract String name();

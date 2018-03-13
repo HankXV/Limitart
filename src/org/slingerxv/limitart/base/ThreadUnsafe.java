@@ -21,6 +21,7 @@ import java.lang.annotation.*;
  * 表示类或方法不是线程安全的
  *
  * @author hank
+ * @see ThreadSafe
  */
 @Documented
 @Retention(RetentionPolicy.CLASS)
