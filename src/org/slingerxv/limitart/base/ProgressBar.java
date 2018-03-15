@@ -25,7 +25,7 @@ import org.slingerxv.limitart.util.GameMathUtil;
  */
 @ThreadUnsafe
 public class ProgressBar extends IntCounter {
-    private int high;
+    private final int high;
 
     public ProgressBar(int high) {
         this.high = GameMathUtil.fixedBetween(high, low(), super.high());

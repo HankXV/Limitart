@@ -37,7 +37,7 @@ import java.util.Map;
  * @author hank
  */
 public class BinaryMessageFactory {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
     // !!这里的asm应用经测试在JAVA8下最优
     private final Map<Short, MessageContext> msgs = new HashMap<>();
     private final Map<Class<?>, Object> managerInstances = new HashMap<>();
@@ -168,7 +168,7 @@ public class BinaryMessageFactory {
             if (!methods.containsKey(clazz)) {
                 methods.put(clazz, methodAccess);
             }
-            log.info("register msg " + messageType.getName() + " at " + clazz.getName());
+            LOGGER.info("register msg " + messageType.getName() + " at " + clazz.getName());
         }
         return this;
     }
@@ -184,7 +184,7 @@ public class BinaryMessageFactory {
         short messageID = msg.messageID();
         MessageContext messageContext = msgs.get(messageID);
         if (messageContext == null) {
-            log.error(session.remoteAddress() + " message empty,id:" + BinaryMessages.ID2String(messageID));
+            LOGGER.error(session.remoteAddress() + " message empty,id:" + BinaryMessages.ID2String(messageID));
             // 消息上下文不存在
             return;
         }

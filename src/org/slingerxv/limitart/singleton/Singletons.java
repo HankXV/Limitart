@@ -34,8 +34,8 @@ import java.util.Map;
  * @author Hank
  */
 public class Singletons {
-    private static Logger log = Loggers.create();
-    private Map<Class<?>, Object> instances = new HashMap<>();
+    private static final Logger LOGGER = Loggers.create();
+    private final Map<Class<?>, Object> instances = new HashMap<>();
 
     private Singletons() {
     }
@@ -57,11 +57,12 @@ public class Singletons {
      */
     public Singletons search(ClassLoader classLoader) {
         //寻找所有有@Singleton注解的类
-        List<Class<?>> classes = null;
+        List<Class<?>> classes;
         try {
             classes = Conditions.notNull(ReflectionUtil.getClasses("", classLoader, null));
         } catch (IOException | ClassNotFoundException e) {
-            log.error(e);
+            LOGGER.error(e);
+            return this;
         }
         List<Class<?>> needRefs = new LinkedList<>();
         for (Class<?> clazz : classes) {
@@ -73,11 +74,11 @@ public class Singletons {
             try {
                 singletonInstance = clazz.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                log.error("can not create instance of {} from an empty constructor", clazz.getName());
+                LOGGER.error("can not create instance of {} from an empty constructor", clazz.getName());
             }
             Conditions.notNull(singletonInstance);
             instances.put(clazz, singletonInstance);
-            log.trace("find singleton class:{}", clazz.getName());
+            LOGGER.trace("find singleton class:{}", clazz.getName());
         }
         for (Object obj : instances.values()) {
             injectByFieldAndMethod(obj);
@@ -99,11 +100,11 @@ public class Singletons {
             try {
                 //TODO 修改为reflectasm 并且检测和支持构造函数和方法注入
                 T t = clazz.newInstance();
-                log.trace("create instance :{}", t);
+                LOGGER.trace("create instance :{}", t);
                 injectByFieldAndMethod(t);
                 return t;
             } catch (InstantiationException | IllegalAccessException e) {
-                log.error(e);
+                LOGGER.error(e);
             }
         }
         return null;
@@ -130,9 +131,9 @@ public class Singletons {
             try {
                 field.set(obj, instances.get(type));
             } catch (IllegalAccessException e) {
-                log.error(e);
+                LOGGER.error(e);
             }
-            log.trace("inject field {} into {}", type.getName(), obj.getClass().getName());
+            LOGGER.trace("inject field {} into {}", type.getName(), obj.getClass().getName());
         }
     }
 }

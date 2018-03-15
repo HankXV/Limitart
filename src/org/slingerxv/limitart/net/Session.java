@@ -28,8 +28,6 @@ import org.slingerxv.limitart.concurrent.Place;
 import org.slingerxv.limitart.net.binary.BinaryMessageIOException;
 
 import java.net.SocketAddress;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * 长链接会话

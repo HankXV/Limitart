@@ -22,30 +22,29 @@ import java.net.URI;
 
 /**
  * java字节码文件
- * 
- * @author hank
  *
+ * @author hank
  */
 public class JavaClassObject extends SimpleJavaFileObject {
 
-	private ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-	public JavaClassObject(String className, Kind kind) {
-		super(URI.create("string:///" + className.replace('.', '/') + kind.extension), kind);
-	}
+    public JavaClassObject(String className, Kind kind) {
+        super(URI.create("string:///" + className.replace('.', '/') + kind.extension), kind);
+    }
 
-	public byte[] getBytes() {
-		return bos.toByteArray();
-	}
+    public byte[] getBytes() {
+        return bos.toByteArray();
+    }
 
-	@Override
-	public OutputStream openOutputStream() {
-		return bos;
-	}
+    @Override
+    public OutputStream openOutputStream() {
+        return bos;
+    }
 
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		bos.close();
-	}
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        bos.close();
+    }
 }

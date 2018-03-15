@@ -29,8 +29,8 @@ import java.util.Set;
  */
 @ThreadSafe
 public class UnrepeatableQueue<V> {
-    private Set<V> set = new HashSet<>();
-    private Queue<V> queue = new LinkedList<>();
+    private final Set<V> set = new HashSet<>();
+    private final Queue<V> queue = new LinkedList<>();
 
     /**
      * 当前队列大小

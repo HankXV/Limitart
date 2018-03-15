@@ -32,7 +32,7 @@ import java.util.jar.JarFile;
  * @author hank
  */
 public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
-    private static Logger log = Loggers.create();
+    private static final Logger LOGGER = Loggers.create();
 
     /**
      * 加载jar包
@@ -55,10 +55,10 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
             throw new IOException("file not exist:" + jarPath);
         }
         try (JarClassLoader newLoader = new JarClassLoader(new URL[]{file.toURI().toURL()})) {
-            log.info("create class loader:" + newLoader.getClass().getName() + ",parent:"
+            LOGGER.info("create class loader:" + newLoader.getClass().getName() + ",parent:"
                     + newLoader.getParent().getClass().getName());
-            log.info("current thread loader:" + Thread.currentThread().getContextClassLoader().getClass().getName());
-            log.info("system class loader:" + ClassLoader.getSystemClassLoader().getClass().getName());
+            LOGGER.info("current thread loader:" + Thread.currentThread().getContextClassLoader().getClass().getName());
+            LOGGER.info("system class loader:" + ClassLoader.getSystemClassLoader().getClass().getName());
             try (JarFile jarFile = new JarFile(file)) {
                 Enumeration<JarEntry> entrys = jarFile.entries();
                 while (entrys.hasMoreElements()) {
@@ -69,7 +69,7 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
                     }
                     String className = entryName.replace("/", ".").substring(0, entryName.indexOf(".class"));
                     Class<?> clazz = newLoader.loadClass(className);
-                    log.info("load class：" + className);
+                    LOGGER.info("load class：" + className);
                     if (clazz == null) {
                         throw new ClassNotFoundException(className);
                     }
@@ -78,7 +78,7 @@ public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
                     }
                     Class<?> superclass = clazz.getSuperclass();
                     if (!superclass.isInterface()) {
-                        log.warn(
+                        LOGGER.warn(
                                 "CAUTION!!!!parent better be INTERFACE,if your script's parent is CLASS,reference field must be PUBLIC!!!");
                     }
                     Object newInstance = clazz.newInstance();

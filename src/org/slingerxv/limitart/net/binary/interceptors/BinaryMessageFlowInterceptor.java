@@ -32,140 +32,139 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 服务器发送消息流量统计
- * 
- * @author hank
  *
+ * @author hank
  */
 public class BinaryMessageFlowInterceptor implements BinaryServerInterceptor {
-	private static FlowComparator COMPARATOR = new FlowComparator();
-	private Map<Class<? extends BinaryMessage>, Integer> FLOW_MIN = new ConcurrentHashMap<>();
-	private Map<Class<? extends BinaryMessage>, Integer> FLOW_MAX = new ConcurrentHashMap<>();
-	private Map<Class<? extends BinaryMessage>, Long> FLOW_COUNT = new ConcurrentHashMap<>();
-	private Map<Class<? extends BinaryMessage>, Long> FLOW_SIZE = new ConcurrentHashMap<>();
+    private final static FlowComparator COMPARATOR = new FlowComparator();
+    private final Map<Class<? extends BinaryMessage>, Integer> FLOW_MIN = new ConcurrentHashMap<>();
+    private final Map<Class<? extends BinaryMessage>, Integer> FLOW_MAX = new ConcurrentHashMap<>();
+    private final Map<Class<? extends BinaryMessage>, Long> FLOW_COUNT = new ConcurrentHashMap<>();
+    private final Map<Class<? extends BinaryMessage>, Long> FLOW_SIZE = new ConcurrentHashMap<>();
 
-	/**
-	 * 消息统计
-	 * 
-	 * @param clazz
-	 * @param buf
-	 */
-	private void flow(Class<? extends BinaryMessage> clazz, ByteBuf buf) {
-		FLOW_MIN.putIfAbsent(clazz, Integer.MAX_VALUE);
-		FLOW_MAX.putIfAbsent(clazz, 0);
-		FLOW_COUNT.putIfAbsent(clazz, 0L);
-		FLOW_SIZE.putIfAbsent(clazz, 0L);
-		int readableBytes = buf.readableBytes();
-		FLOW_MIN.put(clazz, Math.min(FLOW_MIN.get(clazz), readableBytes));
-		FLOW_MAX.put(clazz, Math.max(FLOW_MAX.get(clazz), readableBytes));
-		FLOW_COUNT.put(clazz, FLOW_COUNT.get(clazz) + 1);
-		FLOW_SIZE.put(clazz, FLOW_SIZE.get(clazz) + readableBytes);
-	}
+    /**
+     * 消息统计
+     *
+     * @param clazz
+     * @param buf
+     */
+    private void flow(Class<? extends BinaryMessage> clazz, ByteBuf buf) {
+        FLOW_MIN.putIfAbsent(clazz, Integer.MAX_VALUE);
+        FLOW_MAX.putIfAbsent(clazz, 0);
+        FLOW_COUNT.putIfAbsent(clazz, 0L);
+        FLOW_SIZE.putIfAbsent(clazz, 0L);
+        int readableBytes = buf.readableBytes();
+        FLOW_MIN.put(clazz, Math.min(FLOW_MIN.get(clazz), readableBytes));
+        FLOW_MAX.put(clazz, Math.max(FLOW_MAX.get(clazz), readableBytes));
+        FLOW_COUNT.put(clazz, FLOW_COUNT.get(clazz) + 1);
+        FLOW_SIZE.put(clazz, FLOW_SIZE.get(clazz) + readableBytes);
+    }
 
-	/**
-	 * 生成流量报告
-	 * 
-	 * @return
-	 */
-	public String reportFlow(int top) {
-		if (top < 1) {
-			return "top error!";
-		}
-		RankMap<Class<? extends BinaryMessage>, FlowMeta> min = new FrequencyReadRankMap<>(COMPARATOR, top);
-		RankMap<Class<? extends BinaryMessage>, FlowMeta> max = new FrequencyReadRankMap<>(COMPARATOR, top);
-		RankMap<Class<? extends BinaryMessage>, FlowMeta> count = new FrequencyReadRankMap<>(COMPARATOR, top);
-		RankMap<Class<? extends BinaryMessage>, FlowMeta> size = new FrequencyReadRankMap<>(COMPARATOR, top);
-		for (Entry<Class<? extends BinaryMessage>, Integer> entry : FLOW_MIN.entrySet()) {
-			FlowMeta meta = new FlowMeta();
-			meta.clazz = entry.getKey();
-			meta.value = entry.getValue();
-			min.put(entry.getKey(), meta);
-		}
-		for (Entry<Class<? extends BinaryMessage>, Integer> entry : FLOW_MAX.entrySet()) {
-			FlowMeta meta = new FlowMeta();
-			meta.clazz = entry.getKey();
-			meta.value = entry.getValue();
-			max.put(entry.getKey(), meta);
-		}
-		for (Entry<Class<? extends BinaryMessage>, Long> entry : FLOW_COUNT.entrySet()) {
-			FlowMeta meta = new FlowMeta();
-			meta.clazz = entry.getKey();
-			meta.value = entry.getValue();
-			count.put(entry.getKey(), meta);
-		}
-		for (Entry<Class<? extends BinaryMessage>, Long> entry : FLOW_SIZE.entrySet()) {
-			FlowMeta meta = new FlowMeta();
-			meta.clazz = entry.getKey();
-			meta.value = entry.getValue();
-			size.put(entry.getKey(), meta);
-		}
-		List<FlowMeta> minRange = min.getRange(0, top);
-		List<FlowMeta> maxRange = max.getRange(0, top);
-		List<FlowMeta> countRange = count.getRange(0, top);
-		List<FlowMeta> sizeRange = size.getRange(0, top);
-		StringBuilder sb = new StringBuilder();
-		sb.append("=======min:").append("\r\n");
-		for (FlowMeta meta : minRange) {
-			sb.append(meta.toString()).append("\r\n");
-		}
+    /**
+     * 生成流量报告
+     *
+     * @return
+     */
+    public String reportFlow(int top) {
+        if (top < 1) {
+            return "top error!";
+        }
+        RankMap<Class<? extends BinaryMessage>, FlowMeta> min = new FrequencyReadRankMap<>(COMPARATOR, top);
+        RankMap<Class<? extends BinaryMessage>, FlowMeta> max = new FrequencyReadRankMap<>(COMPARATOR, top);
+        RankMap<Class<? extends BinaryMessage>, FlowMeta> count = new FrequencyReadRankMap<>(COMPARATOR, top);
+        RankMap<Class<? extends BinaryMessage>, FlowMeta> size = new FrequencyReadRankMap<>(COMPARATOR, top);
+        for (Entry<Class<? extends BinaryMessage>, Integer> entry : FLOW_MIN.entrySet()) {
+            FlowMeta meta = new FlowMeta();
+            meta.clazz = entry.getKey();
+            meta.value = entry.getValue();
+            min.put(entry.getKey(), meta);
+        }
+        for (Entry<Class<? extends BinaryMessage>, Integer> entry : FLOW_MAX.entrySet()) {
+            FlowMeta meta = new FlowMeta();
+            meta.clazz = entry.getKey();
+            meta.value = entry.getValue();
+            max.put(entry.getKey(), meta);
+        }
+        for (Entry<Class<? extends BinaryMessage>, Long> entry : FLOW_COUNT.entrySet()) {
+            FlowMeta meta = new FlowMeta();
+            meta.clazz = entry.getKey();
+            meta.value = entry.getValue();
+            count.put(entry.getKey(), meta);
+        }
+        for (Entry<Class<? extends BinaryMessage>, Long> entry : FLOW_SIZE.entrySet()) {
+            FlowMeta meta = new FlowMeta();
+            meta.clazz = entry.getKey();
+            meta.value = entry.getValue();
+            size.put(entry.getKey(), meta);
+        }
+        List<FlowMeta> minRange = min.getRange(0, top);
+        List<FlowMeta> maxRange = max.getRange(0, top);
+        List<FlowMeta> countRange = count.getRange(0, top);
+        List<FlowMeta> sizeRange = size.getRange(0, top);
+        StringBuilder sb = new StringBuilder();
+        sb.append("=======min:").append("\r\n");
+        for (FlowMeta meta : minRange) {
+            sb.append(meta.toString()).append("\r\n");
+        }
 
-		sb.append("=======max:").append("\r\n");
-		for (FlowMeta meta : maxRange) {
-			sb.append(meta.toString()).append("\r\n");
-		}
+        sb.append("=======max:").append("\r\n");
+        for (FlowMeta meta : maxRange) {
+            sb.append(meta.toString()).append("\r\n");
+        }
 
-		sb.append("=======count:").append("\r\n");
-		for (FlowMeta meta : countRange) {
-			sb.append(meta.toString()).append("\r\n");
-		}
+        sb.append("=======count:").append("\r\n");
+        for (FlowMeta meta : countRange) {
+            sb.append(meta.toString()).append("\r\n");
+        }
 
-		sb.append("=======size:").append("\r\n");
-		for (FlowMeta meta : sizeRange) {
-			sb.append(meta.toString()).append("\r\n");
-		}
-		return sb.toString();
-	}
+        sb.append("=======size:").append("\r\n");
+        for (FlowMeta meta : sizeRange) {
+            sb.append(meta.toString()).append("\r\n");
+        }
+        return sb.toString();
+    }
 
-	@Override
-	public boolean onConnected(Session session) {
-		return false;
-	}
+    @Override
+    public boolean onConnected(Session session) {
+        return false;
+    }
 
-	@Override
-	public boolean onMessageIn(Session session, BinaryMessage msg) {
-		return false;
-	}
+    @Override
+    public boolean onMessageIn(Session session, BinaryMessage msg) {
+        return false;
+    }
 
-	@Override
-	public void onMessageOut(Session session, BinaryMessage msg) {
-		flow(msg.getClass(), msg.buffer());
-	}
+    @Override
+    public void onMessageOut(Session session, BinaryMessage msg) {
+        flow(msg.getClass(), msg.buffer());
+    }
 
-	private static class FlowMeta implements Func<Class<? extends BinaryMessage>> {
-		private Class<? extends BinaryMessage> clazz;
-		private long value;
+    private static class FlowMeta implements Func<Class<? extends BinaryMessage>> {
+        private Class<? extends BinaryMessage> clazz;
+        private long value;
 
-		@Override
-		public Class<? extends BinaryMessage> run() {
-			return clazz;
-		}
+        @Override
+        public Class<? extends BinaryMessage> run() {
+            return clazz;
+        }
 
-		@Override
-		public String toString() {
-			return "FlowMeta [clazz=" + clazz + ", value=" + value + "]";
-		}
-	}
+        @Override
+        public String toString() {
+            return "FlowMeta [clazz=" + clazz + ", value=" + value + "]";
+        }
+    }
 
-	private static class FlowComparator implements Comparator<FlowMeta>,Serializable {
+    private static class FlowComparator implements Comparator<FlowMeta>, Serializable {
 
-		@Override
-		public int compare(FlowMeta o1, FlowMeta o2) {
-			if (o1.value > o2.value) {
-				return -1;
-			} else if (o1.value < o2.value) {
-				return 1;
-			}
-			return 0;
-		}
+        @Override
+        public int compare(FlowMeta o1, FlowMeta o2) {
+            if (o1.value > o2.value) {
+                return -1;
+            } else if (o1.value < o2.value) {
+                return 1;
+            }
+            return 0;
+        }
 
-	}
+    }
 }

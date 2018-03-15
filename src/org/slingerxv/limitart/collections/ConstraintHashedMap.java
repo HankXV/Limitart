@@ -16,7 +16,6 @@
 package org.slingerxv.limitart.collections;
 
 
-import org.slingerxv.limitart.base.ThreadSafe;
 import org.slingerxv.limitart.base.ThreadUnsafe;
 
 import java.util.HashMap;

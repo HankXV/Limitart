@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author hank
  */
 public abstract class AbstractNettyServer {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
     private static final AttributeKey<Integer> SESSION_ID_KEY = AttributeKey.newInstance("SESSION_ID_KEY");
     private static AtomicInteger SESSION_ID_CREATOR = new AtomicInteger();
     protected final static EventLoopGroup bossGroup;
@@ -69,10 +69,10 @@ public abstract class AbstractNettyServer {
             bootstrap.option(ChannelOption.SO_BACKLOG, 1024).channel(EpollServerSocketChannel.class)
                     .childOption(ChannelOption.SO_LINGER, 0).childOption(ChannelOption.SO_REUSEADDR, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
-            log.info(serverName + " epoll init");
+            LOGGER.info(serverName + " epoll init");
         } else {
             bootstrap.channel(NioServerSocketChannel.class);
-            log.info(serverName + " nio init");
+            LOGGER.info(serverName + " nio init");
         }
         bootstrap.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
@@ -89,13 +89,13 @@ public abstract class AbstractNettyServer {
 
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-                        log.error(ctx.channel() + " cause:", cause);
+                        LOGGER.error(ctx.channel() + " cause:", cause);
                         exceptionThrown(session(ctx.channel()), cause);
                     }
 
                     @Override
                     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                        log.info(ctx.channel().remoteAddress() + " connected！");
+                        LOGGER.info(ctx.channel().remoteAddress() + " connected！");
                         int ID = SESSION_ID_CREATOR.incrementAndGet();
                         ctx.channel().attr(SESSION_ID_KEY).set(ID);
                         Session session = new Session(ID, ctx.channel());
@@ -105,7 +105,7 @@ public abstract class AbstractNettyServer {
 
                     @Override
                     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                        log.info(ctx.channel().remoteAddress() + " disconnected！");
+                        LOGGER.info(ctx.channel().remoteAddress() + " disconnected！");
                         Session remove = sessions.remove(ctx.channel().attr(SESSION_ID_KEY).get());
                         sessionActive(remove, false);
                     }
@@ -136,11 +136,11 @@ public abstract class AbstractNettyServer {
     protected void bind(int port, Proc1<Session> listener) {
         bootstrap.bind(port).addListener((ChannelFuture arg0) -> {
             if (arg0.isSuccess()) {
-                log.info(serverName + " bind at port:" + port);
+                LOGGER.info(serverName + " bind at port:" + port);
                 serverSession = new Session(0, arg0.channel());
                 Procs.invoke(listener, serverSession);
             } else {
-                log.error(serverName + " bind at port error:" + arg0.cause());
+                LOGGER.error(serverName + " bind at port error:" + arg0.cause());
             }
         });
     }

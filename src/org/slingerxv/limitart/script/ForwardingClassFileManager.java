@@ -24,38 +24,37 @@ import java.util.List;
 
 /**
  * 编译后字节码文件管理器
- * 
- * @author hank
  *
+ * @author hank
  */
 public class ForwardingClassFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
-	private List<String> classNames = new ArrayList<>();
-	private List<JavaClassObject> javaClassObjects = new ArrayList<>();
+    private final List<String> classNames = new ArrayList<>();
+    private final List<JavaClassObject> javaClassObjects = new ArrayList<>();
 
-	/**
-	 * @param fileManager
-	 */
-	protected ForwardingClassFileManager(StandardJavaFileManager fileManager) {
-		super(fileManager);
-	}
+    /**
+     * @param fileManager
+     */
+    protected ForwardingClassFileManager(StandardJavaFileManager fileManager) {
+        super(fileManager);
+    }
 
-	@Override
-	public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind,
-			FileObject sibling) {
-		JavaClassObject javaClassObject = new JavaClassObject(className, kind);
-		classNames.add(className);
-		javaClassObjects.add(javaClassObject);
-		return javaClassObject;
-	}
+    @Override
+    public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind,
+                                               FileObject sibling) {
+        JavaClassObject javaClassObject = new JavaClassObject(className, kind);
+        classNames.add(className);
+        javaClassObjects.add(javaClassObject);
+        return javaClassObject;
+    }
 
-	/**
-	 * @return the javaClassObjects
-	 */
-	public List<JavaClassObject> getJavaClassObjects() {
-		return javaClassObjects;
-	}
+    /**
+     * @return the javaClassObjects
+     */
+    public List<JavaClassObject> getJavaClassObjects() {
+        return javaClassObjects;
+    }
 
-	public List<String> getClassNames() {
-		return classNames;
-	}
+    public List<String> getClassNames() {
+        return classNames;
+    }
 }

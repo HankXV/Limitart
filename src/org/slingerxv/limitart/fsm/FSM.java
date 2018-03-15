@@ -36,7 +36,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @SuppressWarnings("rawtypes")
 @ThreadSafe
 public class FSM {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
     private Map<Integer, State> stateMap = new HashMap<>();
     private Queue<Integer> stateQueue = new LinkedList<>();
     private State preState;
@@ -105,7 +105,7 @@ public class FSM {
             firstState(state.getStateId());
         }
         this.stateMap.put(state.getStateId(), state);
-        log.info("ADD:{}", state.getStateId());
+        LOGGER.info("ADD:{}", state.getStateId());
         return this;
     }
 
@@ -125,7 +125,7 @@ public class FSM {
             throw new StateException(MessageFormat.format("stateId:{0} does not exist !", stateId));
         }
         stateQueue.offer(stateId);
-        log.debug("CHANGE:{}", stateId);
+        LOGGER.debug("CHANGE:{}", stateId);
         return this;
     }
 
@@ -184,12 +184,12 @@ public class FSM {
         if (next != null) {
             if (this.curState != null) {
                 this.curState.onExit(next, this);
-                log.debug("EXIST:{}", this.curState.getStateId());
+                LOGGER.debug("EXIST:{}", this.curState.getStateId());
             }
             next.reset();
-            log.debug("RESET:{}", next.getStateId());
+            LOGGER.debug("RESET:{}", next.getStateId());
             next.onEnter(this.curState, this);
-            log.debug("ENTER:{}", next.getStateId());
+            LOGGER.debug("ENTER:{}", next.getStateId());
             this.preState = this.curState;
             curState = next;
         }

@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ThreadSafe
 @Deprecated
 public class AutoGrowthTaskQueueGroup {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
     private AtomicInteger threadId = new AtomicInteger(0);
     private Map<Integer, AutoGrowthSegment> threads = new ConcurrentHashMap<>();
     private int entityCountPerThread;
@@ -54,13 +54,13 @@ public class AutoGrowthTaskQueueGroup {
         this.entityCountPerThread = entityCountPerThread;
         this.coreThreadCount = Math.min(coreThreadCount, this.maxThreadCount);
         if (initThreadCount > 10) {
-            log.warn("initThreadCount is too large, less than 10 better!");
+            LOGGER.warn("initThreadCount is too large, less than 10 better!");
         }
         if (maxThreadCount > 50) {
-            log.warn("maxThreadCount is too large,less than 50 better!");
+            LOGGER.warn("maxThreadCount is too large,less than 50 better!");
         }
         int initCount = Math.min(initThreadCount, this.maxThreadCount);
-        log.info("init,entityCountPerThread:" + this.entityCountPerThread + ",initThreadCount:" + initCount
+        LOGGER.info("init,entityCountPerThread:" + this.entityCountPerThread + ",initThreadCount:" + initCount
                 + ",coreThreadCount:" + this.coreThreadCount + ",maxThreadCount:" + this.maxThreadCount);
         if (initCount > 0) {
             for (int i = 0; i < initCount; ++i) {
@@ -157,7 +157,7 @@ public class AutoGrowthTaskQueueGroup {
             throw new TaskQueueException("entity in thread " + threadIndex + " destroy failed！");
         }
         entity.setThreadIndex(0);
-        log.info(thread.thread.thread().getName() + " unregistered entity:" + entity);
+        LOGGER.info(thread.thread.thread().getName() + " unregistered entity:" + entity);
         if (thread.entities.size() <= 0 && threads.size() > this.coreThreadCount) {
             AutoGrowthSegment remove = threads.remove(threadIndex);
             if (remove != null) {

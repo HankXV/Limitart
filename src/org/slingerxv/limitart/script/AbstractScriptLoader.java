@@ -32,9 +32,9 @@ import java.util.function.BiConsumer;
  * @author hank
  */
 public abstract class AbstractScriptLoader<KEY> {
-    private static Logger log = Loggers.create();
-    private Map<KEY, ScriptData<KEY>> scriptMap = new ConcurrentHashMap<>();
-    private Map<String, KEY> pathMap = new ConcurrentHashMap<>();
+    private static final Logger LOGGER = Loggers.create();
+    private final Map<KEY, ScriptData<KEY>> scriptMap = new ConcurrentHashMap<>();
+    private final Map<String, KEY> pathMap = new ConcurrentHashMap<>();
 
     /**
      * 遍历所有脚本
@@ -89,9 +89,9 @@ public abstract class AbstractScriptLoader<KEY> {
             pathMap.put(filePath, key);
         }
         if (replace) {
-            log.info("replace script data on script:" + scriptInstance.getClass().getName());
+            LOGGER.info("replace script data on script:" + scriptInstance.getClass().getName());
         } else {
-            log.info("register new script data on script:" + scriptInstance.getClass().getName());
+            LOGGER.info("register new script data on script:" + scriptInstance.getClass().getName());
         }
     }
 

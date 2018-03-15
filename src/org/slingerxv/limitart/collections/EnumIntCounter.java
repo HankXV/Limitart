@@ -54,8 +54,8 @@ public class EnumIntCounter<E extends Enum<E>> implements Iterable<Integer> {
      */
     public int sum() {
         int sum = 0;
-        for (int i = 0; i < counts.length; i++) {
-            sum += counts[i];
+        for (int count : counts) {
+            sum += count;
         }
         return sum;
     }

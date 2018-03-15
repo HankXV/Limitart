@@ -55,6 +55,6 @@ public abstract class AbstractThreadActor<T extends Executor, R extends Place<T>
     @Override
     public synchronized void join(R newPlace, Proc onSuccess, Proc1<Exception> onFail) {
         R where = where();
-        super.join(newPlace, () -> newPlace.res().execute(() -> onSuccess.run()), where != null ? (e) -> where.res().execute(() -> onFail.run(e)) : onFail);
+        super.join(newPlace, () -> newPlace.res().execute(onSuccess::run), where != null ? (e) -> where.res().execute(() -> onFail.run(e)) : onFail);
     }
 }

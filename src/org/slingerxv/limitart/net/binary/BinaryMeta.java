@@ -38,8 +38,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BinaryMeta {
     private static boolean COMPRESS_INT32_64 = true;
-    private static Map<Class<? extends BinaryMeta>, ConstructorAccess> messageMetaCache = new ConcurrentHashMap<>();
-    private static Map<Class<? extends BinaryMeta>, FieldAccess> messageMetaFieldCache = new ConcurrentHashMap<>();
+    private final static Map<Class<? extends BinaryMeta>, ConstructorAccess> messageMetaCache = new ConcurrentHashMap<>();
+    private final static Map<Class<? extends BinaryMeta>, FieldAccess> messageMetaFieldCache = new ConcurrentHashMap<>();
     private ByteBuf buffer;
 
     /**

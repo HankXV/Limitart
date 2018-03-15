@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 @ThreadUnsafe
 public class LRUHashMap<K, V> extends LinkedHashMap<K, V> {
     private transient static final long serialVersionUID = 1L;
-    private transient int cacheSize;
+    private transient final int cacheSize;
     private transient Proc2<Object, V> onRemove;
     private transient Test2<Object, V> canRemoveWithoutLRU;
 

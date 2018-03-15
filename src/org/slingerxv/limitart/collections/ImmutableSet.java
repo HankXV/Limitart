@@ -24,13 +24,13 @@ import java.util.*;
 
 
 /**
- * 不可变Set
+ * 不可变Set TODO 实现Set接口
  *
  * @author hank
  */
 @ThreadSafe
 public class ImmutableSet<E> implements Iterable<E> {
-    private Set<E> set;
+    private final Set<E> set;
 
     public static <E> ImmutableSet<E> of(@NotNull Collection<E> collection) {
         Conditions.args(collection != null && !collection.isEmpty());
@@ -39,12 +39,11 @@ public class ImmutableSet<E> implements Iterable<E> {
         return il;
     }
 
+    @SafeVarargs
     public static <E> ImmutableSet<E> just(@NotNull E... elements) {
         Conditions.args(elements != null && elements.length > 0);
         ImmutableSet<E> il = new ImmutableSet<>();
-        for (int i = 0; i < elements.length; ++i) {
-            il.set.add(elements[i]);
-        }
+        Collections.addAll(il.set, elements);
         return il;
     }
 

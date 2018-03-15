@@ -16,9 +16,9 @@
 package org.slingerxv.limitart.logging;
 
 public class LoggerDemo {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
 
     public static void main(String[] args) {
-        log.info("xxxxx");
+        LOGGER.info("xxxxx");
     }
 }
