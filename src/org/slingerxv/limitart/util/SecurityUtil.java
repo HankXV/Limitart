@@ -29,6 +29,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * modified from Spring Project
+ */
 public final class SecurityUtil {
     private static final String ALGORITHM_MD5 = "MD5";
     private static final char hexDigits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',

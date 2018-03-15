@@ -58,7 +58,7 @@ public class ImmutableList<E> implements Iterable<E> {
         return (E) arrays[index];
     }
 
-    public void foreach(@NotNull Test2<Integer, E> test) {
+    public void forEach(@NotNull Test2<Integer, E> test) {
         for (int i = 0; i < arrays.length; ++i) {
             if (!test.test(i, (E) arrays[i])) {
                 break;

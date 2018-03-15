@@ -33,7 +33,7 @@ public interface Actor<T, R extends Place<T>> {
     void join(@NotNull R r, Proc onSuccess, Proc1<Exception> onFail);
 
     /**
-     * 当前占用着在哪个资源域上(获取当前占有的资源)
+     * 当前占用者在哪个资源域上(获取当前占有的资源)
      *
      * @return 资源实体
      */
