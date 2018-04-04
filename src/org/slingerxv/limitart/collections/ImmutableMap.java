@@ -22,17 +22,16 @@ import org.slingerxv.limitart.base.ThreadSafe;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
- * 不可变Map
+ * 不可变Map TODO 实现MAP接口
  *
  * @author hank
  */
 @ThreadSafe
 public class ImmutableMap<K, V> {
-    private Map<K, V> map;
+    private final Map<K, V> map;
 
     public static <K, V> ImmutableMap<K, V> of(@NotNull Map<K, V> map) {
         Conditions.args(map != null && !map.isEmpty());

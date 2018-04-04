@@ -35,7 +35,7 @@ import java.util.Base64;
 public final class SymmetricEncryptionUtil {
     private static final String TRANSFORMATION = "AES/CBC/NoPadding";
     private static final String ALGORITHM = "AES";
-    private Key generateKey;
+    private final Key generateKey;
     private byte[] iv;
 
     /**

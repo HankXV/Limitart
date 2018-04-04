@@ -29,7 +29,7 @@ import org.slingerxv.limitart.logging.Loggers;
  * @author Hank
  */
 public class DisruptorTaskQueue extends AbstractTaskQueue {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
     private Disruptor<Holder<Runnable>> disruptor;
     private SingletonThreadFactory threadFactory;
     private Proc3<Runnable, Throwable, Long> exception;
@@ -68,7 +68,7 @@ public class DisruptorTaskQueue extends AbstractTaskQueue {
             try {
                 event.get().run();
             } catch (Exception e) {
-                log.error("invoke handler error", e);
+                LOGGER.error("invoke handler error", e);
             } finally {
                 event.set(null);
             }
@@ -78,22 +78,22 @@ public class DisruptorTaskQueue extends AbstractTaskQueue {
 
             @Override
             public void handleEventException(Throwable ex, long sequence, Holder<Runnable> event) {
-                log.error("sequence " + sequence + " error!", ex);
+                LOGGER.error("sequence " + sequence + " error!", ex);
                 Procs.invoke(exception, event.get(), ex, sequence);
             }
 
             @Override
             public void handleOnStartException(final Throwable ex) {
-                log.error("Exception during onStart()", ex);
+                LOGGER.error("Exception during onStart()", ex);
             }
 
             @Override
             public void handleOnShutdownException(final Throwable ex) {
-                log.error("Exception during onShutdown()", ex);
+                LOGGER.error("Exception during onShutdown()", ex);
             }
         });
         disruptor.start();
-        log.info("thread " + threadFactory.name() + " start!");
+        LOGGER.info("thread " + threadFactory.name() + " start!");
     }
 
 
@@ -127,7 +127,7 @@ public class DisruptorTaskQueue extends AbstractTaskQueue {
     public void shutdown() {
         if (disruptor != null) {
             disruptor.shutdown();
-            log.info("thread " + threadFactory.name() + " stop!");
+            LOGGER.info("thread " + threadFactory.name() + " stop!");
         }
     }
 }

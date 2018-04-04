@@ -55,15 +55,13 @@ public class TaskQueueActor<R extends Place<TaskQueue>> extends AbstractThreadAc
         Conditions.notNull(onFail, "onFail");
         R where = where();
         Conditions.notNull(where, "no place to hold!");
-        where.res().execute(() -> {
-            another.res().execute(() -> {
-                if (proccess.run()) {
-                    where.res().execute(() -> onSuccess.run());
-                } else {
-                    where.res().execute(() -> onFail.run());
-                }
-            });
-        });
+        where.res().execute(() -> another.res().execute(() -> {
+            if (proccess.run()) {
+                where.res().execute(onSuccess::run);
+            } else {
+                where.res().execute(onFail::run);
+            }
+        }));
     }
 
     /**
@@ -73,25 +71,29 @@ public class TaskQueueActor<R extends Place<TaskQueue>> extends AbstractThreadAc
      * @param another
      * @param proccess
      * @param onSuccess
-     * @param onFail
      */
+    public void onAnotherSync(R another, Func<Boolean> proccess, Proc onSuccess) {
+        onAnotherSync(another, proccess, onSuccess, null);
+    }
+
     public void onAnotherSync(R another, Func<Boolean> proccess, Proc onSuccess, Proc onFail) {
         Conditions.notNull(another, "another");
         Conditions.notNull(proccess, "proccess");
         Conditions.notNull(onSuccess, "onSuccess");
-        Conditions.notNull(onFail, "onFail");
         R where = where();
         Conditions.notNull(where, "no place to hold!");
         where.res().execute(() -> {
-            Future<Boolean> submit = another.res().submit(() -> proccess.run());
+            Future<Boolean> submit = another.res().submit(proccess::run);
             Boolean result = null;
             try {
                 result = submit.get(SYNC_OVER_TIME, TimeUnit.MILLISECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 LOGGER.error("task queue " + another.res().thread().getName(), e);
             }
-            if (result == null || result == false) {
-                onFail.run();
+            if (result == null || !result) {
+                if (onFail != null) {
+                    onFail.run();
+                }
             } else {
                 onSuccess.run();
             }

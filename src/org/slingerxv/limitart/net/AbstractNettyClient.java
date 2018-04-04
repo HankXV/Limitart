@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @author hank
  */
 public abstract class AbstractNettyClient {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
     protected final static EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
     private String clientName;
@@ -53,10 +53,10 @@ public abstract class AbstractNettyClient {
         bootstrap.group(workerGroup);
         if (Epoll.isAvailable()) {
             bootstrap.channel(EpollSocketChannel.class);
-            log.info(clientName + " epoll init");
+            LOGGER.info(clientName + " epoll init");
         } else {
             bootstrap.channel(NioSocketChannel.class);
-            log.info(clientName + " nio init");
+            LOGGER.info(clientName + " nio init");
         }
         bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -77,20 +77,20 @@ public abstract class AbstractNettyClient {
 
                             @Override
                             public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                                log.info(clientName() + " disconnected!");
+                                LOGGER.info(clientName() + " disconnected!");
                                 channelInactive0(ctx);
                             }
 
                             @Override
                             public void channelActive(ChannelHandlerContext ctx) throws Exception {
                                 session = new Session(0, ctx.channel());
-                                log.info(clientName() + " connected!");
+                                LOGGER.info(clientName() + " connected!");
                                 channelActive0(ctx);
                             }
 
                             @Override
                             public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-                                log.error(ctx.channel() + " cause:", cause);
+                                LOGGER.error(ctx.channel() + " cause:", cause);
                                 exceptionCaught0(ctx, cause);
                             }
                         });
@@ -120,11 +120,11 @@ public abstract class AbstractNettyClient {
         if (session != null && session.writable()) {
             return;
         }
-        log.info(clientName + " start connect server：" + ip + ":" + port + "...");
+        LOGGER.info(clientName + " start connect server：" + ip + ":" + port + "...");
         try {
-            bootstrap.connect(ip, port).sync().addListener((ChannelFutureListener) channelFuture -> log.info(clientName + " connect server：" + ip + ":" + port + " success！"));
+            bootstrap.connect(ip, port).sync().addListener((ChannelFutureListener) channelFuture -> LOGGER.info(clientName + " connect server：" + ip + ":" + port + " success！"));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             if (autoReconnect > 0) {
                 tryReconnect(ip, port, autoReconnect);
             }
@@ -133,7 +133,7 @@ public abstract class AbstractNettyClient {
 
     protected void tryReconnect(String ip, int port, int waitSeconds) {
         tryDisConnect();
-        log.info(clientName + " try connect server：" + ip + ":" + port + " after " + waitSeconds + " seconds");
+        LOGGER.info(clientName + " try connect server：" + ip + ":" + port + " after " + waitSeconds + " seconds");
         if (waitSeconds > 0) {
             workerGroup.schedule(() -> connect0(ip, port), waitSeconds, TimeUnit.SECONDS);
         } else {

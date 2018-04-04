@@ -36,10 +36,10 @@ import java.util.concurrent.TimeUnit;
  * @author hank
  */
 public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
-    private static Logger log = Loggers.create();
-    private ScheduledExecutorService worker = Executors.newScheduledThreadPool(1);
+    private final static Logger LOGGER = Loggers.create();
+    private final ScheduledExecutorService worker = Executors.newScheduledThreadPool(1);
     // 脚本地址根目录
-    private String scriptRootPath;
+    private final String scriptRootPath;
 
     /**
      * 初始化
@@ -64,7 +64,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
                     reloadAll0();
                 } catch (InstantiationException | IllegalAccessException | NoSuchAlgorithmException | IOException
                         | ScriptConstructException | ScriptNotExistException | ScriptKeyDuplicatedException e) {
-                    log.error("load scripts error!", e);
+                    LOGGER.error("load scripts error!", e);
                 }
             }, 0, autoReloadInterval, TimeUnit.SECONDS);
         } else {
@@ -98,7 +98,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
                 reloadAll0();
             } catch (InstantiationException | IllegalAccessException | NoSuchAlgorithmException | IOException
                     | ScriptConstructException | ScriptNotExistException | ScriptKeyDuplicatedException e) {
-                log.error("reload all error", e);
+                LOGGER.error("reload all error", e);
             }
         });
     }
@@ -156,7 +156,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
                 reloadScript0(new ByteCodeClassLoader(), scriptId);
             } catch (InstantiationException | IllegalAccessException | NoSuchAlgorithmException | IOException
                     | ScriptNotExistException | ScriptConstructException | ScriptKeyDuplicatedException e) {
-                log.error("reload error:" + scriptId, e);
+                LOGGER.error("reload error:" + scriptId, e);
             }
         });
     }

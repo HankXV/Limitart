@@ -23,13 +23,13 @@ import org.slingerxv.limitart.base.ThreadSafe;
 import java.util.*;
 
 /**
- * 不可变列表
+ * 不可变列表 TODO 实现List接口
  *
  * @author hank
  */
 @ThreadSafe
 public class ImmutableList<E> implements Iterable<E> {
-    private Object[] arrays;
+    private final Object[] arrays;
 
     public static <E> ImmutableList<E> of(@NotNull List<E> list) {
         Conditions.args(list != null && !list.isEmpty());
@@ -40,12 +40,11 @@ public class ImmutableList<E> implements Iterable<E> {
         return il;
     }
 
+    @SafeVarargs
     public static <E> ImmutableList<E> just(@NotNull E... elements) {
         Conditions.args(elements != null && elements.length > 0);
         ImmutableList<E> il = new ImmutableList<>(elements.length);
-        for (int i = 0; i < elements.length; ++i) {
-            il.arrays[i] = elements[i];
-        }
+        System.arraycopy(elements, 0, il.arrays, 0, elements.length);
         return il;
     }
 
@@ -54,8 +53,7 @@ public class ImmutableList<E> implements Iterable<E> {
     }
 
     public E get(int index) {
-        Conditions.eleIndex(index, arrays.length);
-        return (E) arrays[index];
+        return (E) arrays[Conditions.eleIndex(index, arrays.length)];
     }
 
     public void forEach(@NotNull Test2<Integer, E> test) {

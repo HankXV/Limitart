@@ -1,57 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="field">
-    <xs:complexType>
-      <xs:simpleContent>
-        <xs:extension base="xs:string">
-          <xs:attribute type="xs:string" name="type" use="optional"/>
-          <xs:attribute type="xs:string" name="name" use="optional"/>
-          <xs:attribute type="xs:string" name="explain" use="optional"/>
-        </xs:extension>
-      </xs:simpleContent>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="meta">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element ref="field" maxOccurs="unbounded" minOccurs="0"/>
-        <xs:element ref="list"/>
-      </xs:sequence>
-      <xs:attribute type="xs:string" name="name"/>
-      <xs:attribute type="xs:string" name="explain"/>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="messages">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element ref="meta"/>
-        <xs:element ref="message" maxOccurs="unbounded" minOccurs="0"/>
-      </xs:sequence>
-      <xs:attribute type="xs:string" name="id"/>
-      <xs:attribute type="xs:string" name="name"/>
-      <xs:attribute type="xs:string" name="package"/>
-      <xs:attribute type="xs:string" name="explain"/>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="list">
-    <xs:complexType>
-      <xs:simpleContent>
-        <xs:extension base="xs:string">
-          <xs:attribute type="xs:string" name="type" use="optional"/>
-          <xs:attribute type="xs:string" name="name" use="optional"/>
-          <xs:attribute type="xs:string" name="explain" use="optional"/>
-        </xs:extension>
-      </xs:simpleContent>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="message">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element ref="field" maxOccurs="unbounded" minOccurs="0"/>
-        <xs:element ref="list"/>
-      </xs:sequence>
-      <xs:attribute type="xs:string" name="name" use="optional"/>
-      <xs:attribute type="xs:string" name="explain" use="optional"/>
-    </xs:complexType>
-  </xs:element>
+<xs:schema elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="field">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute type="xs:string" name="type"/>
+                    <xs:attribute type="xs:string" name="name"/>
+                    <xs:attribute type="xs:string" name="explain"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="meta">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="field" maxOccurs="unbounded" minOccurs="0"/>
+                <xs:element ref="list"/>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="name"/>
+            <xs:attribute type="xs:string" name="explain"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="messages">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="meta"/>
+                <xs:element ref="message" maxOccurs="unbounded" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="id"/>
+            <xs:attribute type="xs:string" name="name"/>
+            <xs:attribute type="xs:string" name="package"/>
+            <xs:attribute type="xs:string" name="explain"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="list">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute type="xs:string" name="type"/>
+                    <xs:attribute type="xs:string" name="name"/>
+                    <xs:attribute type="xs:string" name="explain"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="message">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="field" maxOccurs="unbounded" minOccurs="0"/>
+                <xs:element ref="list"/>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="name"/>
+            <xs:attribute type="xs:string" name="explain"/>
+        </xs:complexType>
+    </xs:element>
 </xs:schema>

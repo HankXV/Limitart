@@ -29,40 +29,39 @@ import java.util.Set;
 
 /**
  * 白名单拦截器
- * 
- * @author hank
  *
+ * @author hank
  */
 public class BinaryServerWhiteListInterceptor implements BinaryServerInterceptor {
-	private static Logger log = Loggers.create();
-	private Set<String> whiteList = new HashSet<>();
+    private final static Logger LOGGER = Loggers.create();
+    private final Set<String> whiteList = new HashSet<>();
 
-	public BinaryServerWhiteListInterceptor(String... ips) {
-		Collections.addAll(whiteList, ips);
-	}
+    public BinaryServerWhiteListInterceptor(String... ips) {
+        Collections.addAll(whiteList, ips);
+    }
 
-	public BinaryServerWhiteListInterceptor(Collection<String> ips) {
-		whiteList.addAll(ips);
-	}
+    public BinaryServerWhiteListInterceptor(Collection<String> ips) {
+        whiteList.addAll(ips);
+    }
 
-	@Override
-	public boolean onConnected(Session session) {
-		InetSocketAddress insocket = (InetSocketAddress) session.remoteAddress();
-		String remoteAddress = insocket.getAddress().getHostAddress();
-		if (!whiteList.contains(remoteAddress)) {
-			log.info("ip: " + remoteAddress + " rejected link!");
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean onConnected(Session session) {
+        InetSocketAddress insocket = (InetSocketAddress) session.remoteAddress();
+        String remoteAddress = insocket.getAddress().getHostAddress();
+        if (!whiteList.contains(remoteAddress)) {
+            LOGGER.info("ip: " + remoteAddress + " rejected link!");
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	public boolean onMessageIn(Session session, BinaryMessage msg) {
-		return false;
-	}
+    @Override
+    public boolean onMessageIn(Session session, BinaryMessage msg) {
+        return false;
+    }
 
-	@Override
-	public void onMessageOut(Session session, BinaryMessage msg) {
+    @Override
+    public void onMessageOut(Session session, BinaryMessage msg) {
 
-	}
+    }
 }

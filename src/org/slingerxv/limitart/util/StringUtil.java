@@ -35,7 +35,7 @@ public final class StringUtil {
     private final static Pattern SQL_KEY_WORD =
             Pattern.compile(
                     "(?:')|(?:--)|(/\\*(?:.|[\\n\\r])*?\\*/)|"
-                            + "(\\b(select|update|and|or|delete|insert|trancate|char|into|substr|ascii|declare|exec|count|master|into|drop|execute)\\b)",
+                            + "(\\b(select|update|and|or|delete|insert|trancate|char|substr|ascii|declare|exec|count|master|into|drop|execute)\\b)",
                     Pattern.CASE_INSENSITIVE);
 
     private StringUtil() {
@@ -68,10 +68,7 @@ public final class StringUtil {
      * @return
      */
     public static boolean isPhoneNumber(String value) {
-        if (empty(value)) {
-            return false;
-        }
-        return matchReg(PHONE_REG, value);
+        return !empty(value) && matchReg(PHONE_REG, value);
     }
 
     /**
@@ -81,10 +78,7 @@ public final class StringUtil {
      * @return
      */
     public static boolean isMail(String value) {
-        if (empty(value)) {
-            return false;
-        }
-        return matchReg(EMAIL_REG, value);
+        return !empty(value) && matchReg(EMAIL_REG, value);
     }
 
     /**
@@ -94,10 +88,7 @@ public final class StringUtil {
      * @return
      */
     public static boolean isIp4(String value) {
-        if (empty(value)) {
-            return false;
-        }
-        return matchReg(IP_REG, value);
+        return !empty(value) && matchReg(IP_REG, value);
     }
 
     /**
@@ -107,10 +98,7 @@ public final class StringUtil {
      * @return
      */
     public static boolean isInnerIp4(String value) {
-        if (empty(value)) {
-            return false;
-        }
-        return matchReg(IP_INNER_REG, value);
+        return !empty(value) && matchReg(IP_INNER_REG, value);
     }
 
     /**
@@ -120,10 +108,7 @@ public final class StringUtil {
      * @return
      */
     public static boolean isSQLRelative(String value) {
-        if (empty(value)) {
-            return false;
-        }
-        return SQL_KEY_WORD.matcher(value).find();
+        return !empty(value) && SQL_KEY_WORD.matcher(value).find();
     }
 
     /**

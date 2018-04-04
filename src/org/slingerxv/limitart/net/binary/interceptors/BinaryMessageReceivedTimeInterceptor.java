@@ -23,47 +23,46 @@ import org.slingerxv.limitart.net.binary.BinaryServerInterceptor;
 
 /**
  * 接收消息速度拦截器
- * 
- * @author hank
  *
+ * @author hank
  */
 public class BinaryMessageReceivedTimeInterceptor implements BinaryServerInterceptor {
-	private static Logger log = Loggers.create();
-	private static int LAST_RECEIVE_MSG_TIME = 1;
-	private int millsInterval;
+    private final static Logger LOGGER = Loggers.create();
+    private final static int LAST_RECEIVE_MSG_TIME = 1;
+    private final int millsInterval;
 
-	/**
-	 * 消息接收间隔
-	 * 
-	 * @param millsInterval
-	 */
-	public BinaryMessageReceivedTimeInterceptor(int millsInterval) {
-		this.millsInterval = millsInterval;
-	}
+    /**
+     * 消息接收间隔
+     *
+     * @param millsInterval
+     */
+    public BinaryMessageReceivedTimeInterceptor(int millsInterval) {
+        this.millsInterval = millsInterval;
+    }
 
-	@Override
-	public boolean onConnected(Session session) {
-		return false;
-	}
+    @Override
+    public boolean onConnected(Session session) {
+        return false;
+    }
 
-	@Override
-	public boolean onMessageIn(Session session, BinaryMessage msg) {
-		long now = System.currentTimeMillis();
-		if (session.params().containsKey(LAST_RECEIVE_MSG_TIME)) {
-			Long lastReceiveTime = session.params().getLong(LAST_RECEIVE_MSG_TIME);
-			if (now - lastReceiveTime < millsInterval) {
-				log.info(session + " send message too fast,close!");
-				session.close();
-				return true;
-			}
-		}
-		session.params().putLong(LAST_RECEIVE_MSG_TIME, now);
-		return false;
-	}
+    @Override
+    public boolean onMessageIn(Session session, BinaryMessage msg) {
+        long now = System.currentTimeMillis();
+        if (session.params().containsKey(LAST_RECEIVE_MSG_TIME)) {
+            Long lastReceiveTime = session.params().getLong(LAST_RECEIVE_MSG_TIME);
+            if (now - lastReceiveTime < millsInterval) {
+                LOGGER.info(session + " send message too fast,close!");
+                session.close();
+                return true;
+            }
+        }
+        session.params().putLong(LAST_RECEIVE_MSG_TIME, now);
+        return false;
+    }
 
-	@Override
-	public void onMessageOut(Session session, BinaryMessage msg) {
+    @Override
+    public void onMessageOut(Session session, BinaryMessage msg) {
 
-	}
+    }
 
 }

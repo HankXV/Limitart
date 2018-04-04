@@ -37,17 +37,15 @@ public class HashedTable<R, C, V> implements Table<R, C, V> {
 
     @Override
     public V put(R r, C c, V v) {
-        Map<C, V> map = maps.get(r);
-        if (map == null) {
-            map = new HashMap<>();
-            maps.put(r, map);
-        }
+        Map<C, V> map = maps.computeIfAbsent(r, k -> new HashMap<>());
         return map.put(c, v);
     }
 
     @Override
     public Map<C, V> row(R r) {
-        return maps.getOrDefault(r, new HashMap<>());
+        HashMap<C, V> newMap = new HashMap<>();
+        maps.put(r, newMap);
+        return newMap;
     }
 
     @Override

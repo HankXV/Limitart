@@ -37,8 +37,8 @@ public final class CollectionUtil {
         }
         for (long j : expect) {
             boolean has = false;
-            for (int i = 0; i < value.length; ++i) {
-                if (value[i] == j) {
+            for (long aValue : value) {
+                if (aValue == j) {
                     has = true;
                     break;
                 }
@@ -59,8 +59,8 @@ public final class CollectionUtil {
         }
         for (int j : expect) {
             boolean has = false;
-            for (int i = 0; i < value.length; ++i) {
-                if (value[i] == j) {
+            for (int aValue : value) {
+                if (aValue == j) {
                     has = true;
                     break;
                 }

@@ -25,7 +25,7 @@ package org.slingerxv.limitart.base;
  */
 @ThreadSafe
 public class ThreadLocalHolder<T> {
-    private ThreadLocal<T> ref = new ThreadLocal<>();
+    private final ThreadLocal<T> ref = new ThreadLocal<>();
 
     public static <T> ThreadLocalHolder<T> of(@NotNull T t) {
         Conditions.notNull(t);

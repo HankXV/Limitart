@@ -129,7 +129,7 @@ public class FrequencyWriteRankMap<K, V extends Func<K>> implements RankMap<K, V
             end = start;
         }
         if (end >= size) {
-            end = size - 1;
+            end = size;
         }
         if (start == end) {
             V at = getAt(start);

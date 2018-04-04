@@ -19,10 +19,10 @@ package org.slingerxv.limitart.logging;
 import org.slingerxv.limitart.logging.impl.Slf4JLoggers;
 
 public abstract class Loggers {
-    private static Loggers DEFAULT = new Slf4JLoggers();
+    private volatile static Loggers DEFAULT;
 
 
-    public static void setDefault(Loggers factory) {
+    public synchronized static void setDefault(Loggers factory) {
         DEFAULT = factory;
     }
 
@@ -35,6 +35,9 @@ public abstract class Loggers {
     }
 
     public static Logger create(String name) {
+        if (DEFAULT == null) {
+            DEFAULT = new Slf4JLoggers();
+        }
         return DEFAULT.instance(name);
     }
 

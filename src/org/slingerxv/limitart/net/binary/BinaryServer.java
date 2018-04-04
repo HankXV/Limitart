@@ -36,7 +36,7 @@ import java.util.List;
  * @author Hank
  */
 public class BinaryServer extends AbstractNettyServer implements Server {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
     private AddressPair addressPair;
     private BinaryDecoder decoder;
     private BinaryEncoder encoder;
@@ -77,7 +77,7 @@ public class BinaryServer extends AbstractNettyServer implements Server {
         if (activeOrNot) {
             for (BinaryServerInterceptor interceptor : interceptors) {
                 if (interceptor.onConnected(session)) {
-                    log.info("session:" + session.remoteAddress() + " is intercepted by "
+                    LOGGER.info("session:" + session.remoteAddress() + " is intercepted by "
                             + interceptor.getClass().getName());
                     session.close();
                     return;
@@ -100,7 +100,7 @@ public class BinaryServer extends AbstractNettyServer implements Server {
             try {
                 msg.decode();
             } catch (Exception e) {
-                log.error("message id:" + BinaryMessages.ID2String(messageId) + " decode error!");
+                LOGGER.error("message id:" + BinaryMessages.ID2String(messageId) + " decode error!");
                 throw new BinaryMessageCodecException(e);
             }
             msg.buffer(null);
@@ -113,7 +113,7 @@ public class BinaryServer extends AbstractNettyServer implements Server {
                 try {
                     onMessageIn.run(session, msg, factory);
                 } catch (Exception e) {
-                    log.error(session.remoteAddress() + " cause:", e);
+                    LOGGER.error(session.remoteAddress() + " cause:", e);
                     Procs.invoke(onExceptionTrown, session, e);
                 }
             } else {
@@ -121,7 +121,7 @@ public class BinaryServer extends AbstractNettyServer implements Server {
             }
         } catch (Throwable e) {
             session.close();
-            log.error("close session:" + session.remoteAddress(), e);
+            LOGGER.error("close session:" + session.remoteAddress(), e);
         } finally {
             buffer.release();
         }

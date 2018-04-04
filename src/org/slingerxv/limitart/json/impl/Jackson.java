@@ -40,7 +40,7 @@ import java.util.List;
  * @version 2018/3/6 0006 20:48
  */
 public class Jackson extends JSON {
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public Jackson() {
         VisibilityChecker<?> o = mapper.getVisibilityChecker()

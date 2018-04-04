@@ -24,7 +24,7 @@ import java.util.concurrent.*;
  * @author hank
  */
 public interface TaskQueue extends Executor {
-    static DisruptorTaskQueue create(String threadName) {
+    static TaskQueue create(String threadName) {
         return DisruptorTaskQueue.create(threadName);
     }
 

@@ -31,7 +31,7 @@ import java.util.List;
  * @author hank
  */
 public class BinarySendMessageUtil {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
 
     /**
      * 发送消息
@@ -50,7 +50,7 @@ public class BinarySendMessageUtil {
         try {
             msg.encode();
         } catch (IllegalAccessException | BinaryMessageCodecException e) {
-            log.error("message encode error!", e);
+            LOGGER.error("message encode error!", e);
         }
         encoder.afterWriteBody(buffer);
         session.writeNow(buffer, listener);
@@ -78,7 +78,7 @@ public class BinarySendMessageUtil {
         try {
             msg.encode();
         } catch (IllegalAccessException | BinaryMessageCodecException e) {
-            log.error("message encode error!", e);
+            LOGGER.error("message encode error!", e);
         }
         encoder.afterWriteBody(buffer);
         for (int i = 0; i < sessions.size(); ++i) {

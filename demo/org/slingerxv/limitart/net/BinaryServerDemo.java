@@ -30,7 +30,7 @@ public class BinaryServerDemo {
         new BinaryServer.BinaryServerBuilder()
                 .factory(BinaryMessageFactory.empty().registerManager(BinaryManagerDemo.class)).onConnected((s, b) -> {
             if (b) {
-                role.join(s, () -> System.out.println("join session success!"), (e) -> e.printStackTrace());
+                role.join(s, () -> System.out.println("join session success!"), Throwable::printStackTrace);
             } else {
                 role.leave(s);
                 System.out.println("leave session success");

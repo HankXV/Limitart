@@ -33,7 +33,7 @@ import org.slingerxv.limitart.net.Client;
  * @author hank
  */
 public class BinaryClient extends AbstractNettyClient implements Client {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
     // ----config
     private AddressPair remoteAddress;
     private BinaryDecoder decoder;
@@ -114,7 +114,7 @@ public class BinaryClient extends AbstractNettyClient implements Client {
             msg.buffer(null);
             factory.invokeMethod(session(), msg);
         } catch (Throwable e) {
-            log.error("decode error", e);
+            LOGGER.error("decode error", e);
         } finally {
             buffer.release();
         }

@@ -20,7 +20,6 @@ import org.slingerxv.limitart.base.Func1;
 import org.slingerxv.limitart.base.ThreadUnsafe;
 import org.slingerxv.limitart.util.EnumUtil;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.Iterator;
 
 /**
@@ -100,7 +99,7 @@ public class EnumList<E extends Enum<E>, V> implements Iterable<V> {
      * @return
      */
     public V get(int ordinal) {
-        return (V) objects[ordinal];
+        return objects[ordinal];
     }
 
     /**

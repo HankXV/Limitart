@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
  * @author hank
  */
 public final class BinaryMessages {
-    private static Logger log = Loggers.create();
+    private final static Logger LOGGER = Loggers.create();
     private static Validator xmlValidator;
 
     private BinaryMessages() {
@@ -64,10 +64,10 @@ public final class BinaryMessages {
      */
     public static short createID(int modID, int mID) {
         if (modID > Short.MAX_VALUE || modID < Short.MIN_VALUE) {
-            log.error("modID error", new BinaryMessageIDException(modID));
+            LOGGER.error("modID error", new BinaryMessageIDException(modID));
         }
         if (mID > Short.MAX_VALUE || mID < Short.MIN_VALUE) {
-            log.error("mID error", new BinaryMessageIDException(modID));
+            LOGGER.error("mID error", new BinaryMessageIDException(modID));
         }
         return (short) (modID << 8 | mID);
     }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.util;
+package org.slingerxv.limitart.game;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -23,17 +23,14 @@ import org.slingerxv.limitart.collections.ConcurrentHashSet;
 
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.LongAdder;
 
-public class UniqueIDUtilTest {
+public class UniqueIDTest {
     private Set<Long> sets;
-    private LongAdder adder;
     private CountDownLatch count;
     private static int THREAD_COUNT = 100;
 
     @Before
     public void setUp() {
-        adder = new LongAdder();
         sets = new ConcurrentHashSet<>();
         count = new CountDownLatch(THREAD_COUNT);
     }
@@ -56,13 +53,21 @@ public class UniqueIDUtilTest {
     }
 
     private void insert() {
-        for (int i = 0; i < 1000000; ++i) {
-            long createUUID = UniqueIDUtil.nextID(24, adder);
+        int serverKey = ServerKey.serverKey(1, Byte.MAX_VALUE);
+        int server = ServerKey.server(serverKey);
+        byte platform = ServerKey.platform(serverKey);
+//        System.out.println("key:" + serverKey + ",server:" + server + ",platform:" + platform);
+        for (int i = 0; i < 10000000; ++i) {
+            long createUUID = UniqueID.nextID(serverKey);
+//            System.out.println(Thread.currentThread().getName() + ":" + createUUID);
+            if(createUUID<0){
+                Assert.fail();
+            }
             if (sets.contains(createUUID)) {
                 Assert.fail();
             }
         }
-        // System.out.println(Thread.currentThread().getName() + " ok!");
+        System.out.println(Thread.currentThread().getName() + " ok!");
         count.countDown();
     }
 }

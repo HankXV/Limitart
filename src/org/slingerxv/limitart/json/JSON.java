@@ -26,7 +26,7 @@ import java.util.List;
  * @version 2018/3/6 0006 20:35
  */
 public abstract class JSON {
-    private static JSON DEFAULT = new Jackson();
+    private static JSON DEFAULT;
 
     /**
      * 获取默认实例(Jackson)
@@ -34,7 +34,19 @@ public abstract class JSON {
      * @return
      */
     public static JSON getDefault() {
+        if (DEFAULT == null) {
+            DEFAULT = new Jackson();
+        }
         return DEFAULT;
+    }
+
+    /**
+     * 获取默认实例(Jackson)
+     *
+     * @return
+     */
+    public synchronized static void setDefault(JSON json) {
+        DEFAULT = json;
     }
 
     /**

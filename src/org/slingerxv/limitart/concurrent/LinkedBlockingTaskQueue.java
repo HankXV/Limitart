@@ -29,7 +29,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @see DisruptorTaskQueue
  */
 public class LinkedBlockingTaskQueue extends AbstractTaskQueue implements Runnable {
-    private static Logger log = Loggers.create();
+    private static Logger LOGGER = Loggers.create();
     private BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
     private SingletonThreadFactory threadFactory;
     private boolean start = false;
@@ -66,7 +66,7 @@ public class LinkedBlockingTaskQueue extends AbstractTaskQueue implements Runnab
                 take = queue.take();
                 take.run();
             } catch (Exception e) {
-                log.error("invoke error", e);
+                LOGGER.error("invoke error", e);
                 Procs.invoke(exception, take, e);
             }
         }
