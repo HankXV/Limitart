@@ -13,26 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.base;
-
-import org.slingerxv.limitart.util.GameMathUtil;
-
 /**
- * 进度条
- *
- * @author hank
- * @version 2018-02-26
+ * 游戏需要的轻量数据库增删改查操作
  */
-@ThreadUnsafe
-public class ProgressBar extends IntCounter {
-    private final int high;
-
-    public ProgressBar(int high) {
-        this.high = GameMathUtil.fixedBetween(high, low(), super.high());
-    }
-
-    @Override
-    protected int high() {
-        return this.high;
-    }
-}
+package org.slingerxv.limitart.db;

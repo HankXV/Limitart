@@ -29,15 +29,16 @@ import java.util.Comparator;
 public final class CompareChain {
     private int result;
 
-    public static CompareChain empty() {
-        return new CompareChain();
+    public static <T> Comparator<T> build(Builder<T> builder) {
+        return (o1, o2) -> builder.chain(o1, o2).compare();
     }
 
-    public static <T> Comparator<T> build(Func2<T, T, CompareChain> func) {
-        return (o1, o2) -> {
-            CompareChain compareChain = func.run(o1, o2);
-            return compareChain.compare();
-        };
+    public interface Builder<T> {
+        CompareChain chain(T o1, T o2);
+    }
+
+    public static CompareChain empty() {
+        return new CompareChain();
     }
 
     public static CompareChain start(byte a, byte b) {

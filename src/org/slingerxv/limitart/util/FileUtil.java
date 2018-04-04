@@ -15,8 +15,6 @@
  */
 package org.slingerxv.limitart.util;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -91,25 +89,6 @@ public final class FileUtil {
     }
 
     /**
-     * 读取文件为ByteBuf(需要手动释放)
-     *
-     * @param file
-     * @return
-     * @throws IOException
-     */
-    public static ByteBuf readFile(File file) throws IOException {
-        ByteBuf buf = Unpooled.buffer();
-        try (FileInputStream input = new FileInputStream(file)) {
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = input.read(buffer)) != -1) {
-                buf.writeBytes(buffer, 0, len);
-            }
-        }
-        return buf;
-    }
-
-    /**
      * 读取文件为byte[]
      *
      * @param file
@@ -118,10 +97,7 @@ public final class FileUtil {
      * @throws IOException
      */
     public static byte[] readFile1(File file) throws IOException {
-        try (FileInputStream input = new FileInputStream(file)) {
-            return inputStream2ByteArray(input);
-        }
-
+        return Files.readAllBytes(file.toPath());
     }
 
     /**

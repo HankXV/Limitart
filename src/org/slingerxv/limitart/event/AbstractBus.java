@@ -13,50 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.slingerxv.limitart.game.poker;
+package org.slingerxv.limitart.event;
 
-/*
- * 德州牌型
+import org.slingerxv.limitart.base.Proc1;
+
+import java.util.*;
+
+/**
+ * 抽象总线
+ *
+ * @author hank
+ * @version 2018/4/12 0012 21:13
  */
-public enum TXCardRank {
-    /**
-     * 0 高牌
-     */
-    HIGH_CARD,
-    /**
-     * 1 一对
-     */
-    ONE_PAIR,
-    /**
-     * 2 两对
-     */
-    TWO_PAIR,
-    /**
-     * 3 三条
-     */
-    THREE_OF_A_KIND,
-    /**
-     * 4 顺子
-     */
-    STRAIGHT,
-    /**
-     * 5 同花
-     */
-    FLUSH,
-    /**
-     * 6 葫芦
-     */
-    FULL_HOUSE,
-    /**
-     * 7 四条
-     */
-    FOUR_OF_A_KIND,
-    /**
-     * 8 同花顺
-     */
-    STRAIGHT_FLUSH,
-    /**
-     * 9 皇家同花顺
-     */
-    ROYAL_FLUSH,;
+public abstract class AbstractBus implements Bus {
+    protected final Map<Class<? extends Event>, Set<Proc1>> callbacks = new HashMap<>();
+
+    @Override
+    public <E extends Event> void addListener(final Class<E> eventType, final Proc1<E> callback) {
+        Set<Proc1> set = callbacks.computeIfAbsent(eventType, k -> new LinkedHashSet<>());
+        set.add(callback);
+    }
 }

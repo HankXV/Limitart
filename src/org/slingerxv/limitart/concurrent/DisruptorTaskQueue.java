@@ -29,9 +29,9 @@ import org.slingerxv.limitart.logging.Loggers;
  * @author Hank
  */
 public class DisruptorTaskQueue extends AbstractTaskQueue {
-    private static Logger LOGGER = Loggers.create();
-    private Disruptor<Holder<Runnable>> disruptor;
-    private SingletonThreadFactory threadFactory;
+    private static final Logger LOGGER = Loggers.create();
+    private final Disruptor<Holder<Runnable>> disruptor;
+    private final SingletonThreadFactory threadFactory;
     private Proc3<Runnable, Throwable, Long> exception;
 
     public static DisruptorTaskQueue create(String threadName) {

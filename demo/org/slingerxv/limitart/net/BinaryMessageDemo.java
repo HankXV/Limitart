@@ -19,7 +19,7 @@ import org.slingerxv.limitart.net.binary.BinaryMessage;
 import org.slingerxv.limitart.net.binary.BinaryMessages;
 
 public class BinaryMessageDemo extends BinaryMessage {
-	public String content = "hello limitart!";
+	public final String content = "hello limitart!";
 
 	@Override
 	public short messageID() {

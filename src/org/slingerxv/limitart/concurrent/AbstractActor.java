@@ -26,7 +26,7 @@ import org.slingerxv.limitart.base.WeakRefHolder;
  * @author hank
  */
 public abstract class AbstractActor<T, R extends Place<T>> implements Actor<T, R> {
-    private transient WeakRefHolder<R> weakRefHolder = WeakRefHolder.empty();
+    private final transient WeakRefHolder<R> weakRefHolder = WeakRefHolder.empty();
 
     @Override
     public void leave(R oldPlace) {

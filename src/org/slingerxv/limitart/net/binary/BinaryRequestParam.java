@@ -26,8 +26,8 @@ import org.slingerxv.limitart.net.Session;
  * @author hank
  */
 public class BinaryRequestParam {
-    private BinaryMessage msg;
-    private Session session;
+    private final BinaryMessage msg;
+    private final Session session;
     private Object extra;
 
     public BinaryRequestParam(@NotNull Session session, @NotNull BinaryMessage msg) {

@@ -15,10 +15,7 @@
  */
 package org.slingerxv.limitart.collections;
 
-import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.base.Func;
-import org.slingerxv.limitart.base.NotNull;
-import org.slingerxv.limitart.base.ThreadUnsafe;
+import org.slingerxv.limitart.base.*;
 
 import java.util.*;
 
@@ -30,17 +27,19 @@ import java.util.*;
  * @author hank
  */
 @ThreadUnsafe
-public class FrequencyReadRankMap<K, V extends Func<K>> implements RankMap<K, V> {
+public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, V> {
     private final List<V> list;
     private final Map<K, V> map;
     private final Comparator<V> comparator;
     private final int capacity;
 
+    public static <K, V extends RankMap.RankObj<K>> RankMapImpl<K, V> create(@NotNull Comparator<V> comparator, int capacity) {
+        return new RankMapImpl(comparator, capacity);
+    }
 
-    public FrequencyReadRankMap(@NotNull Comparator<V> comparator, int capacity) {
-        if (capacity <= 0) {
-            throw new IllegalArgumentException("capacity > 0");
-        }
+
+    private RankMapImpl(@NotNull Comparator<V> comparator, int capacity) {
+        Conditions.positive(capacity);
         this.map = new HashMap<>(capacity);
         this.comparator = Conditions.notNull(comparator, "comparator");
         this.list = new ArrayList<>(capacity);
@@ -48,45 +47,83 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements RankMap<K, V>
     }
 
     @Override
-    public V get(@NotNull Object key) {
+    public V get(@NotNull K key) {
         return map.get(key);
     }
 
     @Override
-    public V put(@NotNull K key, @NotNull V value) {
-        Conditions.notNull(key, "key");
+    public void replaceOrPut(V value) {
         Conditions.notNull(value, "value");
+        K key = value.key();
         if (map.containsKey(key)) {
             V obj = map.get(key);
+            Conditions.args(value != obj, "can not put the same object(same hash):%s", value);
             // 比较新数据与老数据大小
             int compare = comparator.compare(value, obj);
             if (compare == 0) {
-                return null;
+                return;
             }
             // 因为防止老对象被更改值，所以要删除一次
             int binarySearch = binarySearch(obj, false);
             list.remove(binarySearch);
+            // 这里删除实际上是个多余的动作，暂时兼容一下下面的接口
+            map.remove(key);
         }
-        int binarySearch = 0;
-        if (size() > 0) {
-            binarySearch = binarySearch(value, true);
-        }
-        map.put(key, value);
-        list.add(binarySearch, value);
-        while (map.size() > this.capacity) {
-            V pollLast = list.remove(map.size() - 1);
-            map.remove(pollLast.run());
-        }
-        return value;
+        putIfAbsent(value);
+    }
+
+    @Override
+    public boolean containsKey(K key) {
+        return map.containsKey(key);
     }
 
     @Override
     public V remove(@NotNull K key) {
         V remove = map.remove(key);
         if (remove != null) {
-            list.remove(remove);
+            int binarySearch = binarySearch(remove, false);
+            list.remove(binarySearch);
         }
         return remove;
+    }
+
+    @Override
+    public void update(K key, Proc1<V> consumer) {
+        V old = map.get(key);
+        Conditions.notNull(old != null, "key(%s) pufIfAbsent first!", key);
+        // 在更新前先找到老值的位置
+        int i = binarySearch(old, false);
+        list.remove(i);
+        consumer.run(old);
+        int newIndex = binarySearch(old, true);
+        list.add(newIndex, old);
+    }
+
+    @Override
+    public void putIfAbsent(V value) {
+        Conditions.notNull(value, "value");
+        Conditions.args(!map.containsKey(value.key()), "key duplicated:%s", value.key());
+        int binarySearch = 0;
+        if (size() > 0) {
+            binarySearch = binarySearch(value, true);
+        }
+        map.put(value.key(), value);
+        list.add(binarySearch, value);
+        while (map.size() > this.capacity) {
+            V pollLast = list.remove(map.size() - 1);
+            map.remove(pollLast.key());
+        }
+    }
+
+    @Override
+    public void updateOrPut(K key, Proc1<V> consumer, Func<V> instance) {
+        if (!containsKey(key)) {
+            V newInstance = instance.run();
+            consumer.run(newInstance);
+            putIfAbsent(newInstance);
+        } else {
+            update(key, consumer);
+        }
     }
 
     @Override
@@ -101,7 +138,7 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements RankMap<K, V>
     }
 
     @Override
-    public int getIndex(@NotNull K key) {
+    public int getIndex(@com.sun.istack.internal.NotNull K key) {
         if (!this.map.containsKey(key)) {
             return -1;
         }
@@ -169,16 +206,13 @@ public class FrequencyReadRankMap<K, V extends Func<K>> implements RankMap<K, V>
             int mid = (low + high) >>> 1;
             V midVal = list.get(mid);
             int cmp = this.comparator.compare(midVal, v);
-            if (cmp < 0)
-                low = mid + 1;
-            else if (cmp > 0)
-                high = mid - 1;
-            else
-                return mid;
+            if (cmp < 0) low = mid + 1;
+            else if (cmp > 0) high = mid - 1;
+            else return mid;
         }
         if (similar) {
             return low;
         }
-        return -1;
+        throw new IllegalStateException("can not find pos,maybe change the value without this map???");
     }
 }

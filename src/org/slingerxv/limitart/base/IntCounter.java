@@ -63,7 +63,7 @@ public class IntCounter {
      *
      * @return
      */
-    protected int high() {
+    public int high() {
         return Integer.MAX_VALUE;
     }
 
@@ -72,7 +72,7 @@ public class IntCounter {
      *
      * @return
      */
-    protected int low() {
+    public int low() {
         return 0;
     }
 

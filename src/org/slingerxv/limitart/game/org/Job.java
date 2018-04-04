@@ -17,12 +17,14 @@ package org.slingerxv.limitart.game.org;
 
 
 import org.slingerxv.limitart.base.Conditions;
+import org.slingerxv.limitart.base.EnumInterface;
 
 /**
  * 职位(建议使用枚举构造一组Job)
  *
  * @author hank
  */
+@EnumInterface
 public interface Job {
     /**
      * 职位ID

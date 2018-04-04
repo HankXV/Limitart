@@ -73,8 +73,6 @@ public class ImmutableMap<K, V> {
     }
 
     public Map<K, V> copy() {
-        Map<K, V> hashMap = new HashMap<>();
-        hashMap.putAll(map);
-        return hashMap;
+        return new HashMap<>(map);
     }
 }

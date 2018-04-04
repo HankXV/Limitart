@@ -29,9 +29,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @see DisruptorTaskQueue
  */
 public class LinkedBlockingTaskQueue extends AbstractTaskQueue implements Runnable {
-    private static Logger LOGGER = Loggers.create();
-    private BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
-    private SingletonThreadFactory threadFactory;
+    private static final Logger LOGGER = Loggers.create();
+    private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+    private final SingletonThreadFactory threadFactory;
     private boolean start = false;
     private Proc2<Runnable, Throwable> exception;
 

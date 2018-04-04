@@ -21,7 +21,7 @@ package org.slingerxv.limitart.base;
  * @author hank
  */
 @ThreadUnsafe
-public class ImmutableCouple<H, W> implements Couple {
+public class ImmutableCouple<H, W> implements Couple<H, W> {
     private final H h;
     private final W w;
 

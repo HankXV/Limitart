@@ -22,7 +22,7 @@ package org.slingerxv.limitart.net;
  *
  */
 public class MessagePackageTest {
-	private static byte PACKAGE_ID = 1;
+	private static final byte PACKAGE_ID = 1;
 
 	/**
 	 * 消息Bean测试

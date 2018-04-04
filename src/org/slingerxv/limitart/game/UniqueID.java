@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @ThreadSafe
 public final class UniqueID {
-    private static Seed DEFAULT_ID_ADDER = Seed.create();
+    private static final Seed DEFAULT_ID_ADDER = Seed.create();
 
     private UniqueID() {
     }
@@ -77,7 +77,7 @@ public final class UniqueID {
      * 种子
      */
     public static class Seed {
-        private transient volatile AtomicLong origin = new AtomicLong(((TimeUtil.now() / 1000) & 0x000000001FFFFFFFL) << 11);
+        private final transient AtomicLong origin = new AtomicLong(((TimeUtil.now() / 1000) & 0x000000001FFFFFFFL) << 11);
 
         public static Seed create() {
             return new Seed();

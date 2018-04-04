@@ -24,7 +24,7 @@ import java.util.List;
  * @author hank
  */
 public abstract class State<T extends FSM> {
-    private List<Event<T>> conditions = new LinkedList<>();
+    private final List<Event<T>> conditions = new LinkedList<>();
     private boolean finished = false;
     private long executedTime;
 

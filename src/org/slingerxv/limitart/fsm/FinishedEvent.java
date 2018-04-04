@@ -24,7 +24,7 @@ package org.slingerxv.limitart.fsm;
  */
 public class FinishedEvent<T extends FSM> implements Event<T> {
 
-	private Integer nextNodeId;
+	private final Integer nextNodeId;
 	private long delay;
 
 	public FinishedEvent(Integer nextNodeId, long delay) {

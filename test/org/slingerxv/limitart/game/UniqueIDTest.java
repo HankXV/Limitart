@@ -27,7 +27,7 @@ import java.util.concurrent.CountDownLatch;
 public class UniqueIDTest {
     private Set<Long> sets;
     private CountDownLatch count;
-    private static int THREAD_COUNT = 100;
+    private static final int THREAD_COUNT = 100;
 
     @Before
     public void setUp() {

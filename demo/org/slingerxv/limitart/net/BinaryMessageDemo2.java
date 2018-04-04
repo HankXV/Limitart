@@ -23,7 +23,7 @@ import org.slingerxv.limitart.net.binary.BinaryMessages;
  *
  */
 public class BinaryMessageDemo2 extends BinaryMessage {
-	public String content = "hello script manager";
+	public final String content = "hello script manager";
 
 	@Override
 	public short messageID() {

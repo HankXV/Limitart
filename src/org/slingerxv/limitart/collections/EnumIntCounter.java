@@ -71,6 +71,9 @@ public class EnumIntCounter<E extends Enum<E>> implements Iterable<Integer> {
     }
 
     private int getCount(int ordinal) {
+        if (ordinal > counts.length - 1 || ordinal < 0) {
+            return 0;
+        }
         return counts[ordinal];
     }
 
@@ -86,6 +89,12 @@ public class EnumIntCounter<E extends Enum<E>> implements Iterable<Integer> {
     }
 
     private int putCount(int ordinal, int value) {
+        // 容错
+        if (ordinal > counts.length - 1) {
+            int[] temp = new int[ordinal + 1];
+            System.arraycopy(counts, 0, temp, 0, counts.length);
+            counts = temp;
+        }
         int old = counts[ordinal];
         counts[ordinal] = value;
         return old;
