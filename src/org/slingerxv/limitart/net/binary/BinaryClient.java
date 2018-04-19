@@ -20,9 +20,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.*;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.net.AbstractNettyClient;
 import org.slingerxv.limitart.net.AddressPair;
 import org.slingerxv.limitart.net.Client;
@@ -33,7 +33,7 @@ import org.slingerxv.limitart.net.Client;
  * @author hank
  */
 public class BinaryClient extends AbstractNettyClient implements Client {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(BinaryClient.class);
     // ----config
     private final AddressPair remoteAddress;
     private final BinaryDecoder decoder;

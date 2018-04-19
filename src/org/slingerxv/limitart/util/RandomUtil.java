@@ -172,7 +172,7 @@ public final class RandomUtil {
         for (int prob : weight) {
             sumProb += prob;
         }
-        int randomInt = nextInt(0, sumProb);
+        int randomInt = nextInt(1, sumProb);
         int step = 0;
         for (int i = 0; i < weight.length; ++i) {
             step += weight[i];
@@ -180,6 +180,18 @@ public final class RandomUtil {
                 return i;
             }
         }
-        return 0;
+        throw new IllegalArgumentException("at least one weight > 0");
+    }
+
+    public static void main(String[] args) {
+        int[] weight = new int[]{1, 0};
+        int count = 0;
+        for (int i = 0; i < 100000000; ++i) {
+            int i1 = weight(weight);
+            if (i1 == (weight.length - 1)) {
+                ++count;
+            }
+        }
+        System.out.println(count);
     }
 }

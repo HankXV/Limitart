@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.logging.Logger;
 import org.slingerxv.limitart.logging.Loggers;
 
+@Deprecated
 public class Slf4JLoggers extends Loggers {
 
 

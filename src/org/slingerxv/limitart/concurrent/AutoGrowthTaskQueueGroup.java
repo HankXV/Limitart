@@ -15,13 +15,13 @@
  */
 package org.slingerxv.limitart.concurrent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.Func1;
 import org.slingerxv.limitart.base.NotNull;
 import org.slingerxv.limitart.base.ThreadSafe;
 import org.slingerxv.limitart.collections.ConcurrentHashSet;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ThreadSafe
 @Deprecated
 public class AutoGrowthTaskQueueGroup {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(AutoGrowthTaskQueueGroup.class);
     private final AtomicInteger threadId = new AtomicInteger(0);
     private final Map<Integer, AutoGrowthSegment> threads = new ConcurrentHashMap<>();
     private final int entityCountPerThread;

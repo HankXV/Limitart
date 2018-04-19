@@ -1,8 +1,8 @@
 [![Maven](https://img.shields.io/badge/maven-v3.0--alpha-green.svg)](https://mvnrepository.com/artifact/org.slingerxv/limitart)
 [![Apache](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 ![JDK](https://img.shields.io/badge/jdk-1.8-green.svg)
-#### 轻量级快速开发游戏服务器 Limitart
-Limitart是以Netty为基础开发的一套可快速实现游戏服务器的轻量级框架，依赖非常少的第三方库、代码量少、上手容易，让你可以非常快速的开发出服务器原型。
+#### 轻量级快速开发轻量级服务器 Limitart
+Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的框架(包括游戏服务器,中间件等)，依赖非常少的第三方库、代码量少、上手容易，让你可以非常快速的开发出服务器原型。
 #### 3.X快速开始
 1.涉及到的类
 

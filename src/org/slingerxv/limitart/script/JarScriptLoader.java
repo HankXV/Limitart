@@ -15,8 +15,9 @@
  */
 package org.slingerxv.limitart.script;
 
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +33,7 @@ import java.util.jar.JarFile;
  * @author hank
  */
 public class JarScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(JarScriptLoader.class);
 
     /**
      * 加载jar包

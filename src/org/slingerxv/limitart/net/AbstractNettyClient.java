@@ -23,9 +23,9 @@ import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @author hank
  */
 public abstract class AbstractNettyClient {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyClient.class);
     protected final static EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
     private String clientName;

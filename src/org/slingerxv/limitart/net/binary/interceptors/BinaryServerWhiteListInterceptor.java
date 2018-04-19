@@ -15,8 +15,8 @@
  */
 package org.slingerxv.limitart.net.binary.interceptors;
 
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.net.Session;
 import org.slingerxv.limitart.net.binary.BinaryMessage;
 import org.slingerxv.limitart.net.binary.BinaryServerInterceptor;
@@ -33,7 +33,7 @@ import java.util.Set;
  * @author hank
  */
 public class BinaryServerWhiteListInterceptor implements BinaryServerInterceptor {
-    private final static Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(BinaryServerWhiteListInterceptor.class);
     private final Set<String> whiteList = new HashSet<>();
 
     public BinaryServerWhiteListInterceptor(String... ips) {

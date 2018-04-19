@@ -17,9 +17,9 @@ package org.slingerxv.limitart.net.binary;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.*;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.net.Session;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ import java.util.List;
  * @author hank
  */
 public class BinarySendMessageUtil {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(BinarySendMessageUtil.class);
 
     /**
      * 发送消息

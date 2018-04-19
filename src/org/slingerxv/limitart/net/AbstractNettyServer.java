@@ -26,11 +26,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.AttributeKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.Proc1;
 import org.slingerxv.limitart.base.Procs;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author hank
  */
 public abstract class AbstractNettyServer {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyServer.class);
     private static final AttributeKey<Integer> SESSION_ID_KEY = AttributeKey.newInstance("SESSION_ID_KEY");
     private static final AtomicInteger SESSION_ID_CREATOR = new AtomicInteger();
     protected final static EventLoopGroup bossGroup;

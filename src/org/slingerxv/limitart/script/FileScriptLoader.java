@@ -15,9 +15,9 @@
  */
 package org.slingerxv.limitart.script;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.util.CodecUtil;
 import org.slingerxv.limitart.util.FileUtil;
 
@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * @author hank
  */
 public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
-    private final static Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileScriptLoader.class);
     private final ScheduledExecutorService worker = Executors.newScheduledThreadPool(1);
     // 脚本地址根目录
     private final String scriptRootPath;

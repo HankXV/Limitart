@@ -15,9 +15,9 @@
  */
 package org.slingerxv.limitart.script;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 
 import java.io.File;
 import java.util.Map;
@@ -32,7 +32,7 @@ import java.util.function.BiConsumer;
  * @author hank
  */
 public abstract class AbstractScriptLoader<KEY> {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScriptLoader.class);
     private final Map<KEY, ScriptData<KEY>> scriptMap = new ConcurrentHashMap<>();
     private final Map<String, KEY> pathMap = new ConcurrentHashMap<>();
 

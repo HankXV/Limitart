@@ -16,4 +16,6 @@
 /**
  * 日志通用接口
  */
+//因为如果封装了一层logger会导致logger打印的栈多出一层，行数变得不准确
+@Deprecated
 package org.slingerxv.limitart.logging;

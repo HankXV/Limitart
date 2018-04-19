@@ -15,8 +15,8 @@
  */
 package org.slingerxv.limitart.net.binary;
 
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.net.binary.BinaryMessageProtoFileInfo.BinaryMessageFieldProtoInfo;
 import org.slingerxv.limitart.net.binary.BinaryMessageProtoFileInfo.BinaryMessageMetaProtoInfo;
 import org.slingerxv.limitart.net.binary.BinaryMessageProtoFileInfo.BinaryMessageProtoInfo;
@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
  * @author hank
  */
 public final class BinaryMessages {
-    private final static Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(BinaryMessage.class);
     private static Validator xmlValidator;
 
     private BinaryMessages() {

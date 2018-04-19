@@ -15,14 +15,15 @@
  */
 package org.slingerxv.limitart.fsm;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.NotNull;
 import org.slingerxv.limitart.base.Proc;
 import org.slingerxv.limitart.base.ThreadSafe;
 import org.slingerxv.limitart.collections.ConstraintConcurrentMap;
 import org.slingerxv.limitart.collections.ConstraintMap;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
+import org.slingerxv.limitart.concurrent.AutoGrowthTaskQueueGroup;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -36,7 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @SuppressWarnings("rawtypes")
 @ThreadSafe
 public class FSM {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(FSM.class);
     private final Map<Integer, State> stateMap = new HashMap<>();
     private final Queue<Integer> stateQueue = new LinkedList<>();
     private State preState;
