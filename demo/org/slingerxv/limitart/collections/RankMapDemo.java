@@ -23,7 +23,7 @@ public class RankMapDemo {
         System.out.println(rankMap.getAll());
     }
 
-    public static class Bean implements RankMap.RankObj<Long> {
+    public static class Bean implements RankMap.LongRankObj {
         private long id;
         private Item item;
         private int price;

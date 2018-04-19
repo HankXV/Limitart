@@ -29,8 +29,8 @@ import java.util.Map;
  * @version 2018/4/12 0012 22:11
  */
 public abstract class MissionProcessor<E extends MissionExecutor> {
-    private Map<MissionType, MissionHandler> missions = new HashMap<>();
-    private Map<MissionTargetType, MissionTargetHandler> targets = new HashMap<>();
+    private final Map<MissionType, MissionHandler> missions = new HashMap<>();
+    private final Map<MissionTargetType, MissionTargetHandler> targets = new HashMap<>();
 
     /**
      * 注册一个任务处理器

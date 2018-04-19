@@ -49,4 +49,13 @@ public class MutableTriple<A, B, C> implements Triple<A, B, C> {
     public void setC(@Nullable C c) {
         this.c = c;
     }
+
+    @Override
+    public String toString() {
+        return "MutableTriple{" +
+                "a=" + a +
+                ", b=" + b +
+                ", c=" + c +
+                '}';
+    }
 }

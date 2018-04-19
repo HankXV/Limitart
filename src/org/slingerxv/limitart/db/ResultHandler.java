@@ -17,7 +17,6 @@ package org.slingerxv.limitart.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 public interface ResultHandler<T> {
     T parse(ResultSet resultSet) throws SQLException;

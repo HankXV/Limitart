@@ -15,7 +15,6 @@
  */
 package org.slingerxv.limitart.util;
 
-import io.netty.util.CharsetUtil;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -23,18 +22,18 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 /**
  * 对称加密验证工具
  *
  * @author hank
  */
-public final class SymmetricEncryptionUtil {
+public final class EncryptionUtil {
     private static final String TRANSFORMATION = "AES/CBC/NoPadding";
     private static final String ALGORITHM = "AES";
     private final Key generateKey;
@@ -51,8 +50,8 @@ public final class SymmetricEncryptionUtil {
      * @throws InvalidKeyException
      * @throws InvalidAlgorithmParameterException
      */
-    public synchronized static SymmetricEncryptionUtil getEncodeInstance(String password, String ivStr) {
-        return new SymmetricEncryptionUtil(password, ivStr);
+    public synchronized static EncryptionUtil getEncodeInstance(String password, String ivStr) {
+        return new EncryptionUtil(password, ivStr);
     }
 
     /**
@@ -65,8 +64,8 @@ public final class SymmetricEncryptionUtil {
      * @throws InvalidKeyException
      * @throws InvalidAlgorithmParameterException
      */
-    public synchronized static SymmetricEncryptionUtil getDecodeInstance(String password) {
-        return new SymmetricEncryptionUtil(password);
+    public synchronized static EncryptionUtil getDecodeInstance(String password) {
+        return new EncryptionUtil(password);
     }
 
     /**
@@ -75,15 +74,15 @@ public final class SymmetricEncryptionUtil {
      * @param password
      * @param ivStr
      */
-    private SymmetricEncryptionUtil(String password, String ivStr) {
-        byte[] bytes = password.getBytes(CharsetUtil.UTF_8);
+    private EncryptionUtil(String password, String ivStr) {
+        byte[] bytes = password.getBytes(StandardCharsets.UTF_8);
         byte[] resultKey = new byte[0X10];
         System.arraycopy(bytes, 0, resultKey, 0, Math.min(resultKey.length, bytes.length));
         generateKey = new SecretKeySpec(resultKey, ALGORITHM);
         if (ivStr != null) {
             // 初始化16位向量
             this.iv = new byte[0X10];
-            byte[] ivRaw = ivStr.getBytes(CharsetUtil.UTF_8);
+            byte[] ivRaw = ivStr.getBytes(StandardCharsets.UTF_8);
             System.arraycopy(ivRaw, 0, this.iv, 0, Math.min(this.iv.length, ivRaw.length));
         }
     }
@@ -97,7 +96,7 @@ public final class SymmetricEncryptionUtil {
      * @throws InvalidAlgorithmParameterException
      * @throws InvalidKeyException
      */
-    private SymmetricEncryptionUtil(String password) {
+    private EncryptionUtil(String password) {
         this(password, null);
     }
 
@@ -127,8 +126,8 @@ public final class SymmetricEncryptionUtil {
         byte[] content = new byte[doFinal.length + this.iv.length];
         System.arraycopy(this.iv, 0, content, 0, this.iv.length);
         System.arraycopy(doFinal, 0, content, this.iv.length, doFinal.length);
-        byte[] base64Encode = Base64.getEncoder().encode(content);
-        String b64Str = new String(base64Encode, CharsetUtil.UTF_8);
+        byte[] base64Encode = CodecUtil.toBase64(content);
+        String b64Str = new String(base64Encode, StandardCharsets.UTF_8);
         String result = b64Str.replace('+', '-').replace('/', '_').replace('=', '.');
         if (zeroFlag > 0) {
             result = "$" + String.format("%02d", zeroFlag) + result;
@@ -144,7 +143,7 @@ public final class SymmetricEncryptionUtil {
      * @throws Exception
      */
     public String encode(String source) throws Exception {
-        return encode(source.getBytes(CharsetUtil.UTF_8));
+        return encode(source.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -162,7 +161,7 @@ public final class SymmetricEncryptionUtil {
             tokenSource = tokenSource.substring(3);
         }
         String token = tokenSource.replace('-', '+').replace('_', '/').replace('.', '=');
-        byte[] base64Decode = Base64.getDecoder().decode(token.getBytes(CharsetUtil.UTF_8));
+        byte[] base64Decode = CodecUtil.fromBase64(token.getBytes(StandardCharsets.UTF_8));
         byte[] iv = new byte[0X10];
         byte[] content = new byte[base64Decode.length - iv.length];
         System.arraycopy(base64Decode, 0, iv, 0, iv.length);
@@ -174,9 +173,9 @@ public final class SymmetricEncryptionUtil {
         if (zeroFlag > 0) {
             byte[] afterZero = new byte[doFinal.length - zeroFlag];
             System.arraycopy(doFinal, 0, afterZero, 0, afterZero.length);
-            return new String(afterZero, CharsetUtil.UTF_8);
+            return new String(afterZero, StandardCharsets.UTF_8);
         } else {
-            return new String(doFinal, CharsetUtil.UTF_8);
+            return new String(doFinal, StandardCharsets.UTF_8);
         }
     }
 }

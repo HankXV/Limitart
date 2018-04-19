@@ -19,6 +19,7 @@ import org.slingerxv.limitart.base.ThreadUnsafe;
 import org.slingerxv.limitart.util.EnumUtil;
 import org.slingerxv.limitart.util.GameMathUtil;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -192,5 +193,10 @@ public class EnumIntCounter<E extends Enum<E>> implements Iterable<Integer> {
     @Override
     public Iterator<Integer> iterator() {
         return new IntArrayIterator(this.counts);
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(this.counts);
     }
 }

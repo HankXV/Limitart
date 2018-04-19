@@ -41,4 +41,12 @@ public class ImmutableCouple<H, W> implements Couple<H, W> {
     W get2() {
         return this.w;
     }
+
+    @Override
+    public String toString() {
+        return "ImmutableCouple{" +
+                "h=" + h +
+                ", w=" + w +
+                '}';
+    }
 }

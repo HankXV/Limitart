@@ -18,8 +18,8 @@ package org.slingerxv.limitart.script;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.logging.Logger;
 import org.slingerxv.limitart.logging.Loggers;
+import org.slingerxv.limitart.util.CodecUtil;
 import org.slingerxv.limitart.util.FileUtil;
-import org.slingerxv.limitart.util.SecurityUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,7 +138,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
                 }
                 @SuppressWarnings("unchecked")
                 Script<KEY> script = (Script<KEY>) newInstance;
-                registerScriptData(script, SecurityUtil.md5Encode32(readFile1), getFilePath(file));
+                registerScriptData(script, CodecUtil.toMD5(readFile1), getFilePath(file));
             } else {
                 reloadScript0(loader, scriptKey);
             }
@@ -180,7 +180,7 @@ public class FileScriptLoader<KEY> extends AbstractScriptLoader<KEY> {
         String filePath = getFilePath(scriptId);
         File file = new File(filePath);
         byte[] readFile1 = FileUtil.readFile1(file);
-        String md5Encode32 = SecurityUtil.md5Encode32(readFile1);
+        String md5Encode32 = CodecUtil.toMD5(readFile1);
         if (isSameCode(scriptId, md5Encode32)) {
             return;
         }

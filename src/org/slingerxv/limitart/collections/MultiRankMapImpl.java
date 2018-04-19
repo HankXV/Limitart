@@ -17,10 +17,12 @@ public class MultiRankMapImpl<K, V extends RankMap.RankObj<K>> implements MultiR
     private final Map<Comparator<V>, List<V>> list;
     private Comparator<V> first;
 
+    @SafeVarargs
     public static <K, V extends RankMap.RankObj<K>> MultiRankMapImpl<K, V> create(Comparator<V>... comparators) {
         return new MultiRankMapImpl<>(comparators);
     }
 
+    @SafeVarargs
     private MultiRankMapImpl(Comparator<V>... comparators) {
         Conditions.args(
                 comparators != null && comparators.length > 0, "comparators needed!");
@@ -63,8 +65,7 @@ public class MultiRankMapImpl<K, V extends RankMap.RankObj<K>> implements MultiR
                     continue;
                 }
                 // 因为防止老对象被更改值，所以要删除一次
-                int binarySearch = binarySearch(comparator, list, obj, false);
-                list.remove(binarySearch);
+                listRemove(comparator, list, obj);
             }
             map.remove(key);
         }
@@ -80,12 +81,7 @@ public class MultiRankMapImpl<K, V extends RankMap.RankObj<K>> implements MultiR
     public V remove(K key) {
         V remove = map.remove(key);
         if (remove != null) {
-            list.forEach(
-                    (c, l) -> {
-                        int binarySearch = binarySearch(c, l, remove, false);
-                        Conditions.args(binarySearch != -1, "fatal! key(%s) not sync", key);
-                        l.remove(binarySearch);
-                    });
+            list.forEach((c, l) -> listRemove(c, l, remove));
         }
         return remove;
     }
@@ -95,7 +91,7 @@ public class MultiRankMapImpl<K, V extends RankMap.RankObj<K>> implements MultiR
         V old = map.get(key);
         Conditions.notNull(old, "key(%s) pufIfAbsent first!", key);
         // 在更新前先找到老值的位置
-        list.forEach((c, l) -> l.remove(binarySearch(c, l, old, false)));
+        list.forEach((c, l) -> listRemove(c, l, old));
         consumer.run(old);
         list.forEach((c, l) -> l.add(binarySearch(c, l, old, true), old));
     }
@@ -195,6 +191,13 @@ public class MultiRankMapImpl<K, V extends RankMap.RankObj<K>> implements MultiR
         return vs.get(at);
     }
 
+    private void listRemove(Comparator<V> comparator, List<V> list, V old) {
+        int i = binarySearch(comparator, list, old, false);
+        V remove = list.remove(i);
+        Conditions.args(
+                old == remove, "remove obj not equals,comparator or key comparator must be error!");
+    }
+
     private int binarySearch(Comparator<V> comparator, List<V> list, V v, boolean similar) {
         int low = 0;
         int high = list.size() - 1;
@@ -202,6 +205,9 @@ public class MultiRankMapImpl<K, V extends RankMap.RankObj<K>> implements MultiR
             int mid = (low + high) >>> 1;
             V midVal = list.get(mid);
             int cmp = comparator.compare(midVal, v);
+            if (cmp == 0) {
+                cmp = midVal.compareKey(v.key());
+            }
             if (cmp < 0) low = mid + 1;
             else if (cmp > 0) high = mid - 1;
             else return mid;

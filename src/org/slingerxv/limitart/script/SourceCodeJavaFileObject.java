@@ -15,7 +15,6 @@
  */
 package org.slingerxv.limitart.script;
 
-import io.netty.util.CharsetUtil;
 import org.slingerxv.limitart.util.FileUtil;
 
 import javax.tools.SimpleJavaFileObject;
@@ -23,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 源码型JavaFileObject
@@ -35,18 +35,18 @@ public class SourceCodeJavaFileObject extends SimpleJavaFileObject {
 
     public SourceCodeJavaFileObject(File sourceFile) throws IOException {
         super(sourceFile.toURI(), Kind.SOURCE);
-        this.code = new String(FileUtil.readFile1(sourceFile), CharsetUtil.UTF_8);
+        this.code = new String(FileUtil.readFile1(sourceFile), StandardCharsets.UTF_8);
     }
 
     public SourceCodeJavaFileObject(URI fileURI, InputStream fileInputStream)
             throws IOException {
         super(fileURI, Kind.SOURCE);
-        this.code = new String(FileUtil.inputStream2ByteArray(fileInputStream), CharsetUtil.UTF_8);
+        this.code = new String(FileUtil.inputStream2ByteArray(fileInputStream), StandardCharsets.UTF_8);
     }
 
     public SourceCodeJavaFileObject(URI fileURI, byte[] fileContent) {
         super(fileURI, Kind.SOURCE);
-        this.code = new String(fileContent, CharsetUtil.UTF_8);
+        this.code = new String(fileContent, StandardCharsets.UTF_8);
     }
 
     @Override

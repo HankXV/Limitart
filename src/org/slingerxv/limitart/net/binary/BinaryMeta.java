@@ -25,6 +25,7 @@ import org.slingerxv.limitart.util.ReflectionUtil;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -619,7 +620,7 @@ public class BinaryMeta {
         } else if ("".equals(value)) {
             putByteArray(new byte[0]);
         } else {
-            byte[] bytes = value.getBytes(CharsetUtil.UTF_8);
+            byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
             putByteArray(bytes);
         }
     }
@@ -636,7 +637,7 @@ public class BinaryMeta {
         } else if (bytes.length == 0) {
             return "";
         } else {
-            return new String(bytes, CharsetUtil.UTF_8);
+            return new String(bytes, StandardCharsets.UTF_8);
         }
     }
 
