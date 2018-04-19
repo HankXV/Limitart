@@ -98,7 +98,10 @@ public class EnumList<E extends Enum<E>, V> implements Iterable<V> {
      * @param ordinal
      * @return
      */
-    public V get(int ordinal) {
+    private V get(int ordinal) {
+        if (ordinal < 0 || ordinal > objects.length - 1) {
+            return null;
+        }
         return objects[ordinal];
     }
 
@@ -114,6 +117,12 @@ public class EnumList<E extends Enum<E>, V> implements Iterable<V> {
     }
 
     private V put(int ordinal, V v) {
+        // 容错
+        if (ordinal > objects.length - 1) {
+            Object[] temp = new Object[ordinal + 1];
+            System.arraycopy(objects, 0, temp, 0, objects.length);
+            this.objects = (V[]) temp;
+        }
         V object = objects[ordinal];
         objects[ordinal] = v;
         return object;

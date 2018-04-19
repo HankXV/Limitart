@@ -71,9 +71,7 @@ public class ImmutableSet<E> implements Iterable<E> {
     }
 
     public Set<E> copy() {
-        Set<E> hashSet = new HashSet<>();
-        hashSet.addAll(set);
-        return hashSet;
+        return new HashSet<>(set);
     }
 
     @Override

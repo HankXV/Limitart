@@ -36,17 +36,17 @@ import java.util.List;
  * @author Hank
  */
 public class BinaryServer extends AbstractNettyServer implements Server {
-    private static Logger LOGGER = Loggers.create();
-    private AddressPair addressPair;
-    private BinaryDecoder decoder;
-    private BinaryEncoder encoder;
-    private BinaryMessageFactory factory;
+    private static final Logger LOGGER = Loggers.create();
+    private final AddressPair addressPair;
+    private final BinaryDecoder decoder;
+    private final BinaryEncoder encoder;
+    private final BinaryMessageFactory factory;
     // --listener
-    private Proc3<Session, BinaryMessage, BinaryMessageFactory> onMessageIn;
-    private Proc2<Session, Boolean> onConnected;
-    private Proc1<Session> onBind;
-    private Proc2<Session, Throwable> onExceptionTrown;
-    private List<BinaryServerInterceptor> interceptors = new LinkedList<>();
+    private final Proc3<Session, BinaryMessage, BinaryMessageFactory> onMessageIn;
+    private final Proc2<Session, Boolean> onConnected;
+    private final Proc1<Session> onBind;
+    private final Proc2<Session, Throwable> onExceptionTrown;
+    private final List<BinaryServerInterceptor> interceptors = new LinkedList<>();
 
     private BinaryServer(BinaryServerBuilder builder) {
         super(builder.serverName);
@@ -242,7 +242,7 @@ public class BinaryServer extends AbstractNettyServer implements Server {
         private Proc2<Session, Boolean> onConnected;
         private Proc1<Session> onBind;
         private Proc2<Session, Throwable> onExceptionTrown;
-        private List<BinaryServerInterceptor> interceptors = new LinkedList<>();
+        private final List<BinaryServerInterceptor> interceptors = new LinkedList<>();
 
         public BinaryServerBuilder() {
             this.serverName = "Limitart-Binary-Server";

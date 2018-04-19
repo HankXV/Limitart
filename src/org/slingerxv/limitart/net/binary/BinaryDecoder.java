@@ -25,11 +25,11 @@ import org.slingerxv.limitart.net.Session;
  *
  */
 public abstract class BinaryDecoder {
-	private int maxFrameLength;
-	private int lengthFieldOffset;
-	private int lengthFieldLength;
-	private int lengthAdjustment;
-	private int initialBytesToStrip;
+	private final int maxFrameLength;
+	private final int lengthFieldOffset;
+	private final int lengthFieldLength;
+	private final int lengthAdjustment;
+	private final int initialBytesToStrip;
 
 	/**
 	 * 构造

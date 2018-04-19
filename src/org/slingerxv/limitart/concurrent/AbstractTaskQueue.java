@@ -23,7 +23,7 @@ import java.util.concurrent.*;
  * @author hank
  */
 public abstract class AbstractTaskQueue implements TaskQueue {
-    private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
 
     @Override

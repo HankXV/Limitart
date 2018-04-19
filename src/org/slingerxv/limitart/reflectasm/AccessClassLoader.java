@@ -20,7 +20,7 @@ class AccessClassLoader extends ClassLoader {
     static private volatile AccessClassLoader selfContextAccessClassLoader = new AccessClassLoader(
             selfContextParentClassLoader);
 
-    static private volatile Method defineClassMethod;
+    static private Method defineClassMethod;
 
     static {
         try {

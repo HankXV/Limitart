@@ -23,7 +23,7 @@ import org.slingerxv.limitart.net.binary.BinaryServer;
  * @author hank
  */
 public class BinaryServerDemo {
-    static SessionRole role = new SessionRole();
+    static final SessionRole role = new SessionRole();
 
     public static void main(String[] args)
             throws BinaryMessageIDDuplicatedException, InstantiationException, IllegalAccessException {

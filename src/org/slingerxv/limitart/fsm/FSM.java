@@ -36,17 +36,17 @@ import java.util.concurrent.locks.ReentrantLock;
 @SuppressWarnings("rawtypes")
 @ThreadSafe
 public class FSM {
-    private static Logger LOGGER = Loggers.create();
-    private Map<Integer, State> stateMap = new HashMap<>();
-    private Queue<Integer> stateQueue = new LinkedList<>();
+    private static final Logger LOGGER = Loggers.create();
+    private final Map<Integer, State> stateMap = new HashMap<>();
+    private final Queue<Integer> stateQueue = new LinkedList<>();
     private State preState;
     private State curState;
-    private ConstraintMap<Object> params = new ConstraintConcurrentMap<>();
+    private final ConstraintMap<Object> params = new ConstraintConcurrentMap<>();
     private long lastLoopTime = 0;
     private int firstStateId;
     private Thread lastThread;
-    private List<Ticker> tickers = new ArrayList<>();
-    private ReentrantLock tickerLock = new ReentrantLock();
+    private final List<Ticker> tickers = new ArrayList<>();
+    private final ReentrantLock tickerLock = new ReentrantLock();
 
     /**
      * 开启
@@ -246,10 +246,10 @@ public class FSM {
     }
 
     private static class Ticker {
-        private long delay;
+        private final long delay;
         private int times;
         private long delayCounter;
-        private Proc listener;
+        private final Proc listener;
 
         public Ticker(long delay, int times, Proc listener) {
             this.delay = delay;

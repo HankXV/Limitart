@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @author hank
  */
 public abstract class AbstractNettyClient {
-    private static Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = Loggers.create();
     protected final static EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
     private String clientName;

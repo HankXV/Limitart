@@ -27,7 +27,7 @@ public interface Couple<H, W> {
         return new ImmutableCouple(husband, wife);
     }
 
-    H get1();
+    @Nullable H get1();
 
-    W get2();
+    @Nullable W get2();
 }

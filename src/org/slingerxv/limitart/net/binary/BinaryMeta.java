@@ -548,17 +548,18 @@ public class BinaryMeta {
     public final <T extends BinaryMeta> List<T> getMessageMetaList(Class<T> clazz)
             throws IllegalArgumentException, IllegalAccessException, BinaryMessageCodecException {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<T> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                T messageMeta = getMessageMeta(clazz);
-                list.add(messageMeta);
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<T> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    T messageMeta = getMessageMeta(clazz);
+                    list.add(messageMeta);
+                }
+                return list;
         }
     }
 
@@ -593,16 +594,17 @@ public class BinaryMeta {
     public final <T extends BinaryMeta> T[] getMessageMetaArray(Class<T> clazz)
             throws IllegalArgumentException, IllegalAccessException, BinaryMessageCodecException {
         short length = getShort();
-        if (length == -1) {
-            return null;
-        } else if (length == 0) {
-            return (T[]) Array.newInstance(clazz, 0);
-        } else {
-            T[] result = (T[]) Array.newInstance(clazz, length);
-            for (int i = 0; i < length; ++i) {
-                result[i] = getMessageMeta(clazz);
-            }
-            return result;
+        switch (length) {
+            case -1:
+                return null;
+            case 0:
+                return (T[]) Array.newInstance(clazz, 0);
+            default:
+                T[] result = (T[]) Array.newInstance(clazz, length);
+                for (int i = 0; i < length; ++i) {
+                    result[i] = getMessageMeta(clazz);
+                }
+                return result;
         }
     }
 
@@ -661,16 +663,17 @@ public class BinaryMeta {
      */
     public final List<String> getStringList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<String> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                list.add(getString());
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<String> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    list.add(getString());
+                }
+                return list;
         }
     }
 
@@ -697,16 +700,17 @@ public class BinaryMeta {
      */
     public final String[] getStringArray() {
         short length = getShort();
-        if (length == -1) {
-            return null;
-        } else if (length == 0) {
-            return new String[0];
-        } else {
-            String[] result = new String[length];
-            for (int i = 0; i < length; ++i) {
-                result[i] = getString();
-            }
-            return result;
+        switch (length) {
+            case -1:
+                return null;
+            case 0:
+                return new String[0];
+            default:
+                String[] result = new String[length];
+                for (int i = 0; i < length; ++i) {
+                    result[i] = getString();
+                }
+                return result;
         }
     }
 
@@ -759,16 +763,17 @@ public class BinaryMeta {
      */
     public final List<Long> getLongList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<Long> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                list.add(getLong());
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<Long> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    list.add(getLong());
+                }
+                return list;
         }
     }
 
@@ -795,16 +800,17 @@ public class BinaryMeta {
      */
     public final long[] getLongArray() {
         short length = getShort();
-        if (length == -1) {
-            return null;
-        } else if (length == 0) {
-            return new long[0];
-        } else {
-            long[] result = new long[length];
-            for (int i = 0; i < length; ++i) {
-                result[i] = getLong();
-            }
-            return result;
+        switch (length) {
+            case -1:
+                return null;
+            case 0:
+                return new long[0];
+            default:
+                long[] result = new long[length];
+                for (int i = 0; i < length; ++i) {
+                    result[i] = getLong();
+                }
+                return result;
         }
     }
 
@@ -857,16 +863,17 @@ public class BinaryMeta {
      */
     public final List<Integer> getIntList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<Integer> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                list.add(getInt());
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<Integer> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    list.add(getInt());
+                }
+                return list;
         }
     }
 
@@ -877,16 +884,17 @@ public class BinaryMeta {
      */
     public final List<Byte> getByteList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<Byte> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                list.add(getByte());
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<Byte> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    list.add(getByte());
+                }
+                return list;
         }
     }
 
@@ -913,16 +921,17 @@ public class BinaryMeta {
      */
     public final int[] getIntArray() {
         short length = getShort();
-        if (length == -1) {
-            return null;
-        } else if (length == 0) {
-            return new int[0];
-        } else {
-            int[] result = new int[length];
-            for (int i = 0; i < length; ++i) {
-                result[i] = getInt();
-            }
-            return result;
+        switch (length) {
+            case -1:
+                return null;
+            case 0:
+                return new int[0];
+            default:
+                int[] result = new int[length];
+                for (int i = 0; i < length; ++i) {
+                    result[i] = getInt();
+                }
+                return result;
         }
     }
 
@@ -983,14 +992,15 @@ public class BinaryMeta {
      */
     public final List<byte[]> getByteArrayList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<byte[]> list = new ArrayList<>();
-            list.add(getByteArray());
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<byte[]> list = new ArrayList<>();
+                list.add(getByteArray());
+                return list;
         }
     }
 
@@ -1015,14 +1025,15 @@ public class BinaryMeta {
      */
     public final byte[] getByteArray() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new byte[0];
-        } else {
-            byte[] bytes = new byte[len];
-            buffer.readBytes(bytes, 0, len);
-            return bytes;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new byte[0];
+            default:
+                byte[] bytes = new byte[len];
+                buffer.readBytes(bytes, 0, len);
+                return bytes;
         }
     }
 
@@ -1067,16 +1078,17 @@ public class BinaryMeta {
      */
     public final List<Boolean> getBooleanList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<Boolean> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                list.add(getBoolean());
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<Boolean> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    list.add(getBoolean());
+                }
+                return list;
         }
     }
 
@@ -1103,16 +1115,17 @@ public class BinaryMeta {
      */
     public final boolean[] getBooleanArray() {
         short length = getShort();
-        if (length == -1) {
-            return null;
-        } else if (length == 0) {
-            return new boolean[0];
-        } else {
-            boolean[] result = new boolean[length];
-            for (int i = 0; i < length; ++i) {
-                result[i] = getBoolean();
-            }
-            return result;
+        switch (length) {
+            case -1:
+                return null;
+            case 0:
+                return new boolean[0];
+            default:
+                boolean[] result = new boolean[length];
+                for (int i = 0; i < length; ++i) {
+                    result[i] = getBoolean();
+                }
+                return result;
         }
     }
 
@@ -1157,16 +1170,17 @@ public class BinaryMeta {
      */
     public final List<Float> getFloatList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<Float> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                list.add(getFloat());
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<Float> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    list.add(getFloat());
+                }
+                return list;
         }
     }
 
@@ -1193,16 +1207,17 @@ public class BinaryMeta {
      */
     public final float[] getFloatArray() {
         short length = getShort();
-        if (length == -1) {
-            return null;
-        } else if (length == 0) {
-            return new float[0];
-        } else {
-            float[] result = new float[length];
-            for (int i = 0; i < length; ++i) {
-                result[i] = getFloat();
-            }
-            return result;
+        switch (length) {
+            case -1:
+                return null;
+            case 0:
+                return new float[0];
+            default:
+                float[] result = new float[length];
+                for (int i = 0; i < length; ++i) {
+                    result[i] = getFloat();
+                }
+                return result;
         }
     }
 
@@ -1247,16 +1262,17 @@ public class BinaryMeta {
      */
     public final List<Double> getDoubleList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<Double> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                list.add(getDouble());
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<Double> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    list.add(getDouble());
+                }
+                return list;
         }
     }
 
@@ -1283,16 +1299,17 @@ public class BinaryMeta {
      */
     public final double[] getDoubleArray() {
         short length = getShort();
-        if (length == -1) {
-            return null;
-        } else if (length == 0) {
-            return new double[0];
-        } else {
-            double[] result = new double[length];
-            for (int i = 0; i < length; ++i) {
-                result[i] = getDouble();
-            }
-            return result;
+        switch (length) {
+            case -1:
+                return null;
+            case 0:
+                return new double[0];
+            default:
+                double[] result = new double[length];
+                for (int i = 0; i < length; ++i) {
+                    result[i] = getDouble();
+                }
+                return result;
         }
     }
 
@@ -1345,16 +1362,17 @@ public class BinaryMeta {
      */
     public final List<Short> getShortList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<Short> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                list.add(getShort());
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<Short> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    list.add(getShort());
+                }
+                return list;
         }
     }
 
@@ -1381,16 +1399,17 @@ public class BinaryMeta {
      */
     public final short[] getShortArray() {
         short length = getShort();
-        if (length == -1) {
-            return null;
-        } else if (length == 0) {
-            return new short[0];
-        } else {
-            short[] result = new short[length];
-            for (int i = 0; i < length; ++i) {
-                result[i] = getShort();
-            }
-            return result;
+        switch (length) {
+            case -1:
+                return null;
+            case 0:
+                return new short[0];
+            default:
+                short[] result = new short[length];
+                for (int i = 0; i < length; ++i) {
+                    result[i] = getShort();
+                }
+                return result;
         }
     }
 
@@ -1435,16 +1454,17 @@ public class BinaryMeta {
      */
     public final List<Character> getCharList() {
         short len = getShort();
-        if (len == -1) {
-            return null;
-        } else if (len == 0) {
-            return new ArrayList<>();
-        } else {
-            List<Character> list = new ArrayList<>();
-            for (int i = 0; i < len; ++i) {
-                list.add(getChar());
-            }
-            return list;
+        switch (len) {
+            case -1:
+                return null;
+            case 0:
+                return new ArrayList<>();
+            default:
+                List<Character> list = new ArrayList<>();
+                for (int i = 0; i < len; ++i) {
+                    list.add(getChar());
+                }
+                return list;
         }
     }
 
@@ -1471,16 +1491,17 @@ public class BinaryMeta {
      */
     public final char[] getCharArray() {
         short length = getShort();
-        if (length == -1) {
-            return null;
-        } else if (length == 0) {
-            return new char[0];
-        } else {
-            char[] result = new char[length];
-            for (int i = 0; i < length; ++i) {
-                result[i] = getChar();
-            }
-            return result;
+        switch (length) {
+            case -1:
+                return null;
+            case 0:
+                return new char[0];
+            default:
+                char[] result = new char[length];
+                for (int i = 0; i < length; ++i) {
+                    result[i] = getChar();
+                }
+                return result;
         }
     }
 

@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Deprecated
 public class AutoGrowthEntity {
-    private transient AtomicInteger threadIndex = new AtomicInteger(0);
+    private final transient AtomicInteger threadIndex = new AtomicInteger(0);
 
     public void setThreadIndex(int threadIndex) {
         this.threadIndex.set(threadIndex);

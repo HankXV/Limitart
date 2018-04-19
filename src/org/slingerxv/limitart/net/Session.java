@@ -35,9 +35,9 @@ import java.net.SocketAddress;
  * @author Hank
  */
 public class Session implements Place<EventLoop> {
-    private Channel channel;
-    private int ID;
-    private ConstraintMap<Integer> params = new ConstraintConcurrentMap<>();
+    private final Channel channel;
+    private final int ID;
+    private final ConstraintMap<Integer> params = new ConstraintConcurrentMap<>();
 
     public Session(int ID, Channel channel) {
         Conditions.notNull(channel, "channel");

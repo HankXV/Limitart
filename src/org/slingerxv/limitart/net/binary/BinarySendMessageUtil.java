@@ -31,7 +31,7 @@ import java.util.List;
  * @author hank
  */
 public class BinarySendMessageUtil {
-    private static Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = Loggers.create();
 
     /**
      * 发送消息

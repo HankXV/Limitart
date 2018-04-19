@@ -244,26 +244,37 @@ public final class Pokers {
         byte number = getCardNumber(card);
         byte color = getCardColor(card);
         String suit = null;
-        if (color == CARD_SUIT_CLUB) {
-            suit = "梅花";
-        } else if (color == CARD_SUIT_HEART) {
-            suit = "红桃";
-        } else if (color == CARD_SUIT_DIAMOND) {
-            suit = "方块";
-        } else if (color == CARD_SUIT_SPADE) {
-            suit = "黑桃";
+        switch (color) {
+            case CARD_SUIT_CLUB:
+                suit = "梅花";
+                break;
+            case CARD_SUIT_HEART:
+                suit = "红桃";
+                break;
+            case CARD_SUIT_DIAMOND:
+                suit = "方块";
+                break;
+            case CARD_SUIT_SPADE:
+                suit = "黑桃";
+                break;
         }
         String num;
-        if (number == CARD_NUM_JACK) {
-            num = "J";
-        } else if (number == CARD_NUM_QUEEN) {
-            num = "Q";
-        } else if (number == CARD_NUM_KING) {
-            num = "K";
-        } else if (number == CARD_NUM_ACE) {
-            num = "A";
-        } else {
-            num = number + "";
+        switch (number) {
+            case CARD_NUM_JACK:
+                num = "J";
+                break;
+            case CARD_NUM_QUEEN:
+                num = "Q";
+                break;
+            case CARD_NUM_KING:
+                num = "K";
+                break;
+            case CARD_NUM_ACE:
+                num = "A";
+                break;
+            default:
+                num = number + "";
+                break;
         }
         return num + "[" + suit + "]";
     }

@@ -17,7 +17,9 @@ package org.slingerxv.limitart.util;
 
 import io.netty.util.CharsetUtil;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -63,9 +65,7 @@ public final class SymmetricEncryptionUtil {
      * @throws InvalidKeyException
      * @throws InvalidAlgorithmParameterException
      */
-    public synchronized static SymmetricEncryptionUtil getDecodeInstance(String password)
-            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            InvalidAlgorithmParameterException {
+    public synchronized static SymmetricEncryptionUtil getDecodeInstance(String password) {
         return new SymmetricEncryptionUtil(password);
     }
 
@@ -154,7 +154,7 @@ public final class SymmetricEncryptionUtil {
      * @return
      * @throws Exception
      */
-    public String decode(String source) throws Exception {
+    public String decode(String source) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         String tokenSource = source;
         int zeroFlag = 0;
         if (tokenSource.startsWith("$")) {

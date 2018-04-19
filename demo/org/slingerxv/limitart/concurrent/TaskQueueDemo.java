@@ -39,7 +39,7 @@ public class TaskQueueDemo {
     }
 
     private static class Map implements Place<TaskQueue> {
-        TaskQueue queue;
+        final TaskQueue queue;
 
         public Map(TaskQueue queue) {
             this.queue = queue;

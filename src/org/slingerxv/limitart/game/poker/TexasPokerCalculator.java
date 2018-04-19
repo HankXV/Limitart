@@ -27,27 +27,27 @@ import java.util.List;
  *
  * @author laiyongqiang
  */
-public class TXCardsCalculator {
+public class TexasPokerCalculator {
     // 高牌
-    private final static long HIGH_CARD = TXCardRank.HIGH_CARD.ordinal() * 0x10000000000L;
+    private final static long HIGH_CARD = TexasPokerRank.HIGH_CARD.ordinal() * 0x10000000000L;
     // 一对
-    private final static long ONE_PAIR = TXCardRank.ONE_PAIR.ordinal() * 0x10000000000L;
+    private final static long ONE_PAIR = TexasPokerRank.ONE_PAIR.ordinal() * 0x10000000000L;
     // 两对
-    private final static long TWO_PAIR = TXCardRank.TWO_PAIR.ordinal() * 0x10000000000L;
+    private final static long TWO_PAIR = TexasPokerRank.TWO_PAIR.ordinal() * 0x10000000000L;
     // 三条
-    private final static long THREE_OF_A_KIND = TXCardRank.THREE_OF_A_KIND.ordinal() * 0x10000000000L;
+    private final static long THREE_OF_A_KIND = TexasPokerRank.THREE_OF_A_KIND.ordinal() * 0x10000000000L;
     // 顺子
-    private final static long STRAIGHT = TXCardRank.STRAIGHT.ordinal() * 0x10000000000L;
+    private final static long STRAIGHT = TexasPokerRank.STRAIGHT.ordinal() * 0x10000000000L;
     // 同花
-    private final static long FLUSH = TXCardRank.FLUSH.ordinal() * 0x10000000000L;
+    private final static long FLUSH = TexasPokerRank.FLUSH.ordinal() * 0x10000000000L;
     // 葫芦
-    private final static long FULL_HOUSE = TXCardRank.FULL_HOUSE.ordinal() * 0x10000000000L;
+    private final static long FULL_HOUSE = TexasPokerRank.FULL_HOUSE.ordinal() * 0x10000000000L;
     // 四条
-    private final static long FOUR_OF_A_KIND = TXCardRank.FOUR_OF_A_KIND.ordinal() * 0x10000000000L;
+    private final static long FOUR_OF_A_KIND = TexasPokerRank.FOUR_OF_A_KIND.ordinal() * 0x10000000000L;
     // 同花顺
-    private final static long STRAIGHT_FLUSH = TXCardRank.STRAIGHT_FLUSH.ordinal() * 0x10000000000L;
+    private final static long STRAIGHT_FLUSH = TexasPokerRank.STRAIGHT_FLUSH.ordinal() * 0x10000000000L;
     // 皇家同花顺
-    private final static long ROYAL_FLUSH = TXCardRank.ROYAL_FLUSH.ordinal() * 0x10000000000L;
+    private final static long ROYAL_FLUSH = TexasPokerRank.ROYAL_FLUSH.ordinal() * 0x10000000000L;
     // 原始数据
     private byte[] cards;
     private byte[] numbers;
@@ -74,7 +74,7 @@ public class TXCardsCalculator {
      * @param handCards
      * @return
      */
-    public static TXCardsCalculator calBestCards(byte[] tableCards, byte[] handCards) {
+    public static TexasPokerCalculator calBestCards(byte[] tableCards, byte[] handCards) {
         List<Byte> sum = new ArrayList<>();
         for (byte handCard : handCards) {
             sum.add(handCard);
@@ -86,9 +86,9 @@ public class TXCardsCalculator {
         List<List<Byte>> cnm = GameMathUtil.CNM(sum, 5);
         // 所有组合中牌型最大的一种
         long maxValue = 0;
-        TXCardsCalculator maxEval = null;
+        TexasPokerCalculator maxEval = null;
         for (List<Byte> list : cnm) {
-            TXCardsCalculator temp = new TXCardsCalculator(CollectionUtil.toByteArray(list));
+            TexasPokerCalculator temp = new TexasPokerCalculator(CollectionUtil.toByteArray(list));
             if (temp.getValue() > maxValue) {
                 maxEval = temp;
                 maxValue = temp.getValue();
@@ -97,7 +97,7 @@ public class TXCardsCalculator {
         return maxEval;
     }
 
-    public TXCardsCalculator(byte[] txCards) {
+    public TexasPokerCalculator(byte[] txCards) {
         if (txCards.length != 2 && txCards.length != 5) {
             throw new IllegalArgumentException("the length must to be two or five");
         }
@@ -162,8 +162,8 @@ public class TXCardsCalculator {
      * @param cardCount
      * @return
      */
-    public static TXCardRank getCardRank(long evaluator, int cardCount) {
-        return EnumUtil.byOrdinal(TXCardRank.class, (int) (evaluator >> (cardCount << 3)));
+    public static TexasPokerRank getCardRank(long evaluator, int cardCount) {
+        return EnumUtil.byOrdinal(TexasPokerRank.class, (int) (evaluator >> (cardCount << 3)));
     }
 
     // 评估数值
@@ -180,8 +180,8 @@ public class TXCardsCalculator {
      *
      * @return
      */
-    public TXCardRank getRank() {
-        return EnumUtil.byOrdinal(TXCardRank.class, (int) (this.rank / 0x10000000000L));
+    public TexasPokerRank getRank() {
+        return EnumUtil.byOrdinal(TexasPokerRank.class, (int) (this.rank / 0x10000000000L));
     }
 
     /**

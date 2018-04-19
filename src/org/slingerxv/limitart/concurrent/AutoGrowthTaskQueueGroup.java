@@ -38,13 +38,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ThreadSafe
 @Deprecated
 public class AutoGrowthTaskQueueGroup {
-    private static Logger LOGGER = Loggers.create();
-    private AtomicInteger threadId = new AtomicInteger(0);
-    private Map<Integer, AutoGrowthSegment> threads = new ConcurrentHashMap<>();
-    private int entityCountPerThread;
-    private int coreThreadCount;
-    private int maxThreadCount;
-    private Func1<Integer, TaskQueue> newTaskQueue;
+    private static final Logger LOGGER = Loggers.create();
+    private final AtomicInteger threadId = new AtomicInteger(0);
+    private final Map<Integer, AutoGrowthSegment> threads = new ConcurrentHashMap<>();
+    private final int entityCountPerThread;
+    private final int coreThreadCount;
+    private final int maxThreadCount;
+    private final Func1<Integer, TaskQueue> newTaskQueue;
 
     public AutoGrowthTaskQueueGroup(int entityCountPerThread, int coreThreadCount, int initThreadCount,
                                     int maxThreadCount, @NotNull Func1<Integer, TaskQueue> newTaskQueue) {
@@ -185,6 +185,6 @@ public class AutoGrowthTaskQueueGroup {
     private static class AutoGrowthSegment {
         private int threadIndex;
         private TaskQueue thread;
-        private Set<AutoGrowthEntity> entities = new ConcurrentHashSet<>();
+        private final Set<AutoGrowthEntity> entities = new ConcurrentHashSet<>();
     }
 }

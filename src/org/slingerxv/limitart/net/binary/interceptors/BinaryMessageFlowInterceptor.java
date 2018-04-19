@@ -17,7 +17,6 @@ package org.slingerxv.limitart.net.binary.interceptors;
 
 import io.netty.buffer.ByteBuf;
 import org.slingerxv.limitart.base.Func;
-import org.slingerxv.limitart.collections.FrequencyReadRankMap;
 import org.slingerxv.limitart.collections.RankMap;
 import org.slingerxv.limitart.net.Session;
 import org.slingerxv.limitart.net.binary.BinaryMessage;
@@ -69,33 +68,33 @@ public class BinaryMessageFlowInterceptor implements BinaryServerInterceptor {
         if (top < 1) {
             return "top error!";
         }
-        RankMap<Class<? extends BinaryMessage>, FlowMeta> min = new FrequencyReadRankMap<>(COMPARATOR, top);
-        RankMap<Class<? extends BinaryMessage>, FlowMeta> max = new FrequencyReadRankMap<>(COMPARATOR, top);
-        RankMap<Class<? extends BinaryMessage>, FlowMeta> count = new FrequencyReadRankMap<>(COMPARATOR, top);
-        RankMap<Class<? extends BinaryMessage>, FlowMeta> size = new FrequencyReadRankMap<>(COMPARATOR, top);
+        RankMap<Class<? extends BinaryMessage>, FlowMeta> min = RankMap.create(COMPARATOR, top);
+        RankMap<Class<? extends BinaryMessage>, FlowMeta> max = RankMap.create(COMPARATOR, top);
+        RankMap<Class<? extends BinaryMessage>, FlowMeta> count = RankMap.create(COMPARATOR, top);
+        RankMap<Class<? extends BinaryMessage>, FlowMeta> size = RankMap.create(COMPARATOR, top);
         for (Entry<Class<? extends BinaryMessage>, Integer> entry : FLOW_MIN.entrySet()) {
             FlowMeta meta = new FlowMeta();
             meta.clazz = entry.getKey();
             meta.value = entry.getValue();
-            min.put(entry.getKey(), meta);
+            min.replaceOrPut(meta);
         }
         for (Entry<Class<? extends BinaryMessage>, Integer> entry : FLOW_MAX.entrySet()) {
             FlowMeta meta = new FlowMeta();
             meta.clazz = entry.getKey();
             meta.value = entry.getValue();
-            max.put(entry.getKey(), meta);
+            max.replaceOrPut(meta);
         }
         for (Entry<Class<? extends BinaryMessage>, Long> entry : FLOW_COUNT.entrySet()) {
             FlowMeta meta = new FlowMeta();
             meta.clazz = entry.getKey();
             meta.value = entry.getValue();
-            count.put(entry.getKey(), meta);
+            count.replaceOrPut(meta);
         }
         for (Entry<Class<? extends BinaryMessage>, Long> entry : FLOW_SIZE.entrySet()) {
             FlowMeta meta = new FlowMeta();
             meta.clazz = entry.getKey();
             meta.value = entry.getValue();
-            size.put(entry.getKey(), meta);
+            size.replaceOrPut(meta);
         }
         List<FlowMeta> minRange = min.getRange(0, top);
         List<FlowMeta> maxRange = max.getRange(0, top);
@@ -139,12 +138,12 @@ public class BinaryMessageFlowInterceptor implements BinaryServerInterceptor {
         flow(msg.getClass(), msg.buffer());
     }
 
-    private static class FlowMeta implements Func<Class<? extends BinaryMessage>> {
+    private static class FlowMeta implements RankMap.RankObj<Class<? extends BinaryMessage>> {
         private Class<? extends BinaryMessage> clazz;
         private long value;
 
         @Override
-        public Class<? extends BinaryMessage> run() {
+        public Class<? extends BinaryMessage> key() {
             return clazz;
         }
 

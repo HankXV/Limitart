@@ -42,15 +42,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author hank
  */
 public abstract class AbstractNettyServer {
-    private static Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = Loggers.create();
     private static final AttributeKey<Integer> SESSION_ID_KEY = AttributeKey.newInstance("SESSION_ID_KEY");
-    private static AtomicInteger SESSION_ID_CREATOR = new AtomicInteger();
+    private static final AtomicInteger SESSION_ID_CREATOR = new AtomicInteger();
     protected final static EventLoopGroup bossGroup;
     protected final static EventLoopGroup workerGroup;
     private ServerBootstrap bootstrap;
     private Session serverSession;
     private String serverName;
-    private Map<Integer, Session> sessions = new ConcurrentHashMap<>();
+    private final Map<Integer, Session> sessions = new ConcurrentHashMap<>();
 
     static {
         if (Epoll.isAvailable()) {

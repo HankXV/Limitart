@@ -37,7 +37,7 @@ import java.util.Map;
  * @author hank
  */
 public class BinaryMessageFactory {
-    private static Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = Loggers.create();
     // !!这里的asm应用经测试在JAVA8下最优
     private final Map<Short, MessageContext> msgs = new HashMap<>();
     private final Map<Class<?>, Object> managerInstances = new HashMap<>();

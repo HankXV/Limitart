@@ -33,15 +33,15 @@ import org.slingerxv.limitart.net.Client;
  * @author hank
  */
 public class BinaryClient extends AbstractNettyClient implements Client {
-    private static Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = Loggers.create();
     // ----config
-    private AddressPair remoteAddress;
-    private BinaryDecoder decoder;
-    private BinaryEncoder encoder;
-    private BinaryMessageFactory factory;
+    private final AddressPair remoteAddress;
+    private final BinaryDecoder decoder;
+    private final BinaryEncoder encoder;
+    private final BinaryMessageFactory factory;
     // ----listener
-    private Proc2<BinaryClient, Boolean> onConnected;
-    private Proc2<BinaryClient, Throwable> onExceptionCaught;
+    private final Proc2<BinaryClient, Boolean> onConnected;
+    private final Proc2<BinaryClient, Throwable> onExceptionCaught;
 
     private BinaryClient(BinaryClientBuilder builder) {
         super(builder.clientName, builder.autoReconnect);

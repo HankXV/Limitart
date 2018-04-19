@@ -17,21 +17,26 @@ package org.slingerxv.limitart.collections;
 
 import org.slingerxv.limitart.base.Func;
 import org.slingerxv.limitart.base.NotNull;
+import org.slingerxv.limitart.base.Proc1;
 
 import java.util.Comparator;
 import java.util.List;
 
 
 /**
- * 顺序Map接口
+ * 有序Map接口(注意不要对V进行除接口外的操作，避免排序错误，V对象值的更新请特别注意引用类型的值)
  *
  * @param <K>
  * @param <V>
  * @author hank
  */
-public interface RankMap<K, V extends Func<K>> {
-    static <K, V extends Func<K>> RankMap<K, V> empty(@NotNull Comparator<V> comparator, int capacity) {
-        return new FrequencyReadRankMap(comparator, capacity);
+public interface RankMap<K, V extends RankMap.RankObj<K>> {
+    static <K, V extends RankObj<K>> RankMap<K, V> create(@NotNull Comparator<V> comparator, int capacity) {
+        return RankMapImpl.create(comparator, capacity);
+    }
+
+    interface RankObj<K> {
+        K key();
     }
 
     /**
@@ -40,16 +45,23 @@ public interface RankMap<K, V extends Func<K>> {
      * @param key
      * @return
      */
-    V get(K key);
+    V get(final K key);
 
     /**
-     * 放入值
+     * 替换或放入新的值
      *
-     * @param key
      * @param value
      * @return
      */
-    V put(K key, V value);
+    void replaceOrPut(@com.sun.istack.internal.NotNull V value);
+
+    /**
+     * 是否包含Key
+     *
+     * @param key
+     * @return
+     */
+    boolean containsKey(final K key);
 
     /**
      * 删除值
@@ -57,7 +69,31 @@ public interface RankMap<K, V extends Func<K>> {
      * @param key
      * @return
      */
-    V remove(K key);
+    V remove(final K key);
+
+    /**
+     * 更新值
+     *
+     * @param key
+     * @param consumer
+     */
+    void update(final K key, final Proc1<V> consumer);
+
+    /**
+     * 如果不存在则放入
+     *
+     * @param value
+     */
+    void putIfAbsent(final V value);
+
+    /**
+     * 新增或更新
+     *
+     * @param key
+     * @param consumer
+     * @param instance
+     */
+    void updateOrPut(final K key, final Proc1<V> consumer, final Func<V> instance);
 
     /**
      * 集合大小
@@ -72,7 +108,7 @@ public interface RankMap<K, V extends Func<K>> {
      * @param key
      * @return
      */
-    int getIndex(K key);
+    int getIndex(final K key);
 
     /**
      * 获取一个范围的数据
