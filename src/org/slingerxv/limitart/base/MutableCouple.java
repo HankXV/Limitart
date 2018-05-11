@@ -56,4 +56,12 @@ public class MutableCouple<H, W> implements Couple<H, W> {
         this.w = w;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "MutableCouple{" +
+                "h=" + h +
+                ", w=" + w +
+                '}';
+    }
 }

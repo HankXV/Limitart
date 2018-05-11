@@ -25,7 +25,7 @@ import org.slingerxv.limitart.base.Conditions;
  */
 public class Select implements SQL {
     private static final String TEMPLATE = "SELECT %s FROM `%s` %s;";
-    private String[] fields;
+    private final String[] fields;
     private String tableName;
     private Where where;
 

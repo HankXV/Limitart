@@ -99,7 +99,7 @@ public final class GameMathUtil {
      * @param y
      * @return
      */
-    public static int safelyMulti(int x, int y) {
+    public static int safeMulti(int x, int y) {
         long r = (long) x * (long) y;
         if ((int) r != r) {
             return Integer.MAX_VALUE;
@@ -115,7 +115,7 @@ public final class GameMathUtil {
      * @param y
      * @return
      */
-    public static long safelyMulti(long x, long y) {
+    public static long safeMulti(long x, long y) {
         long r = x * y;
         long ax = Math.abs(x);
         long ay = Math.abs(y);

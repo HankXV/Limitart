@@ -44,4 +44,9 @@ public class IntHolder {
         this.value = value;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return value + "";
+    }
 }

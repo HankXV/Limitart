@@ -17,6 +17,7 @@ package org.slingerxv.limitart.collections;
 
 import org.slingerxv.limitart.base.Func;
 import org.slingerxv.limitart.base.NotNull;
+import org.slingerxv.limitart.base.Nullable;
 import org.slingerxv.limitart.base.Proc1;
 
 import java.util.Comparator;
@@ -35,8 +36,22 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
         return RankMapImpl.create(comparator, capacity);
     }
 
+    static <K, V extends RankObj<K>> RankMap<K, V> create(@NotNull Comparator<V> comparator) {
+        return RankMapImpl.create(comparator);
+    }
+
     interface RankObj<K> {
         K key();
+
+        int compareKey(K other);
+    }
+
+    interface LongRankObj extends RankObj<Long> {
+
+        @Override
+        default int compareKey(Long other) {
+            return Long.compare(other, key());
+        }
     }
 
     /**
@@ -45,7 +60,8 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
      * @param key
      * @return
      */
-    V get(final K key);
+    @Nullable
+    V get(@NotNull final K key);
 
     /**
      * 替换或放入新的值
@@ -53,7 +69,7 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
      * @param value
      * @return
      */
-    void replaceOrPut(@com.sun.istack.internal.NotNull V value);
+    void replaceOrPut(@NotNull V value);
 
     /**
      * 是否包含Key
@@ -61,7 +77,7 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
      * @param key
      * @return
      */
-    boolean containsKey(final K key);
+    boolean containsKey(@NotNull final K key);
 
     /**
      * 删除值
@@ -69,7 +85,7 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
      * @param key
      * @return
      */
-    V remove(final K key);
+    V remove(@NotNull final K key);
 
     /**
      * 更新值
@@ -77,14 +93,14 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
      * @param key
      * @param consumer
      */
-    void update(final K key, final Proc1<V> consumer);
+    void update(@NotNull final K key, @NotNull final Proc1<V> consumer);
 
     /**
      * 如果不存在则放入
      *
      * @param value
      */
-    void putIfAbsent(final V value);
+    void putIfAbsent(@NotNull final V value);
 
     /**
      * 新增或更新
@@ -93,7 +109,7 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
      * @param consumer
      * @param instance
      */
-    void updateOrPut(final K key, final Proc1<V> consumer, final Func<V> instance);
+    void updateOrPut(@NotNull final K key, @NotNull final Proc1<V> consumer, @NotNull final Func<V> instance);
 
     /**
      * 集合大小
@@ -108,7 +124,7 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
      * @param key
      * @return
      */
-    int getIndex(final K key);
+    int getIndex(@NotNull final K key);
 
     /**
      * 获取一个范围的数据
@@ -117,6 +133,7 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
      * @param end   结束索引(包含边界)
      * @return
      */
+    @NotNull
     List<V> getRange(int start, int end);
 
     /**
@@ -124,6 +141,7 @@ public interface RankMap<K, V extends RankMap.RankObj<K>> {
      *
      * @return
      */
+    @NotNull
     List<V> getAll();
 
     /**

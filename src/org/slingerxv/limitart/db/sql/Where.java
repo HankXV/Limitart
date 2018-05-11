@@ -30,7 +30,7 @@ import java.util.List;
  * @version 2018/4/14 0014 16:47
  */
 public class Where {
-    private List<Triple<Condition, String, Object>> wheres = new ArrayList<>();
+    private final List<Triple<Condition, String, Object>> wheres = new ArrayList<>();
     private int conditionValueCount;
 
     public static @NotNull

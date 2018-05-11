@@ -37,12 +37,14 @@ public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, 
         return new RankMapImpl(comparator, capacity);
     }
 
+    public static <K, V extends RankMap.RankObj<K>> RankMapImpl<K, V> create(@NotNull Comparator<V> comparator) {
+        return new RankMapImpl(comparator, 0);
+    }
 
     private RankMapImpl(@NotNull Comparator<V> comparator, int capacity) {
-        Conditions.positive(capacity);
-        this.map = new HashMap<>(capacity);
+        this.map = new HashMap<>();
         this.comparator = Conditions.notNull(comparator, "comparator");
-        this.list = new ArrayList<>(capacity);
+        this.list = new ArrayList<>();
         this.capacity = capacity;
     }
 
@@ -64,8 +66,7 @@ public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, 
                 return;
             }
             // 因为防止老对象被更改值，所以要删除一次
-            int binarySearch = binarySearch(obj, false);
-            list.remove(binarySearch);
+            listRemove(obj);
             // 这里删除实际上是个多余的动作，暂时兼容一下下面的接口
             map.remove(key);
         }
@@ -79,12 +80,11 @@ public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, 
 
     @Override
     public V remove(@NotNull K key) {
-        V remove = map.remove(key);
-        if (remove != null) {
-            int binarySearch = binarySearch(remove, false);
-            list.remove(binarySearch);
+        V old = map.remove(key);
+        if (old != null) {
+            listRemove(old);
         }
-        return remove;
+        return old;
     }
 
     @Override
@@ -92,8 +92,7 @@ public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, 
         V old = map.get(key);
         Conditions.notNull(old != null, "key(%s) pufIfAbsent first!", key);
         // 在更新前先找到老值的位置
-        int i = binarySearch(old, false);
-        list.remove(i);
+        listRemove(old);
         consumer.run(old);
         int newIndex = binarySearch(old, true);
         list.add(newIndex, old);
@@ -109,7 +108,7 @@ public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, 
         }
         map.put(value.key(), value);
         list.add(binarySearch, value);
-        while (map.size() > this.capacity) {
+        while (capacity > 0 && map.size() > this.capacity) {
             V pollLast = list.remove(map.size() - 1);
             map.remove(pollLast.key());
         }
@@ -199,6 +198,13 @@ public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, 
         return list.toString();
     }
 
+    private void listRemove(V old) {
+        int i = binarySearch(old, false);
+        V remove = list.remove(i);
+        Conditions.args(
+                old == remove, "remove obj not equals,comparator or key comparator must be error!");
+    }
+
     private int binarySearch(V v, boolean similar) {
         int low = 0;
         int high = size() - 1;
@@ -206,6 +212,9 @@ public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, 
             int mid = (low + high) >>> 1;
             V midVal = list.get(mid);
             int cmp = this.comparator.compare(midVal, v);
+            if (cmp == 0) {
+                cmp = midVal.compareKey(v.key());
+            }
             if (cmp < 0) low = mid + 1;
             else if (cmp > 0) high = mid - 1;
             else return mid;

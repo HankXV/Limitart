@@ -5,15 +5,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class SymmetricEncryptionUtilTest {
-	private SymmetricEncryptionUtil utilEncode;
-	private SymmetricEncryptionUtil utilDecode;
-	private SymmetricEncryptionUtil utilDecodeError;
+	private EncryptionUtil utilEncode;
+	private EncryptionUtil utilDecode;
+	private EncryptionUtil utilDecodeError;
 
 	@Before
 	public void setUp() throws Exception {
-		utilEncode = SymmetricEncryptionUtil.getEncodeInstance("SymmetricEncryptionUtilTest", "okwjeofijop2i3jr");
-		utilDecode = SymmetricEncryptionUtil.getDecodeInstance("SymmetricEncryptionUtilTest");
-		utilDecodeError = SymmetricEncryptionUtil.getDecodeInstance("2324ds");
+		utilEncode = EncryptionUtil.getEncodeInstance("SymmetricEncryptionUtilTest", "okwjeofijop2i3jr");
+		utilDecode = EncryptionUtil.getDecodeInstance("SymmetricEncryptionUtilTest");
+		utilDecodeError = EncryptionUtil.getDecodeInstance("2324ds");
 	}
 
 	@Test

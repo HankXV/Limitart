@@ -49,4 +49,13 @@ public class ImmutableTriple<A, B, C> implements Triple<A, B, C> {
     C getC() {
         return c;
     }
+
+    @Override
+    public String toString() {
+        return "ImmutableTriple{" +
+                "a=" + a +
+                ", b=" + b +
+                ", c=" + c +
+                '}';
+    }
 }

@@ -36,9 +36,9 @@ import java.util.List;
  * @version 2018/4/14 0014 16:47
  */
 public class SimpleDBHandler implements DBHandler {
-    private DataSource dataSource;
+    private final DataSource dataSource;
     //批量操作的值
-    private int batchNum;
+    private final int batchNum;
 
     /**
      * @param dataSource

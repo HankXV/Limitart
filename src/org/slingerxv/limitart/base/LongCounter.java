@@ -15,45 +15,36 @@
  */
 package org.slingerxv.limitart.base;
 
+
 import org.slingerxv.limitart.util.GameMathUtil;
 
-
 /**
- * int计数器
+ * 计数器
  *
  * @author hank
- * @version 2017/11/2 0002 20:41
+ * @version 2017/10/31 0031 10:35
  */
 @ThreadUnsafe
-public class IntCounter {
-    private int count;
+public class LongCounter {
+    private long count;
 
-    public IntCounter() {
-        //DO NOTHING 为了正常序列化
+    public LongCounter() {
+        // DO NOTHING
     }
 
-    public IntCounter(int initVal) {
+    public LongCounter(long initVal) {
         Conditions.args(initVal >= low() && initVal <= high(), "low<=initVal<=high");
         setCount(initVal);
     }
 
-    /**
-     * 归零
-     */
     public void zero() {
         setCount(0);
     }
 
-    /**
-     * 设置为最大值
-     */
     public void setHigh() {
         setCount(high());
     }
 
-    /**
-     * 设置为最小值
-     */
     public void setLow() {
         setCount(low());
     }
@@ -63,8 +54,8 @@ public class IntCounter {
      *
      * @return
      */
-    public int high() {
-        return Integer.MAX_VALUE;
+    protected long high() {
+        return Long.MAX_VALUE;
     }
 
     /**
@@ -72,8 +63,8 @@ public class IntCounter {
      *
      * @return
      */
-    public int low() {
-        return 0;
+    protected long low() {
+        return 0L;
     }
 
     /**
@@ -81,7 +72,7 @@ public class IntCounter {
      *
      * @return
      */
-    public int getCount() {
+    public long getCount() {
         return this.count;
     }
 
@@ -91,7 +82,7 @@ public class IntCounter {
      * @param value
      * @return
      */
-    protected int setCount(int value) {
+    public long setCount(long value) {
         return this.count = GameMathUtil.fixedBetween(value, low(), high());
     }
 
@@ -100,8 +91,8 @@ public class IntCounter {
      *
      * @return
      */
-    public int incrementAndGet() {
-        return addAndGet(1);
+    public long incrementAndGet() {
+        return addAndGet(1L);
     }
 
     /**
@@ -109,8 +100,8 @@ public class IntCounter {
      *
      * @return
      */
-    public int decrementAndGet() {
-        return addAndGet(-1);
+    public long decrementAndGet() {
+        return addAndGet(-1L);
     }
 
     /**
@@ -119,8 +110,8 @@ public class IntCounter {
      * @param delta
      * @return
      */
-    public int addAndGet(int delta) {
-        return setCount(getCount() + delta);
+    public long addAndGet(long delta) {
+        return setCount(GameMathUtil.safeAdd(getCount(), delta));
     }
 
     /**
@@ -128,8 +119,8 @@ public class IntCounter {
      *
      * @return
      */
-    public int getAndIncrement() {
-        return getAndAdd(1);
+    public long getAndIncrement() {
+        return getAndAdd(1L);
     }
 
     /**
@@ -137,8 +128,8 @@ public class IntCounter {
      *
      * @return
      */
-    public int getAndDecrement() {
-        return getAndAdd(-1);
+    public long getAndDecrement() {
+        return getAndAdd(-1L);
     }
 
     /**
@@ -147,8 +138,8 @@ public class IntCounter {
      * @param delta
      * @return
      */
-    public int getAndAdd(int delta) {
-        int old = getCount();
+    public long getAndAdd(long delta) {
+        long old = getCount();
         setCount(GameMathUtil.safeAdd(old, delta));
         return old;
     }

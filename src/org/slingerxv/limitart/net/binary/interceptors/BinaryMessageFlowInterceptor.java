@@ -16,7 +16,6 @@
 package org.slingerxv.limitart.net.binary.interceptors;
 
 import io.netty.buffer.ByteBuf;
-import org.slingerxv.limitart.base.Func;
 import org.slingerxv.limitart.collections.RankMap;
 import org.slingerxv.limitart.net.Session;
 import org.slingerxv.limitart.net.binary.BinaryMessage;
@@ -145,6 +144,11 @@ public class BinaryMessageFlowInterceptor implements BinaryServerInterceptor {
         @Override
         public Class<? extends BinaryMessage> key() {
             return clazz;
+        }
+
+        @Override
+        public int compareKey(Class<? extends BinaryMessage> other) {
+            return key() == other ? 0 : 1;
         }
 
         @Override

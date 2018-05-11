@@ -36,7 +36,7 @@ public class GameMathUtilTest {
         Assert.assertTrue(GameMathUtil.safeAdd(Integer.MAX_VALUE, 1) == Integer.MAX_VALUE);
         Assert.assertTrue(GameMathUtil.safeSub(10, 11) == -1);
         Assert.assertTrue(GameMathUtil.safeSub(Integer.MIN_VALUE, 1) == Integer.MIN_VALUE);
-        Assert.assertTrue(GameMathUtil.safelyMulti(10, 11) == 110);
-        Assert.assertTrue(GameMathUtil.safelyMulti(Integer.MAX_VALUE, 10) == Integer.MAX_VALUE);
+        Assert.assertTrue(GameMathUtil.safeMulti(10, 11) == 110);
+        Assert.assertTrue(GameMathUtil.safeMulti(Integer.MAX_VALUE, 10) == Integer.MAX_VALUE);
     }
 }

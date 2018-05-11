@@ -2,13 +2,10 @@ package org.slingerxv.limitart.collections;
 
 import com.sun.istack.internal.NotNull;
 import org.slingerxv.limitart.base.Func;
-import org.slingerxv.limitart.base.Func1;
 import org.slingerxv.limitart.base.Proc1;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * 复合排行Map

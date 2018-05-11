@@ -44,4 +44,9 @@ public class LongHolder {
         this.value = value;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return value + "";
+    }
 }

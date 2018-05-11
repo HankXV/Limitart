@@ -126,6 +126,21 @@ public final class TimeUtil {
     }
 
     /**
+     * 是否为同一月
+     *
+     * @param time1
+     * @param time2
+     * @return
+     */
+    public static boolean sameMonth(long time1, long time2) {
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTimeInMillis(time1);
+        Calendar cal2 = Calendar.getInstance();
+        cal2.setTimeInMillis(time2);
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH);
+    }
+
+    /**
      * 获取所在天的凌晨时间
      *
      * @param time
