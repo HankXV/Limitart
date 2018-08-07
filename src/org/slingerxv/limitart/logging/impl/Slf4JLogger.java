@@ -18,6 +18,7 @@ package org.slingerxv.limitart.logging.impl;
 
 import org.slingerxv.limitart.logging.AbstractLogger;
 
+@Deprecated
 class Slf4JLogger extends AbstractLogger {
 
     private final transient org.slf4j.Logger logger;

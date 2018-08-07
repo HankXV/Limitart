@@ -18,6 +18,7 @@ package org.slingerxv.limitart.logging;
 
 import org.slingerxv.limitart.logging.impl.Slf4JLoggers;
 
+@Deprecated
 public abstract class Loggers {
     private volatile static Loggers DEFAULT;
 

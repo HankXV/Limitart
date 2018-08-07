@@ -15,7 +15,7 @@
  */
 package org.slingerxv.limitart.logging;
 
-
+@Deprecated
 public enum LogLevel {
     TRACE,
     DEBUG,

@@ -16,11 +16,11 @@
 package org.slingerxv.limitart.concurrent;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
 import org.slingerxv.limitart.base.Func;
 import org.slingerxv.limitart.base.Proc;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 
 import java.util.concurrent.*;
 
@@ -30,7 +30,7 @@ import java.util.concurrent.*;
  * @param <R> 消息队列资源域
  */
 public class TaskQueueActor<R extends Place<TaskQueue>> extends AbstractThreadActor<TaskQueue, R> {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskQueueActor.class);
     //同步执行最大阻塞时间
     private static final long SYNC_OVER_TIME = 2000;
 

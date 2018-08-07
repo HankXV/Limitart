@@ -101,7 +101,10 @@ public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, 
     @Override
     public void putIfAbsent(V value) {
         Conditions.notNull(value, "value");
-        Conditions.args(!map.containsKey(value.key()), "key duplicated:%s", value.key());
+        if (map.containsKey(value.key())) {
+            return;
+        }
+//        Conditions.args(!map.containsKey(value.key()), "key duplicated:%s", value.key());
         int binarySearch = 0;
         if (size() > 0) {
             binarySearch = binarySearch(value, true);

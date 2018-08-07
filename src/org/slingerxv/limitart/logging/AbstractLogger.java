@@ -15,6 +15,7 @@
  */
 package org.slingerxv.limitart.logging;
 
+@Deprecated
 public abstract class AbstractLogger implements Logger {
 
     private static final String EXCEPTION_STR = "exception:";

@@ -99,7 +99,10 @@ public class MultiRankMapImpl<K, V extends RankMap.RankObj<K>> implements MultiR
     @Override
     public void putIfAbsent(V value) {
         Conditions.notNull(value, "value");
-        Conditions.args(!map.containsKey(value.key()), "key duplicated:%s", value.key());
+        if (map.containsKey(value.key())) {
+            return;
+        }
+//        Conditions.args(!map.containsKey(value.key()), "key duplicated:%s", value.key());
         map.put(value.key(), value);
         list.forEach(
                 (c, l) -> {

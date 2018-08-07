@@ -22,7 +22,7 @@ package org.slingerxv.limitart.db;
  * @version 2018/4/14 0014 16:47
  */
 @Deprecated
-public class DruidDataSource extends com.alibaba.druid.pool.DruidDataSource implements DBDataSource {
+public class DruidDataSourceEx extends com.alibaba.druid.pool.DruidDataSource implements DBDataSource {
     @Override
     public boolean autoCommit() {
         return isDefaultAutoCommit();

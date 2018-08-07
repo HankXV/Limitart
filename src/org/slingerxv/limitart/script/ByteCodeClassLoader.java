@@ -15,8 +15,8 @@
  */
 package org.slingerxv.limitart.script;
 
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.util.FileUtil;
 
 import javax.tools.DiagnosticCollector;
@@ -37,7 +37,7 @@ import java.util.List;
  * @author hank
  */
 public class ByteCodeClassLoader extends ClassLoader {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ByteCodeClassLoader.class);
 
     public ByteCodeClassLoader() {
         this(Thread.currentThread().getContextClassLoader());

@@ -16,9 +16,9 @@
 package org.slingerxv.limitart.singleton;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.Conditions;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 import org.slingerxv.limitart.util.ReflectionUtil;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.util.Map;
  * @author Hank
  */
 public class Singletons {
-    private static final Logger LOGGER = Loggers.create();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Singletons.class);
     private final Map<Class<?>, Object> instances = new HashMap<>();
 
     private Singletons() {
@@ -61,7 +61,7 @@ public class Singletons {
         try {
             classes = Conditions.notNull(ReflectionUtil.getClasses("", classLoader, null));
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.error(e);
+            LOGGER.error("reflect error", e);
             return this;
         }
         List<Class<?>> needRefs = new LinkedList<>();
@@ -104,7 +104,7 @@ public class Singletons {
                 injectByFieldAndMethod(t);
                 return t;
             } catch (InstantiationException | IllegalAccessException e) {
-                LOGGER.error(e);
+                LOGGER.error("instance error", e);
             }
         }
         return null;
@@ -131,7 +131,7 @@ public class Singletons {
             try {
                 field.set(obj, instances.get(type));
             } catch (IllegalAccessException e) {
-                LOGGER.error(e);
+                LOGGER.error("reflect error", e);
             }
             LOGGER.trace("inject field {} into {}", type.getName(), obj.getClass().getName());
         }

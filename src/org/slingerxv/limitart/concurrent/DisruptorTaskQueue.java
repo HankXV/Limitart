@@ -15,12 +15,12 @@
  */
 package org.slingerxv.limitart.concurrent;
 
-import com.lmax.disruptor.*;
+import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.ExceptionHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+import org.slf4j.LoggerFactory;
 import org.slingerxv.limitart.base.*;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
 
 
 /**
@@ -29,7 +29,7 @@ import org.slingerxv.limitart.logging.Loggers;
  * @author Hank
  */
 public class DisruptorTaskQueue extends AbstractTaskQueue {
-    private static final Logger LOGGER = Loggers.create();
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DisruptorTaskQueue.class);
     private final Disruptor<Holder<Runnable>> disruptor;
     private final SingletonThreadFactory threadFactory;
     private Proc3<Runnable, Throwable, Long> exception;

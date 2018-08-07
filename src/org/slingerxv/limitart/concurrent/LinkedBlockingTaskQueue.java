@@ -15,9 +15,11 @@
  */
 package org.slingerxv.limitart.concurrent;
 
-import org.slingerxv.limitart.base.*;
-import org.slingerxv.limitart.logging.Logger;
-import org.slingerxv.limitart.logging.Loggers;
+import org.slf4j.LoggerFactory;
+import org.slingerxv.limitart.base.Conditions;
+import org.slingerxv.limitart.base.Proc2;
+import org.slingerxv.limitart.base.Procs;
+import org.slingerxv.limitart.base.SingletonThreadFactory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -29,7 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @see DisruptorTaskQueue
  */
 public class LinkedBlockingTaskQueue extends AbstractTaskQueue implements Runnable {
-    private static final Logger LOGGER = Loggers.create();
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(LinkedBlockingTaskQueue.class);
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
     private final SingletonThreadFactory threadFactory;
     private boolean start = false;
