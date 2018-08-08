@@ -178,7 +178,8 @@ public class RankMapImpl<K, V extends RankMap.RankObj<K>> implements RankMap<K, 
             }
             return temp;
         }
-        return list.subList(start, end);
+        temp.addAll(list.subList(start, end));
+        return temp;
     }
 
     @Override
