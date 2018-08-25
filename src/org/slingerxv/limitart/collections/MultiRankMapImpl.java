@@ -167,7 +167,8 @@ public class MultiRankMapImpl<K, V extends RankMap.RankObj<K>> implements MultiR
             }
             return temp;
         }
-        return vs.subList(start, end);
+        temp.addAll(vs.subList(start, end));
+        return temp;
     }
 
     @Override
