@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 消息协议文件 id:0~255 -->
 <messages id="1" name="MessagePackageTest"
-	package="org.slingerxv.limitart.net.binary.msgimpl" explain="消息生成测试">
+	package="top.limitart.net.binary.msgimpl" explain="消息生成测试">
 	<meta name="MetaInfo" explain="消息Bean测试">
 		<field type="int" name="ID" explain="测试ID" />
 		<field type="String" name="str" explain="测试名字" />

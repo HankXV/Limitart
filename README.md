@@ -65,10 +65,10 @@ Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的�
 ```
 7.服务器日志+结果
 
-    [main] INFO org.slingerxv.limitart.net.binary.BinaryMessageFactory - register msg org.slingerxv.limitart.net.BinaryMessageDemo at org.slingerxv.limitart.net.BinaryManagerDemo
-    [main] INFO org.slingerxv.limitart.net.AbstractNettyServer - Limitart-Binary-Server nio init
-    [nioEventLoopGroup-2-1] INFO org.slingerxv.limitart.net.AbstractNettyServer - Limitart-Binary-Server bind at port:8888
-    [nioEventLoopGroup-3-1] INFO org.slingerxv.limitart.net.AbstractNettyServer - /127.0.0.1:54062 connected！
+    [main] INFO BinaryMessageFactory - register msg BinaryMessageDemo at BinaryManagerDemo
+    [main] INFO AbstractNettyServer - Limitart-Binary-Server nio init
+    [nioEventLoopGroup-2-1] INFO AbstractNettyServer - Limitart-Binary-Server bind at port:8888
+    [nioEventLoopGroup-3-1] INFO AbstractNettyServer - /127.0.0.1:54062 connected！
     hello limitart!
 #### 消息编码
 
