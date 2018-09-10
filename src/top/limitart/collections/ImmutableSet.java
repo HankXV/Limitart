@@ -24,12 +24,12 @@ import java.util.*;
 
 
 /**
- * 不可变Set TODO 实现Set接口
+ * 不可变Set
  *
  * @author hank
  */
 @ThreadSafe
-public class ImmutableSet<E> implements Iterable<E> {
+public class ImmutableSet<E> implements Set<E> {
     private final Set<E> set;
 
     public static <E> ImmutableSet<E> of(@NotNull Collection<E> collection) {
@@ -51,16 +51,21 @@ public class ImmutableSet<E> implements Iterable<E> {
         set = new HashSet<>();
     }
 
+    @Override
     public int size() {
         return set.size();
     }
 
-
-    public boolean contains(E e) {
-        Conditions.notNull(e);
-        return set.contains(e);
+    @Override
+    public boolean isEmpty() {
+        return size() == 0;
     }
 
+    @Override
+    public boolean contains(Object o) {
+        Conditions.notNull(o);
+        return set.contains(o);
+    }
 
     public void forEach(Test1<E> test) {
         for (E e : set) {
@@ -77,5 +82,50 @@ public class ImmutableSet<E> implements Iterable<E> {
     @Override
     public Iterator<E> iterator() {
         return new ArrayIterator(this.set.toArray());
+    }
+
+    @Override
+    public Object[] toArray() {
+        return set.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return set.toArray(a);
+    }
+
+    @Override
+    public boolean add(E e) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return set.containsAll(c);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return set.retainAll(c);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException();
     }
 }

@@ -35,10 +35,6 @@ public class Dats {
         List<DatProtoFileInfo> datProtoFileInfos = readDatProtoFile(file);
         generateDatJava(datProtoFileInfos, "d://test");
         generateDatBin(file, "d://test");
-        List<D_WinRank> d_winRank = readDatBin(D_WinRank.class, new File(Class.class.getResource("/D_WinRank.bytes").getPath()));
-        for (D_WinRank dWinRank : d_winRank) {
-            long count = dWinRank.getCount();
-        }
     }
 
     /**

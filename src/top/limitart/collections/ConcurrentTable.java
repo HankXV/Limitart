@@ -15,18 +15,19 @@
  */
 package top.limitart.collections;
 
-import top.limitart.base.ThreadUnsafe;
+import top.limitart.base.ThreadSafe;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 二维表HashMap实现
+ * 二维表HashMap实现 //TODO 优化 代码重复了
  *
  * @author hank
  */
-@ThreadUnsafe
-public class HashedTable<R, C, V> implements Table<R, C, V> {
-    private final Map<R, Map<C, V>> maps = new HashMap<>();
+@ThreadSafe
+public class ConcurrentTable<R, C, V> implements Table<R, C, V> {
+    private final Map<R, Map<C, V>> maps = new ConcurrentHashMap<>();
 
     @Override
     public Set<R> keySet() {
@@ -35,13 +36,13 @@ public class HashedTable<R, C, V> implements Table<R, C, V> {
 
     @Override
     public V put(R r, C c, V v) {
-        Map<C, V> map = maps.computeIfAbsent(r, k -> new HashMap<>());
+        Map<C, V> map = maps.computeIfAbsent(r, k -> new ConcurrentHashMap<>());
         return map.put(c, v);
     }
 
     @Override
     public Map<C, V> row(R r) {
-        Map<C, V> newMap = new HashMap<>();
+        Map<C, V> newMap = new ConcurrentHashMap<>();
         maps.put(r, newMap);
         return newMap;
     }

@@ -20,15 +20,16 @@ import top.limitart.base.NotNull;
 import top.limitart.base.Test2;
 import top.limitart.base.ThreadSafe;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
- * 不可变列表 TODO 实现List接口
+ * 不可变列表
  *
  * @author hank
  */
 @ThreadSafe
-public class ImmutableList<E> implements Iterable<E> {
+public class ImmutableList<E> implements List<E> {
     private final Object[] arrays;
 
     public static <E> ImmutableList<E> of(@NotNull List<E> list) {
@@ -52,8 +53,59 @@ public class ImmutableList<E> implements Iterable<E> {
         arrays = new Object[capacity];
     }
 
+    @Override
     public E get(int index) {
         return (E) arrays[Conditions.eleIndex(index, arrays.length)];
+    }
+
+    @Override
+    public E set(int index, E element) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void add(int index, E element) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public E remove(int index) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int indexOf(Object o) {
+        for (int i = 0; i < arrays.length; ++i) {
+            if (o.equals(arrays[i])) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+        for (int i = arrays.length - 1; i >= 0; --i) {
+            if (o.equals(arrays[i])) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public ListIterator<E> listIterator() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ListIterator<E> listIterator(int index) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<E> subList(int fromIndex, int toIndex) {
+        throw new UnsupportedOperationException();
     }
 
     public void forEach(@NotNull Test2<Integer, E> test) {
@@ -64,6 +116,7 @@ public class ImmutableList<E> implements Iterable<E> {
         }
     }
 
+    @Override
     public @NotNull
     E[] toArray() {
         Object[] copy = new Object[arrays.length];
@@ -71,8 +124,73 @@ public class ImmutableList<E> implements Iterable<E> {
         return (E[]) copy;
     }
 
+    @Override
+    public <T> T[] toArray(T[] a) {
+        int size = size();
+        T[] copy = a.length >= size ? a :
+                (T[]) Array
+                        .newInstance(a.getClass().getComponentType(), size);
+        System.arraycopy(arrays, 0, copy, 0, arrays.length);
+        return copy;
+    }
+
+    @Override
+    public boolean add(E e) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return false;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends E> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
+
     public int size() {
         return arrays.length;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        for (int i = 0; i < arrays.length; ++i) {
+            if (o.equals(arrays[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

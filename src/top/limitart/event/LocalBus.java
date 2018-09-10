@@ -22,7 +22,7 @@ import top.limitart.base.ThreadUnsafe;
 import java.util.Set;
 
 /**
- * 本地实现(post后直接在post方的线程立马相应)
+ * 本地实现(post后直接在post方的线程立马响应)
  *
  * @author hank
  * @version 2018/4/12 0012 21:21

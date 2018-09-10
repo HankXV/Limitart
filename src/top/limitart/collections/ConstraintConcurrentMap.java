@@ -226,7 +226,7 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      */
     @Override
     public ConstraintMap<K> putBoolean(K key, boolean value) {
-        putInt(key, value ? 1 : 0);
+        putObj(key, value);
         return this;
     }
 
@@ -238,7 +238,10 @@ public class ConstraintConcurrentMap<K> extends ConcurrentHashMap<K, Object> imp
      */
     @Override
     public boolean getBoolean(K key) {
-        return getInt(key) == 1;
+        if (!containsKey(key)) {
+            return false;
+        }
+        return getObj(key);
     }
 
     /**

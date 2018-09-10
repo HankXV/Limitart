@@ -28,7 +28,7 @@ public interface Prepare {
         System.out.println(insert.sql());
         SQL delete = Prepare.delete().from("account").where(Where.create().whereEquals("id", 1));
         System.out.println(delete.sql());
-        Update update = Prepare.update().from("account").set("id", 1, "age", 10).where(Where.create().whereEquals("name", "hank"));
+        Update update = Prepare.update("account").set("id", 1, "age", 10).where(Where.create().whereEquals("name", "hank"));
         System.out.println(update.sql());
         Select select = Prepare.select("id", "age").from("account").where(Where.create().whereEquals("name", "hank"));
         System.out.println(select.sql());
@@ -48,8 +48,8 @@ public interface Prepare {
      *
      * @return
      */
-    static Update update() {
-        return Update.start();
+    static Update update(String table) {
+        return Update.start(table);
     }
 
     /**

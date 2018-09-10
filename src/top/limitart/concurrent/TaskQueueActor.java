@@ -76,14 +76,14 @@ public class TaskQueueActor<R extends Place<TaskQueue>> extends AbstractThreadAc
         onAnotherSync(another, proccess, onSuccess, null);
     }
 
-    public void onAnotherSync(R another, Func<Boolean> proccess, Proc onSuccess, Proc onFail) {
+    public void onAnotherSync(R another, Func<Boolean> process, Proc onSuccess, Proc onFail) {
         Conditions.notNull(another, "another");
-        Conditions.notNull(proccess, "proccess");
+        Conditions.notNull(process, "process");
         Conditions.notNull(onSuccess, "onSuccess");
         R where = where();
         Conditions.notNull(where, "no place to hold!");
         where.res().execute(() -> {
-            Future<Boolean> submit = another.res().submit(proccess::run);
+            Future<Boolean> submit = another.res().submit(process::run);
             Boolean result = null;
             try {
                 result = submit.get(SYNC_OVER_TIME, TimeUnit.MILLISECONDS);
