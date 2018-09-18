@@ -21,7 +21,7 @@ import top.limitart.base.ThreadUnsafe;
 import java.util.HashMap;
 
 /**
- * 约束型Map
+ * 约束型Map //TODO 优化 代码重复了
  *
  * @author hank
  */
@@ -226,7 +226,7 @@ public class ConstraintHashedMap<K> extends HashMap<K, Object> implements Constr
      */
     @Override
     public ConstraintMap<K> putBoolean(K key, boolean value) {
-        putInt(key, value ? 1 : 0);
+        putObj(key, value);
         return this;
     }
 
@@ -238,7 +238,10 @@ public class ConstraintHashedMap<K> extends HashMap<K, Object> implements Constr
      */
     @Override
     public boolean getBoolean(K key) {
-        return getInt(key) == 1;
+        if (!containsKey(key)) {
+            return false;
+        }
+        return getObj(key);
     }
 
     /**

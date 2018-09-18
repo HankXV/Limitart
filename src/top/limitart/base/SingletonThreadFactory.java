@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author Hank
  */
+@ThreadSafe
 public abstract class SingletonThreadFactory implements ThreadFactory {
 
     public abstract String name();

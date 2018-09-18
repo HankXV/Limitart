@@ -20,8 +20,7 @@ import top.limitart.base.NotNull;
 import top.limitart.base.Test2;
 import top.limitart.base.ThreadSafe;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -30,7 +29,7 @@ import java.util.Map;
  * @author hank
  */
 @ThreadSafe
-public class ImmutableMap<K, V> {
+public class ImmutableMap<K, V> implements Map<K, V> {
     private final Map<K, V> map;
 
     public static <K, V> ImmutableMap<K, V> of(@NotNull Map<K, V> map) {
@@ -44,25 +43,70 @@ public class ImmutableMap<K, V> {
         map = new HashMap<>();
     }
 
+    @Override
     public int size() {
         return map.size();
     }
 
-    public V get(K k) {
-        Conditions.notNull(k);
-        return map.get(k);
+    @Override
+    public boolean isEmpty() {
+        return size() == 0;
     }
 
 
-    public boolean containsKey(K k) {
-        Conditions.notNull(k);
-        return map.containsKey(k);
+    @Override
+    public V get(Object key) {
+        Conditions.notNull(key);
+        return map.get(key);
     }
 
-    public boolean containsValue(V v) {
-        Conditions.notNull(v);
-        return map.containsValue(v);
+    @Override
+    public V put(K key, V value) {
+        throw new UnsupportedOperationException();
     }
+
+    @Override
+    public V remove(Object key) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void putAll(Map<? extends K, ? extends V> m) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<K> keySet() {
+        return new HashSet<>(map.keySet());
+    }
+
+    @Override
+    public Collection<V> values() {
+        return new ArrayList<>(map.values());
+    }
+
+    @Override
+    public Set<Entry<K, V>> entrySet() {
+        return new HashSet<>(map.entrySet());
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        Conditions.notNull(key);
+        return map.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        Conditions.notNull(value);
+        return map.containsValue(value);
+    }
+
 
     public void forEach(Test2<K, V> test) {
         for (Map.Entry<K, V> entry : map.entrySet()) {

@@ -1,6 +1,7 @@
 package top.limitart.collections;
 
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,4 +71,6 @@ public interface Table<R, C, V> {
      * 清除所有元素
      */
     void clear();
+
+    Collection<V> values();
 }

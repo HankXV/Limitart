@@ -30,17 +30,14 @@ public class Update implements SQL {
     private Object[] setValues;
     private Where where;
 
-    public static Update start() {
-        return new Update();
+    public static Update start(String table) {
+        return new Update(table);
     }
 
-    private Update() {
+    private Update(String table) {
+        this.tableName = table;
     }
 
-    public Update from(String tableName) {
-        this.tableName = tableName;
-        return this;
-    }
 
     /**
      * @param sets
