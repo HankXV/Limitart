@@ -236,6 +236,7 @@ public class Dats {
             t.buffer(buf);
             t.decode();
         }
+        buf.release();
         return result;
     }
 }

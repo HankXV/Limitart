@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * @version 2018-02-26
  */
 public final class TimeUtil {
-    //系统内置始终，跟系统时间不挂钩
+    //系统内置时钟，跟系统时间不挂钩
     private static Clock clock = Clock.systemDefaultZone();
     /**
      * 秒
