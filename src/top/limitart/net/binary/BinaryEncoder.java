@@ -19,13 +19,36 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * 二进制编码器
- * 
- * @author hank
  *
+ * @author hank
  */
 public abstract class BinaryEncoder {
 
-	public abstract void beforeWriteBody(ByteBuf buf, short messageId);
+    public abstract void beforeWriteBody(ByteBuf buf, short messageId);
 
-	public abstract void afterWriteBody(ByteBuf buf);
+    public abstract void afterWriteBody(ByteBuf buf);
+
+    /**
+     * 默认编码器
+     *
+     * @author hank
+     */
+    public static class BinaryDefaultEncoder extends BinaryEncoder {
+        public final static BinaryDefaultEncoder ME = new BinaryDefaultEncoder();
+
+        @Override
+        public void beforeWriteBody(ByteBuf buf, short messageId) {
+            // 消息长度(包括消息Id)
+            buf.writeShort(0);
+            // 消息Id
+            buf.writeShort(messageId);
+        }
+
+        @Override
+        public void afterWriteBody(ByteBuf buf) {
+            // 重设消息长度
+            buf.setShort(0, buf.readableBytes() - Short.BYTES);
+        }
+
+    }
 }

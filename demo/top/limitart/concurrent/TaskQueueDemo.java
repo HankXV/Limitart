@@ -1,5 +1,6 @@
 package top.limitart.concurrent;
 
+
 public class TaskQueueDemo {
     public static void main(String[] args) {
         TaskQueue queue1 = TaskQueue.create("queue1");
@@ -38,7 +39,7 @@ public class TaskQueueDemo {
 
     }
 
-    private static class Map implements Place<TaskQueue> {
+    private static class Map implements Actor.Place<TaskQueue> {
         final TaskQueue queue;
 
         public Map(TaskQueue queue) {

@@ -16,8 +16,10 @@
 package top.limitart.net.binary;
 
 
+import io.netty.channel.EventLoop;
 import top.limitart.base.Conditions;
 import top.limitart.base.NotNull;
+import top.limitart.mapping.RequestContext;
 import top.limitart.net.Session;
 
 /**
@@ -25,26 +27,20 @@ import top.limitart.net.Session;
  *
  * @author hank
  */
-public class BinaryRequestParam {
-    private final BinaryMessage msg;
-    private final Session session;
+public class BinaryRequestParam extends RequestContext<BinaryMessage> {
+    private final Session<BinaryMessage, EventLoop> session;
     private Object extra;
 
     public BinaryRequestParam(@NotNull Session session, @NotNull BinaryMessage msg) {
+        super(msg);
         Conditions.notNull(session, "session");
         Conditions.notNull(msg, "msg");
         this.session = session;
-        this.msg = msg;
     }
 
-    @SuppressWarnings("unchecked")
-    public @NotNull
-    <T extends BinaryMessage> T msg() {
-        return (T) msg;
-    }
 
     public @NotNull
-    Session session() {
+    Session<BinaryMessage, EventLoop> session() {
         return this.session;
     }
 

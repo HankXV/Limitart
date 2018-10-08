@@ -8,13 +8,14 @@ Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的�
 #### 3.X快速开始
 1.涉及到的类
 
-    BinaryServer:服务器主体
+    BinaryEndPoint:网络端点(服务器和客户端可理解为端点)
     BinaryMeta:二进制消息元，主要封装了序列化操作
     BinaryMessage:二进制消息，是网络传输的对象，可以传输基本类型和BinaryMeta以及他们的列表
-    BinaryHandler:消息处理方法，负责把指定的消息路由到指定的方法
-    BinaryManager:消息处理类注解，负责管理一个模块的所有处理方法，即一组BinaryHandler
     BinaryRequestParam:所有消息处理方法必须声明的参数
-    BinaryMessageFactory:消息工厂，负责管理所有服务器需要处理的消息
+    
+    Mapper:消息处理方法，负责把指定的消息路由到指定的方法
+    MapperClass:消息处理类注解，负责管理一个模块的所有处理方法，即一组BinaryHandler
+    Router:路由器，负责将对应的信息路由到对应的方法
 
 2.创建一个消息
 ```java
@@ -22,7 +23,7 @@ Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的�
     	public String content = "hello limitart!";
 
     	@Override
-    	public short messageID() {
+    	public Short id() {
     		return BinaryMessages.createID(0X00, 0X01);
     	}
 
@@ -30,9 +31,9 @@ Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的�
 ````
 3.为这个消息创建处理器
 ```java
-    @BinaryManager
+    @MapperClass
     public class BinaryManagerDemo {
-    	@BinaryHandler(BinaryMessageDemo.class)
+    	@Mapper(BinaryMessageDemo.class)
     	public void doMessageDemo(BinaryRequestParam param) {
     		BinaryMessageDemo msg = param.msg();
     		System.out.println(msg.content);
@@ -41,27 +42,27 @@ Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的�
 ```
 4.让消息工厂实例化注册消息处理器
 ```java
-    BinaryMessageFactory factory = BinaryMessageFactory.createEmpty().registerManager(BinaryManagerDemo.class);
-    // 注意：这里可以调用BinaryMessageFactory.create("[包名]","[自定义实例]")的接口来配合脚本加载器(ScriptLoader)来初始化
+    Router router = Router.empty().registerMapperClass(BinaryManagerDemo.class);
+    // 注意：这里可以调用Router.create("[包名]","[自定义实例]")的接口来配合脚本加载器(ScriptLoader)或单例注入(Singletons)来初始化
 ```
 5.配置服务器实体
 ```java
-    new BinaryServer.BinaryServerBuilder()
-    				.factory(factory)
+    new BinaryEndPoint.Builder(true)
+    				.router(router)
     				.build()
-    				.startServer();
+    				.start(new AddressPair(8888));
 ```
 6.开启客户端连接并发送消息
 ```java
-    new BinaryClient.BinaryClientBuilder().remoteAddress(new AddressPair("127.0.0.1", 8888))
-            .factory(BinaryMessageFactory.createEmpty()).onConnected((BinaryClient cl, Boolean state) -> {
+    new BinaryEndPoint.Builder(false)
+           .router(Router.empty()).onConnected((s, state) -> {
         if (state) {
             try {
-                cl.sendMessage(new BinaryMessageDemo());
+                s.writeNow(new BinaryMessageDemo());
             } catch (Exception e) {
             }
         }
-    }).build().connect();
+     }).build().start(new AddressPair("127.0.0.1", 8888));
 ```
 7.服务器日志+结果
 

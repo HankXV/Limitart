@@ -71,7 +71,7 @@ public class MessagePackageTest {
 		public java.util.List<MetaInfo> metas = new java.util.ArrayList<>();
 
 		@Override
-		public short messageID() {
+		public Short id() {
 			return BinaryMessages.createID(PACKAGE_ID, 1);
 		}
 
@@ -98,7 +98,7 @@ public class MessagePackageTest {
 		public java.util.List<MetaInfo> metas = new java.util.ArrayList<>();
 
 		@Override
-		public short messageID() {
+		public Short id() {
 			return BinaryMessages.createID(PACKAGE_ID, 2);
 		}
 

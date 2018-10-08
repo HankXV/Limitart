@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.limitart.net;
+package top.limitart.mapping;
 
-import top.limitart.net.binary.BinaryMessage;
-import top.limitart.net.binary.BinaryMessages;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author hank
+ * 路由存在的类(用于查找)
  *
+ * @author hank
  */
-public class BinaryMessageDemo2 extends BinaryMessage {
-	public final String content = "hello script manager";
-
-	@Override
-	public Short id() {
-		return BinaryMessages.createID(0X00, 0X02);
-	}
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface MapperClass {
 }

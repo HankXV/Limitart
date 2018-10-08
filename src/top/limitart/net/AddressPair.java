@@ -24,7 +24,14 @@ import top.limitart.util.StringUtil;
  *
  * @author Hank
  */
-public class AddressPair extends ImmutableCouple<String,Integer>{
+public class AddressPair extends ImmutableCouple<String, Integer> {
+    public static AddressPair withPort(int port) {
+        return new AddressPair(port);
+    }
+
+    public static AddressPair withIP(String ip, int port) {
+        return new AddressPair(ip, port);
+    }
 
     /**
      * 用端口初始化(一般用于服务器)
@@ -42,7 +49,7 @@ public class AddressPair extends ImmutableCouple<String,Integer>{
      * @param port 端口
      */
     public AddressPair(@Nullable String ip, int port) {
-        super(ip,port);
+        super(ip, port);
         if (ip != null && !StringUtil.isIp4(ip)) {
             throw new IllegalArgumentException("ip format error");
         }
@@ -67,4 +74,8 @@ public class AddressPair extends ImmutableCouple<String,Integer>{
         return get2();
     }
 
+    @Override
+    public String toString() {
+        return (StringUtil.empty(getIp()) ? "0.0.0.0" : getIp()) + ":" + getPort();
+    }
 }

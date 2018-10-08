@@ -16,70 +16,81 @@
 package top.limitart.net.binary;
 
 import io.netty.buffer.ByteBuf;
-import top.limitart.net.Session;
 
 /**
  * 二进制解码器
- * 
- * @author hank
  *
+ * @author hank
  */
 public abstract class BinaryDecoder {
-	private final int maxFrameLength;
-	private final int lengthFieldOffset;
-	private final int lengthFieldLength;
-	private final int lengthAdjustment;
-	private final int initialBytesToStrip;
+    private final int maxFrameLength;
+    private final int lengthFieldOffset;
+    private final int lengthFieldLength;
+    private final int lengthAdjustment;
+    private final int initialBytesToStrip;
 
-	/**
-	 * 构造
-	 * 
-	 * @param maxFrameLength
-	 *            每个单位的消息最大长度
-	 * @param lengthFieldOffset
-	 *            表示长度字节的位在消息段中的偏移量
-	 * @param lengthFieldLength
-	 *            用了多长的字节表示了长度属性
-	 * @param lengthAdjustment
-	 *            长度调整(假如编码的长度信息比实际消息体的长度少2，那么此项设置为-2)
-	 * @param initialBytesToStrip
-	 *            正式解码消息时跳过原始二进制序列的几个字节
-	 */
-	public BinaryDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment,
-			int initialBytesToStrip) {
-		this.maxFrameLength = maxFrameLength;
-		this.lengthFieldOffset = lengthFieldOffset;
-		this.lengthFieldLength = lengthFieldLength;
-		this.lengthAdjustment = lengthAdjustment;
-		this.initialBytesToStrip = initialBytesToStrip;
-	}
+    /**
+     * 构造
+     *
+     * @param maxFrameLength      每个单位的消息最大长度
+     * @param lengthFieldOffset   表示长度字节的位在消息段中的偏移量
+     * @param lengthFieldLength   用了多长的字节表示了长度属性
+     * @param lengthAdjustment    长度调整(假如编码的长度信息比实际消息体的长度少2，那么此项设置为-2)
+     * @param initialBytesToStrip 正式解码消息时跳过原始二进制序列的几个字节
+     */
+    public BinaryDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment,
+                         int initialBytesToStrip) {
+        this.maxFrameLength = maxFrameLength;
+        this.lengthFieldOffset = lengthFieldOffset;
+        this.lengthFieldLength = lengthFieldLength;
+        this.lengthAdjustment = lengthAdjustment;
+        this.initialBytesToStrip = initialBytesToStrip;
+    }
 
-	/**
-	 * 自定义处理完buffer后返回消息Id
-	 * 
-	 * @param session
-	 * @param buffer
-	 * @return
-	 */
-	public abstract short readMessageId(Session session, ByteBuf buffer);
+    /**
+     * 自定义处理完buffer后返回消息Id
+     *
+     * @param buffer
+     * @return
+     */
+    public abstract short readMessageId(ByteBuf buffer);
 
-	public int getMaxFrameLength() {
-		return maxFrameLength;
-	}
+    public int getMaxFrameLength() {
+        return maxFrameLength;
+    }
 
-	public int getLengthFieldOffset() {
-		return lengthFieldOffset;
-	}
+    public int getLengthFieldOffset() {
+        return lengthFieldOffset;
+    }
 
-	public int getLengthFieldLength() {
-		return lengthFieldLength;
-	}
+    public int getLengthFieldLength() {
+        return lengthFieldLength;
+    }
 
-	public int getLengthAdjustment() {
-		return lengthAdjustment;
-	}
+    public int getLengthAdjustment() {
+        return lengthAdjustment;
+    }
 
-	public int getInitialBytesToStrip() {
-		return initialBytesToStrip;
-	}
+    public int getInitialBytesToStrip() {
+        return initialBytesToStrip;
+    }
+
+    /**
+     * 默认解码器
+     *
+     * @author hank
+     */
+    public static class BinaryDefaultDecoder extends BinaryDecoder {
+        public final static BinaryDefaultDecoder ME = new BinaryDefaultDecoder();
+
+        public BinaryDefaultDecoder() {
+            super(Short.MAX_VALUE, 0, 2, 0, 2);
+        }
+
+        @Override
+        public short readMessageId(ByteBuf buffer) {
+            return buffer.readShort();
+        }
+
+    }
 }

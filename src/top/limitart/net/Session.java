@@ -15,129 +15,89 @@
  */
 package top.limitart.net;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.EventLoop;
-import top.limitart.base.Conditions;
+
 import top.limitart.base.Proc2;
-import top.limitart.base.Procs;
-import top.limitart.collections.ConstraintConcurrentMap;
 import top.limitart.collections.ConstraintMap;
-import top.limitart.concurrent.Place;
-import top.limitart.net.binary.BinaryMessageIOException;
+import top.limitart.concurrent.Actor;
 
 import java.net.SocketAddress;
 
 /**
- * 长链接会话
+ * 会话
  *
+ * @param <B> 会话传递消息的介质
+ * @param <T> 会话占用的线程
  * @author Hank
  */
-public class Session implements Place<EventLoop> {
-    private final Channel channel;
-    private final int ID;
-    private final ConstraintMap<Integer> params = new ConstraintConcurrentMap<>();
-
-    public Session(int ID, Channel channel) {
-        Conditions.notNull(channel, "channel");
-        this.channel = channel;
-        this.ID = ID;
-    }
-
+public interface Session<B, T> extends Actor.Place<T> {
     /**
      * 立即写出数据
      *
      * @param buf
      * @param resultCallback
      */
-    public void writeNow(ByteBuf buf, Proc2<Boolean, Throwable> resultCallback) {
-        Conditions.notNull(buf, "buf");
-        if (!writable()) {
-            Procs.invoke(resultCallback, false, new BinaryMessageIOException("unwritable"));
-            return;
-        }
-        this.channel.writeAndFlush(buf).addListener((ChannelFutureListener) arg0 -> Procs.invoke(resultCallback, arg0.isSuccess(), arg0.cause()));
-    }
+    void writeNow(B buf, Proc2<Boolean, Throwable> resultCallback);
+
+    void writeNow(byte[] buf, Proc2<Boolean, Throwable> resultCallback);
 
     /**
      * 立即写出数据
      *
      * @param buf
      */
-    public void writeNow(ByteBuf buf) {
-        writeNow(buf, null);
-    }
+    void writeNow(B buf);
 
     /**
      * 是否可写
      *
      * @return
      */
-    public boolean writable() {
-        return this.channel.isWritable();
-    }
+    boolean writable();
 
     /**
      * 关闭会话
      *
      * @param resultCallback
      */
-    public void close(Proc2<Boolean, Throwable> resultCallback) {
-        this.channel.close().addListener((ChannelFutureListener) arg0 -> Procs.invoke(resultCallback, arg0.isSuccess(), arg0.cause()));
-    }
+    void close(Proc2<Boolean, Throwable> resultCallback);
 
     /**
      * 关闭会话
      */
-    public void close() {
-        close(null);
-    }
+    void close();
 
     /**
      * 远程地址
      *
      * @return
      */
-    public SocketAddress remoteAddress() {
-        return this.channel.remoteAddress();
-    }
+    SocketAddress remoteAddress();
 
     /**
      * 本地地址
      *
      * @return
      */
-    public SocketAddress localAddress() {
-        return this.channel.localAddress();
-    }
+    SocketAddress localAddress();
 
     /**
      * ID
      *
      * @return
      */
-    public int ID() {
-        return this.ID;
-    }
+    int ID();
 
     /**
      * 获取自定义参数列表
      *
      * @return the params
      */
-    public ConstraintMap<Integer> params() {
-        return params;
-    }
+    ConstraintMap<Integer> params();
 
-    @Override
-    public String toString() {
-        return channel.toString();
-    }
-
-
-    @Override
-    public EventLoop res() {
-        return channel.eventLoop();
-    }
+    /**
+     * 当前会话所处线程
+     *
+     * @return
+     */
+    T thread();
 }

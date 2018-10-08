@@ -13,20 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.limitart.net;
-
-import top.limitart.net.binary.BinaryMessage;
-import top.limitart.net.binary.BinaryMessages;
+package top.limitart.mapping;
 
 /**
- * @author hank
+ * 路由消息
  *
+ * @author hank
+ * @version 2018/10/8 0008 20:11
  */
-public class BinaryMessageDemo2 extends BinaryMessage {
-	public final String content = "hello script manager";
-
-	@Override
-	public Short id() {
-		return BinaryMessages.createID(0X00, 0X02);
-	}
+public interface Request<ID> {
+    ID id();
 }

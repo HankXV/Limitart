@@ -13,20 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.limitart.net;
+package top.limitart.concurrent;
 
-import top.limitart.net.binary.BinaryMessage;
-import top.limitart.net.binary.BinaryMessages;
+import top.limitart.base.Singleton;
+import top.limitart.base.ThreadSafe;
+
+import java.util.concurrent.ThreadFactory;
 
 /**
- * @author hank
+ * 单例线程工厂
  *
+ * @author Hank
  */
-public class BinaryMessageDemo2 extends BinaryMessage {
-	public final String content = "hello script manager";
+@ThreadSafe
+public abstract class SingletonThreadFactory extends Singleton<Thread> implements ThreadFactory {
 
-	@Override
-	public Short id() {
-		return BinaryMessages.createID(0X00, 0X02);
-	}
+    public SingletonThreadFactory() {
+        super(true, null);
+    }
+
+    public abstract String name();
+
+    @Override
+    public Thread newThread(Runnable r) {
+        return getOrCreate(() -> new Thread(r, name()));
+    }
+
+    public Thread thread() {
+        return get();
+    }
 }

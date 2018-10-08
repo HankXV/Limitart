@@ -15,7 +15,6 @@
  */
 package top.limitart.concurrent;
 
-import top.limitart.base.NamedThreadFactory;
 
 import java.util.concurrent.*;
 

@@ -19,11 +19,11 @@ import top.limitart.net.binary.BinaryMessage;
 import top.limitart.net.binary.BinaryMessages;
 
 public class BinaryMessageDemo extends BinaryMessage {
-	public final String content = "hello limitart!";
+    public final String content = "hello limitart!";
 
-	@Override
-	public short messageID() {
-		return BinaryMessages.createID(0X00, 0X01);
-	}
+    @Override
+    public Short id() {
+        return BinaryMessages.createID(0X00, 0X01);
+    }
 
 }

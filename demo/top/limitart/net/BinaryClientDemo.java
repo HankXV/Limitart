@@ -15,22 +15,24 @@
  */
 package top.limitart.net;
 
-import top.limitart.net.binary.BinaryClient;
-import top.limitart.net.binary.BinaryMessageFactory;
+import io.netty.channel.EventLoop;
+import top.limitart.mapping.Router;
+import top.limitart.net.binary.BinaryEndPoint;
+import top.limitart.net.binary.BinaryMessage;
 
 /**
  * @author hank
  */
 public class BinaryClientDemo {
     public static void main(String[] args) throws Exception {
-        new BinaryClient.BinaryClientBuilder().remoteAddress(new AddressPair("127.0.0.1", 8888))
-                .factory(BinaryMessageFactory.empty()).onConnected((BinaryClient cl, Boolean state) -> {
+        new BinaryEndPoint.Builder(false)
+                .router(Router.empty().registerMapperClass(BinaryManagerDemo.class)).onConnected((s, state) -> {
             if (state) {
                 try {
-                    cl.sendMessage(new BinaryMessageDemo());
+                    s.writeNow(new BinaryMessageDemo());
                 } catch (Exception ignored) {
                 }
             }
-        }).build().connect();
+        }).build().start(new AddressPair("127.0.0.1", 8888));
     }
 }

@@ -1,4 +1,6 @@
 package top.limitart.net;
 
-public class SessionRole extends SessionActor {
+import top.limitart.net.binary.BinaryMessage;
+
+public class SessionRole extends NettySessionActor<BinaryMessage> {
 }

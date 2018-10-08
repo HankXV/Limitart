@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.limitart.net;
+package top.limitart.mapping;
 
-import top.limitart.net.binary.BinaryMessage;
+import top.limitart.base.LimitartNonRuntimeException;
 import top.limitart.net.binary.BinaryMessages;
 
 /**
- * @author hank
+ * 消息ID重复异常
  *
+ * @author hank
  */
-public class BinaryMessageDemo2 extends BinaryMessage {
-	public final String content = "hello script manager";
+public class RequestIDDuplicatedException extends LimitartNonRuntimeException {
 
-	@Override
-	public Short id() {
-		return BinaryMessages.createID(0X00, 0X02);
-	}
+    private static final long serialVersionUID = 1L;
+
+    public RequestIDDuplicatedException(Object messageID) {
+        super("request ID duplicated:" + messageID);
+    }
 }

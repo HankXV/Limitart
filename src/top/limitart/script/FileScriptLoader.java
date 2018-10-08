@@ -18,7 +18,7 @@ package top.limitart.script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.limitart.base.Conditions;
-import top.limitart.base.NamedThreadFactory;
+import top.limitart.concurrent.NamedThreadFactory;
 import top.limitart.util.CodecUtil;
 import top.limitart.util.FileUtil;
 
