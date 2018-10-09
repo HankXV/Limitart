@@ -15,16 +15,15 @@
  */
 package top.limitart.net;
 
-import top.limitart.net.binary.BinaryHandler;
-import top.limitart.net.binary.BinaryManager;
+import top.limitart.mapping.Mapper;
+import top.limitart.mapping.MapperClass;
 import top.limitart.net.binary.BinaryRequestParam;
 
 /**
  * @author hank
- *
  */
-@BinaryManager
+@MapperClass
 public abstract class BinaryScriptManager {
-	@BinaryHandler(BinaryMessageDemo2.class)
-	public abstract void helloScriptManager(BinaryRequestParam param);
+    @Mapper(BinaryMessageDemo2.class)
+    public abstract void helloScriptManager(BinaryRequestParam param);
 }

@@ -25,7 +25,7 @@ import java.util.concurrent.Executor;
  *
  * @author hank
  */
-public abstract class AbstractThreadActor<T extends Executor, R extends Place<T>> extends AbstractActor<T, R> {
+public abstract class AbstractThreadActor<T extends Executor, R extends Actor.Place<T>> extends AbstractActor<T, R> {
 
     /**
      * 调用线程是否为当前线程

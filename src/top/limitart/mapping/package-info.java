@@ -13,20 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.limitart.net;
-
-import top.limitart.net.binary.BinaryMessage;
-import top.limitart.net.binary.BinaryMessages;
-
 /**
- * @author hank
- *
+ * 方法路由器
+ * 主要用于决定哪些参数需要传递给哪些方法来执行的一个路由器
  */
-public class BinaryMessageDemo2 extends BinaryMessage {
-	public final String content = "hello script manager";
-
-	@Override
-	public Short id() {
-		return BinaryMessages.createID(0X00, 0X02);
-	}
-}
+package top.limitart.mapping;

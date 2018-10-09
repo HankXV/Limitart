@@ -15,18 +15,33 @@
  */
 package top.limitart.net;
 
-import top.limitart.net.binary.BinaryMessage;
-import top.limitart.net.binary.BinaryMessages;
-
 /**
- * @author hank
+ * 端点
  *
+ * @param <IN>  需要端点处理的输入信息
+ * @param <OUT> 端点处理后的输出信息
+ * @author hank
+ * @version 2018/10/9 0009 19:38
  */
-public class BinaryMessageDemo2 extends BinaryMessage {
-	public final String content = "hello script manager";
+public interface EndPoint<IN, OUT> {
+    /**
+     * 端点名称
+     *
+     * @return
+     */
+    String name();
 
-	@Override
-	public Short id() {
-		return BinaryMessages.createID(0X00, 0X02);
-	}
+    /**
+     * 启动端点
+     */
+    EndPoint start(AddressPair addressPair) throws Exception;
+
+    /**
+     * 停止端点
+     */
+    EndPoint stop() throws Exception;
+
+    OUT in2Out(IN in) throws Exception;
+
+    IN out2In(OUT out) throws Exception;
 }

@@ -15,18 +15,17 @@
  */
 package top.limitart.net;
 
-import top.limitart.net.binary.BinaryMessage;
-import top.limitart.net.binary.BinaryMessages;
+import io.netty.channel.EventLoop;
+import top.limitart.concurrent.AbstractThreadActor;
 
 /**
- * @author hank
+ * Sesson资源占用者，可以用其他对象来持有Netty的网络线程资源
  *
+ * @author hank
  */
-public class BinaryMessageDemo2 extends BinaryMessage {
-	public final String content = "hello script manager";
-
-	@Override
-	public Short id() {
-		return BinaryMessages.createID(0X00, 0X02);
-	}
+public class NettySessionActor<M> extends AbstractThreadActor<EventLoop, Session<M, EventLoop>> {
+    @Override
+    protected boolean sameThread(EventLoop eventExecutors) {
+        return eventExecutors.inEventLoop();
+    }
 }

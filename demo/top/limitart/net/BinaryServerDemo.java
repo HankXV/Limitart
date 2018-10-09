@@ -15,9 +15,8 @@
  */
 package top.limitart.net;
 
-import top.limitart.net.binary.BinaryMessageFactory;
-import top.limitart.net.binary.BinaryMessageIDDuplicatedException;
-import top.limitart.net.binary.BinaryServer;
+import top.limitart.mapping.Router;
+import top.limitart.net.binary.BinaryEndPoint;
 
 /**
  * @author hank
@@ -26,15 +25,15 @@ public class BinaryServerDemo {
     static final SessionRole role = new SessionRole();
 
     public static void main(String[] args)
-            throws BinaryMessageIDDuplicatedException, InstantiationException, IllegalAccessException {
-        new BinaryServer.BinaryServerBuilder()
-                .factory(BinaryMessageFactory.empty().registerManager(BinaryManagerDemo.class)).onConnected((s, b) -> {
+            throws Exception {
+        new BinaryEndPoint.Builder(true)
+                .router(Router.empty().registerMapperClass(BinaryManagerDemo.class)).onConnected((s, b) -> {
             if (b) {
                 role.join(s, () -> System.out.println("join session success!"), Throwable::printStackTrace);
             } else {
                 role.leave(s);
                 System.out.println("leave session success");
             }
-        }).build().startServer();
+        }).build().start(new AddressPair(8888));
     }
 }

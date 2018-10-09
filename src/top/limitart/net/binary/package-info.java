@@ -15,6 +15,6 @@
  */
 /**
  * 二进制自定义协议服务器
- *
+ * 入口{@code BinaryEndPoint}
  */
 package top.limitart.net.binary;

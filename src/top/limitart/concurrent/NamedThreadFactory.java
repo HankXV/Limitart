@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.limitart.net;
+package top.limitart.concurrent;
 
-import top.limitart.net.binary.BinaryMessage;
-import top.limitart.net.binary.BinaryMessages;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author hank
- *
- */
-public class BinaryMessageDemo2 extends BinaryMessage {
-	public final String content = "hello script manager";
+public abstract class NamedThreadFactory implements ThreadFactory {
+    private AtomicInteger counter = new AtomicInteger();
 
-	@Override
-	public Short id() {
-		return BinaryMessages.createID(0X00, 0X02);
-	}
+    public abstract String namePrefix();
+
+    @Override
+    public Thread newThread(Runnable r) {
+        return new Thread(r, namePrefix() + "-" + counter.getAndIncrement());
+    }
+
 }

@@ -13,20 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.limitart.net;
+package top.limitart.mapping;
 
-import top.limitart.net.binary.BinaryMessage;
-import top.limitart.net.binary.BinaryMessages;
+import top.limitart.base.Conditions;
 
 /**
- * @author hank
+ * 路由参数上下文
  *
+ * @param <MSG> 消息
+ * @author hank
+ * @version 2018/10/8 0008 20:01
  */
-public class BinaryMessageDemo2 extends BinaryMessage {
-	public final String content = "hello script manager";
+public abstract class RequestContext<MSG extends Request> {
+    private final MSG msg;
 
-	@Override
-	public Short id() {
-		return BinaryMessages.createID(0X00, 0X02);
-	}
+    public RequestContext(MSG msg) {
+        Conditions.notNull(msg, "msg");
+        this.msg = msg;
+    }
+
+    public <T extends MSG> T msg() {
+        return (T) msg;
+    }
 }

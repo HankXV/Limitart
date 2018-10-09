@@ -15,15 +15,19 @@
  */
 package top.limitart.net;
 
-import top.limitart.net.binary.BinaryHandler;
-import top.limitart.net.binary.BinaryManager;
+import io.netty.channel.EventLoop;
+import top.limitart.mapping.Mapper;
+import top.limitart.mapping.MapperClass;
+import top.limitart.net.binary.BinaryMessage;
 import top.limitart.net.binary.BinaryRequestParam;
 
-@BinaryManager
+@MapperClass
 public class BinaryManagerDemo {
-	@BinaryHandler(BinaryMessageDemo.class)
-	public void doMessageDemo(BinaryRequestParam param) {
-		BinaryMessageDemo msg = param.msg();
-		System.out.println(msg.content);
-	}
+    @Mapper(BinaryMessageDemo.class)
+    public void doMessageDemo(BinaryRequestParam param) {
+        BinaryMessageDemo msg = param.msg();
+        Session<BinaryMessage, EventLoop> session = param.session();
+        System.out.println(msg.content);
+        session.writeNow(msg);
+    }
 }

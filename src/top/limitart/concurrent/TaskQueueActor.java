@@ -29,7 +29,7 @@ import java.util.concurrent.*;
  *
  * @param <R> 消息队列资源域
  */
-public class TaskQueueActor<R extends Place<TaskQueue>> extends AbstractThreadActor<TaskQueue, R> {
+public class TaskQueueActor<R extends Actor.Place<TaskQueue>> extends AbstractThreadActor<TaskQueue, R> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskQueueActor.class);
     //同步执行最大阻塞时间
     private static final long SYNC_OVER_TIME = 2000;
@@ -44,19 +44,19 @@ public class TaskQueueActor<R extends Place<TaskQueue>> extends AbstractThreadAc
      * 当前线程不会等待指定线程执行完毕
      *
      * @param another   其他消息队列
-     * @param proccess  其他消息队里执行的任务
+     * @param process  其他消息队里执行的任务
      * @param onSuccess 在本队列执行的成功回调
      * @param onFail    在本队列执行的失败回调
      */
-    public void onAnotherAsync(R another, Func<Boolean> proccess, Proc onSuccess, Proc onFail) {
+    public void onAnotherAsync(R another, Func<Boolean> process, Proc onSuccess, Proc onFail) {
         Conditions.notNull(another, "another");
-        Conditions.notNull(proccess, "proccess");
+        Conditions.notNull(process, "proccess");
         Conditions.notNull(onSuccess, "onSuccess");
         Conditions.notNull(onFail, "onFail");
         R where = where();
         Conditions.notNull(where, "no place to hold!");
         where.res().execute(() -> another.res().execute(() -> {
-            if (proccess.run()) {
+            if (process.run()) {
                 where.res().execute(onSuccess::run);
             } else {
                 where.res().execute(onFail::run);
@@ -69,11 +69,11 @@ public class TaskQueueActor<R extends Place<TaskQueue>> extends AbstractThreadAc
      * 保证在响应速度要求低的调用响应线程要求高的线程，阻塞前者以确保运行在前者线程的数据正确性
      *
      * @param another
-     * @param proccess
+     * @param process
      * @param onSuccess
      */
-    public void onAnotherSync(R another, Func<Boolean> proccess, Proc onSuccess) {
-        onAnotherSync(another, proccess, onSuccess, null);
+    public void onAnotherSync(R another, Func<Boolean> process, Proc onSuccess) {
+        onAnotherSync(another, process, onSuccess, null);
     }
 
     public void onAnotherSync(R another, Func<Boolean> process, Proc onSuccess, Proc onFail) {
