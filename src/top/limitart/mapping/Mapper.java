@@ -33,5 +33,5 @@ public @interface Mapper {
      *
      * @return
      */
-    Class<? extends Request> value();
+    Class<?> value();
 }

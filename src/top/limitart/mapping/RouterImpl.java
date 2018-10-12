@@ -31,26 +31,30 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
+ * 方法路由器实现
+ *
  * @author hank
  * @version 2018/10/8 0008 20:48
  */
-public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> implements Router<ID, R, C> {
+public class RouterImpl<M, C extends RequestContext<M>> implements Router<M, C> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterImpl.class);
     // !!这里的asm应用经测试在JAVA8下最优
-    private final Map<ID, Class<R>> requests = new ConcurrentHashMap<>();
-    private final Map<Class<R>, RouterImpl.Context> msgs = new ConcurrentHashMap<>();
+    private final Map<Class<M>, RouterImpl.Context> msgs = new ConcurrentHashMap<>();
     private final Map<Class<?>, Object> managerInstances = new ConcurrentHashMap<>();
     private final Map<Class<?>, MethodAccess> methods = new ConcurrentHashMap<>();
+    private Class<M> mClass;
+    private Class<C> cClass;
 
     /**
      * 创造一个空的消息工厂
      *
      * @return
      */
-    public static RouterImpl empty() {
-        return new RouterImpl();
+    public static <M, C extends RequestContext<M>> Router empty(Class<M> mClass, Class<C> cClass) {
+        return new RouterImpl(mClass, cClass);
     }
 
     /**
@@ -61,10 +65,10 @@ public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @throws ReflectiveOperationException
      * @throws IOException
      */
-    public static RouterImpl create(String scanPackage)
-            throws IOException, ReflectiveOperationException, RequestIDDuplicatedException {
+    public static <M, C extends RequestContext<M>> Router create(Class<M> mClass, Class<C> cClass, String scanPackage)
+            throws IOException, ReflectiveOperationException, RequestDuplicatedException {
         Conditions.notNull(scanPackage, "scanPackage");
-        RouterImpl factory = new RouterImpl();
+        RouterImpl factory = new RouterImpl(mClass, cClass);
         List<Class<?>> classesByPackage = ReflectionUtil.getClassesBySuperClass(scanPackage, Object.class);
         for (Class<?> clazz : classesByPackage) {
             factory.registerMapperClass(clazz, null);
@@ -81,10 +85,10 @@ public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @throws IOException
      * @throws ReflectiveOperationException
      */
-    public static Router create(String scanPackage, Func1<Class<?>, Object> confirmInstance)
+    public static <M, C extends RequestContext<M>> Router create(Class<M> mClass, Class<C> cClass, String scanPackage, Func1<Class<?>, Object> confirmInstance)
             throws Exception {
         Conditions.notNull(scanPackage, "scanPackage");
-        RouterImpl factory = new RouterImpl();
+        RouterImpl factory = new RouterImpl(mClass, cClass);
         List<Class<?>> classesByPackage = ReflectionUtil.getClassesBySuperClass(scanPackage, Object.class);
         for (Class<?> clazz : classesByPackage) {
             factory.registerMapperClass(clazz, confirmInstance);
@@ -92,7 +96,9 @@ public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> 
         return factory;
     }
 
-    public RouterImpl() {
+    public RouterImpl(Class<M> mClass, Class<C> cClass) {
+        this.mClass = mClass;
+        this.cClass = cClass;
     }
 
     /**
@@ -103,7 +109,7 @@ public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @throws IllegalAccessException
      */
     @Override
-    public Router registerMapperClass(Class<?> mapperClass) throws IllegalAccessException, InstantiationException, RequestIDDuplicatedException {
+    public Router<M, C> registerMapperClass(Class<?> mapperClass) throws IllegalAccessException, InstantiationException, RequestDuplicatedException {
         return registerMapperClass(mapperClass, null);
     }
 
@@ -113,8 +119,8 @@ public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @param mapperClass     类
      * @param confirmInstance 指定manager的 实例
      */
-    public Router registerMapperClass(Class<?> mapperClass, Func1<Class<?>, Object> confirmInstance)
-            throws IllegalAccessException, InstantiationException, RequestIDDuplicatedException {
+    public Router<M, C> registerMapperClass(Class<?> mapperClass, Func1<Class<?>, Object> confirmInstance)
+            throws IllegalAccessException, InstantiationException, RequestDuplicatedException {
         MapperClass manager = mapperClass.getAnnotation(MapperClass.class);
         if (manager == null) {
             return this;
@@ -128,34 +134,33 @@ public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> 
                 continue;
             }
             if (!Modifier.isPublic(method.getModifiers())) {
-                throw new IllegalAccessError("method must be public:" + mapperClass.getName() + "."
+                throw new IllegalAccessError("method must be PUBLIC:" + mapperClass.getName() + "."
                         + ReflectionUtil.getMethodOverloadName(method));
             }
             Class<?>[] parameterTypes = method.getParameterTypes();
             if (parameterTypes.length != 1) {
                 throw new IllegalArgumentException(mapperClass.getName() + "." + ReflectionUtil.getMethodOverloadName(method)
-                        + " params length must be only one");
+                        + " params length must be only ONE");
+            }
+            Class<?> messageType = handler.value();
+            if (!mClass.isAssignableFrom(messageType)) {
+                LOGGER.info("{} IS NOT a {},IGNORE.", messageType.getName(), mClass.getName());
+                continue;
             }
             Class<?> paramType = parameterTypes[0];
-            if (!RequestContext.class.isAssignableFrom(paramType)) {
+            if (!cClass.isAssignableFrom(paramType)) {
                 throw new IllegalAccessException(mapperClass.getName() + "." + ReflectionUtil.getMethodOverloadName(method)
-                        + " param can only be assignable from " + RequestContext.class.getName());
+                        + " param can only be ASSIGNABLE from " + cClass.getName());
             }
-            Class<R> messageType = (Class<R>) handler.value();
-            ConstructorAccess<R> constructorAccess = ConstructorAccess.get(messageType);
+            ConstructorAccess<M> constructorAccess = (ConstructorAccess<M>) ConstructorAccess.get(messageType);
             if (msgs.containsKey(messageType)) {
-                throw new RequestIDDuplicatedException(messageType.getName());
-            }
-            ID id = constructorAccess.newInstance().id();
-            if (requests.containsKey(id)) {
-                throw new RequestIDDuplicatedException(id);
+                throw new RequestDuplicatedException(messageType.getName());
             }
             RouterImpl.Context messageContext = new RouterImpl.Context();
             messageContext.conAccess = constructorAccess;
             messageContext.managerClazz = mapperClass;
             messageContext.methodIndex = i;
-            msgs.put(messageType, messageContext);
-            requests.put(id, messageType);
+            msgs.put((Class<M>) messageType, messageContext);
             if (!managerInstances.containsKey(mapperClass)) {
                 if (confirmInstance != null) {
                     managerInstances.put(mapperClass, confirmInstance.run(mapperClass));
@@ -178,13 +183,18 @@ public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @param request
      * @param newInstance
      */
-    public void replaceInstance(Class<?> mapperClass, R request, Object newInstance) {
+    public void replaceInstance(Class<?> mapperClass, M request, Object newInstance) {
         Conditions.notNull(mapperClass, "mapperClass");
         Conditions.notNull(request, "request");
         Conditions.notNull(newInstance, "newInstance");
         if (managerInstances.containsKey(mapperClass)) {
             managerInstances.put(mapperClass, newInstance);
         }
+    }
+
+    @Override
+    public void foreachRequstClass(Consumer<Class<M>> consumer) {
+        msgs.keySet().forEach(consumer);
     }
 
     /**
@@ -194,24 +204,17 @@ public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @return
      */
     @Override
-    public R requestInstance(Class<R> requestClass) {
+    public M requestInstance(Class<M> requestClass) {
         if (!msgs.containsKey(requestClass)) {
             return null;
         }
         RouterImpl.Context messageContext = msgs.get(requestClass);
-        return (R) messageContext.conAccess.newInstance();
+        return (M) messageContext.conAccess.newInstance();
     }
 
-    @Override
-    public R requestInstance(ID id) throws Exception {
-        if (!requests.containsKey(id)) {
-            return null;
-        }
-        return requestInstance(requests.get(id));
-    }
 
     @Override
-    public void request(R request, Func<C> contextInstance, Proc1<MethodInvoker> proc) {
+    public void request(M request, Func<C> contextInstance, Proc1<MethodInvoker> proc) {
         Conditions.notNull(request, "request");
         RouterImpl.Context messageContext = msgs.get(request.getClass());
         if (messageContext == null) {
@@ -227,7 +230,7 @@ public class RouterImpl<ID, R extends Request<ID>, C extends RequestContext<R>> 
 
 
     private class Context {
-        private ConstructorAccess<R> conAccess;
+        private ConstructorAccess<M> conAccess;
         private Class<?> managerClazz;
         private int methodIndex;
     }

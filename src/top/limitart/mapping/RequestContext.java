@@ -24,7 +24,7 @@ import top.limitart.base.Conditions;
  * @author hank
  * @version 2018/10/8 0008 20:01
  */
-public abstract class RequestContext<MSG extends Request> {
+public abstract class RequestContext<MSG> {
     private final MSG msg;
 
     public RequestContext(MSG msg) {

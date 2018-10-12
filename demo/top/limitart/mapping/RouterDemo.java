@@ -7,7 +7,7 @@ package top.limitart.mapping;
  */
 public class RouterDemo {
     public static void main(String[] args) throws Exception {
-        Router<Short, StringRequest, StringQuestParam> router = Router.empty();
+        Router<StringRequest, StringQuestParam> router = Router.empty(StringRequest.class, StringQuestParam.class);
         router.registerMapperClass(StringMapperClass.class);
         StringRequest newRequest = new StringRequest();
         newRequest.setMsg("hank!!!");

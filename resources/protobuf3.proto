@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "top.limitart.net";
+option java_outer_classname = "ProtobufMessageDemo";
+
+message Demo1 {
+    string name = 1;
+}
+
+message Demo2 {
+    repeated Demo1 demo1 = 1;
+    int32 id = 2;
+}

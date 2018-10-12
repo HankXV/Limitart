@@ -13,14 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.limitart.mapping;
-
 /**
- * 路由消息
- *
- * @author hank
- * @version 2018/10/8 0008 20:11
+ * Google Protobuf 实现
+ * 入口{@code ProtobufEndPoint}
  */
-public interface Request<ID> {
-    ID id();
-}
+package top.limitart.net.protobuf;

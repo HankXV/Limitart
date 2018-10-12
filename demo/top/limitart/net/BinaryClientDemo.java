@@ -15,10 +15,10 @@
  */
 package top.limitart.net;
 
-import io.netty.channel.EventLoop;
 import top.limitart.mapping.Router;
 import top.limitart.net.binary.BinaryEndPoint;
 import top.limitart.net.binary.BinaryMessage;
+import top.limitart.net.binary.BinaryRequestParam;
 
 /**
  * @author hank
@@ -26,13 +26,13 @@ import top.limitart.net.binary.BinaryMessage;
 public class BinaryClientDemo {
     public static void main(String[] args) throws Exception {
         new BinaryEndPoint.Builder(false)
-                .router(Router.empty().registerMapperClass(BinaryManagerDemo.class)).onConnected((s, state) -> {
+                .router(Router.empty(BinaryMessage.class, BinaryRequestParam.class).registerMapperClass(MessageMapper.class)).onConnected((s, state) -> {
             if (state) {
                 try {
                     s.writeNow(new BinaryMessageDemo());
                 } catch (Exception ignored) {
                 }
             }
-        }).build().start(new AddressPair("127.0.0.1", 8888));
+        }).build().start(new AddressPair("127.0.0.1", 7878));
     }
 }

@@ -16,18 +16,17 @@
 package top.limitart.mapping;
 
 import top.limitart.base.LimitartNonRuntimeException;
-import top.limitart.net.binary.BinaryMessages;
 
 /**
- * 消息ID重复异常
+ * 消息重复异常
  *
  * @author hank
  */
-public class RequestIDDuplicatedException extends LimitartNonRuntimeException {
+public class RequestDuplicatedException extends LimitartNonRuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public RequestIDDuplicatedException(Object messageID) {
+    public RequestDuplicatedException(Object messageID) {
         super("request ID duplicated:" + messageID);
     }
 }

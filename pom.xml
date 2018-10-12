@@ -189,6 +189,13 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.22.Final</version>
         </dependency>
+        <!-- Google Protobuf-->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+
         <!-- JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>

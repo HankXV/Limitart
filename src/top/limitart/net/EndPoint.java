@@ -41,7 +41,21 @@ public interface EndPoint<IN, OUT> {
      */
     EndPoint stop() throws Exception;
 
-    OUT in2Out(IN in) throws Exception;
+    /**
+     * 将端点内部可读信息转化为外部可传输信息
+     *
+     * @param in
+     * @return
+     * @throws Exception
+     */
+    OUT toOutputFinal(IN in) throws Exception;
 
-    IN out2In(OUT out) throws Exception;
+    /**
+     * 将端点外部可传输信息转化为内部可读信息
+     *
+     * @param out
+     * @return
+     * @throws Exception
+     */
+    IN toInputFinal(OUT out) throws Exception;
 }

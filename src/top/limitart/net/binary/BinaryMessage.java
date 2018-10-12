@@ -16,13 +16,11 @@
 package top.limitart.net.binary;
 
 
-import top.limitart.mapping.Request;
-
 /**
  * 消息实体
  *
  * @author Hank
  */
-public abstract class BinaryMessage extends BinaryMeta implements Request<Short> {
-
+public abstract class BinaryMessage extends BinaryMeta {
+    public abstract short id();
 }

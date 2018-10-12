@@ -26,7 +26,7 @@ public class BinaryMessageDemo2 extends BinaryMessage {
 	public final String content = "hello script manager";
 
 	@Override
-	public Short id() {
+	public short id() {
 		return BinaryMessages.createID(0X00, 0X02);
 	}
 }
