@@ -66,26 +66,28 @@ abstract public class ConstructorAccess<T> {
                     enclosingClassNameInternal = null;
                     try {
                         constructor = type.getDeclaredConstructor((Class[]) null);
+                        constructor.setAccessible(true);
                         modifiers = constructor.getModifiers();
                     } catch (Exception ex) {
                         throw new RuntimeException("Class cannot be created (missing no-arg constructor): " + type.getName(), ex);
                     }
-                    if (Modifier.isPrivate(modifiers)) {
-                        throw new RuntimeException("Class cannot be created (the no-arg constructor is private): " + type.getName());
-                    }
+//                    if (Modifier.isPrivate(modifiers)) {
+//                        throw new RuntimeException("Class cannot be created (the no-arg constructor is private): " + type.getName());
+//                    }
                 } else {
                     enclosingClassNameInternal = enclosingType.getName().replace('.', '/');
                     try {
                         constructor = type.getDeclaredConstructor(enclosingType); // Inner classes should have this.
+                        constructor.setAccessible(true);
                         modifiers = constructor.getModifiers();
                     } catch (Exception ex) {
                         throw new RuntimeException(
                                 "Non-static member class cannot be created (missing enclosing class constructor): " + type.getName(), ex);
                     }
-                    if (Modifier.isPrivate(modifiers)) {
-                        throw new RuntimeException(
-                                "Non-static member class cannot be created (the enclosing class constructor is private): " + type.getName());
-                    }
+//                    if (Modifier.isPrivate(modifiers)) {
+//                        throw new RuntimeException(
+//                                "Non-static member class cannot be created (the enclosing class constructor is private): " + type.getName());
+//                    }
                 }
                 String superclassNameInternal = Modifier.isPublic(modifiers)
                         ? ReflectASMConst.PACKAGE_NAME + "PublicConstructorAccess"

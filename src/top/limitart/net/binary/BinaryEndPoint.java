@@ -27,20 +27,24 @@ import top.limitart.mapping.Router;
 import top.limitart.net.NettyEndPoint;
 import top.limitart.net.Session;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author hank
  * @version 2018/10/9 0009 21:11
  */
-public class BinaryEndPoint extends NettyEndPoint<BinaryMessage> {
+public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
     private static Logger LOGGER = LoggerFactory.getLogger(BinaryEndPoint.class);
     private final BinaryDecoder decoder;
     private final BinaryEncoder encoder;
-    private final Router<Short, BinaryMessage, BinaryRequestParam> router;
-    private final Proc3<Session<BinaryMessage, EventLoop>, BinaryMessage, Router<Short, BinaryMessage, BinaryRequestParam>> onMessageIn;
+    private final Map<Short, Class<BinaryMessage>> id2Msg = new ConcurrentHashMap<>();
+
+    private final Router<BinaryMessage, BinaryRequestParam> router;
+    private final Proc3<Session<BinaryMessage, EventLoop>, BinaryMessage, Router<BinaryMessage, BinaryRequestParam>> onMessageIn;
     private final Proc2<Session<BinaryMessage, EventLoop>, Boolean> onConnected;
     private final Proc1<Session<BinaryMessage, EventLoop>> onBind;
     private final Proc2<Session<BinaryMessage, EventLoop>, Throwable> onExceptionThrown;
-
 
     public BinaryEndPoint(Builder builder) {
         super(builder.name, builder.server, builder.autoReconnect);
@@ -51,12 +55,27 @@ public class BinaryEndPoint extends NettyEndPoint<BinaryMessage> {
         this.onConnected = builder.onConnected;
         this.onBind = builder.onBind;
         this.onExceptionThrown = builder.onExceptionThrown;
+        //初始化消息
+        router.foreachRequstClass(c -> {
+            BinaryMessage binaryMessage = null;
+            try {
+                binaryMessage = router.requestInstance(c);
+            } catch (Exception e) {
+                LOGGER.error("mapping message id error", e);
+            }
+            id2Msg.put(binaryMessage.id(), c);
+        });
     }
 
     @Override
-    protected void initPipeline(ChannelPipeline pipeline) {
+    protected void beforeTranlaterPipeline(ChannelPipeline pipeline) {
         pipeline.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(), decoder.getLengthFieldOffset(),
                 decoder.getLengthFieldLength(), decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()));
+    }
+
+    @Override
+    protected void afterTranslaterPipeline(ChannelPipeline pipeline) {
+        //DO NOTHING
     }
 
     @Override
@@ -89,11 +108,16 @@ public class BinaryEndPoint extends NettyEndPoint<BinaryMessage> {
         Procs.invoke(onBind, session);
     }
 
+
     @Override
-    public BinaryMessage in2Out(ByteBuf byteBuf) throws Exception {
+    public BinaryMessage toOutputFinal(ByteBuf byteBuf) throws Exception {
         // 消息id
         short messageId = decoder.readMessageId(byteBuf);
-        BinaryMessage msg = router.requestInstance(messageId);
+        Class<BinaryMessage> aClass = id2Msg.get(messageId);
+        if (aClass == null) {
+            throw new BinaryMessageCodecException(name() + " message empty,id:" + BinaryMessages.ID2String(messageId));
+        }
+        BinaryMessage msg = router.requestInstance(aClass);
         if (msg == null) {
             throw new BinaryMessageCodecException(name() + " message empty,id:" + BinaryMessages.ID2String(messageId));
         }
@@ -109,7 +133,7 @@ public class BinaryEndPoint extends NettyEndPoint<BinaryMessage> {
     }
 
     @Override
-    public ByteBuf out2In(BinaryMessage msg) {
+    public ByteBuf toInputFinal(BinaryMessage msg) throws Exception {
         ByteBuf buffer = Unpooled.buffer();
         encoder.beforeWriteBody(buffer, msg.id());
         msg.buffer(buffer);
@@ -129,8 +153,8 @@ public class BinaryEndPoint extends NettyEndPoint<BinaryMessage> {
         private int autoReconnect;
         private BinaryDecoder decoder;
         private BinaryEncoder encoder;
-        private Router<Short, BinaryMessage, BinaryRequestParam> router;
-        private Proc3<Session<BinaryMessage, EventLoop>, BinaryMessage, Router<Short, BinaryMessage, BinaryRequestParam>> onMessageIn;
+        private Router<BinaryMessage, BinaryRequestParam> router;
+        private Proc3<Session<BinaryMessage, EventLoop>, BinaryMessage, Router<BinaryMessage, BinaryRequestParam>> onMessageIn;
         private Proc2<Session<BinaryMessage, EventLoop>, Boolean> onConnected;
         private Proc1<Session<BinaryMessage, EventLoop>> onBind;
         private Proc2<Session<BinaryMessage, EventLoop>, Throwable> onExceptionThrown;
@@ -197,7 +221,7 @@ public class BinaryEndPoint extends NettyEndPoint<BinaryMessage> {
          * @return
          */
         @Necessary
-        public Builder router(Router<Short, BinaryMessage, BinaryRequestParam> router) {
+        public Builder router(Router<BinaryMessage, BinaryRequestParam> router) {
             this.router = router;
             return this;
         }
@@ -210,7 +234,7 @@ public class BinaryEndPoint extends NettyEndPoint<BinaryMessage> {
          * @return
          */
         @Optional
-        public Builder onMessageIn(Proc3<Session<BinaryMessage, EventLoop>, BinaryMessage, Router<Short, BinaryMessage, BinaryRequestParam>> onMessageIn) {
+        public Builder onMessageIn(Proc3<Session<BinaryMessage, EventLoop>, BinaryMessage, Router<BinaryMessage, BinaryRequestParam>> onMessageIn) {
             this.onMessageIn = onMessageIn;
             return this;
         }

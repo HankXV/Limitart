@@ -29,15 +29,15 @@ import java.util.function.Consumer;
  * @author hank
  * @version 2018/10/8 0008 20:08
  */
-public interface Router<ID, R extends Request<ID>, C extends RequestContext<R>> {
+public interface Router<M, C extends RequestContext<M>> {
 
     /**
      * 创造一个空的消息工厂
      *
      * @return
      */
-    static Router empty() {
-        return RouterImpl.empty();
+    static <M, C extends RequestContext<M>> Router empty(Class<M> mClass, Class<C> cClass) {
+        return RouterImpl.empty(mClass, cClass);
     }
 
     /**
@@ -48,8 +48,9 @@ public interface Router<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @throws ReflectiveOperationException
      * @throws IOException
      */
-    static Router create(String scanPackage) throws RequestIDDuplicatedException, ReflectiveOperationException, IOException {
-        return RouterImpl.create(scanPackage);
+    static <M, C extends RequestContext<M>>
+    Router create(Class<M> mClass, Class<C> cClass, String scanPackage) throws RequestDuplicatedException, ReflectiveOperationException, IOException {
+        return RouterImpl.create(mClass, cClass, scanPackage);
     }
 
     /**
@@ -61,8 +62,8 @@ public interface Router<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @throws IOException
      * @throws ReflectiveOperationException
      */
-    static Router create(String scanPackage, Func1<Class<?>, Object> confirmInstance) throws Exception {
-        return RouterImpl.create(scanPackage, confirmInstance);
+    static <M, C extends RequestContext<M>> Router create(Class<M> mClass, Class<C> cClass, String scanPackage, Func1<Class<?>, Object> confirmInstance) throws Exception {
+        return RouterImpl.create(mClass, cClass, scanPackage, confirmInstance);
     }
 
     /**
@@ -70,7 +71,7 @@ public interface Router<ID, R extends Request<ID>, C extends RequestContext<R>> 
      *
      * @param mapperClass
      */
-    Router registerMapperClass(Class<?> mapperClass) throws Exception;
+    Router<M, C> registerMapperClass(Class<?> mapperClass) throws Exception;
 
     /**
      * 注册一个manager
@@ -78,7 +79,7 @@ public interface Router<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @param mapperClass     类
      * @param confirmInstance 指定manager的实例
      */
-    Router registerMapperClass(Class<?> mapperClass, Func1<Class<?>, Object> confirmInstance) throws Exception;
+    Router<M, C> registerMapperClass(Class<?> mapperClass, Func1<Class<?>, Object> confirmInstance) throws Exception;
 
     /**
      * 替换掉manager的实例
@@ -86,7 +87,9 @@ public interface Router<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @param request
      * @param newInstance
      */
-    void replaceInstance(Class<?> mapperClass, R request, Object newInstance) throws Exception;
+    void replaceInstance(Class<?> mapperClass, M request, Object newInstance) throws Exception;
+
+    void foreachRequstClass(Consumer<Class<M>> consumer);
 
     /**
      * 根据ID获取一个消息实例
@@ -95,11 +98,9 @@ public interface Router<ID, R extends Request<ID>, C extends RequestContext<R>> 
      * @return
      * @throws ReflectiveOperationException
      */
-    R requestInstance(Class<R> requestClass) throws Exception;
+    M requestInstance(Class<M> requestClass) throws Exception;
 
-    R requestInstance(ID id) throws Exception;
-
-    void request(R r, Func<C> contextInstance, Proc1<MethodInvoker> proc);
+    void request(M request, Func<C> contextInstance, Proc1<MethodInvoker> proc);
 
     interface MethodInvoker {
         void invoke();

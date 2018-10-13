@@ -15,21 +15,21 @@
  */
 package top.limitart.net;
 
+import com.google.protobuf.Message;
 import top.limitart.mapping.Router;
-import top.limitart.net.binary.BinaryEndPoint;
-import top.limitart.net.binary.BinaryMessage;
-import top.limitart.net.binary.BinaryRequestParam;
+import top.limitart.net.protobuf.ProtobufEndPoint;
+import top.limitart.net.protobuf.ProtobufRequestParam;
 
 /**
  * @author hank
  */
-public class BinaryServerDemo {
-    static final BinarySessionRole role = new BinarySessionRole();
+public class ProtobufServerDemo {
+    static final ProtobufSessionRole role = new ProtobufSessionRole();
 
     public static void main(String[] args)
             throws Exception {
-        new BinaryEndPoint.Builder(true)
-                .router(Router.empty(BinaryMessage.class, BinaryRequestParam.class).registerMapperClass(MessageMapper.class)).onConnected((s, b) -> {
+        new ProtobufEndPoint.Builder(true)
+                .router(Router.empty(Message.class, ProtobufRequestParam.class).registerMapperClass(MessageMapper.class)).onConnected((s, b) -> {
             if (b) {
                 role.join(s, () -> System.out.println("join session success!"), Throwable::printStackTrace);
             } else {

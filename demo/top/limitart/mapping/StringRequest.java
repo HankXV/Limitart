@@ -5,7 +5,7 @@ package top.limitart.mapping;
  * @author hank
  * @version 2018/10/8 0008 21:21
  */
-public class StringRequest implements Request<Short> {
+public class StringRequest {
     private String msg;
 
 
@@ -17,8 +17,4 @@ public class StringRequest implements Request<Short> {
         this.msg = msg;
     }
 
-    @Override
-    public Short id() {
-        return 1;
-    }
 }

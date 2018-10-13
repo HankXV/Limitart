@@ -22,7 +22,7 @@ public class BinaryMessageDemo extends BinaryMessage {
     public final String content = "hello limitart!";
 
     @Override
-    public Short id() {
+    public short id() {
         return BinaryMessages.createID(0X00, 0X01);
     }
 

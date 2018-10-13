@@ -18,7 +18,6 @@ package top.limitart.net;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -29,8 +28,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.handler.codec.MessageToMessageCodec;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
@@ -49,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author hank
  * @version 2018/10/9 0009 19:43
  */
-public abstract class NettyEndPoint<M> implements EndPoint<ByteBuf, M> {
+public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
     private static Logger LOGGER = LoggerFactory.getLogger(NettyEndPoint.class);
     private static final AttributeKey<Integer> SESSION_ID_KEY = AttributeKey.newInstance("SESSION_ID_KEY");
     private static final AttributeKey<AddressPair> CLIENT_REMOTE_ADDR = AttributeKey.newInstance("CLIENT_REMOTE_ADDR");
@@ -62,7 +60,7 @@ public abstract class NettyEndPoint<M> implements EndPoint<ByteBuf, M> {
     private final static Class<? extends ServerChannel> serverChannelClass;
     private final static Class<? extends Channel> clientChannelClass;
 
-    private Session<M, EventLoop> endPointSession;
+    private Session<OUT, EventLoop> endPointSession;
     private int autoReconnect;
 
     static {
@@ -136,16 +134,27 @@ public abstract class NettyEndPoint<M> implements EndPoint<ByteBuf, M> {
         return autoReconnect;
     }
 
+    /**
+     * 安插在IN_OUT转化器之前的处理链
+     *
+     * @param pipeline
+     */
+    protected abstract void beforeTranlaterPipeline(ChannelPipeline pipeline);
 
-    protected abstract void initPipeline(ChannelPipeline pipeline);
+    /**
+     * 安插在IN_OUT转化器之后的处理链
+     *
+     * @param pipeline
+     */
+    protected abstract void afterTranslaterPipeline(ChannelPipeline pipeline);
 
-    protected abstract void exceptionThrown(Session<M, EventLoop> session, Throwable cause) throws Exception;
+    protected abstract void exceptionThrown(Session<OUT, EventLoop> session, Throwable cause) throws Exception;
 
-    protected abstract void sessionActive(Session<M, EventLoop> session, boolean activeOrNot) throws Exception;
+    protected abstract void sessionActive(Session<OUT, EventLoop> session, boolean activeOrNot) throws Exception;
 
-    protected abstract void messageReceived(Session<M, EventLoop> session, M msg) throws Exception;
+    protected abstract void messageReceived(Session<OUT, EventLoop> session, OUT msg) throws Exception;
 
-    protected abstract void onBind(Session<M, EventLoop> session);
+    protected abstract void onBind(Session<OUT, EventLoop> session);
 
     public NettyEndPoint(String name, boolean server, int autoReconnect) {
         Conditions.notNull(name, "name");
@@ -159,8 +168,11 @@ public abstract class NettyEndPoint<M> implements EndPoint<ByteBuf, M> {
 
                 @Override
                 protected void initChannel(SocketChannel ch) {
-                    initPipeline(ch.pipeline());
-                    ch.pipeline().addLast(new ReadTimeoutHandler(60)).addLast().addLast(new M2ByteBufEncoder()).addLast(new ByteBuf2MDecoder()).addLast(new ChannelStateHandler());
+                    ch.pipeline().addLast(new ReadTimeoutHandler(60));
+                    beforeTranlaterPipeline(ch.pipeline());
+                    ch.pipeline().addLast(new InOutTransfer());
+                    afterTranslaterPipeline(ch.pipeline());
+                    ch.pipeline().addLast(new ChannelStateHandler());
                 }
             });
             if (Epoll.isAvailable()) {
@@ -178,8 +190,11 @@ public abstract class NettyEndPoint<M> implements EndPoint<ByteBuf, M> {
 
                 @Override
                 protected void initChannel(SocketChannel ch) {
-                    initPipeline(ch.pipeline());
-                    ch.pipeline().addLast(new ReadTimeoutHandler(60)).addLast().addLast(new M2ByteBufEncoder()).addLast(new ByteBuf2MDecoder()).addLast(new ChannelStateHandler());
+                    ch.pipeline().addLast(new ReadTimeoutHandler(60));
+                    beforeTranlaterPipeline(ch.pipeline());
+                    ch.pipeline().addLast(new InOutTransfer());
+                    afterTranslaterPipeline(ch.pipeline());
+                    ch.pipeline().addLast(new ChannelStateHandler());
                 }
             });
             if (Epoll.isAvailable()) {
@@ -203,8 +218,24 @@ public abstract class NettyEndPoint<M> implements EndPoint<ByteBuf, M> {
      * @param channel 通道
      * @return 会话
      */
-    protected Session<M, EventLoop> session(Channel channel) {
+    protected Session<OUT, EventLoop> session(Channel channel) {
         return sessions.get(channel.attr(SESSION_ID_KEY).get());
+    }
+
+    @ChannelHandler.Sharable
+    private class InOutTransfer extends MessageToMessageCodec<IN, OUT> {
+
+        @Override
+        protected void encode(ChannelHandlerContext ctx, OUT msg, List<Object> out) throws Exception {
+            IN i = NettyEndPoint.this.toInputFinal(msg);
+            out.add(i);
+        }
+
+        @Override
+        protected void decode(ChannelHandlerContext ctx, IN msg, List<Object> out) throws Exception {
+            OUT o = NettyEndPoint.this.toOutputFinal(msg);
+            out.add(o);
+        }
     }
 
     private class ChannelStateHandler extends ChannelInboundHandlerAdapter {
@@ -224,7 +255,7 @@ public abstract class NettyEndPoint<M> implements EndPoint<ByteBuf, M> {
             LOGGER.info(ctx.channel().remoteAddress() + " connected！");
             int ID = SESSION_ID_CREATOR.incrementAndGet();
             ctx.channel().attr(SESSION_ID_KEY).set(ID);
-            Session<M, EventLoop> session = new NettySession(ID, ctx.channel());
+            Session<OUT, EventLoop> session = new NettySession(ID, ctx.channel());
             sessions.put(session.ID(), session);
             sessionActive(session, true);
         }
@@ -232,7 +263,7 @@ public abstract class NettyEndPoint<M> implements EndPoint<ByteBuf, M> {
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
             LOGGER.info(ctx.channel().remoteAddress() + " disconnected！");
-            Session<M, EventLoop> remove = sessions.remove(ctx.channel().attr(SESSION_ID_KEY).get());
+            Session<OUT, EventLoop> remove = sessions.remove(ctx.channel().attr(SESSION_ID_KEY).get());
             sessionActive(remove, false);
             if (bootstrap instanceof Bootstrap) {
                 if (getAutoReconnect() > 0) {
@@ -242,33 +273,9 @@ public abstract class NettyEndPoint<M> implements EndPoint<ByteBuf, M> {
             }
         }
 
-    }
-
-    private class ByteBuf2MDecoder extends ByteToMessageDecoder {
-
         @Override
-        protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-            try {
-                M m = in2Out(in);
-                messageReceived(session(ctx.channel()), m);
-            } catch (Exception e) {
-                LOGGER.error("close session:" + ctx.channel().remoteAddress(), e);
-                ctx.channel().close();
-            }
-
-        }
-    }
-
-    private class M2ByteBufEncoder extends MessageToByteEncoder<M> {
-        @Override
-        public boolean isSharable() {
-            return true;
-        }
-
-        @Override
-        protected void encode(ChannelHandlerContext ctx, M msg, ByteBuf out) throws Exception {
-            ByteBuf byteBuf = out2In(msg);
-            out.writeBytes(byteBuf);
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            NettyEndPoint.this.messageReceived(session(ctx.channel()), (OUT) msg);
         }
     }
 }
