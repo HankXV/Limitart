@@ -33,7 +33,7 @@ public class ImmutableList<E> implements List<E> {
     private final Object[] arrays;
 
     public static <E> ImmutableList<E> of(@NotNull List<E> list) {
-        Conditions.args(list != null && !list.isEmpty());
+        Conditions.notNull(list);
         ImmutableList<E> il = new ImmutableList<>(list.size());
         for (int i = 0; i < list.size(); ++i) {
             il.arrays[i] = list.get(i);

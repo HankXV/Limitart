@@ -34,12 +34,12 @@ import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.limitart.base.Conditions;
+import top.limitart.concurrent.ThreadLocalHolder;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Netty实现的端点
@@ -49,11 +49,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
     private static Logger LOGGER = LoggerFactory.getLogger(NettyEndPoint.class);
-    private static final AttributeKey<Integer> SESSION_ID_KEY = AttributeKey.newInstance("SESSION_ID_KEY");
     private static final AttributeKey<AddressPair> CLIENT_REMOTE_ADDR = AttributeKey.newInstance("CLIENT_REMOTE_ADDR");
-    private static final AtomicInteger SESSION_ID_CREATOR = new AtomicInteger();
     private String name;
-    private final Map<Integer, Session> sessions = new ConcurrentHashMap<>();
+    private final ThreadLocalHolder<Map<Channel, Session>> sessions = ThreadLocalHolder.create();
     protected AbstractBootstrap bootstrap;
     protected final static EventLoopGroup bossGroup;
     protected final static EventLoopGroup workerGroup;
@@ -83,7 +81,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
             bootstrap.bind(addressPair.getPort()).addListener((ChannelFuture arg0) -> {
                 if (arg0.isSuccess()) {
                     LOGGER.info(name() + " bind at :" + addressPair);
-                    endPointSession = new NettySession(0, arg0.channel());
+                    endPointSession = new NettySession(arg0.channel());
                     onBind(endPointSession);
                 } else {
                     LOGGER.error(name() + " bind error:" + arg0.cause());
@@ -96,7 +94,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
             LOGGER.info(name() + " start connect server：" + addressPair + "...");
             try {
                 ((Bootstrap) bootstrap).connect(addressPair.getIp(), addressPair.getPort()).sync().addListener((ChannelFutureListener) channelFuture -> {
-                    endPointSession = new NettySession<>(0, channelFuture.channel());
+                    endPointSession = new NettySession<>(channelFuture.channel());
                     channelFuture.channel().attr(CLIENT_REMOTE_ADDR).set(addressPair);
                     LOGGER.info(name() + " connect server：" + addressPair + " success！");
                 });
@@ -139,22 +137,26 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
      *
      * @param pipeline
      */
-    protected abstract void beforeTranlaterPipeline(ChannelPipeline pipeline);
+    protected abstract void beforeTranslatorPipeline(ChannelPipeline pipeline);
 
     /**
      * 安插在IN_OUT转化器之后的处理链
      *
      * @param pipeline
      */
-    protected abstract void afterTranslaterPipeline(ChannelPipeline pipeline);
+    protected abstract void afterTranslatorPipeline(ChannelPipeline pipeline);
 
     protected abstract void exceptionThrown(Session<OUT, EventLoop> session, Throwable cause) throws Exception;
 
     protected abstract void sessionActive(Session<OUT, EventLoop> session, boolean activeOrNot) throws Exception;
 
-    protected abstract void messageReceived(Session<OUT, EventLoop> session, OUT msg) throws Exception;
+    protected abstract void messageReceived(Session<OUT, EventLoop> session, Object msg) throws Exception;
 
     protected abstract void onBind(Session<OUT, EventLoop> session);
+
+    protected Session<OUT, EventLoop> createSession(Channel channel) {
+        return new NettySession<>(channel);
+    }
 
     public NettyEndPoint(String name, boolean server, int autoReconnect) {
         Conditions.notNull(name, "name");
@@ -169,9 +171,9 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
                 @Override
                 protected void initChannel(SocketChannel ch) {
                     ch.pipeline().addLast(new ReadTimeoutHandler(60));
-                    beforeTranlaterPipeline(ch.pipeline());
+                    beforeTranslatorPipeline(ch.pipeline());
                     ch.pipeline().addLast(new InOutTransfer());
-                    afterTranslaterPipeline(ch.pipeline());
+                    afterTranslatorPipeline(ch.pipeline());
                     ch.pipeline().addLast(new ChannelStateHandler());
                 }
             });
@@ -191,9 +193,9 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
                 @Override
                 protected void initChannel(SocketChannel ch) {
                     ch.pipeline().addLast(new ReadTimeoutHandler(60));
-                    beforeTranlaterPipeline(ch.pipeline());
+                    beforeTranslatorPipeline(ch.pipeline());
                     ch.pipeline().addLast(new InOutTransfer());
-                    afterTranslaterPipeline(ch.pipeline());
+                    afterTranslatorPipeline(ch.pipeline());
                     ch.pipeline().addLast(new ChannelStateHandler());
                 }
             });
@@ -218,8 +220,29 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
      * @param channel 通道
      * @return 会话
      */
-    protected Session<OUT, EventLoop> session(Channel channel) {
-        return sessions.get(channel.attr(SESSION_ID_KEY).get());
+    protected Session<OUT, EventLoop> getSession(Channel channel) {
+        Conditions.args(channel.eventLoop().inEventLoop(), "can not call this on another thread,must on it's own");
+        Map<Channel, Session> channelSessionMap = sessions.get();
+        if (channelSessionMap == null) {
+            return null;
+        }
+        return channelSessionMap.get(channel);
+    }
+
+    protected Session<OUT, EventLoop> putSession(Channel channel) {
+        Conditions.args(channel.eventLoop().inEventLoop(), "can not call this on another thread,must on it's own");
+        Session<OUT, EventLoop> session = createSession(channel);
+        sessions.getWithInitialize(HashMap::new).put(channel, session);
+        return session;
+    }
+
+    protected Session<OUT, EventLoop> removeSession(Channel channel) {
+        Conditions.args(channel.eventLoop().inEventLoop(), "can not call this on another thread,must on it's own");
+        Map<Channel, Session> channelSessionMap = sessions.get();
+        if (channelSessionMap == null) {
+            return null;
+        }
+        return channelSessionMap.remove(channel);
     }
 
     @ChannelHandler.Sharable
@@ -247,23 +270,19 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             LOGGER.error(ctx.channel() + " cause:", cause);
-            exceptionThrown(session(ctx.channel()), cause);
+            exceptionThrown(getSession(ctx.channel()), cause);
         }
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
             LOGGER.info(ctx.channel().remoteAddress() + " connected！");
-            int ID = SESSION_ID_CREATOR.incrementAndGet();
-            ctx.channel().attr(SESSION_ID_KEY).set(ID);
-            Session<OUT, EventLoop> session = new NettySession(ID, ctx.channel());
-            sessions.put(session.ID(), session);
-            sessionActive(session, true);
+            sessionActive(putSession(ctx.channel()), true);
         }
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
             LOGGER.info(ctx.channel().remoteAddress() + " disconnected！");
-            Session<OUT, EventLoop> remove = sessions.remove(ctx.channel().attr(SESSION_ID_KEY).get());
+            Session<OUT, EventLoop> remove = removeSession(ctx.channel());
             sessionActive(remove, false);
             if (bootstrap instanceof Bootstrap) {
                 if (getAutoReconnect() > 0) {
@@ -275,7 +294,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            NettyEndPoint.this.messageReceived(session(ctx.channel()), (OUT) msg);
+            NettyEndPoint.this.messageReceived(getSession(ctx.channel()), (OUT) msg);
         }
     }
 }

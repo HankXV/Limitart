@@ -16,10 +16,7 @@
 package top.limitart.concurrent;
 
 
-import top.limitart.base.Conditions;
-import top.limitart.base.NotNull;
-import top.limitart.base.Nullable;
-import top.limitart.base.ThreadSafe;
+import top.limitart.base.*;
 
 /**
  * 线程变量
@@ -32,12 +29,7 @@ import top.limitart.base.ThreadSafe;
 public class ThreadLocalHolder<T> {
     private final ThreadLocal<T> ref = new ThreadLocal<>();
 
-    public static <T> ThreadLocalHolder<T> of(@NotNull T t) {
-        Conditions.notNull(t);
-        return empty().set(t);
-    }
-
-    public static <T> ThreadLocalHolder<T> empty() {
+    public static <T> ThreadLocalHolder<T> create() {
         return new ThreadLocalHolder<>();
     }
 
@@ -47,6 +39,16 @@ public class ThreadLocalHolder<T> {
     public @Nullable
     T get() {
         return ref.get();
+    }
+
+    public @NotNull
+    T getWithInitialize(Func<T> init) {
+        T t = get();
+        if (t == null) {
+            t = Conditions.notNull(init.run());
+            set(t);
+        }
+        return t;
     }
 
     public ThreadLocalHolder set(@Nullable T t) {

@@ -46,6 +46,10 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
     private final Proc1<Session<BinaryMessage, EventLoop>> onBind;
     private final Proc2<Session<BinaryMessage, EventLoop>, Throwable> onExceptionThrown;
 
+    public static Builder builder(boolean server) {
+        return new Builder(server);
+    }
+
     public BinaryEndPoint(Builder builder) {
         super(builder.name, builder.server, builder.autoReconnect);
         this.decoder = Conditions.notNull(builder.decoder, "decoder");
@@ -68,13 +72,13 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
     }
 
     @Override
-    protected void beforeTranlaterPipeline(ChannelPipeline pipeline) {
+    protected void beforeTranslatorPipeline(ChannelPipeline pipeline) {
         pipeline.addLast(new LengthFieldBasedFrameDecoder(decoder.getMaxFrameLength(), decoder.getLengthFieldOffset(),
                 decoder.getLengthFieldLength(), decoder.getLengthAdjustment(), decoder.getInitialBytesToStrip()));
     }
 
     @Override
-    protected void afterTranslaterPipeline(ChannelPipeline pipeline) {
+    protected void afterTranslatorPipeline(ChannelPipeline pipeline) {
         //DO NOTHING
     }
 
@@ -89,7 +93,8 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
     }
 
     @Override
-    protected void messageReceived(Session<BinaryMessage, EventLoop> session, BinaryMessage msg) throws Exception {
+    protected void messageReceived(Session<BinaryMessage, EventLoop> session, Object arg) throws Exception {
+        BinaryMessage msg = (BinaryMessage) arg;
         if (onMessageIn != null) {
             try {
                 onMessageIn.run(session, msg, router);

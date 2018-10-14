@@ -28,7 +28,7 @@ public class ProtobufServerDemo {
 
     public static void main(String[] args)
             throws Exception {
-        new ProtobufEndPoint.Builder(true)
+        ProtobufEndPoint.builder(true)
                 .router(Router.empty(Message.class, ProtobufRequestParam.class).registerMapperClass(MessageMapper.class)).onConnected((s, b) -> {
             if (b) {
                 role.join(s, () -> System.out.println("join session success!"), Throwable::printStackTrace);
@@ -36,6 +36,6 @@ public class ProtobufServerDemo {
                 role.leave(s);
                 System.out.println("leave session success");
             }
-        }).build().start(new AddressPair(7878));
+        }).build().start(AddressPair.withPort(7878));
     }
 }

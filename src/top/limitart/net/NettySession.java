@@ -31,12 +31,10 @@ import java.net.SocketAddress;
  */
 public class NettySession<M> extends AbstractSession<M, EventLoop> {
     private final Channel channel;
-    private final int ID;
 
-    public NettySession(int ID, Channel channel) {
+    public NettySession(Channel channel) {
         Conditions.notNull(channel, "channel");
         this.channel = channel;
-        this.ID = ID;
     }
 
     /**
@@ -55,15 +53,6 @@ public class NettySession<M> extends AbstractSession<M, EventLoop> {
         this.channel.writeAndFlush(buf).addListener((ChannelFutureListener) arg0 -> Procs.invoke(resultCallback, arg0.isSuccess(), arg0.cause()));
     }
 
-    @Override
-    public void writeNow(byte[] buf, Proc2<Boolean, Throwable> resultCallback) {
-        Conditions.notNull(buf, "buf");
-        if (!writable()) {
-            Procs.invoke(resultCallback, false, new BinaryMessageIOException("unwritable"));
-            return;
-        }
-        this.channel.writeAndFlush(buf).addListener((ChannelFutureListener) arg0 -> Procs.invoke(resultCallback, arg0.isSuccess(), arg0.cause()));
-    }
 
     /**
      * 是否可写
@@ -104,16 +93,6 @@ public class NettySession<M> extends AbstractSession<M, EventLoop> {
     @Override
     public SocketAddress localAddress() {
         return this.channel.localAddress();
-    }
-
-    /**
-     * ID
-     *
-     * @return
-     */
-    @Override
-    public int ID() {
-        return this.ID;
     }
 
     @Override

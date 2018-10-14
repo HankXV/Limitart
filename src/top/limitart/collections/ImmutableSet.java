@@ -33,7 +33,7 @@ public class ImmutableSet<E> implements Set<E> {
     private final Set<E> set;
 
     public static <E> ImmutableSet<E> of(@NotNull Collection<E> collection) {
-        Conditions.args(collection != null && !collection.isEmpty());
+        Conditions.notNull(collection);
         ImmutableSet<E> il = new ImmutableSet<>();
         il.set.addAll(collection);
         return il;
