@@ -33,7 +33,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     private final Map<K, V> map;
 
     public static <K, V> ImmutableMap<K, V> of(@NotNull Map<K, V> map) {
-        Conditions.args(map != null && !map.isEmpty());
+        Conditions.notNull(map);
         ImmutableMap<K, V> il = new ImmutableMap<>();
         il.map.putAll(map);
         return il;

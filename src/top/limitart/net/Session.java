@@ -38,8 +38,6 @@ public interface Session<B, T> extends Actor.Place<T> {
      */
     void writeNow(B buf, Proc2<Boolean, Throwable> resultCallback);
 
-    void writeNow(byte[] buf, Proc2<Boolean, Throwable> resultCallback);
-
     /**
      * 立即写出数据
      *
@@ -79,13 +77,6 @@ public interface Session<B, T> extends Actor.Place<T> {
      * @return
      */
     SocketAddress localAddress();
-
-    /**
-     * ID
-     *
-     * @return
-     */
-    int ID();
 
     /**
      * 获取自定义参数列表

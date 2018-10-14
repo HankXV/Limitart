@@ -28,7 +28,7 @@ public class BinaryServerDemo {
 
     public static void main(String[] args)
             throws Exception {
-        new BinaryEndPoint.Builder(true)
+        BinaryEndPoint.builder(true)
                 .router(Router.empty(BinaryMessage.class, BinaryRequestParam.class).registerMapperClass(MessageMapper.class)).onConnected((s, b) -> {
             if (b) {
                 role.join(s, () -> System.out.println("join session success!"), Throwable::printStackTrace);
@@ -36,6 +36,6 @@ public class BinaryServerDemo {
                 role.leave(s);
                 System.out.println("leave session success");
             }
-        }).build().start(new AddressPair(7878));
+        }).build().start(AddressPair.withPort(7878));
     }
 }

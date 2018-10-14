@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Google Protobuf 实现
+ * Google Protobuf 端点
  * 入口{@code ProtobufEndPoint}
  */
 package top.limitart.net.protobuf;

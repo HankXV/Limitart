@@ -13,7 +13,7 @@ import top.limitart.net.protobuf.ProtobufRequestParam;
  */
 public class ProtobufClientDemo {
     public static void main(String[] args) throws Exception {
-        new ProtobufEndPoint.Builder(false)
+        ProtobufEndPoint.builder(false)
                 .router(Router.empty(Message.class, ProtobufRequestParam.class).registerMapperClass(MessageMapper.class)).onConnected((s, state) -> {
             if (state) {
                 try {
@@ -21,6 +21,6 @@ public class ProtobufClientDemo {
                 } catch (Exception ignored) {
                 }
             }
-        }).build().start(new AddressPair("127.0.0.1", 7878));
+        }).build().start(AddressPair.withIP("127.0.0.1", 7878));
     }
 }

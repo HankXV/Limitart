@@ -47,6 +47,10 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
     private final Proc1<Session<Message, EventLoop>> onBind;
     private final Proc2<Session<Message, EventLoop>, Throwable> onExceptionThrown;
 
+    public static Builder builder(boolean server) {
+        return new Builder(server);
+    }
+
     public ProtobufEndPoint(ProtobufEndPoint.Builder builder) {
         super(builder.name, builder.server, builder.autoReconnect);
         this.router = Conditions.notNull(builder.router, "router");
@@ -58,7 +62,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
 
 
     @Override
-    protected void beforeTranlaterPipeline(ChannelPipeline pipeline) {
+    protected void beforeTranslatorPipeline(ChannelPipeline pipeline) {
         pipeline.addLast(new ProtobufVarint32FrameDecoder());
         //初始化消息
         router.foreachRequstClass(c -> {
@@ -75,7 +79,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
     }
 
     @Override
-    protected void afterTranslaterPipeline(ChannelPipeline pipeline) {
+    protected void afterTranslatorPipeline(ChannelPipeline pipeline) {
 
     }
 
@@ -90,7 +94,8 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
     }
 
     @Override
-    protected void messageReceived(Session<Message, EventLoop> session, Message msg) throws Exception {
+    protected void messageReceived(Session<Message, EventLoop> session, Object arg) throws Exception {
+        Message msg = (Message) arg;
         if (onMessageIn != null) {
             try {
                 onMessageIn.run(session, msg, router);

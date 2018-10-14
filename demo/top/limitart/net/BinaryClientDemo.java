@@ -25,7 +25,7 @@ import top.limitart.net.binary.BinaryRequestParam;
  */
 public class BinaryClientDemo {
     public static void main(String[] args) throws Exception {
-        new BinaryEndPoint.Builder(false)
+        BinaryEndPoint.builder(false)
                 .router(Router.empty(BinaryMessage.class, BinaryRequestParam.class).registerMapperClass(MessageMapper.class)).onConnected((s, state) -> {
             if (state) {
                 try {
@@ -33,6 +33,6 @@ public class BinaryClientDemo {
                 } catch (Exception ignored) {
                 }
             }
-        }).build().start(new AddressPair("127.0.0.1", 7878));
+        }).build().start(AddressPair.withIP("127.0.0.1", 7878));
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * 二进制自定义协议服务器
+ * 二进制自定义协议端点
  * 入口{@code BinaryEndPoint}
  */
 package top.limitart.net.binary;

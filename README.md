@@ -6,30 +6,21 @@
 
 Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的框架(包括游戏服务器,中间件等)，依赖非常少的第三方库、代码量少、上手容易，让你可以非常快速的开发出服务器原型。
 #### 3.X快速开始
-1.涉及到的类
+1.二进制通信快速开始
 
-    BinaryEndPoint:网络端点(服务器和客户端可理解为端点)
-    BinaryMeta:二进制消息元，主要封装了序列化操作
-    BinaryMessage:二进制消息，是网络传输的对象，可以传输基本类型和BinaryMeta以及他们的列表
-    BinaryRequestParam:所有消息处理方法必须声明的参数
+ ```java
+        //创建一个消息
+        public class BinaryMessageDemo extends BinaryMessage {
+            public String content = "hello limitart!";
     
-    Mapper:消息处理方法，负责把指定的消息路由到指定的方法
-    MapperClass:消息处理类注解，负责管理一个模块的所有处理方法，即一组BinaryHandler
-    Router:路由器，负责将对应的信息路由到对应的方法
-
-2.创建一个消息
-```java
-    public class BinaryMessageDemo extends BinaryMessage {
-    	public String content = "hello limitart!";
-
-    	@Override
-    	public Short id() {
-    		return BinaryMessages.createID(0X00, 0X01);
-    	}
-
-    }
+            @Override
+            public Short id() {
+                return BinaryMessages.createID(0X00, 0X01);
+            }
+    
+        }
 ````
-3.为这个消息创建处理器
+为这个消息创建处理器
 ```java
     @MapperClass
     public class BinaryManagerDemo {
@@ -40,21 +31,21 @@ Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的�
     	}
     }
 ```
-4.让消息工厂实例化注册消息处理器
+
 ```java
+    //让消息工厂实例化注册消息处理器 注意：这里可以调用Router.create("[包名]","[自定义实例]")的接口来配合脚本加载器(ScriptLoader)或单例注入(Singletons)来初始化
     Router router = Router.empty().registerMapperClass(BinaryManagerDemo.class);
-    // 注意：这里可以调用Router.create("[包名]","[自定义实例]")的接口来配合脚本加载器(ScriptLoader)或单例注入(Singletons)来初始化
 ```
-5.配置服务器实体
+配置服务器实体
 ```java
-    new BinaryEndPoint.Builder(true)
+    BinaryEndPoint.builder(true)
     				.router(router)
     				.build()
-    				.start(new AddressPair(8888));
+    				.start(AddressPair.withPort(8888));
 ```
-6.开启客户端连接并发送消息
+开启客户端连接并发送消息
 ```java
-    new BinaryEndPoint.Builder(false)
+    BinaryEndPoint.builder(false)
            .router(Router.empty()).onConnected((s, state) -> {
         if (state) {
             try {
@@ -62,31 +53,35 @@ Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的�
             } catch (Exception e) {
             }
         }
-     }).build().start(new AddressPair("127.0.0.1", 8888));
+     }).build().start(AddressPair.withIP("127.0.0.1", 8888));
 ```
-7.服务器日志+结果
+服务器日志+结果
 
     [main] INFO BinaryMessageFactory - register msg BinaryMessageDemo at BinaryManagerDemo
     [main] INFO AbstractNettyServer - Limitart-Binary-Server nio init
     [nioEventLoopGroup-2-1] INFO AbstractNettyServer - Limitart-Binary-Server bind at port:8888
     [nioEventLoopGroup-3-1] INFO AbstractNettyServer - /127.0.0.1:54062 connected！
     hello limitart!
-#### 消息编码
+消息编码
 
 	消息长度(short,包含消息体长度+2)+消息ID(short)+消息体
-#### 模块介绍
-    base 基础包	
-    collections 主要是一些游戏中常用的数据结构
-    fsm 有限状态机
-    game 游戏相关逻辑整理
-    logging 日志通用接口
-    net 网络通信
-    reflectasm modified from https://github.com/EsotericSoftware/reflectasm
-    script 脚本热更新
-    singleton 轻量单例依赖注入
-    concurrent 并发相关
-    util 常用的工具包
-    
+	
+2.Google Protobuf通信快速开始
+
+创建跟1无异，只是入口变为ProtobufEndPoint
+ 
+3.简单HTTP通信开始
+```java
+        HTTPEndPoint.builder().onMessageIn((s, i) -> {
+            if (i.getUrl().equals("/limitart")) {
+                return "hello limitart!".getBytes(StandardCharsets.UTF_8);
+            }
+            return null;
+        }).build().start(AddressPair.withPort(8080));
+```
+通过浏览器访问 http://127.0.0.1:8080/limitart
+
+得到结果 hello limitart!
 #### 2.X快速开始
 首先，我们需要定义一个网络通信的消息类
 
