@@ -89,7 +89,7 @@ public interface Router<M, C extends RequestContext<M>> {
      */
     void replaceInstance(Class<?> mapperClass, M request, Object newInstance) throws Exception;
 
-    void foreachRequstClass(Consumer<Class<M>> consumer);
+    void foreachRequestClass(Consumer<Class<M>> consumer);
 
     /**
      * 根据ID获取一个消息实例

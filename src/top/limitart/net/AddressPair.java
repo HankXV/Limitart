@@ -33,6 +33,10 @@ public class AddressPair extends ImmutableCouple<String, Integer> {
         return new AddressPair(ip, port);
     }
 
+    public static AddressPair withLocalHost(int port) {
+        return withIP("127.0.0.1", port);
+    }
+
     /**
      * 用端口初始化(一般用于服务器)
      *
