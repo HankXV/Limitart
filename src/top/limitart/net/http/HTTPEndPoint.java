@@ -27,13 +27,19 @@ import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.FileUpload;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import io.netty.handler.ssl.SslHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.limitart.base.*;
+import top.limitart.base.Func2;
+import top.limitart.base.Optional;
+import top.limitart.base.Proc2;
+import top.limitart.base.Procs;
 import top.limitart.net.NettyEndPoint;
 import top.limitart.net.NettyEndPointType;
 import top.limitart.net.Session;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,10 +56,10 @@ import static io.netty.handler.codec.http.HttpMethod.POST;
 public class HTTPEndPoint extends NettyEndPoint<HttpMessage, HttpMessage> {
     private static Logger LOGGER = LoggerFactory.getLogger(HTTPEndPoint.class);
     private static int MESSAGE_MAX_SIZE = 1024 * 1024;
+    private SSLContext sslContext;
     private Proc2<Session<HttpMessage, EventLoop>, HttpMessage> onMessageOverSize;
     private Func2<Session<HttpMessage, EventLoop>, HTTPRequest, byte[]> onMessageIn;
     private Proc2<Session<HttpMessage, EventLoop>, Boolean> onConnected;
-    private Proc1<Session<HttpMessage, EventLoop>> onBind;
     private Proc2<Session<HttpMessage, EventLoop>, Throwable> onExceptionThrown;
 
     public static Builder builder() {
@@ -62,10 +68,10 @@ public class HTTPEndPoint extends NettyEndPoint<HttpMessage, HttpMessage> {
 
     public HTTPEndPoint(Builder builder) {
         super(builder.name, NettyEndPointType.SERVER_REMOTE, 0);
+        this.sslContext = builder.sslContext;
         this.onMessageOverSize = builder.onMessageOverSize;
         this.onMessageIn = builder.onMessageIn;
         this.onConnected = builder.onConnected;
-        this.onBind = builder.onBind;
         this.onExceptionThrown = builder.onExceptionThrown;
     }
 
@@ -76,13 +82,20 @@ public class HTTPEndPoint extends NettyEndPoint<HttpMessage, HttpMessage> {
 
     @Override
     protected void beforeTranslatorPipeline(ChannelPipeline pipeline) {
+        if (this.sslContext != null) {
+            SSLEngine sslEngine = sslContext.createSSLEngine();
+            sslEngine.setUseClientMode(false);
+            sslEngine.setNeedClientAuth(false);
+            sslEngine.setWantClientAuth(false);
+            pipeline.addLast(new SslHandler(sslEngine));
+        }
         pipeline.addLast(new HttpServerCodec()).addLast(new HttpObjectAggregator(MESSAGE_MAX_SIZE) {
             @Override
             protected void handleOversizedMessage(ChannelHandlerContext ctx, HttpMessage oversized) throws Exception {
                 LOGGER.error("{} message oversize :{},max :{}", ctx.channel(), oversized, MESSAGE_MAX_SIZE);
                 Procs.invoke(onMessageOverSize, getSession(ctx.channel()), oversized);
             }
-        }).addLast(new HttpContentCompressor());
+        });
     }
 
     @Override
@@ -169,11 +182,6 @@ public class HTTPEndPoint extends NettyEndPoint<HttpMessage, HttpMessage> {
         }
     }
 
-    @Override
-    protected void onBind(Session<HttpMessage, EventLoop> session) {
-        Procs.invoke(onBind, session);
-    }
-
 
     @Override
     public HttpMessage toOutputFinal(HttpMessage message) throws Exception {
@@ -188,10 +196,10 @@ public class HTTPEndPoint extends NettyEndPoint<HttpMessage, HttpMessage> {
 
     public static class Builder {
         private String name;
+        private SSLContext sslContext;
         private Proc2<Session<HttpMessage, EventLoop>, HttpMessage> onMessageOverSize;
         private Func2<Session<HttpMessage, EventLoop>, HTTPRequest, byte[]> onMessageIn;
         private Proc2<Session<HttpMessage, EventLoop>, Boolean> onConnected;
-        private Proc1<Session<HttpMessage, EventLoop>> onBind;
         private Proc2<Session<HttpMessage, EventLoop>, Throwable> onExceptionThrown;
 
         public Builder() {
@@ -246,18 +254,6 @@ public class HTTPEndPoint extends NettyEndPoint<HttpMessage, HttpMessage> {
             return this;
         }
 
-        /**
-         * 服务器绑定处理
-         *
-         * @param onBind
-         * @return
-         */
-        @Optional
-        public HTTPEndPoint.Builder onBind(Proc1<Session<HttpMessage, EventLoop>> onBind) {
-            this.onBind = onBind;
-            return this;
-        }
-
 
         /**
          * 服务器抛异常处理
@@ -274,6 +270,12 @@ public class HTTPEndPoint extends NettyEndPoint<HttpMessage, HttpMessage> {
         @Optional
         public HTTPEndPoint.Builder onMessageOverSize(Proc2<Session<HttpMessage, EventLoop>, HttpMessage> onMessageOverSize) {
             this.onMessageOverSize = onMessageOverSize;
+            return this;
+        }
+
+        @Optional
+        public HTTPEndPoint.Builder sslContext(SSLContext sslContext) {
+            this.sslContext = sslContext;
             return this;
         }
     }

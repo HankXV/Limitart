@@ -37,6 +37,9 @@ import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.limitart.base.Conditions;
+import top.limitart.base.Proc2;
+import top.limitart.base.Proc3;
+import top.limitart.base.Procs;
 import top.limitart.concurrent.ThreadLocalHolder;
 
 import java.util.HashMap;
@@ -80,7 +83,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
     }
 
     @Override
-    public EndPoint start(AddressPair addressPair) {
+    public EndPoint start(AddressPair addressPair, Proc3<Session<OUT, EventLoop>, Boolean, Throwable> listener) {
         if (bootstrap instanceof ServerBootstrap) {
             ChannelFuture future;
             if (type.local()) {
@@ -92,9 +95,10 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
                 if (arg0.isSuccess()) {
                     LOGGER.info("{} bind at {} {}", name(), type.local() ? "local" : "", addressPair);
                     endPointSession = createSession(arg0.channel());
-                    onBind(endPointSession);
+                    Procs.invoke(listener, endPointSession, true, null);
                 } else {
                     LOGGER.error(name() + " bind error:" + arg0.cause());
+                    Procs.invoke(listener, null, false, arg0.cause());
                 }
             });
         } else {
@@ -113,24 +117,26 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
                     endPointSession = createSession(channelFuture.channel());
                     channelFuture.channel().attr(CLIENT_REMOTE_ADDR).set(addressPair);
                     LOGGER.info("{} connect {} server: {} success！", name(), type.local() ? "local" : "", addressPair);
+                    Procs.invoke(listener, endPointSession, true, null);
                 });
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
+                Procs.invoke(listener, null, false, e);
                 if (autoReconnect > 0) {
-                    tryReconnect(addressPair, autoReconnect);
+                    tryReconnect(addressPair, autoReconnect, listener);
                 }
             }
         }
         return this;
     }
 
-    protected void tryReconnect(AddressPair addressPair, int waitSeconds) {
+    protected void tryReconnect(AddressPair addressPair, int waitSeconds, Proc3<Session<OUT, EventLoop>, Boolean, Throwable> listener) {
         stop();
         LOGGER.info("{} try connect {} server： {} after {} seconds...", name(), type.local() ? "local" : "", addressPair, waitSeconds);
         if (waitSeconds > 0) {
-            workerGroup.schedule(() -> start(addressPair), waitSeconds, TimeUnit.SECONDS);
+            workerGroup.schedule(() -> start(addressPair, listener), waitSeconds, TimeUnit.SECONDS);
         } else {
-            start(addressPair);
+            start(addressPair, listener);
         }
     }
 
@@ -167,8 +173,6 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
     protected abstract void sessionActive(Session<OUT, EventLoop> session, boolean activeOrNot) throws Exception;
 
     protected abstract void messageReceived(Session<OUT, EventLoop> session, Object msg) throws Exception;
-
-    protected abstract void onBind(Session<OUT, EventLoop> session);
 
     protected Session<OUT, EventLoop> createSession(Channel channel) {
         return new NettySession<>(channel);
@@ -306,7 +310,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
             if (bootstrap instanceof Bootstrap) {
                 if (getAutoReconnect() > 0) {
                     AddressPair addressPair = ctx.channel().attr(CLIENT_REMOTE_ADDR).get();
-                    tryReconnect(addressPair, getAutoReconnect());
+                    tryReconnect(addressPair, getAutoReconnect(), null);
                 }
             }
         }

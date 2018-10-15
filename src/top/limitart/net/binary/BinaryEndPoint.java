@@ -113,11 +113,6 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
         }
     }
 
-    @Override
-    protected void onBind(Session<BinaryMessage, EventLoop> session) {
-        Procs.invoke(onBind, session);
-    }
-
 
     @Override
     public BinaryMessage toOutputFinal(ByteBuf byteBuf) throws Exception {
