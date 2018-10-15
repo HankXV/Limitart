@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import top.limitart.base.*;
 import top.limitart.mapping.Router;
 import top.limitart.net.NettyEndPoint;
+import top.limitart.net.NettyEndPointType;
 import top.limitart.net.Session;
 
 import java.util.Map;
@@ -50,8 +51,12 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
         return new Builder(server);
     }
 
+    public static Builder builder(NettyEndPointType type) {
+        return new Builder(type);
+    }
+
     public BinaryEndPoint(Builder builder) {
-        super(builder.name, builder.server, builder.autoReconnect);
+        super(builder.name, builder.type, builder.autoReconnect);
         this.decoder = Conditions.notNull(builder.decoder, "decoder");
         this.encoder = Conditions.notNull(builder.encoder, "encoder");
         this.router = Conditions.notNull(builder.router, "router");
@@ -60,7 +65,7 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
         this.onBind = builder.onBind;
         this.onExceptionThrown = builder.onExceptionThrown;
         //初始化消息
-        router.foreachRequstClass(c -> {
+        router.foreachRequestClass(c -> {
             BinaryMessage binaryMessage = null;
             try {
                 binaryMessage = router.requestInstance(c);
@@ -154,7 +159,7 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
 
     public static class Builder {
         private String name;
-        private boolean server;
+        private NettyEndPointType type;
         private int autoReconnect;
         private BinaryDecoder decoder;
         private BinaryEncoder encoder;
@@ -165,7 +170,11 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
         private Proc2<Session<BinaryMessage, EventLoop>, Throwable> onExceptionThrown;
 
         public Builder(boolean server) {
-            this.server = server;
+            this(server ? NettyEndPointType.defaultServer() : NettyEndPointType.defaultClient());
+        }
+
+        public Builder(NettyEndPointType type) {
+            this.type = type;
             this.name = "Limitart-Binary";
             this.decoder = BinaryDecoder.BinaryDefaultDecoder.ME;
             this.encoder = BinaryEncoder.BinaryDefaultEncoder.ME;

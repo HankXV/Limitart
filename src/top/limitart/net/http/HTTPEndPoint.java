@@ -18,7 +18,6 @@
 
 package top.limitart.net.http;
 
-import com.sun.javafx.collections.MappingChange;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
@@ -32,8 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.limitart.base.*;
 import top.limitart.net.NettyEndPoint;
+import top.limitart.net.NettyEndPointType;
 import top.limitart.net.Session;
-import top.limitart.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +61,7 @@ public class HTTPEndPoint extends NettyEndPoint<HttpMessage, HttpMessage> {
     }
 
     public HTTPEndPoint(Builder builder) {
-        super(builder.name, true, 0);
+        super(builder.name, NettyEndPointType.SERVER_REMOTE, 0);
         this.onMessageOverSize = builder.onMessageOverSize;
         this.onMessageIn = builder.onMessageIn;
         this.onConnected = builder.onConnected;

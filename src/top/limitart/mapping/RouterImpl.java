@@ -193,7 +193,7 @@ public class RouterImpl<M, C extends RequestContext<M>> implements Router<M, C> 
     }
 
     @Override
-    public void foreachRequstClass(Consumer<Class<M>> consumer) {
+    public void foreachRequestClass(Consumer<Class<M>> consumer) {
         msgs.keySet().forEach(consumer);
     }
 

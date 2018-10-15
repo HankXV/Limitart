@@ -24,6 +24,9 @@ import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.epoll.EpollSocketChannel;
+import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalChannel;
+import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -57,6 +60,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
     protected final static EventLoopGroup workerGroup;
     private final static Class<? extends ServerChannel> serverChannelClass;
     private final static Class<? extends Channel> clientChannelClass;
+    private NettyEndPointType type;
 
     private Session<OUT, EventLoop> endPointSession;
     private int autoReconnect;
@@ -78,10 +82,16 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
     @Override
     public EndPoint start(AddressPair addressPair) {
         if (bootstrap instanceof ServerBootstrap) {
-            bootstrap.bind(addressPair.getPort()).addListener((ChannelFuture arg0) -> {
+            ChannelFuture future;
+            if (type.local()) {
+                future = bootstrap.bind(new LocalAddress(addressPair.toString()));
+            } else {
+                future = bootstrap.bind(addressPair.getPort());
+            }
+            future.addListener((ChannelFuture arg0) -> {
                 if (arg0.isSuccess()) {
-                    LOGGER.info(name() + " bind at :" + addressPair);
-                    endPointSession = new NettySession(arg0.channel());
+                    LOGGER.info("{} bind at {} {}", name(), type.local() ? "local" : "", addressPair);
+                    endPointSession = createSession(arg0.channel());
                     onBind(endPointSession);
                 } else {
                     LOGGER.error(name() + " bind error:" + arg0.cause());
@@ -91,12 +101,18 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
             if (endPointSession != null && endPointSession.writable()) {
                 return this;
             }
-            LOGGER.info(name() + " start connect server：" + addressPair + "...");
+            LOGGER.info("{} start connect to {} server： {}...", name(), type.local() ? "local" : "", addressPair);
             try {
-                ((Bootstrap) bootstrap).connect(addressPair.getIp(), addressPair.getPort()).sync().addListener((ChannelFutureListener) channelFuture -> {
-                    endPointSession = new NettySession<>(channelFuture.channel());
+                ChannelFuture future;
+                if (type.local()) {
+                    future = ((Bootstrap) bootstrap).connect(new LocalAddress(addressPair.toString()));
+                } else {
+                    future = ((Bootstrap) bootstrap).connect(addressPair.getIp(), addressPair.getPort());
+                }
+                future.sync().addListener((ChannelFutureListener) channelFuture -> {
+                    endPointSession = createSession(channelFuture.channel());
                     channelFuture.channel().attr(CLIENT_REMOTE_ADDR).set(addressPair);
-                    LOGGER.info(name() + " connect server：" + addressPair + " success！");
+                    LOGGER.info("{} connect {} server: {} success！", name(), type.local() ? "local" : "", addressPair);
                 });
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
@@ -110,7 +126,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
 
     protected void tryReconnect(AddressPair addressPair, int waitSeconds) {
         stop();
-        LOGGER.info(name() + " try connect server：" + addressPair + " after " + waitSeconds + " seconds");
+        LOGGER.info("{} try connect {} server： {} after {} seconds...", name(), type.local() ? "local" : "", addressPair, waitSeconds);
         if (waitSeconds > 0) {
             workerGroup.schedule(() -> start(addressPair), waitSeconds, TimeUnit.SECONDS);
         } else {
@@ -158,61 +174,64 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
         return new NettySession<>(channel);
     }
 
-    public NettyEndPoint(String name, boolean server, int autoReconnect) {
+    public NettyEndPoint(String name, NettyEndPointType type, int autoReconnect) {
         Conditions.notNull(name, "name");
         this.name = name;
         this.autoReconnect = autoReconnect;
-        if (server) {
-            ServerBootstrap serverBootstrap = new ServerBootstrap().group(bossGroup, workerGroup).channel(serverChannelClass);
+        this.type = type;
+        if (type.server()) {
+            ServerBootstrap serverBootstrap = new ServerBootstrap().group(type.local() ? new DefaultEventLoopGroup(1) : bossGroup, type.local() ? new DefaultEventLoop() : workerGroup).channel(type.local() ? LocalServerChannel.class : serverChannelClass);
+            if (!type.local()) {
+                serverBootstrap.childOption(ChannelOption.TCP_NODELAY, true);
+            }
             serverBootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializer<SocketChannel>() {
+                    .childHandler(new ChannelInitializer<Channel>() {
 
-                @Override
-                protected void initChannel(SocketChannel ch) {
-                    ch.pipeline().addLast(new ReadTimeoutHandler(60));
-                    beforeTranslatorPipeline(ch.pipeline());
-                    ch.pipeline().addLast(new InOutTransfer());
-                    afterTranslatorPipeline(ch.pipeline());
-                    ch.pipeline().addLast(new ChannelStateHandler());
-                }
-            });
+                        @Override
+                        protected void initChannel(Channel ch) {
+                            initPipeline(ch.pipeline());
+                        }
+                    });
             if (Epoll.isAvailable()) {
                 serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024)
                         .childOption(ChannelOption.SO_LINGER, 0).childOption(ChannelOption.SO_REUSEADDR, true)
                         .childOption(ChannelOption.SO_KEEPALIVE, true);
-                LOGGER.info(name + " epoll init");
+                LOGGER.info("{} epoll init", name);
             } else {
-                LOGGER.info(name + " nio init");
+                LOGGER.info("{} nio init", name);
             }
             this.bootstrap = serverBootstrap;
         } else {
-            Bootstrap clientBootstrap = new Bootstrap().group(workerGroup).channel(clientChannelClass);
-            clientBootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT).handler(new ChannelInitializer<SocketChannel>() {
+            Bootstrap clientBootstrap = new Bootstrap().group(type.local() ? new DefaultEventLoop() : workerGroup).channel(type.local() ? LocalChannel.class : clientChannelClass);
+            clientBootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT).handler(new ChannelInitializer<Channel>() {
 
                 @Override
-                protected void initChannel(SocketChannel ch) {
-                    ch.pipeline().addLast(new ReadTimeoutHandler(60));
-                    beforeTranslatorPipeline(ch.pipeline());
-                    ch.pipeline().addLast(new InOutTransfer());
-                    afterTranslatorPipeline(ch.pipeline());
-                    ch.pipeline().addLast(new ChannelStateHandler());
+                protected void initChannel(Channel ch) {
+                    initPipeline(ch.pipeline());
                 }
             });
             if (Epoll.isAvailable()) {
-                LOGGER.info(name + " epoll init");
+                LOGGER.info("{} epoll init", name);
             } else {
-                LOGGER.info(name + " nio init");
+                LOGGER.info("{} nio init", name);
             }
             this.bootstrap = clientBootstrap;
         }
+    }
+
+    private void initPipeline(ChannelPipeline pipeline) {
+        pipeline.addLast(new ReadTimeoutHandler(60));
+        beforeTranslatorPipeline(pipeline);
+        pipeline.addLast(new InOutTransfer());
+        afterTranslatorPipeline(pipeline);
+        pipeline.addLast(new ChannelStateHandler());
     }
 
     @Override
     public String name() {
         return this.name;
     }
-
 
     /**
      * 通过channel映射Session
@@ -275,13 +294,13 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            LOGGER.info(ctx.channel().remoteAddress() + " connected！");
+            LOGGER.info("{} connected！", ctx.channel().remoteAddress());
             sessionActive(putSession(ctx.channel()), true);
         }
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-            LOGGER.info(ctx.channel().remoteAddress() + " disconnected！");
+            LOGGER.info("{} disconnected！", ctx.channel().remoteAddress());
             Session<OUT, EventLoop> remove = removeSession(ctx.channel());
             sessionActive(remove, false);
             if (bootstrap instanceof Bootstrap) {

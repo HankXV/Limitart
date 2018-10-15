@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import top.limitart.base.*;
 import top.limitart.mapping.Router;
 import top.limitart.net.NettyEndPoint;
+import top.limitart.net.NettyEndPointType;
 import top.limitart.net.Session;
 
 import java.lang.reflect.InvocationTargetException;
@@ -51,8 +52,12 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
         return new Builder(server);
     }
 
+    public static Builder builder(NettyEndPointType type) {
+        return new Builder(true);
+    }
+
     public ProtobufEndPoint(ProtobufEndPoint.Builder builder) {
-        super(builder.name, builder.server, builder.autoReconnect);
+        super(builder.name, builder.type, builder.autoReconnect);
         this.router = Conditions.notNull(builder.router, "router");
         this.onMessageIn = builder.onMessageIn;
         this.onConnected = builder.onConnected;
@@ -65,7 +70,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
     protected void beforeTranslatorPipeline(ChannelPipeline pipeline) {
         pipeline.addLast(new ProtobufVarint32FrameDecoder());
         //初始化消息
-        router.foreachRequstClass(c -> {
+        router.foreachRequestClass(c -> {
             try {
                 Message defaultInstance = (Message) c.getMethod("getDefaultInstance").invoke(null);
                 pipeline.addLast(new ProtobufDecoder(defaultInstance));
@@ -127,7 +132,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
 
     public static class Builder {
         private String name;
-        private boolean server;
+        private NettyEndPointType type;
         private int autoReconnect;
         private Router<Message, ProtobufRequestParam> router;
         private Proc3<Session<Message, EventLoop>, Message, Router<Message, ProtobufRequestParam>> onMessageIn;
@@ -135,9 +140,13 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
         private Proc1<Session<Message, EventLoop>> onBind;
         private Proc2<Session<Message, EventLoop>, Throwable> onExceptionThrown;
 
-        public Builder(boolean server) {
-            this.server = server;
+        public Builder(NettyEndPointType type) {
+            this.type = type;
             this.name = "Limitart-Protobuf";
+        }
+
+        public Builder(boolean server) {
+            this(server ? NettyEndPointType.defaultServer() : NettyEndPointType.defaultClient());
         }
 
         /**
