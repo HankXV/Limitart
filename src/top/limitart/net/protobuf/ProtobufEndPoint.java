@@ -45,7 +45,6 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
     private final Router<Message, ProtobufRequestParam> router;
     private final Proc3<Session<Message, EventLoop>, Message, Router<Message, ProtobufRequestParam>> onMessageIn;
     private final Proc2<Session<Message, EventLoop>, Boolean> onConnected;
-    private final Proc1<Session<Message, EventLoop>> onBind;
     private final Proc2<Session<Message, EventLoop>, Throwable> onExceptionThrown;
 
     public static Builder builder(boolean server) {
@@ -61,7 +60,6 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
         this.router = Conditions.notNull(builder.router, "router");
         this.onMessageIn = builder.onMessageIn;
         this.onConnected = builder.onConnected;
-        this.onBind = builder.onBind;
         this.onExceptionThrown = builder.onExceptionThrown;
     }
 
@@ -114,11 +112,6 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
         }
     }
 
-    @Override
-    protected void onBind(Session<Message, EventLoop> session) {
-        Procs.invoke(onBind, session);
-    }
-
 
     @Override
     public Message toOutputFinal(Message message) throws Exception {
@@ -137,7 +130,6 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
         private Router<Message, ProtobufRequestParam> router;
         private Proc3<Session<Message, EventLoop>, Message, Router<Message, ProtobufRequestParam>> onMessageIn;
         private Proc2<Session<Message, EventLoop>, Boolean> onConnected;
-        private Proc1<Session<Message, EventLoop>> onBind;
         private Proc2<Session<Message, EventLoop>, Throwable> onExceptionThrown;
 
         public Builder(NettyEndPointType type) {
@@ -210,17 +202,6 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
             return this;
         }
 
-        /**
-         * 服务器绑定处理
-         *
-         * @param onBind
-         * @return
-         */
-        @Optional
-        public ProtobufEndPoint.Builder onBind(Proc1<Session<Message, EventLoop>> onBind) {
-            this.onBind = onBind;
-            return this;
-        }
 
         /**
          * 自动重连尝试间隔(秒)

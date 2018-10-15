@@ -15,6 +15,9 @@
  */
 package top.limitart.net;
 
+import io.netty.channel.EventLoop;
+import top.limitart.base.Proc3;
+
 /**
  * 端点
  *
@@ -34,7 +37,14 @@ public interface EndPoint<IN, OUT> {
     /**
      * 启动端点
      */
-    EndPoint start(AddressPair addressPair) throws Exception;
+    EndPoint start(AddressPair addressPair, Proc3<Session<OUT, EventLoop>, Boolean, Throwable> listener) throws Exception;
+
+    /**
+     * 启动端点
+     */
+    default EndPoint start(AddressPair addressPair) throws Exception {
+        return start(addressPair, null);
+    }
 
     /**
      * 停止端点

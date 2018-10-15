@@ -18,20 +18,11 @@
 
 package top.limitart.net;
 
-import top.limitart.net.http.HTTPEndPoint;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * Created by Hank on 2018/10/14
  */
-public class HTTPServerDemo {
-    public static void main(String[] args) throws Exception {
-        HTTPEndPoint.builder().onMessageIn((s, i) -> {
-            if (i.getUrl().equals("/limitart")) {
-                return "hello limitart!".getBytes(StandardCharsets.UTF_8);
-            }
-            return null;
-        }).build().start(AddressPair.withPort(8080));
-    }
+public class HTTPSServerDemo {
+//TODO
+
 }
