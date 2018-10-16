@@ -14,28 +14,46 @@
 * limitations under the License.
 */
 
-package ${_package};
+package top.limitart.dat;
 
-import top.limitart.dat.DataMeta;
 
 /**
-* ${_explain}
-*
-* @author limitart
-*/
-public class ${_name} extends DataMeta {
-<#list _cols as _col>
+ * 胜利场数排行奖励
+ *
+ * @author limitart
+ */
+public class D_WinRank extends DataMeta {
     /**
-    *  ${_col._explain}
-    */
-    private ${_col._type} ${_col._name};
-</#list>
-<#list _cols as _col>
+     * 起始排名
+     */
+    private int startRank;
     /**
-    *  ${_col._explain}
-    */
-    public ${_col._type} get${_col._name?cap_first}() {
-        return this.${_col._name};
+     * 结束排名
+     */
+    private int endRank;
+    /**
+     * 奖励数量
+     */
+    private long count;
+
+    /**
+     * 起始排名
+     */
+    public int getStartRank() {
+        return this.startRank;
     }
-</#list>
+
+    /**
+     * 结束排名
+     */
+    public int getEndRank() {
+        return this.endRank;
+    }
+
+    /**
+     * 奖励数量
+     */
+    public long getCount() {
+        return this.count;
+    }
 }

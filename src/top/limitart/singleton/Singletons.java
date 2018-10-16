@@ -65,7 +65,6 @@ public class Singletons {
             LOGGER.error("reflect error", e);
             return this;
         }
-        List<Class<?>> needRefs = new LinkedList<>();
         for (Class<?> clazz : classes) {
             Singleton annotation = clazz.getAnnotation(Singleton.class);
             if (annotation == null) {

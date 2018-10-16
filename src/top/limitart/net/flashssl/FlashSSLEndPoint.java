@@ -24,7 +24,6 @@ public class FlashSSLEndPoint extends NettyEndPoint<ByteBuf, byte[]> {
             "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\"/></cross-domain-policy>\0"
                     .getBytes(StandardCharsets.UTF_8);
     private Proc2<Session<byte[], EventLoop>, Boolean> onConnected;
-    private Proc1<Session<byte[], EventLoop>> onBind;
     private Proc2<Session<byte[], EventLoop>, Throwable> onExceptionThrown;
 
     public static FlashSSLEndPoint.Builder builder() {
@@ -34,7 +33,6 @@ public class FlashSSLEndPoint extends NettyEndPoint<ByteBuf, byte[]> {
     public FlashSSLEndPoint(FlashSSLEndPoint.Builder builder) {
         super(builder.name, NettyEndPointType.SERVER_REMOTE, 0);
         this.onConnected = builder.onConnected;
-        this.onBind = builder.onBind;
         this.onExceptionThrown = builder.onExceptionThrown;
     }
 
@@ -50,12 +48,12 @@ public class FlashSSLEndPoint extends NettyEndPoint<ByteBuf, byte[]> {
 
     @Override
     protected void exceptionThrown(Session<byte[], EventLoop> session, Throwable cause) throws Exception {
-
+        Procs.invoke(onExceptionThrown, session, cause);
     }
 
     @Override
     protected void sessionActive(Session<byte[], EventLoop> session, boolean activeOrNot) throws Exception {
-
+        Procs.invoke(onConnected, session, activeOrNot);
     }
 
     @Override

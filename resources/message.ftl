@@ -75,7 +75,7 @@ public class ${_name} {
 	</#list>
 
 		@Override
-		public Short id() {
+		public short id() {
 			return BinaryMessages.createID(PACKAGE_ID, ${_message._messageID});
 		}
 
