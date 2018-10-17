@@ -44,8 +44,15 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
     private final Router<BinaryMessage, BinaryRequestParam> router;
     private final Proc3<Session<BinaryMessage, EventLoop>, BinaryMessage, Router<BinaryMessage, BinaryRequestParam>> onMessageIn;
     private final Proc2<Session<BinaryMessage, EventLoop>, Boolean> onConnected;
-    private final Proc1<Session<BinaryMessage, EventLoop>> onBind;
     private final Proc2<Session<BinaryMessage, EventLoop>, Throwable> onExceptionThrown;
+
+    public static Builder client() {
+        return builder(false);
+    }
+
+    public static Builder server() {
+        return builder(true);
+    }
 
     public static Builder builder(boolean server) {
         return new Builder(server);
@@ -56,13 +63,12 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
     }
 
     public BinaryEndPoint(Builder builder) {
-        super(builder.name, builder.type, builder.autoReconnect);
+        super(builder.name, builder.type, builder.autoReconnect, builder.timeoutSeconds);
         this.decoder = Conditions.notNull(builder.decoder, "decoder");
         this.encoder = Conditions.notNull(builder.encoder, "encoder");
         this.router = Conditions.notNull(builder.router, "router");
         this.onMessageIn = builder.onMessageIn;
         this.onConnected = builder.onConnected;
-        this.onBind = builder.onBind;
         this.onExceptionThrown = builder.onExceptionThrown;
         //初始化消息
         router.foreachRequestClass(c -> {
@@ -109,7 +115,10 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
             }
         } else {
             router.request(msg, () ->
-                    new BinaryRequestParam(session, msg), i -> i.invoke());
+                    new BinaryRequestParam(session, msg) {
+                    }, i -> i.invoke());
+            LOGGER.warn("can not find handler to deal msg!!!");
+//            throw new IllegalArgumentException("can not find handler to deal msg");
         }
     }
 
@@ -156,12 +165,12 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
         private String name;
         private NettyEndPointType type;
         private int autoReconnect;
+        private int timeoutSeconds;
         private BinaryDecoder decoder;
         private BinaryEncoder encoder;
         private Router<BinaryMessage, BinaryRequestParam> router;
         private Proc3<Session<BinaryMessage, EventLoop>, BinaryMessage, Router<BinaryMessage, BinaryRequestParam>> onMessageIn;
         private Proc2<Session<BinaryMessage, EventLoop>, Boolean> onConnected;
-        private Proc1<Session<BinaryMessage, EventLoop>> onBind;
         private Proc2<Session<BinaryMessage, EventLoop>, Throwable> onExceptionThrown;
 
         public Builder(boolean server) {
@@ -171,6 +180,7 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
         public Builder(NettyEndPointType type) {
             this.type = type;
             this.name = "Limitart-Binary";
+            this.timeoutSeconds = 60;
             this.decoder = BinaryDecoder.BinaryDefaultDecoder.ME;
             this.encoder = BinaryEncoder.BinaryDefaultEncoder.ME;
         }
@@ -183,6 +193,12 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
          */
         public BinaryEndPoint build() {
             return new BinaryEndPoint(this);
+        }
+
+        @Optional
+        public Builder timeoutSeconds(int timeoutSeconds) {
+            this.timeoutSeconds = timeoutSeconds;
+            return this;
         }
 
         /**
@@ -257,18 +273,6 @@ public class BinaryEndPoint extends NettyEndPoint<ByteBuf, BinaryMessage> {
         @Optional
         public Builder onConnected(Proc2<Session<BinaryMessage, EventLoop>, Boolean> onConnected) {
             this.onConnected = onConnected;
-            return this;
-        }
-
-        /**
-         * 服务器绑定处理
-         *
-         * @param onBind
-         * @return
-         */
-        @Optional
-        public Builder onBind(Proc1<Session<BinaryMessage, EventLoop>> onBind) {
-            this.onBind = onBind;
             return this;
         }
 

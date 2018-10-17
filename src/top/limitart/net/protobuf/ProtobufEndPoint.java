@@ -29,6 +29,7 @@ import top.limitart.mapping.Router;
 import top.limitart.net.NettyEndPoint;
 import top.limitart.net.NettyEndPointType;
 import top.limitart.net.Session;
+import top.limitart.net.binary.BinaryEndPoint;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -47,6 +48,14 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
     private final Proc2<Session<Message, EventLoop>, Boolean> onConnected;
     private final Proc2<Session<Message, EventLoop>, Throwable> onExceptionThrown;
 
+    public static Builder client() {
+        return builder(false);
+    }
+
+    public static Builder server() {
+        return builder(true);
+    }
+
     public static Builder builder(boolean server) {
         return new Builder(server);
     }
@@ -56,7 +65,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
     }
 
     public ProtobufEndPoint(ProtobufEndPoint.Builder builder) {
-        super(builder.name, builder.type, builder.autoReconnect);
+        super(builder.name, builder.type, builder.autoReconnect, builder.timeoutSeconds);
         this.router = Conditions.notNull(builder.router, "router");
         this.onMessageIn = builder.onMessageIn;
         this.onConnected = builder.onConnected;
@@ -108,7 +117,10 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
             }
         } else {
             router.request(msg, () ->
-                    new ProtobufRequestParam(session, msg), i -> i.invoke());
+                    new ProtobufRequestParam(session, msg) {
+                    }, i -> i.invoke());
+            LOGGER.warn("can not find handler to deal msg!!!");
+//            throw new IllegalArgumentException("can not find handler to deal msg");
         }
     }
 
@@ -127,6 +139,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
         private String name;
         private NettyEndPointType type;
         private int autoReconnect;
+        private int timeoutSeconds;
         private Router<Message, ProtobufRequestParam> router;
         private Proc3<Session<Message, EventLoop>, Message, Router<Message, ProtobufRequestParam>> onMessageIn;
         private Proc2<Session<Message, EventLoop>, Boolean> onConnected;
@@ -135,6 +148,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
         public Builder(NettyEndPointType type) {
             this.type = type;
             this.name = "Limitart-Protobuf";
+            this.timeoutSeconds = 60;
         }
 
         public Builder(boolean server) {
@@ -159,11 +173,10 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
          * @return
          */
         @Optional
-        public ProtobufEndPoint.Builder name(String name) {
+        public Builder name(String name) {
             this.name = name;
             return this;
         }
-
 
         /**
          * 消息工厂
@@ -172,11 +185,16 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
          * @return
          */
         @Necessary
-        public ProtobufEndPoint.Builder router(Router<Message, ProtobufRequestParam> router) {
+        public Builder router(Router<Message, ProtobufRequestParam> router) {
             this.router = router;
             return this;
         }
 
+        @Optional
+        public Builder timeoutSeconds(int timeoutSeconds) {
+            this.timeoutSeconds = timeoutSeconds;
+            return this;
+        }
 
         /**
          * 消息接收处理
@@ -185,7 +203,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
          * @return
          */
         @Optional
-        public ProtobufEndPoint.Builder onMessageIn(Proc3<Session<Message, EventLoop>, Message, Router<Message, ProtobufRequestParam>> onMessageIn) {
+        public Builder onMessageIn(Proc3<Session<Message, EventLoop>, Message, Router<Message, ProtobufRequestParam>> onMessageIn) {
             this.onMessageIn = onMessageIn;
             return this;
         }
@@ -197,7 +215,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
          * @return
          */
         @Optional
-        public ProtobufEndPoint.Builder onConnected(Proc2<Session<Message, EventLoop>, Boolean> onConnected) {
+        public Builder onConnected(Proc2<Session<Message, EventLoop>, Boolean> onConnected) {
             this.onConnected = onConnected;
             return this;
         }
@@ -210,7 +228,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
          * @return
          */
         @Optional
-        public ProtobufEndPoint.Builder autoReconnect(int autoReconnect) {
+        public Builder autoReconnect(int autoReconnect) {
             this.autoReconnect = autoReconnect;
             return this;
         }
@@ -222,7 +240,7 @@ public class ProtobufEndPoint extends NettyEndPoint<Message, Message> {
          * @return
          */
         @Optional
-        public ProtobufEndPoint.Builder onExceptionThrown(Proc2<Session<Message, EventLoop>, Throwable> onExceptionThrown) {
+        public Builder onExceptionThrown(Proc2<Session<Message, EventLoop>, Throwable> onExceptionThrown) {
             this.onExceptionThrown = onExceptionThrown;
             return this;
         }

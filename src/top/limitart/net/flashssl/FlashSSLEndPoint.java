@@ -31,7 +31,7 @@ public class FlashSSLEndPoint extends NettyEndPoint<ByteBuf, byte[]> {
     }
 
     public FlashSSLEndPoint(FlashSSLEndPoint.Builder builder) {
-        super(builder.name, NettyEndPointType.SERVER_REMOTE, 0);
+        super(builder.name, NettyEndPointType.SERVER_REMOTE, 0, 0);
         this.onConnected = builder.onConnected;
         this.onExceptionThrown = builder.onExceptionThrown;
     }
@@ -128,7 +128,7 @@ public class FlashSSLEndPoint extends NettyEndPoint<ByteBuf, byte[]> {
          * @return
          */
         @Optional
-        public FlashSSLEndPoint.Builder onConnected(Proc2<Session<byte[], EventLoop>, Boolean> onConnected) {
+        public Builder onConnected(Proc2<Session<byte[], EventLoop>, Boolean> onConnected) {
             this.onConnected = onConnected;
             return this;
         }
@@ -140,7 +140,7 @@ public class FlashSSLEndPoint extends NettyEndPoint<ByteBuf, byte[]> {
          * @return
          */
         @Optional
-        public FlashSSLEndPoint.Builder onBind(Proc1<Session<byte[], EventLoop>> onBind) {
+        public Builder onBind(Proc1<Session<byte[], EventLoop>> onBind) {
             this.onBind = onBind;
             return this;
         }
@@ -153,7 +153,7 @@ public class FlashSSLEndPoint extends NettyEndPoint<ByteBuf, byte[]> {
          * @return
          */
         @Optional
-        public FlashSSLEndPoint.Builder onExceptionThrown(Proc2<Session<byte[], EventLoop>, Throwable> onExceptionThrown) {
+        public Builder onExceptionThrown(Proc2<Session<byte[], EventLoop>, Throwable> onExceptionThrown) {
             this.onExceptionThrown = onExceptionThrown;
             return this;
         }

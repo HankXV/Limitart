@@ -14,7 +14,7 @@ Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的�
             public String content = "hello limitart!";
     
             @Override
-            public Short id() {
+            public short id() {
                 return BinaryMessages.createID(0X00, 0X01);
             }
     
@@ -38,14 +38,14 @@ Limitart是以Netty为基础开发的一套可快速实现轻量级服务器的�
 ```
 配置服务器实体
 ```java
-    BinaryEndPoint.builder(true)
+    BinaryEndPoint.server()
     				.router(router)
     				.build()
     				.start(AddressPair.withPort(8888));
 ```
 开启客户端连接并发送消息
 ```java
-    BinaryEndPoint.builder(false)
+    BinaryEndPoint.client()
            .router(Router.empty()).onConnected((s, state) -> {
         if (state) {
             try {
