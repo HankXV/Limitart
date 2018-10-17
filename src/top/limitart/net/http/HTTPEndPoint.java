@@ -67,7 +67,7 @@ public class HTTPEndPoint extends NettyEndPoint<HttpMessage, HttpMessage> {
     }
 
     public HTTPEndPoint(Builder builder) {
-        super(builder.name, NettyEndPointType.SERVER_REMOTE, 0);
+        super(builder.name, NettyEndPointType.SERVER_REMOTE, 0, 60);
         this.sslContext = builder.sslContext;
         this.onMessageOverSize = builder.onMessageOverSize;
         this.onMessageIn = builder.onMessageIn;

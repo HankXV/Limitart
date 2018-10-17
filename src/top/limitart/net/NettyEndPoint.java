@@ -97,7 +97,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
                     endPointSession = createSession(arg0.channel());
                     Procs.invoke(listener, endPointSession, true, null);
                 } else {
-                    LOGGER.error(name() + " bind error:" + arg0.cause());
+                    LOGGER.error("{} bind error:{}", name(), arg0.cause());
                     Procs.invoke(listener, null, false, arg0.cause());
                 }
             });
@@ -178,7 +178,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
         return new NettySession<>(channel);
     }
 
-    public NettyEndPoint(String name, NettyEndPointType type, int autoReconnect) {
+    public NettyEndPoint(String name, NettyEndPointType type, int autoReconnect, int timeoutSeconds) {
         Conditions.notNull(name, "name");
         this.name = name;
         this.autoReconnect = autoReconnect;
@@ -194,7 +194,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
 
                         @Override
                         protected void initChannel(Channel ch) {
-                            initPipeline(ch.pipeline());
+                            initPipeline(ch.pipeline(), timeoutSeconds);
                         }
                     });
             if (Epoll.isAvailable()) {
@@ -212,7 +212,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
 
                 @Override
                 protected void initChannel(Channel ch) {
-                    initPipeline(ch.pipeline());
+                    initPipeline(ch.pipeline(), timeoutSeconds);
                 }
             });
             if (Epoll.isAvailable()) {
@@ -224,8 +224,10 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
         }
     }
 
-    private void initPipeline(ChannelPipeline pipeline) {
-        pipeline.addLast(new ReadTimeoutHandler(60));
+    private void initPipeline(ChannelPipeline pipeline, int timeoutSeconds) {
+        if (timeoutSeconds > 0) {
+            pipeline.addLast(new ReadTimeoutHandler(timeoutSeconds));
+        }
         beforeTranslatorPipeline(pipeline);
         pipeline.addLast(new InOutTransfer());
         afterTranslatorPipeline(pipeline);
@@ -244,7 +246,7 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
      * @return 会话
      */
     protected Session<OUT, EventLoop> getSession(Channel channel) {
-        Conditions.args(channel.eventLoop().inEventLoop(), "can not call this on another thread,must on it's own");
+        Conditions.args(channel.eventLoop().inEventLoop(), name + " can not call this on another thread,must on it's own");
         Map<Channel, Session> channelSessionMap = sessions.get();
         if (channelSessionMap == null) {
             return null;
@@ -253,14 +255,14 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
     }
 
     protected Session<OUT, EventLoop> putSession(Channel channel) {
-        Conditions.args(channel.eventLoop().inEventLoop(), "can not call this on another thread,must on it's own");
+        Conditions.args(channel.eventLoop().inEventLoop(), name + " can not call this on another thread,must on it's own");
         Session<OUT, EventLoop> session = createSession(channel);
         sessions.getWithInitialize(HashMap::new).put(channel, session);
         return session;
     }
 
     protected Session<OUT, EventLoop> removeSession(Channel channel) {
-        Conditions.args(channel.eventLoop().inEventLoop(), "can not call this on another thread,must on it's own");
+        Conditions.args(channel.eventLoop().inEventLoop(), name + " can not call this on another thread,must on it's own");
         Map<Channel, Session> channelSessionMap = sessions.get();
         if (channelSessionMap == null) {
             return null;
@@ -292,19 +294,19 @@ public abstract class NettyEndPoint<IN, OUT> implements EndPoint<IN, OUT> {
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-            LOGGER.error(ctx.channel() + " cause:", cause);
+            LOGGER.error("{}, {} cause:", name(), ctx.channel(), cause);
             exceptionThrown(getSession(ctx.channel()), cause);
         }
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            LOGGER.info("{} connected！", ctx.channel().remoteAddress());
+            LOGGER.info("{},{} connected！", name(), ctx.channel().remoteAddress());
             sessionActive(putSession(ctx.channel()), true);
         }
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-            LOGGER.info("{} disconnected！", ctx.channel().remoteAddress());
+            LOGGER.info("{},{} disconnected！", name(), ctx.channel().remoteAddress());
             Session<OUT, EventLoop> remove = removeSession(ctx.channel());
             sessionActive(remove, false);
             if (bootstrap instanceof Bootstrap) {

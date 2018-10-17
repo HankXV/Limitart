@@ -23,13 +23,12 @@ import top.limitart.mapping.RequestContext;
 import top.limitart.net.Session;
 
 /**
- * 消息处理方法参数
+ * 消息处理方法参数(使用虚拟类的原因是可能需要通过这个参数来区分消息的类型或者添加额外的变量，比如玩家实体)
  *
  * @author hank
  */
-public class BinaryRequestParam extends RequestContext<BinaryMessage> {
+public abstract class BinaryRequestParam extends RequestContext<BinaryMessage> {
     private final Session<BinaryMessage, EventLoop> session;
-    private Object extra;
 
     public BinaryRequestParam(@NotNull Session session, @NotNull BinaryMessage msg) {
         super(msg);
@@ -42,19 +41,5 @@ public class BinaryRequestParam extends RequestContext<BinaryMessage> {
     public @NotNull
     Session<BinaryMessage, EventLoop> session() {
         return this.session;
-    }
-
-    /**
-     * @return the extra
-     */
-    public Object extra() {
-        return extra;
-    }
-
-    /**
-     * @param extra the extra to set
-     */
-    public void extra(Object extra) {
-        this.extra = extra;
     }
 }
