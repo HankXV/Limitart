@@ -14,6 +14,6 @@ public class RPCDemo {
                 return true;
             }
         };
-        client.loadPackage(new String[]{"top.limitart.rpc"});
+        client.loadPackage(new String[]{""});
     }
 }
