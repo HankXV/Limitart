@@ -16,6 +16,7 @@
 package top.limitart.rpc;
 
 import top.limitart.base.NotNull;
+import top.limitart.base.Nullable;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -36,6 +37,13 @@ public @interface RPCService {
      * @return
      */
     @NotNull String value();
+
+    /**
+     * 模块名称(不指定则为类的简单名称)
+     *
+     * @return
+     */
+    @Nullable String module();
 
     int version() default 1;
 }

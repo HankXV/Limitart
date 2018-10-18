@@ -8,7 +8,7 @@ import java.io.IOException;
  */
 public class RPCDemo {
     public static void main(String[] args) throws ReflectiveOperationException, IOException, PRCServiceProxyException {
-        RPCClient client = new RPCClient() {
+        AbstractRPCConsumer client = new AbstractRPCConsumer() {
             @Override
             protected boolean checkParamType(Class<?> paramType) {
                 return true;
