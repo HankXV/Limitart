@@ -46,7 +46,19 @@ public abstract class RPCClient {
     private Map<Integer, RPCRemoteCallFuture> futures = new ConcurrentHashMap<>();
     private LongAdder dropNum = new LongAdder();
 
-    private void loadPackage(String[] packages) throws IOException, ReflectiveOperationException, PRCServiceProxyException {
+    /**
+     * 指定一个代理
+     *
+     * @param interfaceClss
+     * @param <T>
+     * @return
+     */
+    public <T> T create(Class<T> interfaceClss) {
+        Object proxyObject = this.clientProxies.get(interfaceClss);
+        return (T) proxyObject;
+    }
+
+    public void loadPackage(String[] packages) throws IOException, ReflectiveOperationException, PRCServiceProxyException {
         List<Class<?>> classesByPackage = new ArrayList<>();
         for (String temp : packages) {
             classesByPackage.addAll(ReflectionUtil.getClassesBySuperClass(temp, Object.class));
@@ -56,7 +68,7 @@ public abstract class RPCClient {
         }
     }
 
-    private void loadProxy(Class<?> clzz) throws PRCServiceProxyException {
+    public void loadProxy(Class<?> clzz) throws PRCServiceProxyException {
         RPCService annotation = clzz.getAnnotation(RPCService.class);
         if (annotation == null) {
             return;
@@ -64,8 +76,7 @@ public abstract class RPCClient {
         if (!clzz.isInterface()) {
             throw new PRCServiceProxyException("RPC service must be an interface,error clazz:" + clzz.getName());
         }
-        // 检查参数是否符合标准
-        String provider = annotation.provider();
+        String provider = annotation.value();
         if (StringUtil.empty(provider)) {
             throw new PRCServiceProxyException("service：" + clzz.getName() + " provider null！");
         }

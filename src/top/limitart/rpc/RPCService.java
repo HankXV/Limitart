@@ -30,9 +30,12 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RPCService {
-    @NotNull String provider();
-
-    String module() default "";
+    /**
+     * 服务提供商
+     *
+     * @return
+     */
+    @NotNull String value();
 
     int version() default 1;
 }
