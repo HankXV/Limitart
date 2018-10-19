@@ -15,13 +15,15 @@
  */
 package top.limitart.rpc;
 
+import top.limitart.base.LimitartRuntimeException;
+
 /**
  * 服务执行错误
  * 
  * @author Hank
  *
  */
-public class RPCServiceExecuteException extends RuntimeException {
+public class RPCServiceExecuteException extends LimitartRuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	public RPCServiceExecuteException(String info) {

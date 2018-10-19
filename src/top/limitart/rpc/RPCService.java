@@ -43,7 +43,7 @@ public @interface RPCService {
      *
      * @return
      */
-    @Nullable String module();
+    @Nullable String module() default "";
 
     int version() default 1;
 }

@@ -17,10 +17,14 @@
  */
 package top.limitart.rpc;
 
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.limitart.base.Conditions;
+import top.limitart.base.Proc1;
+import top.limitart.util.ReflectionUtil;
+import top.limitart.util.StringUtil;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,56 +37,50 @@ import java.util.Map.Entry;
  *
  * @author hank
  */
-public class AbstractRPCProvider {
+public abstract class AbstractRPCProvider {
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractRPCProvider.class);
-    private Map<String, RpcServiceInstance> services = new HashMap<>();
+    private Map<RPCModuleName, RpcServiceInstance> services = new HashMap<>();
 
-    private void load() throws  ReflectiveOperationException {
+    public AbstractRPCProvider(String... packages) throws ReflectiveOperationException, IOException, PRCServiceProxyException {
+        String[] params = packages;
+        if (params.length == 0) {
+            params = new String[]{""};
+        }
         List<Class<?>> classesByPackage = new ArrayList<>();
-        for (String temp : this.config.getServicePackages()) {
-            log.info("开始在包：" + temp + "下查找接口...");
-            classesByPackage.addAll(ReflectionUtil.getClassesByPackage(temp, Object.class));
+        for (String temp : params) {
+            classesByPackage.addAll(ReflectionUtil.getClassesBySuperClass(temp, Object.class));
         }
         // RPC接口集合
         Map<Class<?>, Map<String, Method>> rpcInterfaces = new HashMap<>();
         // 查找所有RPC接口
-        for (Class<?> clazz : classesByPackage) {
-            // 必须是一个接口
-            ServiceX annotation = clazz.getAnnotation(ServiceX.class);
+        for (Class<?> clzz : classesByPackage) {
+            RPCService annotation = clzz.getAnnotation(RPCService.class);
             if (annotation == null) {
                 continue;
             }
-            if (!clazz.isInterface()) {
-                throw new ServiceXProxyException(clazz.getName() + "RPC服务器必须是一个接口！");
+            if (!clzz.isInterface()) {
+                throw new PRCServiceProxyException("RPC service must be an interface,error clazz:" + clzz.getName());
             }
-            // 检查参数是否符合标准
-            String provider = annotation.provider();
-            if (StringUtil.isEmptyOrNull(provider)) {
-                throw new ServiceXProxyException("RPC接口提供商不能为空！");
-            }
-            String serviceName = RpcUtil.getServiceName(new RpcProviderName(provider), clazz);
-            if (services.containsKey(serviceName)) {
-                throw new ServiceXProxyException("服务名：" + serviceName + "重复！");
+            String provider = annotation.value();
+            if (StringUtil.empty(provider)) {
+                throw new PRCServiceProxyException("service：" + clzz.getName() + " provider null！");
             }
             // 检查方法
-            Method[] methods = clazz.getMethods();
+            Method[] methods = clzz.getMethods();
             Map<String, Method> methodSet = new HashMap<>();
             // 检查方法参数是否合法
             for (Method method : methods) {
                 String methodOverloadName = ReflectionUtil.getMethodOverloadName(method);
                 // 检查参数
                 Class<?>[] parameterTypes = method.getParameterTypes();
-                for (Class<?> paramsType : parameterTypes) {
-                    RpcUtil.checkParamType(paramsType);
-
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    Conditions.args(canTransferedType(parameterTypes[i]), "{} param type error on index:{}", methodOverloadName, i);
                 }
-                // 检查返回参数是否合法
-                RpcUtil.checkParamType(method.getReturnType());
+                Conditions.args(canTransferedType(method.getReturnType()), "{} param type error on return", methodOverloadName);
                 // 异常抛出检查
                 Class<?>[] exceptionTypes = method.getExceptionTypes();
                 if (exceptionTypes == null || exceptionTypes.length < 1) {
-                    throw new ServiceXProxyException("类" + clazz.getName() + "的方法" + methodOverloadName + "必须要抛出异常："
-                            + Exception.class.getName());
+                    throw new PRCServiceProxyException("class " + clzz.getName() + " method " + methodOverloadName + " must contains Exception");
                 }
                 boolean exOk = false;
                 for (Class<?> ex : exceptionTypes) {
@@ -91,24 +89,21 @@ public class AbstractRPCProvider {
                     }
                 }
                 if (!exOk) {
-                    throw new ServiceXProxyException("类" + clazz.getName() + "的方法" + methodOverloadName + "的异常抛出必须有："
-                            + Exception.class.getName());
+                    throw new PRCServiceProxyException("class " + clzz.getName() + " method " + methodOverloadName + " must contains Exception"
+                    );
                 }
-                methodSet.put(ReflectionUtil.getMethodOverloadName(method), method);
+                methodSet.put(methodOverloadName, method);
             }
-            rpcInterfaces.put(clazz, methodSet);
+            rpcInterfaces.put(clzz, methodSet);
         }
         // 查找RPC接口的实现类
-        List<Class<?>> classesByPackage2 = ReflectionUtil.getClassesByPackage(this.config.getServiceImplPackages(),
-                Object.class);
-        log.info("开始在包：" + this.config.getServiceImplPackages() + "下查找接口实现...");
-        for (Class<?> clazz : classesByPackage2) {
+        for (Class<?> clazz : classesByPackage) {
             Class<?>[] interfaces = clazz.getInterfaces();
             if (interfaces == null || interfaces.length < 1) {
                 continue;
             }
             // 检查实现的接口实例的所有RPC服务
-            Map<String, Class<?>> serviceNames = new HashMap<>();
+            Map<RPCModuleName, Class<?>> serviceNames = new HashMap<>();
             Object instance = null;
             // 遍历接口（主要处理一个实例，实现了多个RPC接口的情况）
             for (Class<?> temp : interfaces) {
@@ -117,98 +112,76 @@ public class AbstractRPCProvider {
                 if (hashMap == null) {
                     continue;
                 }
-                ServiceX annotation = temp.getAnnotation(ServiceX.class);
+                RPCService annotation = temp.getAnnotation(RPCService.class);
                 // 此类有实现此RPC接口
-                serviceNames.put(RpcUtil.getServiceName(new RpcProviderName(annotation.provider()), temp), temp);
+                serviceNames.put(StringUtil.empty(annotation.module()) ? new RPCModuleName(annotation.value(), temp) : new RPCModuleName(annotation.value(), annotation.module()), temp);
                 if (instance == null) {
                     instance = clazz.newInstance();
                 }
             }
             // 如果查找到了实例
             if (instance != null && !serviceNames.isEmpty()) {
-                for (Entry<String, Class<?>> entry : serviceNames.entrySet()) {
-                    String serviceName = entry.getKey();
+                for (Entry<RPCModuleName, Class<?>> entry : serviceNames.entrySet()) {
+                    RPCModuleName serviceName = entry.getKey();
                     if (services.containsKey(serviceName)) {
-                        throw new ServiceXProxyException("服务：" + serviceName + "发现了多个实现类：" + instance);
+                        throw new PRCServiceProxyException("service:" + serviceName + " duplicated:" + instance);
                     }
                     RpcServiceInstance data = new RpcServiceInstance();
-                    data.setInstance(instance);
+                    data.instance = instance;
                     Class<?> value = entry.getValue();
-                    data.getMethods().putAll(rpcInterfaces.get(value));
+                    data.methods.putAll(rpcInterfaces.get(value));
                     services.put(serviceName, data);
-                    log.info("发现服务：" + serviceName + "，实例名称："
+                    LOGGER.info("find RPC service impl:" + serviceName + ",impl name:"
                             + (clazz.getName() + "@" + Integer.toHexString(instance.hashCode())));
                 }
             }
         }
     }
 
+    protected abstract boolean canTransferedType(Class<?> returnType);
+
     /**
      * 执行RPC消费者请求的方法
      *
-     * @param context
      * @param requestId
-     * @param moduleName
-     * @param methodName
      * @param params
      */
-    private void executeRPC(Channel channel, int requestId, String moduleName, String methodName, List<Object> params)
+    public void executeRPC(int requestId, RPCServiceName serviceName, List<Object> params, Proc1<RPCResponse> resultCallback)
             throws Exception {
-        RpcResultServerMessage msg = new RpcResultServerMessage();
-        msg.setRequestId(requestId);
-        msg.setErrorCode(0);
+        int errorCode = 0;
+        Object returnVal = null;
         try {
-            RpcServiceInstance serviceInstanceData = services.get(moduleName);
+            RPCModuleName rpcModuleName = serviceName.getModuleName();
+            RpcServiceInstance serviceInstanceData = services.get(rpcModuleName);
             if (serviceInstanceData == null) {
-                log.error("RPC消费者：" + channel.remoteAddress() + "发送了未知的服务名：" + moduleName);
-                msg.setErrorCode(ServiceError.SERVER_HAS_NO_MODULE);
+                LOGGER.error("module name is not exist:{}", rpcModuleName);
+                errorCode = RPCServiceErrorCode.SERVER_HAS_NO_MODULE;
                 return;
             }
-            Method method = serviceInstanceData.getMethods().get(methodName);
+            Method method = serviceInstanceData.methods.get(serviceName.getMethodName());
             if (method == null) {
-                log.error("RPC消费者：" + channel.remoteAddress() + "发送了未知的方法名：" + methodName + "，服务名为：" + moduleName);
-                msg.setErrorCode(ServiceError.SERVER_HAS_NO_METHOD);
+                LOGGER.error("can not find method {} from {}", serviceName.getMethodName(), rpcModuleName);
+                errorCode = RPCServiceErrorCode.SERVER_HAS_NO_METHOD;
                 return;
             }
-            if (msg.getErrorCode() == 0) {
+            if (errorCode == RPCServiceErrorCode.SUCCESS) {
                 try {
-                    Object result = method.invoke(serviceInstanceData.self(), params.toArray());
+                    Object result = method.invoke(serviceInstanceData.instance, params.toArray());
                     if (result != null) {
-                        msg.setReturnType(result.getClass().getName());
-                        msg.setReturnVal(result);
+                        returnVal = result;
                     }
                 } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         } finally {
-            try {
-                server.sendMessage(channel, msg, null);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
+            resultCallback.run(new RPCResponse(requestId, errorCode, returnVal));
         }
     }
 
 
-    /**
-     * 获取服务实体
-     *
-     * @param provider
-     * @param clazz
-     * @return
-     * @throws ServiceXProxyException
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getServiceInstance(RpcProviderName provider, Class<T> clazz) throws ServiceXProxyException {
-        ServiceX annotation = clazz.getAnnotation(ServiceX.class);
-        if (annotation == null) {
-            throw new ServiceXProxyException(clazz.getName() + "is not ServiceX!");
-        }
-        RpcServiceInstance serviceInstanceData = services.get(RpcUtil.getServiceName(provider, clazz));
-        if (serviceInstanceData == null) {
-            return null;
-        }
-        return (T) serviceInstanceData.self();
+    private class RpcServiceInstance {
+        private Object instance;
+        private Map<String, Method> methods = new HashMap<>();
     }
 }

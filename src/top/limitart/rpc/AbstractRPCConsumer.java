@@ -36,8 +36,9 @@ import java.util.concurrent.atomic.LongAdder;
  * @author hank
  * @version 2018/10/18 0018 17:00
  */
-public abstract class AbstractRPCConsumer implements RPCConsumer {
+public abstract class AbstractRPCConsumer {
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractRPCConsumer.class);
+    private static int MAX_CALLBACK_QUEUE_SIZE = 100;
     // 动态代理集合
     private Map<Class<?>, Object> clientProxies = new HashMap<>();
     // RequestId生成器
@@ -47,6 +48,21 @@ public abstract class AbstractRPCConsumer implements RPCConsumer {
     // 被丢弃的请求数量
     private LongAdder dropNum = new LongAdder();
 
+
+    public AbstractRPCConsumer(String... packages) throws IOException, ReflectiveOperationException, PRCServiceProxyException {
+        String[] params = packages;
+        if (params.length == 0) {
+            params = new String[]{""};
+        }
+        List<Class<?>> classesByPackage = new ArrayList<>();
+        for (String temp : params) {
+            classesByPackage.addAll(ReflectionUtil.getClassesBySuperClass(temp, Object.class));
+        }
+        for (Class<?> clzz : classesByPackage) {
+            loadProxy(clzz);
+        }
+    }
+
     /**
      * 指定一个代理
      *
@@ -54,20 +70,9 @@ public abstract class AbstractRPCConsumer implements RPCConsumer {
      * @param <T>
      * @return
      */
-    @Override
     public <T> T createProxy(Class<T> interfaceClss) {
         Object proxyObject = this.clientProxies.get(interfaceClss);
         return (T) proxyObject;
-    }
-
-    private void loadPackage(String[] packages) throws IOException, ReflectiveOperationException, PRCServiceProxyException {
-        List<Class<?>> classesByPackage = new ArrayList<>();
-        for (String temp : packages) {
-            classesByPackage.addAll(ReflectionUtil.getClassesBySuperClass(temp, Object.class));
-        }
-        for (Class<?> clzz : classesByPackage) {
-            loadProxy(clzz);
-        }
     }
 
     private void loadProxy(Class<?> clzz) throws PRCServiceProxyException {
@@ -89,9 +94,9 @@ public abstract class AbstractRPCConsumer implements RPCConsumer {
             // 检查参数
             Class<?>[] parameterTypes = method.getParameterTypes();
             for (int i = 0; i < parameterTypes.length; i++) {
-                Conditions.args(canTransferedType(parameterTypes[i]), "{} param type error on index:{}", methodOverloadName, i);
+                Conditions.args(canTransferedType(parameterTypes[i]), "%s param type error on index:%s", methodOverloadName, i);
             }
-            Conditions.args(canTransferedType(method.getReturnType()), "{} param type error on return", methodOverloadName);
+            Conditions.args(canTransferedType(method.getReturnType()), "%s param type error on return", methodOverloadName);
             // 异常抛出检查
             Class<?>[] exceptionTypes = method.getExceptionTypes();
             if (exceptionTypes == null || exceptionTypes.length < 1) {
@@ -120,11 +125,12 @@ public abstract class AbstractRPCConsumer implements RPCConsumer {
                             return proxy.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(proxy));
                         }
                     }
-                    RPCServiceName serviceName = new RPCServiceName(provider, annotation.module() == null ? clzz.getSimpleName() : annotation.module(), ReflectionUtil.getMethodOverloadName(method), annotation.version());
+                    RPCServiceName serviceName = new RPCServiceName(StringUtil.empty(annotation.module()) ? new RPCModuleName(provider, clzz) : new RPCModuleName(provider, annotation.module()), ReflectionUtil.
+                            getMethodOverloadName(method), annotation.version());
                     return proxyExecute(serviceName, args, null);
                 });
         clientProxies.put(clzz, newProxyInstance);
-        LOGGER.info("create rpc proxy：{},provider：{},instance：{}", clzz.getName(), provider, newProxyInstance);
+        LOGGER.info("create RPC proxy：{},provider：{},instance：{}", clzz.getName(), provider, newProxyInstance);
     }
 
     private Object proxyExecute(RPCServiceName serviceName, Object[] args, Proc1<Object> callback)
@@ -157,22 +163,21 @@ public abstract class AbstractRPCConsumer implements RPCConsumer {
      */
     private RPCRemoteCallFuture rpcSend(RPCServiceName serviceName, Object[] args
             , Proc1<Object> callback) {
-        //TODO 移动到常量
-        int max = 100;
-        if (futures.size() > max) {
+        if (futures.size() > MAX_CALLBACK_QUEUE_SIZE) {
             dropNum.increment();
-            throw new RPCServiceExecuteException("call back queue size too long：" + max + ",drop request,drops:" + dropNum.longValue()
+            throw new RPCServiceExecuteException("call back queue size too long：" + MAX_CALLBACK_QUEUE_SIZE + ",drop request,drops:" + dropNum.longValue()
             );
         }
         // 开始构造消息
         int requestId = requestIDCreator.incrementAndGet();
         RPCRemoteCallFuture future = new RPCRemoteCallFuture(requestId, callback);
         futures.put(future.getRequestID(), future);
-        //TODO
+        RPCRequest request = new RPCRequest(requestId, serviceName, args);
+        sendRPCRequest(request);
         return future;
     }
 
-    protected void onRPCResonse(int requestID, int errorCode, Object returnVal) {
+    protected void triggerResponse(int requestID, int errorCode, Object returnVal) {
         RPCRemoteCallFuture future = futures.get(requestID);
         if (future == null) {
             LOGGER.error("requestId:{} can not find!", requestID);
@@ -192,6 +197,8 @@ public abstract class AbstractRPCConsumer implements RPCConsumer {
             }
         }
     }
+
+    protected abstract void sendRPCRequest(RPCRequest request);
 
     /**
      * 是否为可传输的对象类型

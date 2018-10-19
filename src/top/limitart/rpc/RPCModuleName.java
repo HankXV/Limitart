@@ -23,49 +23,37 @@ import java.util.Objects;
  * @author hank
  * @version 2018/10/18 0018 20:47
  */
-public class RPCServiceName {
-    //提供商名称(可理解未命名空间) +模块名称(可理解为类名)
-    private RPCModuleName moduleName;
-    //方法名称(可理解为类里的方法)
-    private String methodName;
-    //模块的版本(客户端和服务器版本不同不能调用)
-    private int version;
+public class RPCModuleName {
+    //提供商名称(可理解未命名空间)
+    private String providerName;
+    //模块名称(可理解为类名)
+    private String moduleName;
 
-    public RPCServiceName(RPCModuleName moduleName, String methodName, int version) {
+    public RPCModuleName(String providerName, Class<?> clzz) {
+        this(providerName, clzz.getSimpleName());
+    }
+
+    public RPCModuleName(String providerName, String moduleName) {
+        this.providerName = providerName;
         this.moduleName = moduleName;
-        this.methodName = methodName;
-        this.version = version;
     }
 
     @Override
     public String toString() {
-        return this.moduleName + "/" + this.methodName + "/" + this.version;
+        return "/" + providerName + "/" + moduleName;
     }
 
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
-        RPCServiceName that = (RPCServiceName) object;
-        return version == that.version &&
-                Objects.equals(moduleName, that.moduleName) &&
-                Objects.equals(methodName, that.methodName);
+        RPCModuleName that = (RPCModuleName) object;
+        return Objects.equals(providerName, that.providerName) &&
+                Objects.equals(moduleName, that.moduleName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(moduleName, methodName, version);
-    }
-
-    public RPCModuleName getModuleName() {
-        return moduleName;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public int getVersion() {
-        return version;
+        return Objects.hash(providerName, moduleName);
     }
 }
